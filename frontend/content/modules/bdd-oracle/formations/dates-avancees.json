@@ -1,0 +1,993 @@
+{
+ "id": "dates-avancees",
+ "order": 6,
+ "title": "Dates avancées : TIMESTAMP, INTERVAL et fuseaux",
+ "tagline": "Fractions de seconde, durées, arrondis ISO et fuseaux horaires : passe au niveau expert des dates Oracle.",
+ "emoji": "🌍",
+ "color": "#F59E0B",
+ "level": "Avancé",
+ "minutes": 70,
+ "pitch": [
+  "Salut ! Je te présente **« Dates avancées : TIMESTAMP, INTERVAL et fuseaux »** 🌍.",
+  "Tu connais déjà `DATE`, `TO_CHAR` et `TRUNC`. Mais que se passe-t-il quand il faut **mesurer des durées précises**, regrouper par **semaine ou trimestre**, ou gérer une équipe répartie sur **plusieurs fuseaux horaires** avec l'heure d'été qui change tout ?",
+  "Ici on passe au niveau supérieur : `TIMESTAMP` et ses fractions de seconde, les `INTERVAL`, les arrondis avec masques, le calendrier ISO, et `AT TIME ZONE` pour ne plus jamais se tromper d'heure.",
+  "Chaque leçon est suivie d'exercices, et on termine par un défi : gérer le planning d'une équipe mondiale."
+ ],
+ "benefits": [
+  "Choisir entre DATE, TIMESTAMP et les types avec fuseau",
+  "Calculer des durées exactes avec les INTERVAL (et éviter le piège du 31 janvier)",
+  "Tronquer et arrondir par semaine, trimestre ou année",
+  "Convertir une heure d'un fuseau à un autre avec AT TIME ZONE"
+ ],
+ "lessons": [
+  {
+   "id": "timestamp",
+   "title": "DATE ou TIMESTAMP ? Les secondes qui comptent",
+   "emoji": "⏱️",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Ici **Nimbo** ☁️. Dans la formation de base sur les dates, tu as appris à manipuler le type `DATE`. Ici on passe au **niveau expert** : fractions de secondes, intervalles, arrondis, **fuseaux horaires**. Si tu n'as pas fait la formation « Devenir expert des dates », jette-y un œil d'abord : je suppose que `TO_DATE`, `TO_CHAR` et `TRUNC` te sont familiers."
+    },
+    {
+     "type": "say",
+     "text": "Rappel : un `DATE` Oracle contient **toujours une date ET une heure** (à la **seconde** près). Mais parfois une seconde, c'est trop grossier : journaux d'événements, transactions bancaires, mesures de capteurs… Pour ça, Oracle propose **`TIMESTAMP`** : même chose, mais avec des **fractions de seconde** (jusqu'à 9 chiffres, 6 par défaut)."
+    },
+    {
+     "type": "code",
+     "sql": "DATE                         12/03/2025 14:30:45\nTIMESTAMP                    12/03/2025 14:30:45.123456\nTIMESTAMP(3)                 12/03/2025 14:30:45.123\nTIMESTAMP WITH TIME ZONE     12/03/2025 14:30:45.123456 +01:00\nTIMESTAMP WITH LOCAL TIME ZONE  (stocké en heure de la base, affiché dans le fuseau de la session)",
+     "lang": "text",
+     "title": "La famille des types date/heure"
+    },
+    {
+     "type": "choice",
+     "q": "Tu enregistres des mesures de capteur toutes les 10 millisecondes. Quel type choisis-tu ?",
+     "options": [
+      "DATE",
+      "TIMESTAMP",
+      "VARCHAR2"
+     ],
+     "answer": 1,
+     "explain": "`DATE` s'arrête à la seconde. `TIMESTAMP` garde les fractions de seconde. Stocker une date dans un `VARCHAR2` est presque toujours une mauvaise idée."
+    },
+    {
+     "type": "say",
+     "text": "**Quatre fonctions « maintenant »**, qu'il ne faut pas confondre :"
+    },
+    {
+     "type": "code",
+     "sql": "SYSDATE             DATE        heure du SERVEUR de base de données\nSYSTIMESTAMP         TIMESTAMP WITH TIME ZONE   heure du serveur, avec fractions et fuseau\nCURRENT_DATE         DATE        heure dans le FUSEAU DE LA SESSION\nCURRENT_TIMESTAMP    TIMESTAMP WITH TIME ZONE   idem avec fractions\nLOCALTIMESTAMP       TIMESTAMP   heure de la session, sans fuseau affiché",
+     "lang": "text",
+     "title": "Les fonctions « maintenant »"
+    },
+    {
+     "type": "choice",
+     "q": "Un utilisateur au Japon et un serveur Oracle à Paris. Quelle fonction retourne l'heure **du Japon** (fuseau de la session de l'utilisateur) ?",
+     "options": [
+      "SYSDATE",
+      "CURRENT_DATE",
+      "SYSTIMESTAMP"
+     ],
+     "answer": 1,
+     "explain": "`SYSDATE` et `SYSTIMESTAMP` donnent toujours l'heure du **serveur**. `CURRENT_DATE` et `CURRENT_TIMESTAMP` suivent le **fuseau de la session**."
+    },
+    {
+     "type": "say",
+     "text": "**Créer un timestamp.** Comme pour les dates, il y a deux façons : un **littéral** (`TIMESTAMP '2025-03-12 14:30:45.123'`) ou une **conversion** avec `TO_TIMESTAMP(texte, masque)`. Dans le masque, les fractions se notent **`FF`** (`FF3` = 3 chiffres)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **littéral** timestamp du `12/03/2025 à 14:30:45` (écris-le au format ISO `2025-03-12 14:30:45`).",
+     "hints": [
+      "Le mot TIMESTAMP suivi d'une chaîne entre quotes.",
+      "SELECT TIMESTAMP '...' FROM dual;"
+     ],
+     "accept": [
+      "SELECT TIMESTAMP '2025-03-12 14:30:45.000000' FROM dual;"
+     ],
+     "solution": "SELECT TIMESTAMP '2025-03-12 14:30:45' FROM dual;",
+     "explain": "Un littéral `TIMESTAMP 'AAAA-MM-JJ HH:MI:SS[.fff]'` ne dépend d'aucun réglage de session : c'est la forme la plus sûre."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis le texte `'2025-03-12 14:30:45.123'` en timestamp avec `TO_TIMESTAMP` et le masque `'YYYY-MM-DD HH24:MI:SS.FF3'`.",
+     "hints": [
+      "TO_TIMESTAMP(texte, masque)",
+      "Le masque se termine par .FF3"
+     ],
+     "accept": [],
+     "solution": "SELECT TO_TIMESTAMP('2025-03-12 14:30:45.123', 'YYYY-MM-DD HH24:MI:SS.FF3') FROM dual;",
+     "explain": "`FF3` lit exactement 3 chiffres de fraction de seconde (`FF` seul accepte n'importe quelle précision)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'heure actuelle du serveur sous la forme `2025-03-12 14:30:45.123` (millisecondes) à partir de `SYSTIMESTAMP`.",
+     "hints": [
+      "TO_CHAR(SYSTIMESTAMP, masque)",
+      "Termine le masque par .FF3"
+     ],
+     "accept": [],
+     "solution": "SELECT TO_CHAR(SYSTIMESTAMP, 'YYYY-MM-DD HH24:MI:SS.FF3') FROM dual;",
+     "explain": "`TO_CHAR` sur un timestamp accepte tous les masques de date plus `FF`, `TZH`, `TZM`, `TZR`."
+    },
+    {
+     "type": "say",
+     "text": "**Passer de l'un à l'autre : `CAST`.** `CAST(ts AS DATE)` **supprime** les fractions de seconde. `CAST(d AS TIMESTAMP)` fait l'inverse (fractions à zéro)."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis `SYSTIMESTAMP` en `DATE` avec `CAST`.",
+     "hints": [
+      "CAST(expression AS type)",
+      "Le type cible est DATE."
+     ],
+     "accept": [],
+     "solution": "SELECT CAST(SYSTIMESTAMP AS DATE) FROM dual;",
+     "explain": "Utile pour **comparer** un timestamp avec une colonne `DATE`, ou pour vous débarrasser des fractions."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis `SYSDATE` en `TIMESTAMP` avec `CAST`.",
+     "hints": [
+      "CAST(... AS TIMESTAMP)"
+     ],
+     "accept": [],
+     "solution": "SELECT CAST(SYSDATE AS TIMESTAMP) FROM dual;",
+     "explain": "Les fractions de seconde seront simplement égales à `.000000`."
+    },
+    {
+     "type": "say",
+     "text": "**Extraire une partie : `EXTRACT`.** Piège ⚠️ : `EXTRACT(HOUR FROM ...)` marche sur un **TIMESTAMP** mais **pas sur un DATE** (erreur `ORA-30076`). Pour l'heure d'une `DATE`, on utilise `TO_CHAR(d, 'HH24')`."
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il avec `SELECT EXTRACT(HOUR FROM SYSDATE) FROM dual;` ?",
+     "options": [
+      "Il retourne l'heure du serveur",
+      "Erreur ORA-30076 : SYSDATE est un DATE, pas un TIMESTAMP",
+      "Il retourne 0"
+     ],
+     "answer": 1,
+     "explain": "`EXTRACT(HOUR ...)` exige un TIMESTAMP ou un INTERVAL. Contournement : `EXTRACT(HOUR FROM SYSTIMESTAMP)` ou `TO_CHAR(SYSDATE,'HH24')`."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais l'**heure** du timestamp `TIMESTAMP '2025-03-12 14:30:45'`.",
+     "hints": [
+      "EXTRACT(HOUR FROM ...)"
+     ],
+     "accept": [],
+     "solution": "SELECT EXTRACT(HOUR FROM TIMESTAMP '2025-03-12 14:30:45') FROM dual;",
+     "explain": "Résultat : 14."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais les **secondes** (avec fraction) de `TIMESTAMP '2025-03-12 14:30:45.5'`.",
+     "hints": [
+      "EXTRACT(SECOND FROM ...)"
+     ],
+     "accept": [],
+     "solution": "SELECT EXTRACT(SECOND FROM TIMESTAMP '2025-03-12 14:30:45.5') FROM dual;",
+     "explain": "Résultat : `45.5`. `SECOND` inclut la partie fractionnaire."
+    },
+    {
+     "type": "say",
+     "text": "**La table qu'on va utiliser dans la suite :**"
+    },
+    {
+     "type": "code",
+     "sql": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)",
+     "lang": "text",
+     "title": "Table RESERVATIONS"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des réservations qui **commencent à partir de midi** (12 h), en utilisant `EXTRACT(HOUR ...)`.",
+     "hints": [
+      "Condition sur EXTRACT(HOUR FROM debut)",
+      "WHERE ... >= 12"
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE EXTRACT(HOUR FROM debut) > 11;"
+     ],
+     "solution": "SELECT id FROM reservations WHERE EXTRACT(HOUR FROM debut) >= 12;",
+     "explain": "Réservations 2 (14:15) et 4 (23:30). `debut` est un TIMESTAMP, donc `EXTRACT(HOUR …)` est autorisé.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour chaque réservation, `id` et le **début au format `HH24:MI`** (par exemple `08:00`).",
+     "hints": [
+      "TO_CHAR(debut, masque)",
+      "Masque : HH24:MI"
+     ],
+     "accept": [],
+     "solution": "SELECT id, TO_CHAR(debut, 'HH24:MI') FROM reservations;",
+     "explain": "Résultats : 08:00, 14:15, 09:00, 23:30.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "say",
+     "text": "🏁 **À retenir** : `TIMESTAMP` = `DATE` + fractions de seconde. `SYSDATE` = serveur ; `CURRENT_DATE` = session. `TO_TIMESTAMP` + masque `FF`. `CAST` pour passer d'un type à l'autre. `EXTRACT(HOUR…)` : timestamp seulement."
+    }
+   ]
+  },
+  {
+   "id": "interval",
+   "title": "Les INTERVAL : durées et calculs précis",
+   "emoji": "⏳",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Jusqu'ici, pour ajouter des jours à une date, tu faisais `d + 7`. Oracle propose une façon plus **lisible et plus puissante** : le type **`INTERVAL`**, qui représente une **durée**. Il en existe deux familles :"
+    },
+    {
+     "type": "code",
+     "sql": "INTERVAL YEAR TO MONTH    durée en années et mois     ex. 1 an 6 mois\nINTERVAL DAY TO SECOND     durée en jours, h, min, s   ex. 2 jours 03:30:00",
+     "lang": "text",
+     "title": "Les deux familles"
+    },
+    {
+     "type": "say",
+     "text": "**Les littéraux** s'écrivent avec le mot `INTERVAL`, la valeur entre quotes et l'unité :"
+    },
+    {
+     "type": "code",
+     "sql": "INTERVAL '10' DAY                  10 jours\nINTERVAL '3' MONTH                 3 mois\nINTERVAL '2' YEAR                  2 ans\nINTERVAL '1-6' YEAR TO MONTH       1 an et 6 mois\nINTERVAL '90' MINUTE               90 minutes\nINTERVAL '2 03:30:00' DAY TO SECOND   2 jours 3 h 30",
+     "lang": "text",
+     "title": "Littéraux INTERVAL",
+     "note": "Piège : la précision par défaut du chiffre de tête est de 2. INTERVAL '120' MINUTE échoue (ORA-01873) ; il faut écrire INTERVAL '120' MINUTE(3)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel littéral représente **1 an et 6 mois** ?",
+     "options": [
+      "INTERVAL '1.6' YEAR",
+      "INTERVAL '1-6' YEAR TO MONTH",
+      "INTERVAL '16' MONTH TO YEAR"
+     ],
+     "answer": 1,
+     "explain": "`'années-mois'` avec `YEAR TO MONTH`. Pour 18 mois, `INTERVAL '18' MONTH` marche aussi."
+    },
+    {
+     "type": "say",
+     "text": "**Ajouter un intervalle à une date ou un timestamp** : un simple `+`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la date correspondant au `2025-03-12` **plus 10 jours**, avec un `INTERVAL`.",
+     "hints": [
+      "DATE '...' + INTERVAL '10' DAY"
+     ],
+     "accept": [],
+     "solution": "SELECT DATE '2025-03-12' + INTERVAL '10' DAY FROM dual;",
+     "explain": "Résultat : 22/03/2025. Équivalent à `+ 10`, mais plus lisible."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le timestamp `2025-03-12 14:30:00` **plus 90 minutes**.",
+     "hints": [
+      "TIMESTAMP '...' + INTERVAL '90' MINUTE"
+     ],
+     "accept": [],
+     "solution": "SELECT TIMESTAMP '2025-03-12 14:30:00' + INTERVAL '90' MINUTE FROM dual;",
+     "explain": "Résultat : 12/03/2025 16:00:00."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la date `2025-03-12` **plus 1 an et 6 mois**, avec un seul littéral `INTERVAL ... YEAR TO MONTH`.",
+     "hints": [
+      "INTERVAL '1-6' YEAR TO MONTH"
+     ],
+     "accept": [],
+     "solution": "SELECT DATE '2025-03-12' + INTERVAL '1-6' YEAR TO MONTH FROM dual;",
+     "explain": "Résultat : 12/09/2026."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Le grand piège des mois : le 31 janvier.** `DATE '2025-01-31' + INTERVAL '1' MONTH` donne **ORA-01839** : le 31 février n'existe pas ! Alors que `ADD_MONTHS(DATE '2025-01-31', 1)` renvoie sagement le **28/02/2025** (dernier jour du mois)."
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `SELECT DATE '2025-01-31' + INTERVAL '1' MONTH FROM dual;` ?",
+     "options": [
+      "28/02/2025",
+      "03/03/2025",
+      "Une erreur ORA-01839 (date non valide pour le mois spécifié)"
+     ],
+     "answer": 2,
+     "explain": "L'arithmétique d'intervalle ne « rattrape » pas les fins de mois. **`ADD_MONTHS`** est le bon outil pour ajouter des mois à une date quelconque."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute **1 mois** au `2025-01-31` avec la fonction qui gère correctement les fins de mois.",
+     "hints": [
+      "Pas INTERVAL : une fonction dédiée.",
+      "ADD_MONTHS(date, n)"
+     ],
+     "accept": [],
+     "solution": "SELECT ADD_MONTHS(DATE '2025-01-31', 1) FROM dual;",
+     "explain": "Résultat : 28/02/2025."
+    },
+    {
+     "type": "say",
+     "text": "**Soustraire deux timestamps donne un INTERVAL DAY TO SECOND.** Alors que **soustraire deux DATE donne un nombre de jours** (avec décimales). C'est l'une des grandes différences entre les deux types."
+    },
+    {
+     "type": "code",
+     "sql": "SELECT DATE '2025-03-12' - DATE '2025-03-10' FROM dual;\n-> 2                              (un NOMBRE de jours)\n\nSELECT TIMESTAMP '2025-03-12 18:00:00' - TIMESTAMP '2025-03-12 14:30:00' FROM dual;\n-> +00 03:30:00.000000             (un INTERVAL)",
+     "lang": "sql",
+     "title": "DATE - DATE  /  TIMESTAMP - TIMESTAMP"
+    },
+    {
+     "type": "choice",
+     "q": "`TIMESTAMP '2025-03-12 18:00:00' - TIMESTAMP '2025-03-12 14:30:00'` retourne :",
+     "options": [
+      "3.5",
+      "Un INTERVAL DAY TO SECOND de 3 h 30",
+      "Le timestamp 03:30"
+     ],
+     "answer": 1,
+     "explain": "Le résultat est un `INTERVAL DAY TO SECOND` : `+00 03:30:00.000000`."
+    },
+    {
+     "type": "say",
+     "text": "**On peut extraire les composants d'un intervalle** avec `EXTRACT(DAY|HOUR|MINUTE|SECOND FROM intervalle)`. Pour convertir en **minutes** : `heures × 60 + minutes`."
+    },
+    {
+     "type": "code",
+     "sql": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)",
+     "lang": "text",
+     "title": "Rappel de la table"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et la **durée** (fin − début) de chaque réservation.",
+     "hints": [
+      "Soustrais deux TIMESTAMP."
+     ],
+     "accept": [
+      "SELECT id, (fin - debut) FROM reservations;"
+     ],
+     "solution": "SELECT id, fin - debut FROM reservations;",
+     "explain": "Intervalles : 2 h 30, 45 min, 3 h 45, 1 h 45.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des réservations qui durent **plus de 2 heures**.",
+     "hints": [
+      "Compare (fin - debut) avec un INTERVAL.",
+      "INTERVAL '2' HOUR"
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE (fin - debut) > INTERVAL '2' HOUR;",
+      "SELECT id FROM reservations WHERE fin - debut > INTERVAL '0 02:00:00' DAY TO SECOND;",
+      "SELECT id FROM reservations WHERE fin > debut + INTERVAL '2' HOUR;"
+     ],
+     "solution": "SELECT id FROM reservations WHERE fin - debut > INTERVAL '2' HOUR;",
+     "explain": "Réservations 1 (2 h 30) et 3 (3 h 45).",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et la **fin de la réservation + 30 minutes** de ménage.",
+     "hints": [
+      "fin + INTERVAL '30' MINUTE"
+     ],
+     "accept": [],
+     "solution": "SELECT id, fin + INTERVAL '30' MINUTE FROM reservations;",
+     "explain": "Tu ajoutes une durée à un timestamp : le résultat reste un timestamp.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et la **durée en minutes** de chaque réservation, avec `EXTRACT(HOUR …) * 60 + EXTRACT(MINUTE …)` sur `fin - debut`.",
+     "hints": [
+      "EXTRACT(HOUR FROM (fin - debut)) * 60",
+      "+ EXTRACT(MINUTE FROM (fin - debut))"
+     ],
+     "accept": [
+      "SELECT id, EXTRACT(HOUR FROM fin - debut) * 60 + EXTRACT(MINUTE FROM fin - debut) FROM reservations;",
+      "SELECT id, 60 * EXTRACT(HOUR FROM (fin - debut)) + EXTRACT(MINUTE FROM (fin - debut)) FROM reservations;",
+      "SELECT id, EXTRACT(MINUTE FROM (fin - debut)) + EXTRACT(HOUR FROM (fin - debut)) * 60 FROM reservations;"
+     ],
+     "solution": "SELECT id, EXTRACT(HOUR FROM (fin - debut)) * 60 + EXTRACT(MINUTE FROM (fin - debut)) FROM reservations;",
+     "explain": "Résultats : 150, 45, 225, 105. Attention : si une réservation dépassait 24 h, il faudrait aussi ajouter `EXTRACT(DAY …) * 1440`.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "say",
+     "text": "**Fabriquer un intervalle depuis un nombre** : `NUMTODSINTERVAL(n, 'HOUR')` (ou `'DAY'`, `'MINUTE'`, `'SECOND'`) et `NUMTOYMINTERVAL(n, 'MONTH')` (ou `'YEAR'`). Pratique quand la durée vient d'une **colonne**, car un littéral `INTERVAL '...'` doit être une constante."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le timestamp `2025-03-12 08:00:00` **plus 36 heures**, avec `NUMTODSINTERVAL`.",
+     "hints": [
+      "NUMTODSINTERVAL(36, 'HOUR')"
+     ],
+     "accept": [],
+     "solution": "SELECT TIMESTAMP '2025-03-12 08:00:00' + NUMTODSINTERVAL(36, 'HOUR') FROM dual;",
+     "explain": "Résultat : 13/03/2025 20:00:00 (24 h + 12 h)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour chaque réservation, `id` et le début **décalé d'une durée de 2 jours** avec `NUMTODSINTERVAL(2, 'DAY')`.",
+     "hints": [
+      "debut + NUMTODSINTERVAL(2, 'DAY')"
+     ],
+     "accept": [],
+     "solution": "SELECT id, debut + NUMTODSINTERVAL(2, 'DAY') FROM reservations;",
+     "explain": "L'unité est passée en **texte** : `'DAY'`.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nombre de **minutes** entre `2025-03-12 08:00` et `2025-03-12 10:30` avec des `TO_DATE` (masque `'YYYY-MM-DD HH24:MI'`) et l'arithmétique des dates (différence × 24 × 60).",
+     "hints": [
+      "DATE - DATE = jours, puis * 24 (heures) * 60 (minutes).",
+      "Mets la différence entre parenthèses."
+     ],
+     "accept": [
+      "SELECT (TO_DATE('2025-03-12 10:30', 'YYYY-MM-DD HH24:MI') - TO_DATE('2025-03-12 08:00', 'YYYY-MM-DD HH24:MI')) * 1440 FROM dual;",
+      "SELECT 24 * 60 * (TO_DATE('2025-03-12 10:30', 'YYYY-MM-DD HH24:MI') - TO_DATE('2025-03-12 08:00', 'YYYY-MM-DD HH24:MI')) FROM dual;",
+      "SELECT (TO_DATE('2025-03-12 10:30', 'YYYY-MM-DD HH24:MI') - TO_DATE('2025-03-12 08:00', 'YYYY-MM-DD HH24:MI')) * 60 * 24 FROM dual;"
+     ],
+     "solution": "SELECT (TO_DATE('2025-03-12 10:30', 'YYYY-MM-DD HH24:MI') - TO_DATE('2025-03-12 08:00', 'YYYY-MM-DD HH24:MI')) * 24 * 60 FROM dual;",
+     "explain": "Résultat : 150. Avec des `DATE`, la différence est un **nombre de jours** : 0,104166… × 1440 = 150."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `INTERVAL '…' unité` (littéraux), `+` sur dates/timestamps, **`ADD_MONTHS` pour les mois** (pas `INTERVAL '1' MONTH` en fin de mois), `TIMESTAMP - TIMESTAMP` = INTERVAL, `DATE - DATE` = nombre de jours, `EXTRACT` pour décomposer, `NUMTODSINTERVAL` pour partir d'un nombre."
+    }
+   ]
+  },
+  {
+   "id": "arrondis",
+   "title": "Tronquer, arrondir, repérer dans le calendrier",
+   "emoji": "🗓️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un grand classique des rapports : **regrouper par semaine, par trimestre, par année**. Pour ça, on ne découpe pas à la main : on **tronque** (`TRUNC`) ou on **arrondit** (`ROUND`) les dates selon un **masque**."
+    },
+    {
+     "type": "code",
+     "sql": "TRUNC(d, 'MM')     1er jour du mois           2025-03-12  ->  2025-03-01\nTRUNC(d, 'YYYY')   1er janvier de l'année      2025-03-12  ->  2025-01-01\nTRUNC(d, 'Q')      1er jour du trimestre       2025-05-12  ->  2025-04-01\nTRUNC(d, 'IW')     lundi de la semaine ISO     2025-03-12  ->  2025-03-10\nTRUNC(d, 'HH24')   heure pile                  14:30:45    ->  14:00:00\nTRUNC(d, 'MI')     minute pile                 14:30:45    ->  14:30:00",
+     "lang": "text",
+     "title": "TRUNC avec masque"
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `TRUNC(DATE '2025-05-12', 'Q')` ?",
+     "options": [
+      "01/05/2025",
+      "01/04/2025",
+      "01/01/2025"
+     ],
+     "answer": 1,
+     "explain": "`Q` = quartier (trimestre) : le 2ᵉ trimestre commence le 1ᵉʳ **avril**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **premier jour du trimestre** de la date `2025-08-20`.",
+     "hints": [
+      "TRUNC(date, 'Q')"
+     ],
+     "accept": [],
+     "solution": "SELECT TRUNC(DATE '2025-08-20', 'Q') FROM dual;",
+     "explain": "Résultat : 01/07/2025."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **lundi de la semaine** contenant le `2025-03-12` (masque ISO).",
+     "hints": [
+      "Le masque ISO pour la semaine : IW."
+     ],
+     "accept": [],
+     "solution": "SELECT TRUNC(DATE '2025-03-12', 'IW') FROM dual;",
+     "explain": "Le 12 mars 2025 est un mercredi, donc le lundi est le **10/03/2025**. `IW` ne dépend d'aucun réglage de langue, contrairement à `'DAY'` qui suit le début de semaine du territoire de la session."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **1ᵉʳ janvier** de l'année de la date `2025-08-20`.",
+     "hints": [
+      "TRUNC(date, 'YYYY')"
+     ],
+     "accept": [
+      "SELECT TRUNC(DATE '2025-08-20', 'YEAR') FROM dual;",
+      "SELECT TRUNC(DATE '2025-08-20', 'YY') FROM dual;"
+     ],
+     "solution": "SELECT TRUNC(DATE '2025-08-20', 'YYYY') FROM dual;",
+     "explain": "Résultat : 01/01/2025. `'YEAR'` et `'YYYY'` sont équivalents."
+    },
+    {
+     "type": "exercise",
+     "q": "Ramène le timestamp `2025-03-12 14:30:45` à l'**heure pile** (14:00:00) avec `TRUNC` et le masque `'HH24'`.",
+     "hints": [
+      "TRUNC(..., 'HH24')"
+     ],
+     "accept": [
+      "SELECT TRUNC(TIMESTAMP '2025-03-12 14:30:45', 'HH') FROM dual;"
+     ],
+     "solution": "SELECT TRUNC(TIMESTAMP '2025-03-12 14:30:45', 'HH24') FROM dual;",
+     "explain": "`TRUNC` retourne un `DATE` (donc sans fractions) : `12/03/2025 14:00:00`."
+    },
+    {
+     "type": "say",
+     "text": "**`ROUND`** fonctionne de la même manière, mais **arrondit au plus proche** au lieu de couper : le 16 du mois ou après → mois suivant ; à partir de juillet → année suivante ; midi ou après → jour suivant."
+    },
+    {
+     "type": "code",
+     "sql": "ROUND(DATE '2025-04-10', 'MM')   ->  01/04/2025   (le 10 : on reste sur avril)\nROUND(DATE '2025-04-20', 'MM')   ->  01/05/2025   (le 20 : on passe à mai)\nROUND(DATE '2025-08-20', 'YYYY') ->  01/01/2026   (août : on passe à l'année suivante)\nROUND(SYSDATE)                  ->  minuit le jour le plus proche",
+     "lang": "text",
+     "title": "ROUND avec masque"
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `ROUND(DATE '2025-04-20', 'MM')` ?",
+     "options": [
+      "01/04/2025",
+      "01/05/2025",
+      "30/04/2025"
+     ],
+     "answer": 1,
+     "explain": "Le 20 est dans la seconde moitié du mois : l'arrondi va au **1ᵉʳ mai**."
+    },
+    {
+     "type": "exercise",
+     "q": "Arrondis la date `2025-08-20` à l'**année la plus proche**.",
+     "hints": [
+      "ROUND(date, 'YYYY')"
+     ],
+     "accept": [
+      "SELECT ROUND(DATE '2025-08-20', 'YEAR') FROM dual;"
+     ],
+     "solution": "SELECT ROUND(DATE '2025-08-20', 'YYYY') FROM dual;",
+     "explain": "Août est après juin : résultat **01/01/2026**."
+    },
+    {
+     "type": "say",
+     "text": "**Dernier jour d'une période.** Il n'y a pas de masque pour ça, mais une astuce : **début de la période suivante − 1 jour**. Pour le dernier jour du mois, `LAST_DAY` existe directement."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **dernier jour du trimestre** de la date `2025-05-12`, avec `ADD_MONTHS(TRUNC(…, 'Q'), 3) - 1`.",
+     "hints": [
+      "Début du trimestre : TRUNC(..., 'Q').",
+      "Ajoute 3 mois, puis retire 1 jour."
+     ],
+     "accept": [
+      "SELECT ADD_MONTHS(TRUNC(DATE '2025-05-12', 'Q'), 3) - 1 FROM dual;"
+     ],
+     "solution": "SELECT ADD_MONTHS(TRUNC(DATE '2025-05-12', 'Q'), 3) - 1 FROM dual;",
+     "explain": "1ᵉʳ avril + 3 mois = 1ᵉʳ juillet ; − 1 jour = **30/06/2025**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **dernier jour de l'année** de la date `2025-05-12`.",
+     "hints": [
+      "Même astuce avec 'YYYY' et 12 mois."
+     ],
+     "accept": [
+      "SELECT ADD_MONTHS(TRUNC(DATE '2025-05-12', 'YEAR'), 12) - 1 FROM dual;",
+      "SELECT TRUNC(ADD_MONTHS(DATE '2025-05-12', 12), 'YYYY') - 1 FROM dual;"
+     ],
+     "solution": "SELECT ADD_MONTHS(TRUNC(DATE '2025-05-12', 'YYYY'), 12) - 1 FROM dual;",
+     "explain": "Résultat : 31/12/2025."
+    },
+    {
+     "type": "say",
+     "text": "**Repérer un jour dans le calendrier avec `TO_CHAR`** : `'Q'` trimestre, `'DDD'` numéro du jour dans l'année (1-366), `'IW'` numéro de semaine ISO, `'ID'` jour de la semaine ISO (**1 = lundi … 7 = dimanche**)."
+    },
+    {
+     "type": "code",
+     "sql": "TO_CHAR(DATE '2025-03-12', 'Q')     ->  1\nTO_CHAR(DATE '2025-03-12', 'DDD')   ->  071\nTO_CHAR(DATE '2025-03-12', 'IW')    ->  11\nTO_CHAR(DATE '2025-03-12', 'ID')    ->  3          (mercredi)",
+     "lang": "text",
+     "title": "Exemples TO_CHAR",
+     "note": "Évite le masque 'D' : le numéro du jour dépend du territoire (dimanche = 1 aux USA, lundi = 1 en France)."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi préférer `'ID'` à `'D'` pour le jour de la semaine ?",
+     "options": [
+      "`ID` est plus rapide",
+      "`D` dépend de la langue/du territoire de la session, `ID` est toujours lundi = 1",
+      "`ID` donne le nom du jour"
+     ],
+     "answer": 1,
+     "explain": "Un même code qui donne des résultats différents selon la session est un bug en puissance. `ID` et `IW` sont **fixes**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **numéro de semaine ISO** de la date `2025-03-12`.",
+     "hints": [
+      "Masque IW."
+     ],
+     "accept": [],
+     "solution": "SELECT TO_CHAR(DATE '2025-03-12', 'IW') FROM dual;",
+     "explain": "Résultat : `11`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **numéro du jour dans l'année** de la date `2025-03-12`.",
+     "hints": [
+      "Masque DDD."
+     ],
+     "accept": [],
+     "solution": "SELECT TO_CHAR(DATE '2025-03-12', 'DDD') FROM dual;",
+     "explain": "31 + 28 + 12 = **71** (affiché `071`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des réservations qui commencent **un jour de week-end** (samedi = 6, dimanche = 7 avec `ID`). Table ci-dessus : aucune ne doit sortir.",
+     "hints": [
+      "TO_CHAR(debut, 'ID') IN (...)",
+      "Les valeurs de ID sont des textes : '6' et '7'."
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE TO_CHAR(debut, 'ID') >= '6';",
+      "SELECT id FROM reservations WHERE TO_CHAR(debut, 'ID') IN ('6','7');",
+      "SELECT id FROM reservations WHERE TO_NUMBER(TO_CHAR(debut, 'ID')) >= 6;",
+      "SELECT id FROM reservations WHERE TO_NUMBER(TO_CHAR(debut, 'ID')) IN (6, 7);"
+     ],
+     "solution": "SELECT id FROM reservations WHERE TO_CHAR(debut, 'ID') IN ('6', '7');",
+     "explain": "Le 12 mars 2025 est un mercredi, le 14 un vendredi : aucune ligne, ce qui est le bon résultat. `TO_CHAR` retourne du **texte**, donc compare à `'6'` et pas à `6` (même si Oracle convertirait implicitement).",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des réservations qui **traversent minuit** (la date de début est différente de la date de fin), avec `TRUNC`.",
+     "hints": [
+      "Compare TRUNC(debut) et TRUNC(fin)."
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE TRUNC(debut) != TRUNC(fin);",
+      "SELECT id FROM reservations WHERE TRUNC(fin) > TRUNC(debut);",
+      "SELECT id FROM reservations WHERE TRUNC(debut) < TRUNC(fin);"
+     ],
+     "solution": "SELECT id FROM reservations WHERE TRUNC(debut) <> TRUNC(fin);",
+     "explain": "Seule la réservation **4** (23:30 → 01:15) traverse minuit.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **nombre de réservations par jour** (`YYYY-MM-DD`), avec `TO_CHAR(debut, 'YYYY-MM-DD')` et `GROUP BY`.",
+     "hints": [
+      "GROUP BY avec la même expression que dans le SELECT."
+     ],
+     "accept": [
+      "SELECT TO_CHAR(debut, 'YYYY-MM-DD'), COUNT(*) FROM reservations GROUP BY TO_CHAR(debut, 'YYYY-MM-DD') ORDER BY 1;",
+      "SELECT TO_CHAR(debut, 'YYYY-MM-DD'), COUNT(*) FROM reservations GROUP BY TO_CHAR(debut, 'YYYY-MM-DD') ORDER BY TO_CHAR(debut, 'YYYY-MM-DD');"
+     ],
+     "solution": "SELECT TO_CHAR(debut, 'YYYY-MM-DD'), COUNT(*) FROM reservations GROUP BY TO_CHAR(debut, 'YYYY-MM-DD');",
+     "explain": "12/03 : 2 · 13/03 : 1 · 14/03 : 1. L'expression du `SELECT` doit se retrouver à l'identique dans le `GROUP BY`.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "say",
+     "text": "🏁 `TRUNC(d,'MM'|'Q'|'YYYY'|'IW'|'HH24'|'MI')`, `ROUND` pareil mais au plus proche, dernier jour de période = `ADD_MONTHS(TRUNC(…),n) − 1`, calendrier : `Q`, `DDD`, `IW`, **`ID`** (pas `D`)."
+    }
+   ]
+  },
+  {
+   "id": "fuseaux",
+   "title": "Fuseaux horaires : ne plus jamais se tromper d'heure",
+   "emoji": "🌍",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un client à Cotonou réserve une réunion à **15 h heure de Paris**. Quelle heure est-ce chez lui ? Et en juillet, est-ce la même réponse qu'en mars ? 😅 (Spoiler : non. L'heure d'été complique tout.) Les types avec fuseau sont faits pour ça."
+    },
+    {
+     "type": "code",
+     "sql": "TIMESTAMP WITH TIME ZONE         garde l'heure ET son décalage (+01:00) ou sa région (Europe/Paris)\nTIMESTAMP WITH LOCAL TIME ZONE   stocké en heure de la base ; affiché dans le fuseau de LA SESSION",
+     "lang": "text",
+     "title": "Les deux types avec fuseau"
+    },
+    {
+     "type": "choice",
+     "q": "Quel type conserve **le décalage d'origine** de chaque valeur insérée ?",
+     "options": [
+      "TIMESTAMP",
+      "TIMESTAMP WITH TIME ZONE",
+      "DATE"
+     ],
+     "answer": 1,
+     "explain": "`TIMESTAMP WITH TIME ZONE` stocke le fuseau (ou décalage) avec la valeur. `TIMESTAMP WITH LOCAL TIME ZONE` convertit en heure de la base à l'entrée et en heure de session à la sortie."
+    },
+    {
+     "type": "say",
+     "text": "**Où en est-on ?** Deux fonctions donnent les réglages : `DBTIMEZONE` (fuseau de la base) et `SESSIONTIMEZONE` (fuseau de **ta** session). `SYSTIMESTAMP` affiche l'heure serveur **avec** son décalage."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **fuseau horaire de ta session**.",
+     "hints": [
+      "Une fonction sans parenthèses."
+     ],
+     "accept": [],
+     "solution": "SELECT SESSIONTIMEZONE FROM dual;",
+     "explain": "Exemple de résultat : `+01:00` ou `Africa/Lagos`. Il pilote `CURRENT_DATE` et `CURRENT_TIMESTAMP`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **fuseau horaire de la base de données**.",
+     "hints": [
+      "Une fonction qui commence par DB."
+     ],
+     "accept": [],
+     "solution": "SELECT DBTIMEZONE FROM dual;",
+     "explain": "Bonne pratique : fixer la base sur **UTC** (+00:00) et convertir à l'affichage."
+    },
+    {
+     "type": "say",
+     "text": "**Écrire une valeur avec fuseau** : on ajoute à la fin du littéral soit un **décalage** (`+02:00`), soit un **nom de région** (`Europe/Paris`). Préfère la **région** : elle connaît l'heure d'été !"
+    },
+    {
+     "type": "code",
+     "sql": "TIMESTAMP '2025-07-10 15:00:00 +02:00'          décalage fixe\nTIMESTAMP '2025-07-10 15:00:00 Europe/Paris'      région (gère l'heure d'été)",
+     "lang": "text",
+     "title": "Deux écritures"
+    },
+    {
+     "type": "say",
+     "text": "**Convertir dans un autre fuseau : `AT TIME ZONE`.** C'est LA clause à connaître. La valeur représente **le même instant**, affiché dans un autre fuseau."
+    },
+    {
+     "type": "code",
+     "sql": "SELECT TIMESTAMP '2025-03-12 12:00:00 UTC' AT TIME ZONE 'Africa/Lagos' FROM dual;\n-> 12/03/2025 13:00:00 +01:00\n\nSELECT TIMESTAMP '2025-03-12 12:00:00 UTC' AT TIME ZONE 'America/New_York' FROM dual;\n-> 12/03/2025 08:00:00 -04:00     (New York est déjà à l'heure d'été le 12 mars)\n\nSELECT TIMESTAMP '2025-03-12 12:00:00 UTC' AT TIME ZONE 'Asia/Tokyo' FROM dual;\n-> 12/03/2025 21:00:00 +09:00",
+     "lang": "sql",
+     "title": "AT TIME ZONE"
+    },
+    {
+     "type": "choice",
+     "q": "Il est 12:00 UTC le 12 mars 2025. Quelle heure est-il à Tokyo (UTC+9) ?",
+     "options": [
+      "03:00",
+      "21:00",
+      "13:00"
+     ],
+     "answer": 1,
+     "explain": "12 + 9 = **21:00**. `AT TIME ZONE 'Asia/Tokyo'` fait ce calcul."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche `2025-03-12 12:00:00` **UTC** converti à l'heure de **Bénin** (fuseau `Africa/Lagos`, même heure que Cotonou).",
+     "hints": [
+      "TIMESTAMP '... UTC' AT TIME ZONE '...'",
+      "Région : Africa/Lagos"
+     ],
+     "accept": [
+      "SELECT TIMESTAMP '2025-03-12 12:00:00 +00:00' AT TIME ZONE 'Africa/Lagos' FROM dual;",
+      "SELECT TIMESTAMP '2025-03-12 12:00:00 UTC' AT TIME ZONE '+01:00' FROM dual;"
+     ],
+     "solution": "SELECT TIMESTAMP '2025-03-12 12:00:00 UTC' AT TIME ZONE 'Africa/Lagos' FROM dual;",
+     "explain": "Résultat : 13:00 (+01:00). Le Bénin n'a **pas d'heure d'été** : décalage toujours +01:00."
+    },
+    {
+     "type": "exercise",
+     "q": "Il est `2025-07-10 15:00:00` à **Paris** (`Europe/Paris`). Quelle heure est-ce à **Cotonou** (`Africa/Lagos`) ?",
+     "hints": [
+      "Écris la région dans le littéral, puis AT TIME ZONE.",
+      "Paris est à UTC+2 en juillet."
+     ],
+     "accept": [],
+     "solution": "SELECT TIMESTAMP '2025-07-10 15:00:00 Europe/Paris' AT TIME ZONE 'Africa/Lagos' FROM dual;",
+     "explain": "Résultat : **14:00** (+01:00). En juillet, Paris est à UTC+2 (heure d'été), Cotonou reste à UTC+1 : l'écart n'est que d'une heure. En hiver, ils ont la même heure !"
+    },
+    {
+     "type": "choice",
+     "q": "Paris et Cotonou : quel est l'écart horaire en **hiver** (janvier) ?",
+     "options": [
+      "0 h (même heure)",
+      "1 h",
+      "2 h"
+     ],
+     "answer": 0,
+     "explain": "En hiver, Paris est à UTC+1 comme Cotonou : **aucun écart**. En été (UTC+2 pour Paris), il y a 1 h."
+    },
+    {
+     "type": "exercise",
+     "q": "Il est `2025-01-15 09:00:00` à **Paris**. Convertis cette heure à **New York** (`America/New_York`).",
+     "hints": [
+      "Même schéma qu'avant."
+     ],
+     "accept": [],
+     "solution": "SELECT TIMESTAMP '2025-01-15 09:00:00 Europe/Paris' AT TIME ZONE 'America/New_York' FROM dual;",
+     "explain": "Résultat : **03:00** (−05:00). En janvier, New York est à UTC−5 et Paris à UTC+1 : 6 h d'écart."
+    },
+    {
+     "type": "say",
+     "text": "**Donner un fuseau à un TIMESTAMP « nu »** : `FROM_TZ(timestamp, 'fuseau')`. Utile quand une colonne `TIMESTAMP` stocke de l'heure **locale** sans le dire."
+    },
+    {
+     "type": "exercise",
+     "q": "Dis que le timestamp `2025-03-12 12:00:00` est à l'heure de **Paris** avec `FROM_TZ`.",
+     "hints": [
+      "FROM_TZ(timestamp, 'région')"
+     ],
+     "accept": [
+      "SELECT FROM_TZ(TIMESTAMP '2025-03-12 12:00:00', 'EUROPE/PARIS') FROM dual;"
+     ],
+     "solution": "SELECT FROM_TZ(TIMESTAMP '2025-03-12 12:00:00', 'Europe/Paris') FROM dual;",
+     "explain": "`FROM_TZ` **n'ajoute pas** d'heure : il **étiquette** la valeur avec un fuseau. Résultat : `12:00:00 Europe/Paris`."
+    },
+    {
+     "type": "say",
+     "text": "**Tout ramener en UTC** : `SYS_EXTRACT_UTC(valeur_avec_fuseau)`. La **meilleure pratique** pour comparer des événements de plusieurs pays : on stocke ou compare en **UTC**."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis `TIMESTAMP '2025-07-10 15:00:00 +02:00'` en **UTC** avec `SYS_EXTRACT_UTC`.",
+     "hints": [
+      "SYS_EXTRACT_UTC(valeur)"
+     ],
+     "accept": [
+      "SELECT SYS_EXTRACT_UTC(TIMESTAMP '2025-07-10 15:00:00 Europe/Paris') FROM dual;"
+     ],
+     "solution": "SELECT SYS_EXTRACT_UTC(TIMESTAMP '2025-07-10 15:00:00 +02:00') FROM dual;",
+     "explain": "Résultat : 10/07/2025 **13:00:00** (15 h − 2 h)."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais le **décalage en heures** (`TIMEZONE_HOUR`) de `TIMESTAMP '2025-07-10 15:00:00 +02:00'`.",
+     "hints": [
+      "EXTRACT(TIMEZONE_HOUR FROM ...)"
+     ],
+     "accept": [],
+     "solution": "SELECT EXTRACT(TIMEZONE_HOUR FROM TIMESTAMP '2025-07-10 15:00:00 +02:00') FROM dual;",
+     "explain": "Résultat : 2. Il existe aussi `TIMEZONE_MINUTE` et `TIMEZONE_REGION`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le décalage de `TIMESTAMP '2025-07-10 15:00:00 +02:00'` sous la forme `+02:00` avec `TO_CHAR` et le masque `'TZH:TZM'`.",
+     "hints": [
+      "Masque : TZH:TZM"
+     ],
+     "accept": [],
+     "solution": "SELECT TO_CHAR(TIMESTAMP '2025-07-10 15:00:00 +02:00', 'TZH:TZM') FROM dual;",
+     "explain": "`TZH` = heures du décalage, `TZM` = minutes, `TZR` = nom de région."
+    },
+    {
+     "type": "choice",
+     "q": "**Règle d'or** pour une application utilisée dans plusieurs pays :",
+     "options": [
+      "Stocker l'heure locale de chaque utilisateur dans un DATE",
+      "Stocker en UTC (ou avec fuseau) et convertir à l'affichage",
+      "Stocker du texte comme '10/07/2025 15h'"
+     ],
+     "answer": 1,
+     "explain": "Stocker en **UTC / avec fuseau**, convertir seulement pour l'affichage. Une `DATE` sans fuseau est ambiguë et fait perdre l'information."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `SYSDATE`/`SYSTIMESTAMP` = serveur ; `CURRENT_*` = session ; `SESSIONTIMEZONE`, `DBTIMEZONE` ; **région plutôt que décalage** ; `AT TIME ZONE` pour convertir ; `FROM_TZ` pour étiqueter ; `SYS_EXTRACT_UTC` pour normaliser."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : le planning mondial",
+   "emoji": "🏆",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** Tu gères l'agenda d'une équipe répartie entre Cotonou, Paris et New York. Utilise **tout** ce que tu as appris. 8 questions."
+    },
+    {
+     "type": "code",
+     "sql": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)",
+     "lang": "text",
+     "title": "Rappel : table RESERVATIONS"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 1/8** — Quelle différence principale entre `DATE` et `TIMESTAMP` ?",
+     "options": [
+      "TIMESTAMP stocke les fractions de seconde ; DATE s'arrête à la seconde",
+      "DATE gère les fuseaux, pas TIMESTAMP",
+      "Aucune"
+     ],
+     "answer": 0,
+     "explain": "`TIMESTAMP` ajoute les fractions de seconde (et ses variantes, les fuseaux)."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/8** — Affiche l'`id` des réservations de plus de **3 heures**.",
+     "hints": [
+      "Compare fin - debut avec un INTERVAL."
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE (fin - debut) > INTERVAL '3' HOUR;",
+      "SELECT id FROM reservations WHERE fin > debut + INTERVAL '3' HOUR;"
+     ],
+     "solution": "SELECT id FROM reservations WHERE fin - debut > INTERVAL '3' HOUR;",
+     "explain": "Seule la 3 (3 h 45) dépasse 3 heures.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/8** — Affiche la **durée totale en minutes** de la salle `A` (somme sur ses réservations) : `SUM` de `EXTRACT(HOUR …) * 60 + EXTRACT(MINUTE …)`.",
+     "hints": [
+      "SUM( heures*60 + minutes ) avec WHERE salle = 'A'"
+     ],
+     "accept": [
+      "SELECT SUM(EXTRACT(HOUR FROM fin - debut) * 60 + EXTRACT(MINUTE FROM fin - debut)) FROM reservations WHERE salle = 'A';"
+     ],
+     "solution": "SELECT SUM(EXTRACT(HOUR FROM (fin - debut)) * 60 + EXTRACT(MINUTE FROM (fin - debut))) FROM reservations WHERE salle = 'A';",
+     "explain": "2 h 30 + 3 h 45 = **375 minutes**.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 4/8** — Tu dois ajouter **1 mois** au `2025-01-31`. Quelle solution est **sûre** ?",
+     "options": [
+      "DATE '2025-01-31' + INTERVAL '1' MONTH",
+      "ADD_MONTHS(DATE '2025-01-31', 1)",
+      "DATE '2025-01-31' + 30"
+     ],
+     "answer": 1,
+     "explain": "`ADD_MONTHS` donne le 28/02. L'intervalle plante (ORA-01839), `+ 30` ne tombe pas sur un mois calendaire."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/8** — Affiche le **premier jour du mois** de chaque `debut` (colonne `debut`), une ligne par réservation, avec `id`.",
+     "hints": [
+      "TRUNC(debut, 'MM')"
+     ],
+     "accept": [],
+     "solution": "SELECT id, TRUNC(debut, 'MM') FROM reservations;",
+     "explain": "Toutes les réservations sont en mars 2025 : `01/03/2025`.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/8** — La réunion démarre le `2025-03-12 09:00:00` à **Paris**. Quelle heure est-il à **New York** ? (écris la requête avec `AT TIME ZONE`)",
+     "hints": [
+      "Littéral avec la région de Paris, puis AT TIME ZONE 'America/New_York'."
+     ],
+     "accept": [],
+     "solution": "SELECT TIMESTAMP '2025-03-12 09:00:00 Europe/Paris' AT TIME ZONE 'America/New_York' FROM dual;",
+     "explain": "Résultat : **04:00** (−04:00). Le 12 mars, New York est déjà passé à l'heure d'été (le 9 mars) mais pas Paris (le 30 mars) : l'écart est de **5 h**, et non 6 h comme en hiver !"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/8** — Affiche le **numéro de semaine ISO** (`IW`) de chaque `debut`, avec `id`.",
+     "hints": [
+      "TO_CHAR(debut, 'IW')"
+     ],
+     "accept": [],
+     "solution": "SELECT id, TO_CHAR(debut, 'IW') FROM reservations;",
+     "explain": "Toutes en semaine 11 (10 → 16 mars 2025).",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/8 (boss)** — Affiche l'`id` des réservations qui **commencent après 20 h** (heure ≥ 20) ou qui **traversent minuit**.",
+     "hints": [
+      "Deux conditions reliées par OR.",
+      "EXTRACT(HOUR FROM debut) >= 20 et TRUNC(debut) <> TRUNC(fin)"
+     ],
+     "accept": [
+      "SELECT id FROM reservations WHERE TRUNC(debut) <> TRUNC(fin) OR EXTRACT(HOUR FROM debut) >= 20;",
+      "SELECT id FROM reservations WHERE EXTRACT(HOUR FROM debut) >= 20 OR TRUNC(debut) != TRUNC(fin);",
+      "SELECT id FROM reservations WHERE EXTRACT(HOUR FROM debut) > 19 OR TRUNC(debut) <> TRUNC(fin);"
+     ],
+     "solution": "SELECT id FROM reservations WHERE EXTRACT(HOUR FROM debut) >= 20 OR TRUNC(debut) <> TRUNC(fin);",
+     "explain": "La réservation 4 satisfait les deux conditions (23:30 → 01:15). Les autres : aucune.",
+     "table": "RESERVATIONS\nID | SALLE | DEBUT               | FIN\n1  | A     | 12/03/2025 08:00:00 | 12/03/2025 10:30:00\n2  | B     | 12/03/2025 14:15:00 | 12/03/2025 15:00:00\n3  | A     | 13/03/2025 09:00:00 | 13/03/2025 12:45:00\n4  | C     | 14/03/2025 23:30:00 | 15/03/2025 01:15:00\n(DEBUT et FIN sont de type TIMESTAMP)"
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu maîtrises `TIMESTAMP`, `INTERVAL`, `TRUNC`/`ROUND` avec masques, le calendrier ISO et les fuseaux horaires. Tu es prêt pour les cas réels de facturation, planning et journalisation. 🌍"
+    }
+   ]
+  }
+ ]
+}

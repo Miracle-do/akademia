@@ -1,0 +1,1057 @@
+{
+ "id": "chaines-regex",
+ "order": 7,
+ "title": "Chaînes et expressions régulières",
+ "tagline": "SUBSTR, INSTR, REPLACE, TRANSLATE, LPAD, REGEXP_* : nettoie et valide n'importe quel texte.",
+ "emoji": "🔤",
+ "color": "#EC4899",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 85,
+ "pitch": [
+  "Salut ! Je te présente **« Chaînes et expressions régulières »** 🔤.",
+  "Dans la vraie vie, les données textuelles sont **sales** : majuscules au hasard, espaces en trop, téléphones écrits de dix façons, e-mails sans `@`. Savoir les **nettoyer, découper et valider** est une compétence de tous les jours.",
+  "On part des fonctions classiques (`SUBSTR`, `INSTR`, `REPLACE`, `TRANSLATE`, `LPAD`, `LISTAGG`), puis on passe aux **expressions régulières** (`REGEXP_LIKE`, `REGEXP_SUBSTR`, `REGEXP_REPLACE`…) pour les cas où un simple `LIKE` ne suffit plus.",
+  "Tout au long de la formation, on travaille sur la même table sale, et on termine par un défi de nettoyage complet."
+ ],
+ "benefits": [
+  "Découper un texte avec le duo SUBSTR + INSTR",
+  "Nettoyer et transformer avec REPLACE, TRANSLATE et LPAD",
+  "Valider un e-mail ou un téléphone avec REGEXP_LIKE",
+  "Extraire et réécrire avec REGEXP_SUBSTR et REGEXP_REPLACE"
+ ],
+ "lessons": [
+  {
+   "id": "base",
+   "title": "Les outils de base : longueur, casse, SUBSTR, INSTR",
+   "emoji": "🔤",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! **Nimbo** ☁️ à ton service. Dans une vraie base de données, les textes sont **sales** : majuscules aléatoires, espaces en trop, numéros de téléphone écrits de dix façons, e-mails mal saisis. Savoir **nettoyer et découper** du texte est une compétence de tous les jours. On commence par les fonctions de base."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "La table qu'on va nettoyer"
+    },
+    {
+     "type": "say",
+     "text": "**Casse et longueur.** `UPPER(s)` MAJUSCULES, `LOWER(s)` minuscules, `INITCAP(s)` Première Lettre De Chaque Mot, `LENGTH(s)` nombre de caractères."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche tous les noms (`nom_complet`) **en majuscules**.",
+     "hints": [
+      "UPPER(colonne)"
+     ],
+     "accept": [],
+     "solution": "SELECT UPPER(nom_complet) FROM contacts;",
+     "explain": "AWA DOSSOU, KOFFI MENSAH, SENAMI AGBO…",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le nom avec **la première lettre de chaque mot en majuscule** (`INITCAP`).",
+     "hints": [
+      "INITCAP(colonne)"
+     ],
+     "accept": [],
+     "solution": "SELECT id, INITCAP(nom_complet) FROM contacts;",
+     "explain": "« awa DOSSOU » devient **Awa Dossou**, « yao hounkpe » devient **Yao Hounkpe**. `INITCAP` met en minuscules tout le reste du mot.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et la **longueur de l'e-mail** (`LENGTH`).",
+     "hints": [
+      "LENGTH(colonne)"
+     ],
+     "accept": [],
+     "solution": "SELECT id, LENGTH(email) FROM contacts;",
+     "explain": "18, 20, 19, 12, 15.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Concaténer** : l'opérateur `||` (deux barres verticales). `CONCAT(a, b)` existe mais n'accepte que **deux** arguments : on utilise presque toujours `||`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour chaque contact, une phrase `Contact : <nom>` (en collant `'Contact : '` et la colonne avec `||`).",
+     "hints": [
+      "'texte' || colonne"
+     ],
+     "accept": [],
+     "solution": "SELECT 'Contact : ' || nom_complet FROM contacts;",
+     "explain": "Si une des valeurs est `NULL`, `||` la traite comme du vide (spécificité d'Oracle).",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Spécificité Oracle** : une chaîne **vide** `''` **est** `NULL`. Donc `LENGTH('')` donne `NULL`, pas 0 ! Et `WHERE col = ''` ne retourne **jamais** de ligne : on écrit `WHERE col IS NULL`."
+    },
+    {
+     "type": "choice",
+     "q": "En Oracle, que retourne `SELECT LENGTH('') FROM dual;` ?",
+     "options": [
+      "0",
+      "NULL",
+      "Une erreur"
+     ],
+     "answer": 1,
+     "explain": "En Oracle, la chaîne vide est assimilée à **NULL**. `LENGTH(NULL)` vaut `NULL`."
+    },
+    {
+     "type": "say",
+     "text": "**Extraire une partie : `SUBSTR(texte, début, longueur)`.** Le 1ᵉʳ caractère est en position **1**. La longueur est facultative (sans elle, on va jusqu'à la fin). Un début **négatif** compte **depuis la fin**."
+    },
+    {
+     "type": "code",
+     "sql": "SUBSTR('Oracle SQL', 1, 6)    ->  'Oracle'\nSUBSTR('Oracle SQL', 8)       ->  'SQL'\nSUBSTR('Oracle SQL', -3)      ->  'SQL'       (les 3 derniers caractères)\nSUBSTR('Oracle SQL', -3, 2)   ->  'SQ'",
+     "lang": "text",
+     "title": "SUBSTR"
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `SUBSTR('Oracle SQL', -3)` ?",
+     "options": [
+      "'Ora'",
+      "'SQL'",
+      "'cle'"
+     ],
+     "answer": 1,
+     "explain": "Une position négative part de la **fin** : les 3 derniers caractères = `SQL`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et les **4 premiers caractères** de l'e-mail (`SUBSTR`).",
+     "hints": [
+      "SUBSTR(email, 1, 4)"
+     ],
+     "accept": [],
+     "solution": "SELECT id, SUBSTR(email, 1, 4) FROM contacts;",
+     "explain": "« awa. », « koff », « sena », « yao@ », « ibra ».",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et les **3 derniers caractères** de l'e-mail avec un début négatif.",
+     "hints": [
+      "SUBSTR(email, -3)"
+     ],
+     "accept": [
+      "SELECT id, SUBSTR(email, -3, 3) FROM contacts;"
+     ],
+     "solution": "SELECT id, SUBSTR(email, -3) FROM contacts;",
+     "explain": "Résultats : « .bj » (4 fois) et « com » pour `yao@mail.com`. Un début négatif compte depuis la fin : pratique pour une extension ou un suffixe.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Chercher un texte : `INSTR(texte, recherche)`** retourne la **position** de la 1ʳᵉ occurrence, ou **0** si absente. Options : `INSTR(texte, recherche, début, n-ième)`. Un début **négatif** cherche **à partir de la fin**."
+    },
+    {
+     "type": "code",
+     "sql": "INSTR('awa.dossou@mail.bj', '@')       ->  11\nINSTR('awa.dossou@mail.bj', '.')       ->  4     (1er point)\nINSTR('awa.dossou@mail.bj', '.', 1, 2) ->  16    (2e point)\nINSTR('awa.dossou@mail.bj', '.', -1)   ->  16    (dernier point, en partant de la fin)\nINSTR('awa.dossou@mail.bj', '#')       ->  0     (absent)",
+     "lang": "text",
+     "title": "INSTR"
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `INSTR('abc', 'z')` ?",
+     "options": [
+      "NULL",
+      "0",
+      "-1"
+     ],
+     "answer": 1,
+     "explain": "`INSTR` retourne **0** quand la recherche échoue. (Et non -1 comme dans d'autres langages !)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et la **position de l'arobase** dans l'e-mail.",
+     "hints": [
+      "INSTR(email, '@')"
+     ],
+     "accept": [],
+     "solution": "SELECT id, INSTR(email, '@') FROM contacts;",
+     "explain": "11, 6, 12, 4, **0** pour le contact 5 (il n'a pas de `@`, il a un `#`).",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont l'e-mail **ne contient pas** de `@` (avec `INSTR`).",
+     "hints": [
+      "INSTR(...) = 0"
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE INSTR(email, '@') < 1;",
+      "SELECT id FROM contacts WHERE email NOT LIKE '%@%';"
+     ],
+     "solution": "SELECT id FROM contacts WHERE INSTR(email, '@') = 0;",
+     "explain": "Contact **5**. C'est la technique de base pour repérer les e-mails invalides.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "🏁 `UPPER/LOWER/INITCAP`, `LENGTH`, `||`, **`SUBSTR(s, début, longueur)`** (début négatif = depuis la fin), **`INSTR(s, recherche)`** (0 = absent). Et n'oublie pas : en Oracle, `''` = `NULL`."
+    }
+   ]
+  },
+  {
+   "id": "extraction",
+   "title": "Découper : SUBSTR + INSTR, le duo gagnant",
+   "emoji": "✂️",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`SUBSTR` seul extrait une partie **à position fixe**. Mais un e-mail n'a pas une longueur fixe ! L'astuce : on **cherche** la position d'un séparateur avec `INSTR`, puis on **découpe** avec `SUBSTR`. Ce duo résout 90 % des problèmes de découpage."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "Rappel"
+    },
+    {
+     "type": "code",
+     "sql": "e-mail   :  a w a . d o s s o u @ m a i l . b j\nposition :  1 2 3 4 5 6 7 8 9 10 11 12 …\n                                  ^ INSTR(email,'@') = 11\n\npartie AVANT @ :  SUBSTR(email, 1, INSTR(email,'@') - 1)   -> 'awa.dossou'\npartie APRÈS @ :  SUBSTR(email, INSTR(email,'@') + 1)       -> 'mail.bj'",
+     "lang": "text",
+     "title": "Le principe"
+    },
+    {
+     "type": "choice",
+     "q": "Pour obtenir la partie **avant** l'`@`, quelle longueur donnes-tu à `SUBSTR` ?",
+     "options": [
+      "INSTR(email,'@')",
+      "INSTR(email,'@') - 1",
+      "INSTR(email,'@') + 1"
+     ],
+     "answer": 1,
+     "explain": "Si l'arobase est en position 11, il y a **10** caractères avant : `11 - 1`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour les contacts qui ont un `@`, l'`id` et la **partie avant l'arobase** (identifiant).",
+     "hints": [
+      "SUBSTR(email, 1, INSTR(email,'@') - 1)",
+      "Ajoute WHERE INSTR(email,'@') > 0"
+     ],
+     "accept": [
+      "SELECT id, SUBSTR(email, 1, INSTR(email, '@') - 1) FROM contacts WHERE email LIKE '%@%';",
+      "SELECT id, SUBSTR(email, 1, INSTR(email, '@') - 1) FROM contacts WHERE INSTR(email, '@') <> 0;",
+      "SELECT id, SUBSTR(email, 1, INSTR(email, '@') - 1) FROM contacts WHERE INSTR(email, '@') != 0;"
+     ],
+     "solution": "SELECT id, SUBSTR(email, 1, INSTR(email, '@') - 1) FROM contacts WHERE INSTR(email, '@') > 0;",
+     "explain": "awa.dossou, koffi, senami.agbo, yao. Sans le `WHERE`, le contact 5 donnerait `SUBSTR(email,1,-1)` = `NULL`.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le **domaine** (la partie après l'arobase), pour les e-mails qui contiennent un `@`.",
+     "hints": [
+      "SUBSTR(email, INSTR(email,'@') + 1)",
+      "N'oublie pas le filtre sur les e-mails valides."
+     ],
+     "accept": [
+      "SELECT id, SUBSTR(email, INSTR(email, '@') + 1) FROM contacts WHERE email LIKE '%@%';",
+      "SELECT id, SUBSTR(email, INSTR(email, '@') + 1) FROM contacts WHERE INSTR(email, '@') <> 0;",
+      "SELECT id, SUBSTR(email, INSTR(email, '@') + 1) FROM contacts WHERE INSTR(email, '@') != 0;"
+     ],
+     "solution": "SELECT id, SUBSTR(email, INSTR(email, '@') + 1) FROM contacts WHERE INSTR(email, '@') > 0;",
+     "explain": "mail.bj, univ-abomey.bj, mail.bj, mail.com. ⚠️ Sans filtre, le contact 5 renverrait son e-mail **entier** (`INSTR` = 0, donc début = 1) : un résultat faux qui n'a pas l'air d'une erreur !",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Compte le **nombre de contacts par domaine** (`domaine`, `COUNT(*)`), uniquement pour les e-mails avec `@`.",
+     "hints": [
+      "Même expression dans SELECT et dans GROUP BY."
+     ],
+     "accept": [
+      "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE email LIKE '%@%' GROUP BY SUBSTR(email, INSTR(email, '@') + 1);",
+      "SELECT SUBSTR(email, INSTR(email, '@') + 1) AS domaine, COUNT(*) FROM contacts WHERE INSTR(email, '@') > 0 GROUP BY SUBSTR(email, INSTR(email, '@') + 1);"
+     ],
+     "solution": "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE INSTR(email, '@') > 0 GROUP BY SUBSTR(email, INSTR(email, '@') + 1);",
+     "explain": "`mail.bj` : 2, `univ-abomey.bj` : 1, `mail.com` : 1.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Découper un nom complet en prénom et nom.** Le séparateur est l'espace : `prénom = SUBSTR(n, 1, INSTR(n,' ') - 1)`, `nom = SUBSTR(n, INSTR(n,' ') + 1)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le **prénom** (avant le premier espace) de chaque contact.",
+     "hints": [
+      "Le séparateur est ' ' (un espace entre quotes)."
+     ],
+     "accept": [],
+     "solution": "SELECT id, SUBSTR(nom_complet, 1, INSTR(nom_complet, ' ') - 1) FROM contacts;",
+     "explain": "awa, Koffi, Senami, yao, Ibrahim.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le **nom de famille** (après le premier espace) **en majuscules**.",
+     "hints": [
+      "UPPER( SUBSTR(...) )"
+     ],
+     "accept": [],
+     "solution": "SELECT id, UPPER(SUBSTR(nom_complet, INSTR(nom_complet, ' ') + 1)) FROM contacts;",
+     "explain": "DOSSOU, MENSAH, AGBO, HOUNKPE, ZANNOU. On peut **imbriquer** les fonctions : la plus interne s'exécute d'abord.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le nom normalisé `Prénom NOM` : prénom en `INITCAP`, nom en `UPPER`, séparés par un espace (concatène avec `||`).",
+     "hints": [
+      "INITCAP(prénom) || ' ' || UPPER(nom)",
+      "Prénom : SUBSTR(..., 1, INSTR(...) - 1)."
+     ],
+     "accept": [],
+     "solution": "SELECT id, INITCAP(SUBSTR(nom_complet, 1, INSTR(nom_complet, ' ') - 1)) || ' ' || UPPER(SUBSTR(nom_complet, INSTR(nom_complet, ' ') + 1)) FROM contacts;",
+     "explain": "Résultat : Awa DOSSOU, Koffi MENSAH, Senami AGBO, Yao HOUNKPE, Ibrahim ZANNOU. Voilà un nettoyage de données **réel** en une requête.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Chercher depuis la fin : `INSTR(s, x, -1)`.** Idéal pour l'**extension** d'un fichier (après le **dernier** point). Exemple : `'rapport_final.v2.pdf'` a **deux** points, mais seul le dernier nous intéresse."
+    },
+    {
+     "type": "code",
+     "sql": "INSTR('rapport_final.v2.pdf', '.', -1)                           ->  17\nSUBSTR('rapport_final.v2.pdf', INSTR('rapport_final.v2.pdf','.',-1) + 1)  ->  'pdf'",
+     "lang": "text",
+     "title": "Extension d'un fichier"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'**extension** du fichier `'rapport_final.v2.pdf'` (texte après le **dernier** point).",
+     "hints": [
+      "INSTR(texte, '.', -1) cherche le dernier point."
+     ],
+     "accept": [
+      "SELECT SUBSTR('rapport_final.v2.pdf', -3) FROM dual;"
+     ],
+     "solution": "SELECT SUBSTR('rapport_final.v2.pdf', INSTR('rapport_final.v2.pdf', '.', -1) + 1) FROM dual;",
+     "explain": "Résultat : `pdf`. Avec `INSTR(…, '.')` tout court, on aurait obtenu `v2.pdf`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **position du 2ᵉ point** dans `'rapport_final.v2.pdf'` avec le 4ᵉ argument de `INSTR`.",
+     "hints": [
+      "INSTR(texte, '.', début, n-ième occurrence)"
+     ],
+     "accept": [],
+     "solution": "SELECT INSTR('rapport_final.v2.pdf', '.', 1, 2) FROM dual;",
+     "explain": "Résultat : 17. Signature : `INSTR(texte, recherche, début, occurrence)`."
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux le **dernier mot** d'une phrase de longueur variable. Quelle approche est la bonne ?",
+     "options": [
+      "SUBSTR(s, -5)",
+      "SUBSTR(s, INSTR(s, ' ', -1) + 1)",
+      "SUBSTR(s, INSTR(s, ' ') + 1)"
+     ],
+     "answer": 1,
+     "explain": "On cherche le **dernier** espace (`INSTR(s,' ',-1)`) et on prend ce qui suit."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Avant** le séparateur : `SUBSTR(s, 1, INSTR(s,sep) - 1)`. **Après** : `SUBSTR(s, INSTR(s,sep) + 1)`. **Dernière occurrence** : `INSTR(s, sep, -1)`. **Toujours** filtrer les lignes où le séparateur est absent (`INSTR = 0`)."
+    }
+   ]
+  },
+  {
+   "id": "transformer",
+   "title": "Transformer : REPLACE, TRANSLATE, LPAD, LISTAGG",
+   "emoji": "🧽",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On sait découper. Maintenant on **transforme** : retirer des espaces, enlever les accents, aligner des numéros, masquer une partie d'un téléphone, assembler plusieurs lignes en une seule."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "Rappel"
+    },
+    {
+     "type": "say",
+     "text": "**`REPLACE(texte, ancien, nouveau)`** remplace **toutes** les occurrences. Sans le 3ᵉ argument (ou avec `''`), il **supprime**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le téléphone **sans les espaces** (`REPLACE`).",
+     "hints": [
+      "REPLACE(tel, ' ', '')"
+     ],
+     "accept": [
+      "SELECT id, REPLACE(tel, ' ') FROM contacts;"
+     ],
+     "solution": "SELECT id, REPLACE(tel, ' ', '') FROM contacts;",
+     "explain": "« 0197123456 », « 0196123456 », « +22997654321 », « 97-65-43-21 », NULL. Le contact 5 a un téléphone `NULL` : `REPLACE(NULL,…)` renvoie `NULL`.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le téléphone dans lequel les **tirets sont remplacés par des espaces**.",
+     "hints": [
+      "REPLACE(tel, '-', ' ')"
+     ],
+     "accept": [],
+     "solution": "SELECT id, REPLACE(tel, '-', ' ') FROM contacts;",
+     "explain": "« 97-65-43-21 » devient « 97 65 43 21 ».",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**`TRANSLATE(texte, de, vers)`** remplace **caractère par caractère** : le 1ᵉʳ caractère de `de` devient le 1ᵉʳ de `vers`, etc. Parfait pour **retirer les accents** ou plusieurs caractères d'un coup. Un caractère de `de` sans correspondant dans `vers` est **supprimé**."
+    },
+    {
+     "type": "code",
+     "sql": "TRANSLATE('Sènami','èéêà','eeea')            ->  'Senami'\nTRANSLATE('01-97 12','x- ','x')              ->  '019712'     -- astuce : supprime '-' et ' '",
+     "lang": "text",
+     "title": "TRANSLATE",
+     "note": "L'astuce du 'x' : TRANSLATE ne supporte pas une chaîne vide en 3ᵉ argument (elle retournerait NULL), donc on met un caractère « bidon » devant."
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `TRANSLATE('chat', 'ca', 'ps')` ?",
+     "options": [
+      "'phst'",
+      "'shpt'",
+      "'psat'"
+     ],
+     "answer": 0,
+     "explain": "`c` → `p`, `a` → `s` : « chat » devient « p**h**st » → **`phst`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Retire les accents `é`, `è` et `ê` du texte `'événement très ancré'`, en les remplaçant par `e` (une seule fonction).",
+     "hints": [
+      "TRANSLATE(texte, 'éèê', 'eee')",
+      "Trois caractères à gauche, trois à droite."
+     ],
+     "accept": [],
+     "solution": "SELECT TRANSLATE('événement très ancré', 'éèê', 'eee') FROM dual;",
+     "explain": "Résultat : `evenement tres ancre`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le téléphone ne contenant **que des chiffres, `+` compris à part** : supprime espaces et tirets d'un coup avec `TRANSLATE(tel, 'x- ', 'x')`.",
+     "hints": [
+      "TRANSLATE(tel, 'x- ', 'x')"
+     ],
+     "accept": [
+      "SELECT id, TRANSLATE(tel, 'x -', 'x') FROM contacts;",
+      "SELECT id, TRANSLATE(tel, '- x', 'x') FROM contacts;",
+      "SELECT id, TRANSLATE(tel, ' -x', 'x') FROM contacts;"
+     ],
+     "solution": "SELECT id, TRANSLATE(tel, 'x- ', 'x') FROM contacts;",
+     "explain": "Tous les espaces et tirets disparaissent : « 0197123456 », « 0196123456 », « +22997654321 », « 97654321 ».",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Remplir : `LPAD(s, longueur, caractère)`** (à gauche) et **`RPAD`** (à droite). Si la chaîne est **plus longue** que la longueur demandée, elle est **tronquée** ! Idéal pour des numéros de facture comme `000042`."
+    },
+    {
+     "type": "code",
+     "sql": "LPAD('42', 6, '0')          ->  '000042'\nRPAD('Awa', 8, '.')         ->  'Awa.....'\nLPAD('abcdef', 3)           ->  'abc'      (tronqué !)\nLPAD('7', 3)                ->  '  7'      (espaces par défaut)",
+     "lang": "text",
+     "title": "LPAD / RPAD"
+    },
+    {
+     "type": "choice",
+     "q": "Que retourne `LPAD('123456', 4, '0')` ?",
+     "options": [
+      "'0123456'",
+      "'1234'",
+      "'123456'"
+     ],
+     "answer": 1,
+     "explain": "La chaîne dépasse 4 caractères : `LPAD` la **tronque** à 4 → `1234`. C'est un piège classique !"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nombre `42` sous la forme d'une référence sur **6 chiffres** (`000042`), avec `LPAD`.",
+     "hints": [
+      "LPAD(42, 6, '0')"
+     ],
+     "accept": [
+      "SELECT LPAD('42', 6, '0') FROM dual;",
+      "SELECT LPAD(TO_CHAR(42), 6, '0') FROM dual;"
+     ],
+     "solution": "SELECT LPAD(42, 6, '0') FROM dual;",
+     "explain": "Oracle convertit automatiquement le nombre en texte."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` de chaque contact en **référence** `CT-0001`, `CT-0002`… (préfixe `'CT-'` + `id` sur 4 chiffres).",
+     "hints": [
+      "'CT-' || LPAD(id, 4, '0')"
+     ],
+     "accept": [
+      "SELECT 'CT-' || LPAD(TO_CHAR(id), 4, '0') FROM contacts;"
+     ],
+     "solution": "SELECT 'CT-' || LPAD(id, 4, '0') FROM contacts;",
+     "explain": "CT-0001 … CT-0005.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nom complet **complété à droite avec des points jusqu'à 20 caractères** (`RPAD`), pour une présentation en colonnes.",
+     "hints": [
+      "RPAD(colonne, 20, '.')"
+     ],
+     "accept": [],
+     "solution": "SELECT RPAD(nom_complet, 20, '.') FROM contacts;",
+     "explain": "« awa DOSSOU.......... » (10 caractères + 10 points), « Koffi MENSAH........ »… Si le texte dépasse 20 caractères, il est tronqué.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Masquer une partie** (protection des données) : on garde le début et on remplace le reste par des `*`. Recette : `RPAD(SUBSTR(tel, 1, 4), LENGTH(tel), '*')` : les 4 premiers caractères, complétés par des `*` jusqu'à la longueur d'origine."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le téléphone **masqué** : garde les 4 premiers caractères puis des `*` jusqu'à la longueur d'origine. (Contact 5 : téléphone `NULL`, résultat `NULL`.)",
+     "hints": [
+      "RPAD( SUBSTR(tel,1,4), LENGTH(tel), '*' )"
+     ],
+     "accept": [],
+     "solution": "SELECT id, RPAD(SUBSTR(tel, 1, 4), LENGTH(tel), '*') FROM contacts;",
+     "explain": "« 01 9********** » pour le contact 1 : même longueur que l'original, seuls les 4 premiers caractères restent lisibles.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Assembler des lignes en une seule : `LISTAGG`.** C'est une fonction **d'agrégation** (comme `SUM`), mais pour le texte : `LISTAGG(colonne, séparateur) WITHIN GROUP (ORDER BY …)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tous les prénoms-noms** sur une seule ligne, séparés par `', '`, triés par `nom_complet`.",
+     "hints": [
+      "LISTAGG(colonne, ', ') WITHIN GROUP (ORDER BY colonne)"
+     ],
+     "accept": [],
+     "solution": "SELECT LISTAGG(nom_complet, ', ') WITHIN GROUP (ORDER BY nom_complet) FROM contacts;",
+     "explain": "La clause `WITHIN GROUP (ORDER BY …)` est **obligatoire** : elle définit l'ordre dans la liste.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `LISTAGG` ?",
+     "options": [
+      "Transforme une ligne en plusieurs",
+      "Concatène les valeurs de plusieurs lignes en une seule chaîne",
+      "Trie les lignes"
+     ],
+     "answer": 1,
+     "explain": "C'est le contraire de « découper » : on **agrège** du texte. Avec `GROUP BY`, on obtient une liste par groupe."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `REPLACE` (texte → texte), **`TRANSLATE`** (caractère → caractère, astuce du `'x'` pour supprimer), `LPAD`/`RPAD` (attention à la troncature), `LISTAGG … WITHIN GROUP`."
+    }
+   ]
+  },
+  {
+   "id": "regexp",
+   "title": "Expressions régulières : le langage des motifs",
+   "emoji": "🧬",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`LIKE` ne sait chercher que `%` et `_`. Pour valider un e-mail, un numéro de téléphone ou un code postal, c'est trop pauvre. Oracle intègre les **expressions régulières** : un petit langage pour décrire des **motifs** de texte."
+    },
+    {
+     "type": "code",
+     "sql": "^        début de la chaîne           ^Awa    commence par Awa\n$        fin de la chaîne             bj$     finit par bj\n.        n'importe quel caractère     a.a     aba, aca, a1a…\n*        0 fois ou plus               ab*     a, ab, abbb…\n+        1 fois ou plus               ab+     ab, abbb…\n?        0 ou 1 fois                  ab?     a, ab\n{n}      exactement n fois            [0-9]{4}   4 chiffres\n{n,m}    entre n et m fois            [0-9]{2,4}\n[abc]    un des caractères a, b ou c\n[a-z]    un caractère de a à z\n[^0-9]   un caractère QUI N'EST PAS un chiffre\n(a|b)    a ou b\n\\d  \\w  \\s   chiffre, caractère de mot, espace",
+     "lang": "text",
+     "title": "Les briques"
+    },
+    {
+     "type": "choice",
+     "q": "Que décrit le motif `^[0-9]{4}$` ?",
+     "options": [
+      "Un texte qui contient au moins 4 chiffres",
+      "Un texte composé de **exactement 4 chiffres**, rien d'autre",
+      "4 lettres"
+     ],
+     "answer": 1,
+     "explain": "`^` début, `[0-9]{4}` quatre chiffres, `$` fin : tout le texte doit être ces 4 chiffres."
+    },
+    {
+     "type": "say",
+     "text": "**`REGEXP_LIKE(colonne, motif)`** s'utilise dans un `WHERE`, comme `LIKE` mais avec une regex. Le 3ᵉ argument facultatif est `'i'` (insensible à la casse). **Sans `^` ni `$`**, le motif peut être trouvé **n'importe où** dans le texte."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "Rappel"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont le **nom complet commence par une majuscule**, avec `REGEXP_LIKE` et le motif `'^[[:upper:]]'`.",
+     "hints": [
+      "REGEXP_LIKE(colonne, '^[[:upper:]]')"
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(nom_complet, '^[A-Z]');"
+     ],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(nom_complet, '^[[:upper:]]');",
+     "explain": "Contacts **2** (Koffi), **3** (Senami) et **5** (Ibrahim). « awa » et « yao » commencent par une minuscule : mal saisis ! La casse compte, sauf si on précise `'i'` (exercice suivant).",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Même question mais **sans tenir compte de la casse** (3ᵉ argument `'i'`) : l'`id` des contacts dont le nom commence par `a`.",
+     "hints": [
+      "REGEXP_LIKE(colonne, '^a', 'i')"
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(nom_complet, '^A', 'i');"
+     ],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(nom_complet, '^a', 'i');",
+     "explain": "Contact **1** (« awa DOSSOU »). Le `'i'` rend la recherche insensible à la casse.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont l'**e-mail finit par `.bj`** (motif `'\\.bj$'` : le point est échappé car `.` signifie « n'importe quel caractère »).",
+     "hints": [
+      "Le point littéral s'écrit \\.",
+      "Le motif est '\\.bj$' ; le $ ancre la fin."
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(email, '[.]bj$');"
+     ],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(email, '\\.bj$');",
+     "explain": "Contacts 1, 2, 3 et 5. Le 4 finit par `.com`. Sans le `\\`, `.bj` accepterait aussi `xbj`.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Classes POSIX** : `[[:digit:]]` chiffre, `[[:alpha:]]` lettre, `[[:upper:]]` majuscule, `[[:lower:]]` minuscule, `[[:space:]]` espace. Elles tiennent compte de la langue (avec les lettres accentuées). `[0-9]` et `\\d` font le même travail pour les chiffres."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont le téléphone est **composé de 10 chiffres exactement** (rien d'autre), avec le motif `'^[0-9]{10}$'`.",
+     "hints": [
+      "'^[0-9]{10}$'"
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(tel, '^\\d{10}$');",
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(tel, '^[[:digit:]]{10}$');"
+     ],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(tel, '^[0-9]{10}$');",
+     "explain": "Contact **2** seul (`0196123456`). Le 1 contient des espaces, le 3 un `+`, le 4 des tirets, le 5 est `NULL` (jamais retenu).",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont le téléphone **contient au moins un tiret** (`'-'`) avec `REGEXP_LIKE`.",
+     "hints": [
+      "Le tiret simple suffit comme motif en dehors d'un [ ]."
+     ],
+     "accept": [
+      "SELECT id FROM contacts WHERE REGEXP_LIKE(tel, '[-]');"
+     ],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(tel, '-');",
+     "explain": "Contact **4**.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Valider un e-mail (version simple)** : une suite de caractères sans `@`, un `@`, une suite de caractères sans `@`, un point, au moins 2 lettres. Motif : `^[^@ ]+@[^@ ]+\\.[a-z]{2,}$`"
+    },
+    {
+     "type": "code",
+     "sql": "^           début\n[^@ ]+      un ou plusieurs caractères qui ne sont ni @ ni espace\n@           l'arobase\n[^@ ]+      encore des caractères (le domaine)\n\\.          un vrai point\n[a-z]{2,}   au moins 2 lettres (l'extension)\n$           fin",
+     "lang": "text",
+     "title": "Décoder le motif e-mail"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont l'**e-mail est valide** avec le motif `'^[^@ ]+@[^@ ]+\\.[a-z]{2,}$'`.",
+     "hints": [
+      "Recopie le motif donné.",
+      "REGEXP_LIKE(email, '...')"
+     ],
+     "accept": [],
+     "solution": "SELECT id FROM contacts WHERE REGEXP_LIKE(email, '^[^@ ]+@[^@ ]+\\.[a-z]{2,}$');",
+     "explain": "Contacts 1, 2, 3 et 4. Le 5 (`ibrahim#mail.bj`) est rejeté : pas de `@`.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` des contacts dont l'e-mail est **invalide** (la négation : `NOT REGEXP_LIKE`).",
+     "hints": [
+      "NOT devant REGEXP_LIKE."
+     ],
+     "accept": [],
+     "solution": "SELECT id FROM contacts WHERE NOT REGEXP_LIKE(email, '^[^@ ]+@[^@ ]+\\.[a-z]{2,}$');",
+     "explain": "Contact **5**. Les nettoyages de données commencent souvent par ce genre de requête de détection.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "choice",
+     "q": "`REGEXP_LIKE(col, 'ab')` sans `^` ni `$` retourne vrai pour :",
+     "options": [
+      "Seulement 'ab'",
+      "Tout texte qui **contient** 'ab' quelque part (ex. 'cabine')",
+      "Seulement les textes qui commencent par 'ab'"
+     ],
+     "answer": 1,
+     "explain": "Sans ancres, le motif peut être trouvé **n'importe où**. Pour une validation complète, il faut `^` et `$`."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Briques : `^ $ . * + ? {n,m} [ ] [^ ] ( | )`. **`REGEXP_LIKE(col, motif[, 'i'])`** dans un `WHERE`. Échapper les caractères spéciaux avec `\\`. Pour valider une valeur entière : toujours **`^ … $`**."
+    }
+   ]
+  },
+  {
+   "id": "regexp2",
+   "title": "REGEXP_SUBSTR, REPLACE, COUNT : extraire et réécrire",
+   "emoji": "🛠️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`REGEXP_LIKE` répond par **oui/non**. Les trois fonctions suivantes **travaillent sur le texte** : extraire (`REGEXP_SUBSTR`), localiser (`REGEXP_INSTR`), réécrire (`REGEXP_REPLACE`), compter (`REGEXP_COUNT`)."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "Rappel"
+    },
+    {
+     "type": "say",
+     "text": "**`REGEXP_REPLACE(texte, motif, remplacement)`** remplace **toutes** les correspondances du motif. Dans le remplacement, `\\1`, `\\2`… désignent les **groupes capturés** par des parenthèses."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'`id` et le téléphone **réduit aux chiffres** (supprime tout caractère qui n'est pas un chiffre : motif `'[^0-9]'`, remplacé par `''`).",
+     "hints": [
+      "REGEXP_REPLACE(tel, '[^0-9]', '')"
+     ],
+     "accept": [
+      "SELECT id, REGEXP_REPLACE(tel, '[^[:digit:]]', '') FROM contacts;",
+      "SELECT id, REGEXP_REPLACE(tel, '\\D', '') FROM contacts;",
+      "SELECT id, REGEXP_REPLACE(tel, '[^0-9]') FROM contacts;"
+     ],
+     "solution": "SELECT id, REGEXP_REPLACE(tel, '[^0-9]', '') FROM contacts;",
+     "explain": "« 0197123456 », « 0196123456 », « 22997654321 » (le `+` a disparu), « 97654321 », NULL.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Remplace les **espaces multiples** par un seul espace dans `'Awa    Dossou   Kpade'` (motif `' {2,}'`, remplacement `' '`).",
+     "hints": [
+      "' {2,}' : un espace répété 2 fois ou plus."
+     ],
+     "accept": [
+      "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', ' +', ' ') FROM dual;",
+      "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', '\\s+', ' ') FROM dual;",
+      "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', '[[:space:]]+', ' ') FROM dual;",
+      "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', '[ ]+', ' ') FROM dual;",
+      "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', ' {2,}', ' ', 1, 0) FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_REPLACE('Awa    Dossou   Kpade', ' {2,}', ' ') FROM dual;",
+     "explain": "Résultat : `Awa Dossou Kpade`. Cas fréquent après une saisie manuelle."
+    },
+    {
+     "type": "say",
+     "text": "**Les groupes de capture** : tout ce qui est entre `( )` est mémorisé. On le réutilise avec `\\1`, `\\2`… Exemple : réécrire `0197123456` en `01 97 12 34 56` en capturant cinq paires de chiffres."
+    },
+    {
+     "type": "code",
+     "sql": "REGEXP_REPLACE('0197123456',\n   '(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})',\n   '\\1 \\2 \\3 \\4 \\5')\n-> '01 97 12 34 56'",
+     "lang": "sql",
+     "title": "Formater un numéro"
+    },
+    {
+     "type": "exercise",
+     "q": "Formate `'0197123456'` en `01 97 12 34 56` avec **cinq groupes** `(\\d{2})` et le remplacement `'\\1 \\2 \\3 \\4 \\5'`.",
+     "hints": [
+      "Cinq fois (\\d{2}) collés, puis \\1 \\2 \\3 \\4 \\5 séparés par des espaces."
+     ],
+     "accept": [
+      "SELECT REGEXP_REPLACE('0197123456', '([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})', '\\1 \\2 \\3 \\4 \\5') FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_REPLACE('0197123456', '(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4 \\5') FROM dual;",
+     "explain": "Chaque groupe capture 2 chiffres ; le remplacement les ré-assemble avec des espaces."
+    },
+    {
+     "type": "exercise",
+     "q": "Inverse prénom/nom : transforme `'Awa Dossou'` en `'Dossou Awa'` avec `REGEXP_REPLACE`, le motif `'^(\\S+) (\\S+)$'` et le remplacement `'\\2 \\1'`.",
+     "hints": [
+      "Deux groupes, puis '\\2 \\1' pour les inverser."
+     ],
+     "accept": [
+      "SELECT REGEXP_REPLACE('Awa Dossou', '^([^ ]+) ([^ ]+)$', '\\2 \\1') FROM dual;",
+      "SELECT REGEXP_REPLACE('Awa Dossou', '(\\S+) (\\S+)', '\\2 \\1') FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_REPLACE('Awa Dossou', '^(\\S+) (\\S+)$', '\\2 \\1') FROM dual;",
+     "explain": "`\\S+` = un ou plusieurs caractères qui ne sont pas des espaces. Résultat : `Dossou Awa`."
+    },
+    {
+     "type": "say",
+     "text": "**`REGEXP_SUBSTR(texte, motif[, début, occurrence, options, groupe])`** **extrait** la partie qui correspond. L'occurrence permet de prendre la 2ᵉ, 3ᵉ… correspondance."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais le **premier nombre** de `'Facture N° 4521 du 12/03/2025'` (motif `'[0-9]+'`).",
+     "hints": [
+      "REGEXP_SUBSTR(texte, '[0-9]+')"
+     ],
+     "accept": [
+      "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '\\d+') FROM dual;",
+      "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '[[:digit:]]+') FROM dual;",
+      "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '[0-9]+', 1, 1) FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '[0-9]+') FROM dual;",
+     "explain": "Résultat : `4521`. `+` = une ou plusieurs fois."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais le **2ᵉ nombre** (l'occurrence n°2) de `'Facture N° 4521 du 12/03/2025'`.",
+     "hints": [
+      "4ᵉ argument = numéro d'occurrence.",
+      "REGEXP_SUBSTR(texte, motif, 1, 2)"
+     ],
+     "accept": [
+      "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '\\d+', 1, 2) FROM dual;",
+      "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '[[:digit:]]+', 1, 2) FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_SUBSTR('Facture N° 4521 du 12/03/2025', '[0-9]+', 1, 2) FROM dual;",
+     "explain": "Résultat : `12`. Les arguments : texte, motif, **position de départ**, **numéro d'occurrence**."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais le **domaine** de chaque e-mail (`id`, domaine) avec `REGEXP_SUBSTR(email, '@(.+)$', 1, 1, NULL, 1)` (le dernier `1` = premier groupe).",
+     "hints": [
+      "Motif '@(.+)$', puis 1, 1, NULL, 1."
+     ],
+     "accept": [
+      "SELECT id, REGEXP_SUBSTR(email, '@(.+)$', 1, 1, '', 1) FROM contacts;",
+      "SELECT id, REGEXP_SUBSTR(email, '@(.*)$', 1, 1, NULL, 1) FROM contacts;"
+     ],
+     "solution": "SELECT id, REGEXP_SUBSTR(email, '@(.+)$', 1, 1, NULL, 1) FROM contacts;",
+     "explain": "mail.bj, univ-abomey.bj, mail.bj, mail.com, et **NULL** pour le contact 5 (pas de `@`) : plus besoin de filtrer ! `REGEXP_SUBSTR` retourne `NULL` si le motif ne correspond pas.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "**Le dernier argument de `REGEXP_SUBSTR`** (le **groupe**) dit **quelle parenthèse retourner**. Sans lui, on récupère toute la correspondance, `@` compris. Avantage sur `SUBSTR/INSTR` : **une seule fonction**, et `NULL` automatique si le motif est absent."
+    },
+    {
+     "type": "choice",
+     "q": "Pour `REGEXP_SUBSTR('awa@mail.bj', '@(.+)$')` (sans groupe), le résultat est :",
+     "options": [
+      "'mail.bj'",
+      "'@mail.bj'",
+      "NULL"
+     ],
+     "answer": 1,
+     "explain": "Sans l'argument « groupe », on obtient **toute la correspondance**, donc l'arobase incluse : `@mail.bj`."
+    },
+    {
+     "type": "exercise",
+     "q": "Extrais le **3ᵉ mot** de `'Oracle est un très bon outil'` (mots = suites de caractères non espaces `'[^ ]+'`).",
+     "hints": [
+      "Motif '[^ ]+', occurrence 3."
+     ],
+     "accept": [
+      "SELECT REGEXP_SUBSTR('Oracle est un très bon outil', '\\S+', 1, 3) FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_SUBSTR('Oracle est un très bon outil', '[^ ]+', 1, 3) FROM dual;",
+     "explain": "Résultat : `un`. Technique universelle : **découper selon un séparateur** et choisir le n-ième morceau."
+    },
+    {
+     "type": "say",
+     "text": "**`REGEXP_COUNT(texte, motif)`** compte les occurrences. **`REGEXP_INSTR(texte, motif)`** donne la position de la première correspondance (0 si aucune)."
+    },
+    {
+     "type": "exercise",
+     "q": "Compte le **nombre de mots** de `'Oracle est un très bon outil'` (motif `'[^ ]+'`).",
+     "hints": [
+      "REGEXP_COUNT(texte, '[^ ]+')"
+     ],
+     "accept": [
+      "SELECT REGEXP_COUNT('Oracle est un très bon outil', '\\S+') FROM dual;",
+      "SELECT REGEXP_COUNT('Oracle est un très bon outil', '\\w+') FROM dual;",
+      "SELECT REGEXP_COUNT('Oracle est un très bon outil', ' ') + 1 FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_COUNT('Oracle est un très bon outil', '[^ ]+') FROM dual;",
+     "explain": "Résultat : **6**."
+    },
+    {
+     "type": "exercise",
+     "q": "Compte le **nombre de points** (`.`) dans chaque e-mail (`id`, nombre). Attention : le point est un caractère spécial.",
+     "hints": [
+      "Échappe le point : \\."
+     ],
+     "accept": [
+      "SELECT id, REGEXP_COUNT(email, '[.]') FROM contacts;"
+     ],
+     "solution": "SELECT id, REGEXP_COUNT(email, '\\.') FROM contacts;",
+     "explain": "awa.dossou@mail.bj : 2 ; koffi@univ-abomey.bj : 1 ; senami.agbo@mail.bj : 2 ; yao@mail.com : 1 ; ibrahim#mail.bj : 1.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "Donne la **position du premier chiffre** dans `'Facture N° 4521'` avec `REGEXP_INSTR`.",
+     "hints": [
+      "REGEXP_INSTR(texte, '[0-9]')"
+     ],
+     "accept": [
+      "SELECT REGEXP_INSTR('Facture N° 4521', '\\d') FROM dual;",
+      "SELECT REGEXP_INSTR('Facture N° 4521', '[[:digit:]]') FROM dual;"
+     ],
+     "solution": "SELECT REGEXP_INSTR('Facture N° 4521', '[0-9]') FROM dual;",
+     "explain": "Résultat : 12 (`F-a-c-t-u-r-e-espace-N-°-espace` = 11 caractères avant)."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **`REGEXP_REPLACE`** (réécrire, groupes `\\1`), **`REGEXP_SUBSTR`** (extraire, n-ième occurrence, groupe), **`REGEXP_COUNT`**, **`REGEXP_INSTR`**. Les regex sont **plus puissantes** mais **plus lentes** que `SUBSTR`/`INSTR` : on les réserve aux cas où un motif est vraiment nécessaire."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : nettoyer une base sale",
+   "emoji": "🏆",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** On te confie la table `CONTACTS`, héritée d'un import catastrophique. À toi de la nettoyer avec **tout** ce que tu as appris. 8 questions."
+    },
+    {
+     "type": "code",
+     "sql": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)",
+     "lang": "text",
+     "title": "La table sale"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 1/8** — Quelle fonction retire les **accents** en remplaçant caractère par caractère ?",
+     "options": [
+      "REPLACE",
+      "TRANSLATE",
+      "LPAD"
+     ],
+     "answer": 1,
+     "explain": "`TRANSLATE('é','é','e')` remplace chaque caractère de la liste par son correspondant."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/8** — Affiche `id` et le **prénom** (avant le premier espace) **en `INITCAP`**.",
+     "hints": [
+      "INITCAP( SUBSTR(...) )"
+     ],
+     "accept": [],
+     "solution": "SELECT id, INITCAP(SUBSTR(nom_complet, 1, INSTR(nom_complet, ' ') - 1)) FROM contacts;",
+     "explain": "Awa, Koffi, Senami, Yao, Ibrahim.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/8** — Affiche `id` et le **téléphone ne gardant que les chiffres** (regex).",
+     "hints": [
+      "REGEXP_REPLACE(tel, '[^0-9]', '')"
+     ],
+     "accept": [
+      "SELECT id, REGEXP_REPLACE(tel, '[^[:digit:]]', '') FROM contacts;",
+      "SELECT id, REGEXP_REPLACE(tel, '\\D', '') FROM contacts;"
+     ],
+     "solution": "SELECT id, REGEXP_REPLACE(tel, '[^0-9]', '') FROM contacts;",
+     "explain": "Le contact 5 reste `NULL`.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/8** — Affiche l'`id` des contacts dont l'**e-mail est invalide** (`NOT REGEXP_LIKE`, motif `'^[^@ ]+@[^@ ]+\\.[a-z]{2,}$'`).",
+     "hints": [
+      "NOT REGEXP_LIKE(email, motif)"
+     ],
+     "accept": [],
+     "solution": "SELECT id FROM contacts WHERE NOT REGEXP_LIKE(email, '^[^@ ]+@[^@ ]+\\.[a-z]{2,}$');",
+     "explain": "Contact **5**.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/8** — Affiche le **domaine** de chaque e-mail **valide** et le **nombre** de contacts, trié par nombre décroissant puis par domaine : `domaine`, `COUNT(*)` (utilise `SUBSTR`/`INSTR`, filtre `INSTR(email,'@') > 0`).",
+     "hints": [
+      "Reprends la requête de comptage par domaine, ajoute ORDER BY."
+     ],
+     "accept": [
+      "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE INSTR(email, '@') > 0 GROUP BY SUBSTR(email, INSTR(email, '@') + 1) ORDER BY 2 DESC, 1;",
+      "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE email LIKE '%@%' GROUP BY SUBSTR(email, INSTR(email, '@') + 1) ORDER BY COUNT(*) DESC, SUBSTR(email, INSTR(email, '@') + 1);",
+      "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE email LIKE '%@%' GROUP BY SUBSTR(email, INSTR(email, '@') + 1) ORDER BY 2 DESC, 1;"
+     ],
+     "solution": "SELECT SUBSTR(email, INSTR(email, '@') + 1), COUNT(*) FROM contacts WHERE INSTR(email, '@') > 0 GROUP BY SUBSTR(email, INSTR(email, '@') + 1) ORDER BY COUNT(*) DESC, SUBSTR(email, INSTR(email, '@') + 1);",
+     "explain": "`mail.bj` (2), puis `mail.com` (1), puis `univ-abomey.bj` (1) : à égalité de nombre, ordre alphabétique.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/8** — Affiche la référence `CT-0001` … pour chaque contact **suivie** du nom en majuscules, séparés par `' - '` : `CT-0001 - AWA DOSSOU`.",
+     "hints": [
+      "'CT-' || LPAD(...) || ' - ' || UPPER(...)"
+     ],
+     "accept": [
+      "SELECT 'CT-' || LPAD(TO_CHAR(id), 4, '0') || ' - ' || UPPER(nom_complet) FROM contacts;"
+     ],
+     "solution": "SELECT 'CT-' || LPAD(id, 4, '0') || ' - ' || UPPER(nom_complet) FROM contacts;",
+     "explain": "« CT-0001 - AWA DOSSOU », …",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 7/8** — `LPAD('12345', 3, '0')` retourne :",
+     "options": [
+      "'00012345'",
+      "'123'",
+      "'12345'"
+     ],
+     "answer": 1,
+     "explain": "Quand la chaîne dépasse la longueur cible, `LPAD` **tronque**. `'123'`."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/8 (boss)** — Affiche **tous les identifiants d'e-mail** (partie avant `@`) sur une **seule ligne** séparés par `';'`, triés par ordre alphabétique, pour les contacts qui ont un `@`.",
+     "hints": [
+      "LISTAGG(expression, ';') WITHIN GROUP (ORDER BY expression)",
+      "Filtre : WHERE INSTR(email, '@') > 0"
+     ],
+     "accept": [
+      "SELECT LISTAGG(SUBSTR(email, 1, INSTR(email, '@') - 1), ';') WITHIN GROUP (ORDER BY SUBSTR(email, 1, INSTR(email, '@') - 1)) FROM contacts WHERE email LIKE '%@%';",
+      "SELECT LISTAGG(SUBSTR(email, 1, INSTR(email, '@') - 1), ';') WITHIN GROUP (ORDER BY 1) FROM contacts WHERE INSTR(email, '@') > 0;"
+     ],
+     "solution": "SELECT LISTAGG(SUBSTR(email, 1, INSTR(email, '@') - 1), ';') WITHIN GROUP (ORDER BY SUBSTR(email, 1, INSTR(email, '@') - 1)) FROM contacts WHERE INSTR(email, '@') > 0;",
+     "explain": "Résultat : `awa.dossou;koffi;senami.agbo;yao`. Découpage + agrégation + filtre : tu as tout combiné.",
+     "table": "CONTACTS\nID | NOM_COMPLET    | EMAIL                | TEL\n1  | awa DOSSOU     | awa.dossou@mail.bj   | 01 97 12 34 56\n2  | Koffi MENSAH   | koffi@univ-abomey.bj | 0196123456\n3  | Senami AGBO    | senami.agbo@mail.bj  | +229 97 65 43 21\n4  | yao hounkpe    | yao@mail.com         | 97-65-43-21\n5  | Ibrahim ZANNOU | ibrahim#mail.bj      | (NULL)"
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais maintenant **découper, transformer, valider et réécrire** du texte sous Oracle, avec les fonctions classiques et les expressions régulières. Tes données n'ont qu'à bien se tenir ! 🧼"
+    }
+   ]
+  }
+ ]
+}
