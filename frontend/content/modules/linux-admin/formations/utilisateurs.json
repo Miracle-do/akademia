@@ -1,0 +1,2730 @@
+{
+ "id": "utilisateurs",
+ "order": 6,
+ "title": "Gérer utilisateurs et groupes",
+ "tagline": "useradd, usermod, passwd, chage, groupes, sudo : administre des comptes de A à Z, sans piège.",
+ "emoji": "👤",
+ "color": "#8B5CF6",
+ "level": "Intermédiaire",
+ "minutes": 125,
+ "pitch": [
+  "Bonjour ! Je te présente **« Gérer utilisateurs et groupes »** 👤, la formation la plus complète du module.",
+  "Créer un compte avec `useradd`, tout le monde sait. Mais **savoir vraiment administrer** des utilisateurs, c'est autre chose : comprendre `/etc/passwd` et `/etc/shadow`, éviter le piège de `usermod -G`, imposer une politique de mots de passe, partager des dossiers par groupe, désactiver un compte sans casser quoi que ce soit.",
+  "On part des fondations (UID, GID, les 7 champs de passwd, les 9 de shadow), puis on crée, on modifie, on gère les groupes, on supprime proprement, on surveille et on délègue avec `sudo`.",
+  "Chaque leçon est pleine d'exercices pratiques, et on termine par un **défi final** avec des scénarios réels : arrivée d'une recrue, changement de service, audit de sécurité, départ d'un employé."
+ ],
+ "benefits": [
+  "Lire et comprendre /etc/passwd, /etc/shadow et /etc/group",
+  "Créer, modifier, verrouiller et supprimer des comptes proprement",
+  "Éviter les pièges classiques (usermod -G sans -a, userdel sans sauvegarde)",
+  "Imposer une politique de mots de passe avec chage",
+  "Déléguer avec sudo et auditer les connexions"
+ ],
+ "lessons": [
+  {
+   "id": "identite",
+   "title": "Qui est qui : UID, GID et types de comptes",
+   "emoji": "🪪",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Moi c'est **Nimbo** ☁️. Cette formation est **la plus complète** du module : à la fin, tu sauras **administrer des utilisateurs de A à Z**, comme un vrai administrateur système. On bâtit tout pas à pas, en commençant par les fondations."
+    },
+    {
+     "type": "say",
+     "text": "Première surprise : **le noyau Linux ne connaît pas les noms**. Pour lui, `awa` n'existe pas : il ne voit que des **nombres**. Chaque utilisateur a un **UID** (*User ID*), chaque groupe un **GID** (*Group ID*). Les noms ne sont qu'un confort d'affichage, fourni par des fichiers (`/etc/passwd`, `/etc/group`)."
+    },
+    {
+     "type": "choice",
+     "q": "Comment le noyau Linux identifie-t-il le propriétaire d'un fichier ?",
+     "options": [
+      "Par son nom d'utilisateur",
+      "Par son UID (un nombre)",
+      "Par son adresse e-mail"
+     ],
+     "answer": 1,
+     "explain": "Le noyau stocke **l'UID** dans les métadonnées du fichier. `ls -l` traduit ensuite ce nombre en nom grâce à `/etc/passwd`."
+    },
+    {
+     "type": "say",
+     "text": "Il existe **trois grandes familles de comptes** :"
+    },
+    {
+     "type": "code",
+     "sql": "root         UID 0           le super-utilisateur : tous les droits, partout\ncomptes SYSTÈME  UID 1 à 999     pour faire tourner les services (www-data, sshd, mysql…)\n                              pas de connexion interactive\ncomptes NORMAUX  UID ≥ 1000      les vraies personnes (awa, koffi…)\nnobody       UID 65534       compte « personne », sans aucun droit",
+     "lang": "Terminal",
+     "title": "Les types de comptes"
+    },
+    {
+     "type": "choice",
+     "q": "Quel UID est celui de l'administrateur `root` ?",
+     "options": [
+      "1",
+      "0",
+      "1000"
+     ],
+     "answer": 1,
+     "explain": "`root` est **toujours UID 0**. C'est ce nombre, pas le nom, qui donne les pleins pouvoirs : un compte avec l'UID 0 est un root, quel que soit son nom !"
+    },
+    {
+     "type": "choice",
+     "q": "Un compte a l'UID 998. C'est probablement…",
+     "options": [
+      "Un utilisateur humain",
+      "Un compte système (service)",
+      "Le compte root"
+     ],
+     "answer": 1,
+     "explain": "Sous 1000, ce sont des **comptes système** réservés aux services. Les humains commencent à **1000** (sur Debian, Ubuntu, RHEL…)."
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi des comptes pour les services ?** Un serveur web ne doit pas tourner en root : si on le pirate, l'attaquant n'aurait que les droits d'un compte sans privilèges. C'est le **principe du moindre privilège**."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi Apache/Nginx tournent-ils avec un compte dédié (`www-data`, `nginx`) plutôt qu'en root ?",
+     "options": [
+      "C'est plus rapide",
+      "Limiter les dégâts si le service est compromis",
+      "Pour économiser de la mémoire"
+     ],
+     "answer": 1,
+     "explain": "Moindre privilège : un service piraté ne peut agir qu'avec les droits de **son** compte, pas ceux de root."
+    },
+    {
+     "type": "say",
+     "text": "Pour savoir **qui tu es**, trois commandes : `whoami` (ton nom), `id` (UID, GID et tous tes groupes) et `groups` (tes groupes)."
+    },
+    {
+     "type": "code",
+     "sql": "$ whoami\nawa\n$ id\nuid=1000(awa) gid=1000(awa) groups=1000(awa),27(sudo),1001(dev)\n$ groups\nawa sudo dev",
+     "lang": "Terminal",
+     "title": "Qui suis-je ?"
+    },
+    {
+     "type": "say",
+     "text": "Décode `id` : `uid=1000(awa)` ton UID et ton nom ; `gid=1000(awa)` ton **groupe principal** ; `groups=…` **tous** tes groupes (principal + secondaires). Ici awa est aussi dans `sudo` (GID 27) et `dev` (GID 1001)."
+    },
+    {
+     "type": "exercise",
+     "q": "D'après la sortie `id` ci-dessus, quel est le **GID du groupe principal** d'awa ?",
+     "hints": [
+      "Cherche gid=…"
+     ],
+     "accept": [],
+     "solution": "1000",
+     "explain": "`gid=1000(awa)` : le groupe principal d'awa a le GID **1000**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "D'après cette sortie, dans combien de groupes **au total** se trouve awa ?",
+     "hints": [
+      "Compte les éléments après groups=.",
+      "1000(awa), 27(sudo), 1001(dev)."
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "Trois groupes : `awa` (principal), `sudo`, `dev`.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **ton UID, ton GID et tous tes groupes** ?",
+     "hints": [
+      "Deux lettres : identité."
+     ],
+     "accept": [],
+     "solution": "id",
+     "explain": "`id` donne l'identité complète sous forme numérique et nominative.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **uniquement ton UID** (le nombre) ?",
+     "hints": [
+      "id avec l'option -u (user)."
+     ],
+     "accept": [
+      "id -u"
+     ],
+     "solution": "id -u",
+     "explain": "`id -u` retourne uniquement l'UID. `id -g` le GID principal, `id -un` le nom.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les groupes de l'utilisateur `koffi`** ?",
+     "hints": [
+      "groups + le nom de l'utilisateur."
+     ],
+     "accept": [
+      "id koffi",
+      "id -Gn koffi"
+     ],
+     "solution": "groups koffi",
+     "explain": "`groups koffi` (ou `id koffi`) pour un autre utilisateur que toi.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 Le noyau ne voit que des **UID/GID**. **root = UID 0**, système < 1000, humains ≥ 1000. Outils : `whoami`, `id`, `groups`. La suite : le fichier qui fait le lien entre noms et nombres, `/etc/passwd`."
+    }
+   ]
+  },
+  {
+   "id": "passwd",
+   "title": "/etc/passwd : le registre des comptes",
+   "emoji": "📒",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`/etc/passwd` est le **registre de tous les comptes** du système. C'est un simple fichier texte, **une ligne par compte**, avec **7 champs** séparés par des deux-points. Savoir le lire par cœur est un classique d'examen."
+    },
+    {
+     "type": "code",
+     "sql": "/etc/passwd (extrait)\nroot:x:0:0:root:/root:/bin/bash\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nawa:x:1000:1000:Awa Dossou:/home/awa:/bin/bash\nkoffi:x:1001:1001:Koffi Mensah:/home/koffi:/bin/zsh\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin",
+     "lang": "Terminal",
+     "title": "Quelques lignes"
+    },
+    {
+     "type": "code",
+     "sql": "awa:x:1000:1000:Awa Dossou:/home/awa:/bin/bash\n │ │  │    │       │          │         └─ 7 : shell de connexion\n │ │  │    │       │          └─ 6 : répertoire personnel (home)\n │ │  │    │       └─ 5 : commentaire (nom complet, GECOS)\n │ │  │    └─ 4 : GID du groupe principal\n │ │  └─ 3 : UID\n │ └─ 2 : mot de passe (x = stocké dans /etc/shadow)\n └─ 1 : nom de connexion",
+     "lang": "Terminal",
+     "title": "Les 7 champs"
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie le `x` dans le 2ᵉ champ ?",
+     "options": [
+      "Le compte est désactivé",
+      "Le mot de passe est dans /etc/shadow",
+      "Le mot de passe est vide"
+     ],
+     "answer": 1,
+     "explain": "`x` = « le hash est ailleurs » : dans `/etc/shadow`, lisible par root seulement."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `koffi:x:1001:1001:Koffi Mensah:/home/koffi:/bin/zsh`, quel est le **shell** de koffi ?",
+     "hints": [
+      "C'est le dernier champ."
+     ],
+     "accept": [],
+     "solution": "/bin/zsh",
+     "explain": "Le 7ᵉ champ est le shell : **/bin/zsh**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Dans cette même ligne, quel est l'**UID** de koffi ?",
+     "hints": [
+      "Troisième champ."
+     ],
+     "accept": [],
+     "solution": "1001",
+     "explain": "UID = champ 3 = **1001**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **répertoire personnel** de `www-data` d'après l'extrait ?",
+     "hints": [
+      "Sixième champ."
+     ],
+     "accept": [],
+     "solution": "/var/www",
+     "explain": "Le home de `www-data` est **/var/www** (compte système, pas /home).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `www-data` a-t-il `/usr/sbin/nologin` comme shell ?",
+     "options": [
+      "Pour interdire toute connexion interactive",
+      "Pour lui donner plus de droits",
+      "C'est une erreur"
+     ],
+     "answer": 0,
+     "explain": "`nologin` affiche un message de refus et ferme la session : le compte sert à faire **tourner un service**, pas à se connecter. `/bin/false` a le même effet."
+    },
+    {
+     "type": "say",
+     "text": "Ce fichier est **lisible par tous** (droits 644). Normal : de nombreux programmes en ont besoin pour traduire UID ↔ nom (`ls -l`, par exemple). Mais **seul root** peut le modifier."
+    },
+    {
+     "type": "choice",
+     "q": "Tout le monde peut lire `/etc/passwd`. Est-ce dangereux pour les mots de passe ?",
+     "options": [
+      "Oui, les mots de passe y sont en clair",
+      "Non : les hash sont dans /etc/shadow, illisible par les utilisateurs",
+      "Oui, c'est une faille connue"
+     ],
+     "answer": 1,
+     "explain": "Historiquement les hash étaient dans `passwd` : c'est pourquoi on les a **déplacés** vers `shadow` (droits restreints)."
+    },
+    {
+     "type": "say",
+     "text": "**Comment interroger les comptes sans éditer le fichier à la main ?** `grep` sur le fichier, ou la commande `getent passwd` qui interroge **toutes** les sources de comptes (fichiers, mais aussi LDAP/AD si configuré). Préfère `getent`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la ligne du compte `awa` dans `/etc/passwd` avec `grep`.",
+     "hints": [
+      "grep + nom + fichier."
+     ],
+     "accept": [
+      "grep '^awa:' /etc/passwd",
+      "grep \"^awa:\" /etc/passwd"
+     ],
+     "solution": "grep awa /etc/passwd",
+     "explain": "`grep awa /etc/passwd` (attention : cela montre aussi tout compte contenant « awa »).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le compte `awa` avec `getent`.",
+     "hints": [
+      "getent + la base + le nom."
+     ],
+     "accept": [],
+     "solution": "getent passwd awa",
+     "explain": "`getent passwd awa` fonctionne même pour des comptes venant d'un annuaire (LDAP).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement les noms de connexion** de tous les comptes (1ᵉʳ champ).",
+     "hints": [
+      "cut avec séparateur : et champ 1."
+     ],
+     "accept": [
+      "cut -f1 -d: /etc/passwd",
+      "cut -d':' -f1 /etc/passwd",
+      "getent passwd | cut -d: -f1"
+     ],
+     "solution": "cut -d: -f1 /etc/passwd",
+     "explain": "`cut -d: -f1` extrait le 1ᵉʳ champ de chaque ligne.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Compte **combien de comptes** existent (nombre de lignes de `/etc/passwd`).",
+     "hints": [
+      "wc -l sur le fichier."
+     ],
+     "accept": [
+      "wc -l /etc/passwd",
+      "getent passwd | wc -l"
+     ],
+     "solution": "wc -l < /etc/passwd",
+     "explain": "Une ligne = un compte. Avec `<`, `wc` n'affiche pas le nom du fichier.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les comptes dont le **shell est `/bin/bash`** (la ligne se termine par `/bin/bash`).",
+     "hints": [
+      "Le $ désigne la fin de ligne."
+     ],
+     "accept": [
+      "grep \":/bin/bash$\" /etc/passwd",
+      "grep '/bin/bash$' /etc/passwd"
+     ],
+     "solution": "grep ':/bin/bash$' /etc/passwd",
+     "explain": "`:/bin/bash$` : le shell est le dernier champ.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, grâce à `awk`, les **noms** des comptes dont l'**UID est ≥ 1000** (humains).",
+     "hints": [
+      "awk -F: pour le séparateur, $3 est l'UID."
+     ],
+     "accept": [
+      "awk -F: '$3>=1000 {print $1}' /etc/passwd",
+      "awk -F: '$3>=1000{print $1}' /etc/passwd",
+      "awk -F: '$3 >= 1000{print $1}' /etc/passwd",
+      "awk -F: '($3 >= 1000) {print $1}' /etc/passwd",
+      "awk -F: '($3>=1000) {print $1}' /etc/passwd"
+     ],
+     "solution": "awk -F: '$3 >= 1000 {print $1}' /etc/passwd",
+     "explain": "`-F:` fixe le séparateur ; `$3 >= 1000` filtre sur l'UID ; `print $1` affiche le nom.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `nom:x:UID:GID:commentaire:home:shell` — 7 champs, lisible par tous, modifiable par root. Outils : `grep`, `getent`, `cut`, `awk`. Place au fichier secret : `/etc/shadow`."
+    }
+   ]
+  },
+  {
+   "id": "shadow",
+   "title": "/etc/shadow : mots de passe et vieillissement",
+   "emoji": "🔒",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les **mots de passe** (en fait leurs **empreintes**, ou *hash*) vivent dans `/etc/shadow`. Contrairement à `passwd`, ce fichier est **illisible pour les utilisateurs normaux**."
+    },
+    {
+     "type": "code",
+     "sql": "-rw-r----- 1 root shadow 1180 nov 11 06:00 /etc/shadow      (Debian/Ubuntu : 640 root:shadow)\n----------  1 root root   1180 nov 11 06:00 /etc/shadow      (RHEL/Rocky   : 000 root)",
+     "lang": "Terminal",
+     "title": "Droits de /etc/shadow"
+    },
+    {
+     "type": "say",
+     "text": "Une ligne par compte, **9 champs** séparés par `:` :"
+    },
+    {
+     "type": "code",
+     "sql": "awa:$6$Xk3...$9fQ...:20768:0:90:7:14:20800:\n │   │             │     │ │  │ │   └─ 8 : date d'expiration du COMPTE (jours depuis 1970)\n │   │             │     │ │  │ └─ 7 : jours d'inactivité avant blocage\n │   │             │     │ │  └─ 6 : jours d'avertissement avant expiration\n │   │             │     │ └─ 5 : durée max de validité du mot de passe (jours)\n │   │             │     └─ 4 : durée min entre deux changements\n │   │             └─ 3 : dernier changement (jours depuis le 01/01/1970)\n │   └─ 2 : hash du mot de passe\n └─ 1 : nom de connexion",
+     "lang": "Terminal",
+     "title": "Les champs de shadow"
+    },
+    {
+     "type": "choice",
+     "q": "Combien de champs a une ligne de `/etc/shadow` ?",
+     "options": [
+      "7",
+      "9",
+      "6"
+     ],
+     "answer": 1,
+     "explain": "**9** champs (contre 7 pour `/etc/passwd`)."
+    },
+    {
+     "type": "say",
+     "text": "Le **hash** a le format `$id$sel$empreinte`. L'identifiant dit **quel algorithme** : `$1$` MD5 (obsolète), `$5$` SHA-256, `$6$` SHA-512 (longtemps le standard), `$y$` yescrypt (Debian 11+, Ubuntu 22.04+). Le **sel** (salt) rend deux mots de passe identiques différents."
+    },
+    {
+     "type": "choice",
+     "q": "Un hash commence par `$6$`. Quel algorithme ?",
+     "options": [
+      "MD5",
+      "SHA-512",
+      "bcrypt"
+     ],
+     "answer": 1,
+     "explain": "`$6$` = **SHA-512**. (`$1$` = MD5, `$5$` = SHA-256, `$y$` = yescrypt.)"
+    },
+    {
+     "type": "say",
+     "text": "Que mettre à la place du hash ? Des valeurs spéciales :"
+    },
+    {
+     "type": "code",
+     "sql": "!   ou  !!    compte VERROUILLÉ (ou jamais de mot de passe défini) : aucune connexion par mot de passe\n*              compte sans mot de passe utilisable (typique des comptes système)\n!$6$...        hash précédé d'un ! : mot de passe défini MAIS compte verrouillé (usermod -L)\n(vide)         AUCUN mot de passe : n'importe qui peut se connecter ! (dangereux)",
+     "lang": "Terminal",
+     "title": "Valeurs spéciales du champ 2"
+    },
+    {
+     "type": "choice",
+     "q": "Dans shadow, le champ 2 d'un compte `backup` vaut `*`. Cela signifie…",
+     "options": [
+      "Mot de passe vide : accès libre",
+      "Aucune connexion par mot de passe possible",
+      "Le compte est supprimé"
+     ],
+     "answer": 1,
+     "explain": "`*` (comme `!`) ne correspond à aucun hash possible : impossible de se connecter par mot de passe. Normal pour un compte de service."
+    },
+    {
+     "type": "choice",
+     "q": "Un champ 2 **vide** (`awa::20768:...`) signifie…",
+     "options": [
+      "Le compte est verrouillé",
+      "Le compte n'a pas de mot de passe : tout le monde peut s'y connecter",
+      "Le hash est secret"
+     ],
+     "answer": 1,
+     "explain": "Un champ vide = **aucun mot de passe exigé**. C'est une faille grave à traquer lors d'un audit."
+    },
+    {
+     "type": "say",
+     "text": "Les **dates** sont stockées en **jours depuis le 1ᵉʳ janvier 1970**. `20768` = le 11 novembre 2026. On ne lit pas ça à la main : on utilise `chage -l` (leçon dédiée). Le champ 5 (max) à `99999` signifie **« jamais »**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche l'**état du mot de passe** d'`awa` (P = utilisable, L = verrouillé, NP = aucun) ? (sudo)",
+     "hints": [
+      "passwd avec l'option -S (status)."
+     ],
+     "accept": [
+      "passwd -S awa"
+     ],
+     "solution": "sudo passwd -S awa",
+     "explain": "`passwd -S awa` affiche par exemple `awa P 11/11/2026 0 90 7 14`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la ligne d'`awa` dans `/etc/shadow` (sudo, grep).",
+     "hints": [
+      "Il faut sudo : le fichier est protégé.",
+      "grep '^awa:' /etc/shadow"
+     ],
+     "accept": [
+      "sudo grep awa /etc/shadow",
+      "sudo getent shadow awa",
+      "sudo grep \"^awa:\" /etc/shadow",
+      "grep '^awa:' /etc/shadow",
+      "grep awa /etc/shadow",
+      "getent shadow awa",
+      "grep \"^awa:\" /etc/shadow"
+     ],
+     "solution": "sudo grep '^awa:' /etc/shadow",
+     "explain": "Le `^` ancre le début de ligne : on n'attrape que `awa` et pas `awa2`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `/etc/shadow` est-il lisible seulement par root (et le groupe shadow) ?",
+     "options": [
+      "Pour que les hash ne puissent pas être copiés puis cassés hors ligne",
+      "Parce qu'il est trop gros",
+      "Pour accélérer les connexions"
+     ],
+     "answer": 0,
+     "explain": "Quiconque lit les hash peut tenter de les **casser hors ligne** (attaque par dictionnaire). On limite donc l'accès."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `shadow` = 9 champs, hash `$id$sel$empreinte`, `!`/`*` = pas de connexion par mot de passe, champ vide = **aucun mot de passe** (danger), dates en jours depuis 1970. Maintenant : les **groupes**."
+    }
+   ]
+  },
+  {
+   "id": "groupes",
+   "title": "Groupes : principal et secondaires",
+   "emoji": "👥",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un **groupe** rassemble des utilisateurs pour leur **donner les mêmes droits** sur des fichiers. Plutôt que de gérer les droits utilisateur par utilisateur, on gère des groupes (« compta », « dev », « admin »…)."
+    },
+    {
+     "type": "code",
+     "sql": "/etc/group (extrait)\nroot:x:0:\nsudo:x:27:awa\ndev:x:1001:awa,koffi\ncompta:x:2000:koffi\nawa:x:1000:",
+     "lang": "Terminal",
+     "title": "Le fichier /etc/group"
+    },
+    {
+     "type": "code",
+     "sql": "dev:x:1001:awa,koffi\n │  │  │    └─ 4 : membres SECONDAIRES (séparés par des virgules)\n │  │  └─ 3 : GID\n │  └─ 2 : mot de passe du groupe (x = /etc/gshadow, rarement utilisé)\n └─ 1 : nom du groupe",
+     "lang": "Terminal",
+     "title": "Les 4 champs"
+    },
+    {
+     "type": "choice",
+     "q": "Combien de champs a une ligne de `/etc/group` ?",
+     "options": [
+      "4",
+      "7",
+      "9"
+     ],
+     "answer": 0,
+     "explain": "**4** champs : nom, mot de passe (x), GID, liste des membres."
+    },
+    {
+     "type": "say",
+     "text": "Chaque utilisateur a **un seul groupe principal** (champ 4 de `/etc/passwd`) et **autant de groupes secondaires qu'il faut** (champ 4 de `/etc/group`)."
+    },
+    {
+     "type": "code",
+     "sql": "GROUPE PRINCIPAL    : celui des FICHIERS QU'IL CRÉE. Un seul. Stocké dans /etc/passwd (GID).\nGROUPES SECONDAIRES : droits supplémentaires. Plusieurs. Stockés dans /etc/group (membres).",
+     "lang": "Terminal",
+     "title": "Principal vs secondaires"
+    },
+    {
+     "type": "choice",
+     "q": "Awa crée un fichier. Quel groupe le possède par défaut ?",
+     "options": [
+      "Son groupe principal",
+      "Tous ses groupes",
+      "Le groupe root"
+     ],
+     "answer": 0,
+     "explain": "Les nouveaux fichiers appartiennent à l'**utilisateur** et à son **groupe principal**."
+    },
+    {
+     "type": "choice",
+     "q": "Dans l'extrait, `awa:x:1000:` n'a aucun membre listé. Pourquoi ?",
+     "options": [
+      "C'est une erreur",
+      "C'est le groupe principal d'awa : il n'est pas listé dans les membres, le lien est dans /etc/passwd",
+      "Le groupe est vide donc supprimé"
+     ],
+     "answer": 1,
+     "explain": "Sur Debian/Ubuntu/RHEL, chaque utilisateur reçoit un groupe **privé** du même nom. Le groupe **principal** n'apparaît **pas** dans la liste des membres : il est désigné par le GID de `/etc/passwd`."
+    },
+    {
+     "type": "exercise",
+     "q": "D'après l'extrait, combien de **membres secondaires** a le groupe `dev` ?",
+     "hints": [
+      "Compte les noms après le dernier :."
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "`awa` et `koffi` : **2** membres.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "D'après l'extrait, quel est le **GID** du groupe `compta` ?",
+     "hints": [
+      "Troisième champ."
+     ],
+     "accept": [],
+     "solution": "2000",
+     "explain": "GID = **2000**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les membres du groupe `dev`** ?",
+     "hints": [
+      "getent + la base group + le nom."
+     ],
+     "accept": [
+      "grep '^dev:' /etc/group",
+      "grep dev /etc/group"
+     ],
+     "solution": "getent group dev",
+     "explain": "`getent group dev` affiche la ligne du groupe.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les groupes d'`awa`** ?",
+     "hints": [
+      "groups + utilisateur."
+     ],
+     "accept": [
+      "id -Gn awa",
+      "id awa"
+     ],
+     "solution": "groups awa",
+     "explain": "`groups awa` ou `id -Gn awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement les noms** de tous les groupes (1ᵉʳ champ de `/etc/group`).",
+     "hints": [
+      "Même technique que pour passwd."
+     ],
+     "accept": [
+      "cut -f1 -d: /etc/group",
+      "getent group | cut -d: -f1"
+     ],
+     "solution": "cut -d: -f1 /etc/group",
+     "explain": "`cut -d: -f1 /etc/group`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Important : un changement de groupe n'est pas immédiat** pour les sessions déjà ouvertes. Awa ajoutée à `dev` doit **se reconnecter** (ou lancer `newgrp dev`) pour que le nouveau groupe soit pris en compte."
+    },
+    {
+     "type": "choice",
+     "q": "On vient d'ajouter awa au groupe `compta` pendant qu'elle est connectée. Que doit-elle faire pour utiliser ce groupe ?",
+     "options": [
+      "Rien, c'est immédiat",
+      "Se déconnecter puis se reconnecter",
+      "Redémarrer le serveur"
+     ],
+     "answer": 1,
+     "explain": "Les groupes sont lus **à l'ouverture de session**. Il faut une nouvelle connexion (ou `newgrp`)."
+    },
+    {
+     "type": "say",
+     "text": "`newgrp compta` ouvre un **sous-shell** où `compta` devient ton groupe principal **temporairement** (utile pour créer des fichiers appartenant à ce groupe)."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `/etc/group` : 4 champs. **Un** groupe principal (fichiers créés), **plusieurs** secondaires (droits supplémentaires). Changement de groupe = **nouvelle session**."
+    }
+   ]
+  },
+  {
+   "id": "creer",
+   "title": "Créer des utilisateurs : useradd en détail",
+   "emoji": "➕",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe à l'action ! Pour **créer** un compte : `useradd`. Elle a beaucoup d'options ; voici celles qui comptent. Retiens-les, elles reviennent dans tous les scénarios."
+    },
+    {
+     "type": "code",
+     "sql": "-m        créer le répertoire personnel (home) et y copier /etc/skel\n-M        NE PAS créer le home\n-d DIR    chemin du home (par défaut /home/nom)\n-s SHELL  shell de connexion (ex. /bin/bash)\n-c TEXTE  commentaire (nom complet)\n-u UID    choisir l'UID\n-g GROUPE groupe PRINCIPAL (nom ou GID)\n-G LISTE  groupes SECONDAIRES, séparés par des virgules (sans espace)\n-e DATE   date d'expiration du compte (AAAA-MM-JJ)\n-r        compte SYSTÈME (UID < 1000, pas de home par défaut)",
+     "lang": "Terminal",
+     "title": "Les options de useradd"
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Sans `-m`, le home n'est pas toujours créé** (selon la distribution et `/etc/login.defs`). Et sans `-s`, le shell est celui de `/etc/default/useradd` : très souvent **`/bin/sh`** sur Debian/Ubuntu, pas bash ! On précise donc presque toujours `-m -s /bin/bash`."
+    },
+    {
+     "type": "choice",
+     "q": "Sur Ubuntu, `sudo useradd bob` suivi de `su - bob` donne…",
+     "options": [
+      "Un shell bash avec un home prêt",
+      "Un compte souvent sans home, avec un shell /bin/sh, et sans mot de passe donc inutilisable",
+      "Une erreur : le compte n'existe pas"
+     ],
+     "answer": 1,
+     "explain": "Sans `-m` ni `-s` ni `passwd`, le compte existe mais n'est pas prêt : pas de home (selon la distribution), shell basique, **aucun mot de passe** (compte verrouillé `!`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée l'utilisateur `awa` **avec son home** et le shell **/bin/bash** (sudo).",
+     "hints": [
+      "Deux options : -m et -s."
+     ],
+     "accept": [
+      "sudo useradd -m -s /bin/bash awa",
+      "sudo useradd -s /bin/bash -m awa",
+      "useradd -m -s /bin/bash awa",
+      "useradd -s /bin/bash -m awa"
+     ],
+     "solution": "sudo useradd -m -s /bin/bash awa",
+     "explain": "`-m` crée `/home/awa` (rempli depuis `/etc/skel`), `-s` fixe le shell.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Crée `koffi` avec home, shell bash et le commentaire `Koffi Mensah` (sudo).",
+     "hints": [
+      "-c pour le commentaire, entre guillemets."
+     ],
+     "accept": [
+      "sudo useradd -m -s /bin/bash -c \"Koffi Mensah\" koffi",
+      "sudo useradd -m -c \"Koffi Mensah\" -s /bin/bash koffi",
+      "sudo useradd -s /bin/bash -m -c \"Koffi Mensah\" koffi",
+      "sudo useradd -s /bin/bash -c \"Koffi Mensah\" -m koffi",
+      "sudo useradd -c \"Koffi Mensah\" -m -s /bin/bash koffi",
+      "sudo useradd -c \"Koffi Mensah\" -s /bin/bash -m koffi",
+      "sudo useradd -m -s /bin/bash -c 'Koffi Mensah' koffi",
+      "sudo useradd -m -c 'Koffi Mensah' -s /bin/bash koffi",
+      "sudo useradd -s /bin/bash -m -c 'Koffi Mensah' koffi",
+      "sudo useradd -s /bin/bash -c 'Koffi Mensah' -m koffi",
+      "sudo useradd -c 'Koffi Mensah' -m -s /bin/bash koffi",
+      "sudo useradd -c 'Koffi Mensah' -s /bin/bash -m koffi",
+      "useradd -m -s /bin/bash -c \"Koffi Mensah\" koffi",
+      "useradd -m -c \"Koffi Mensah\" -s /bin/bash koffi",
+      "useradd -s /bin/bash -m -c \"Koffi Mensah\" koffi",
+      "useradd -s /bin/bash -c \"Koffi Mensah\" -m koffi",
+      "useradd -c \"Koffi Mensah\" -m -s /bin/bash koffi",
+      "useradd -c \"Koffi Mensah\" -s /bin/bash -m koffi",
+      "useradd -m -s /bin/bash -c 'Koffi Mensah' koffi",
+      "useradd -m -c 'Koffi Mensah' -s /bin/bash koffi",
+      "useradd -s /bin/bash -m -c 'Koffi Mensah' koffi",
+      "useradd -s /bin/bash -c 'Koffi Mensah' -m koffi",
+      "useradd -c 'Koffi Mensah' -m -s /bin/bash koffi",
+      "useradd -c 'Koffi Mensah' -s /bin/bash -m koffi"
+     ],
+     "solution": "sudo useradd -m -s /bin/bash -c \"Koffi Mensah\" koffi",
+     "explain": "`-c` renseigne le champ 5 de `/etc/passwd` (nom complet).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Crée `senami` avec home, shell bash, **groupe principal** `compta` et **groupe secondaire** `dev` (sudo).",
+     "hints": [
+      "-g (principal), -G (secondaires).",
+      "Les groupes doivent exister avant."
+     ],
+     "accept": [
+      "sudo useradd -m -s /bin/bash -g compta -G dev senami",
+      "sudo useradd -m -s /bin/bash -G dev -g compta senami",
+      "sudo useradd -m -g compta -s /bin/bash -G dev senami",
+      "sudo useradd -m -g compta -G dev -s /bin/bash senami",
+      "sudo useradd -m -G dev -s /bin/bash -g compta senami",
+      "sudo useradd -m -G dev -g compta -s /bin/bash senami",
+      "sudo useradd -s /bin/bash -m -g compta -G dev senami",
+      "sudo useradd -s /bin/bash -m -G dev -g compta senami",
+      "sudo useradd -s /bin/bash -g compta -m -G dev senami",
+      "sudo useradd -s /bin/bash -g compta -G dev -m senami",
+      "sudo useradd -s /bin/bash -G dev -m -g compta senami",
+      "sudo useradd -s /bin/bash -G dev -g compta -m senami",
+      "sudo useradd -g compta -m -s /bin/bash -G dev senami",
+      "sudo useradd -g compta -m -G dev -s /bin/bash senami",
+      "sudo useradd -g compta -s /bin/bash -m -G dev senami",
+      "sudo useradd -g compta -s /bin/bash -G dev -m senami",
+      "sudo useradd -g compta -G dev -m -s /bin/bash senami",
+      "sudo useradd -g compta -G dev -s /bin/bash -m senami",
+      "sudo useradd -G dev -m -s /bin/bash -g compta senami",
+      "sudo useradd -G dev -m -g compta -s /bin/bash senami",
+      "sudo useradd -G dev -s /bin/bash -m -g compta senami",
+      "sudo useradd -G dev -s /bin/bash -g compta -m senami",
+      "sudo useradd -G dev -g compta -m -s /bin/bash senami",
+      "sudo useradd -G dev -g compta -s /bin/bash -m senami",
+      "useradd -m -s /bin/bash -g compta -G dev senami",
+      "useradd -m -s /bin/bash -G dev -g compta senami",
+      "useradd -m -g compta -s /bin/bash -G dev senami",
+      "useradd -m -g compta -G dev -s /bin/bash senami",
+      "useradd -m -G dev -s /bin/bash -g compta senami",
+      "useradd -m -G dev -g compta -s /bin/bash senami",
+      "useradd -s /bin/bash -m -g compta -G dev senami",
+      "useradd -s /bin/bash -m -G dev -g compta senami",
+      "useradd -s /bin/bash -g compta -m -G dev senami",
+      "useradd -s /bin/bash -g compta -G dev -m senami",
+      "useradd -s /bin/bash -G dev -m -g compta senami",
+      "useradd -s /bin/bash -G dev -g compta -m senami",
+      "useradd -g compta -m -s /bin/bash -G dev senami",
+      "useradd -g compta -m -G dev -s /bin/bash senami",
+      "useradd -g compta -s /bin/bash -m -G dev senami",
+      "useradd -g compta -s /bin/bash -G dev -m senami",
+      "useradd -g compta -G dev -m -s /bin/bash senami",
+      "useradd -g compta -G dev -s /bin/bash -m senami",
+      "useradd -G dev -m -s /bin/bash -g compta senami",
+      "useradd -G dev -m -g compta -s /bin/bash senami",
+      "useradd -G dev -s /bin/bash -m -g compta senami",
+      "useradd -G dev -s /bin/bash -g compta -m senami",
+      "useradd -G dev -g compta -m -s /bin/bash senami",
+      "useradd -G dev -g compta -s /bin/bash -m senami"
+     ],
+     "solution": "sudo useradd -m -s /bin/bash -g compta -G dev senami",
+     "explain": "`-g` = principal (un seul), `-G` = secondaires (liste). Les groupes doivent **déjà exister** (`groupadd`).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande est **correcte** pour mettre un utilisateur dans deux groupes secondaires ?",
+     "options": [
+      "useradd -G dev, compta awa",
+      "useradd -G dev,compta awa",
+      "useradd -G dev -G compta awa"
+     ],
+     "answer": 1,
+     "explain": "La liste des groupes secondaires est **séparée par des virgules, sans espace**. Avec `-G` répété, seul le dernier compte."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée un **compte de service** `svcweb` : compte système, sans connexion possible (shell `/usr/sbin/nologin`) (sudo).",
+     "hints": [
+      "-r pour un compte système.",
+      "Shell nologin."
+     ],
+     "accept": [
+      "sudo useradd -r -s /usr/sbin/nologin svcweb",
+      "sudo useradd -s /usr/sbin/nologin -r svcweb",
+      "sudo useradd --system -s /usr/sbin/nologin svcweb",
+      "sudo useradd -s /usr/sbin/nologin --system svcweb",
+      "sudo useradd -r -s /sbin/nologin svcweb",
+      "sudo useradd -s /sbin/nologin -r svcweb",
+      "useradd -r -s /usr/sbin/nologin svcweb",
+      "useradd -s /usr/sbin/nologin -r svcweb",
+      "useradd --system -s /usr/sbin/nologin svcweb",
+      "useradd -s /usr/sbin/nologin --system svcweb",
+      "useradd -r -s /sbin/nologin svcweb",
+      "useradd -s /sbin/nologin -r svcweb"
+     ],
+     "solution": "sudo useradd -r -s /usr/sbin/nologin svcweb",
+     "explain": "`-r` : UID système, pas de home. Avec `nologin`, personne ne peut ouvrir de session avec ce compte.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Le compte vient d'être créé : il est verrouillé** (`!` dans shadow). Il faut **définir un mot de passe** avec `passwd`."
+    },
+    {
+     "type": "exercise",
+     "q": "Définis le mot de passe d'`awa` (sudo).",
+     "hints": [
+      "passwd + utilisateur."
+     ],
+     "accept": [
+      "passwd awa"
+     ],
+     "solution": "sudo passwd awa",
+     "explain": "`passwd awa` demande le nouveau mot de passe deux fois. Sans nom, `passwd` change **ton** mot de passe.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Force `awa` à **changer son mot de passe à sa première connexion** (sudo).",
+     "hints": [
+      "passwd avec l'option « expire »."
+     ],
+     "accept": [
+      "sudo chage -d 0 awa",
+      "passwd -e awa",
+      "chage -d 0 awa"
+     ],
+     "solution": "sudo passwd -e awa",
+     "explain": "`passwd -e` marque le mot de passe comme expiré : au prochain login, le système exige un nouveau mot de passe. Équivalent : `chage -d 0 awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Le dossier modèle `/etc/skel`** : tout ce qu'il contient (`.bashrc`, `.profile`…) est **copié** dans le home de chaque nouvel utilisateur créé avec `-m`. Tu peux y déposer un fichier de bienvenue, une config par défaut, etc."
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert `/etc/skel` ?",
+     "options": [
+      "À stocker les mots de passe",
+      "À fournir les fichiers copiés dans le home des nouveaux utilisateurs",
+      "À lister les groupes"
+     ],
+     "answer": 1,
+     "explain": "C'est le **squelette** du répertoire personnel : modifier `/etc/skel` change ce que reçoivent les **futurs** comptes."
+    },
+    {
+     "type": "say",
+     "text": "Sur **Debian/Ubuntu**, il existe un script plus convivial : **`adduser`**. Il pose des questions (mot de passe, nom complet…), crée le home, choisit bash, etc. Sur RHEL/Rocky, `adduser` n'est qu'un alias de `useradd`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle différence entre `useradd` et `adduser` (Debian/Ubuntu) ?",
+     "options": [
+      "Aucune",
+      "useradd est bas niveau (tout par options) ; adduser est interactif avec de bons défauts",
+      "adduser est réservé à root uniquement"
+     ],
+     "answer": 1,
+     "explain": "`useradd` = outil standard, bas niveau. `adduser` = script Debian interactif. En **script** ou à l'**examen**, on utilise `useradd`."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans quel fichier se règlent l'**UID minimal** (`UID_MIN`) et les défauts d'expiration de mot de passe des nouveaux comptes ?",
+     "hints": [
+      "Un fichier de /etc dont le nom évoque « login »."
+     ],
+     "accept": [],
+     "solution": "/etc/login.defs",
+     "explain": "`/etc/login.defs` contient `UID_MIN`, `GID_MIN`, `PASS_MAX_DAYS`, `UMASK`… Ses valeurs s'appliquent aux **nouveaux** comptes.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `useradd -m -s /bin/bash -c \"Nom\" -g principal -G sec1,sec2 nom`, puis **`passwd nom`**, éventuellement `passwd -e`. Comptes de service : `-r` + `nologin`. Modèles : `/etc/skel`. Défauts : `/etc/login.defs`."
+    }
+   ]
+  },
+  {
+   "id": "modifier",
+   "title": "Modifier un compte : usermod et passwd",
+   "emoji": "🛠️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un compte n'est jamais figé : un employé change de service, de shell, se marie et change de nom, oublie son mot de passe… Deux outils font 90 % du travail : **`usermod`** (modifier un compte) et **`passwd`** (gérer le mot de passe)."
+    },
+    {
+     "type": "say",
+     "text": "`usermod` a **les mêmes options que `useradd`**. Si tu connais l'un, tu connais l'autre : `-s` shell, `-c` commentaire, `-g` groupe principal, `-G` secondaires, `-d` home, `-e` date d'expiration…"
+    },
+    {
+     "type": "exercise",
+     "q": "Change le shell d'`awa` en `/bin/zsh` (sudo).",
+     "hints": [
+      "usermod + -s + shell + utilisateur."
+     ],
+     "accept": [
+      "sudo chsh -s /bin/zsh awa",
+      "usermod -s /bin/zsh awa",
+      "chsh -s /bin/zsh awa"
+     ],
+     "solution": "sudo usermod -s /bin/zsh awa",
+     "explain": "`usermod -s` modifie le champ 7 de `/etc/passwd`. L'utilisateur peut aussi le faire lui-même avec `chsh -s /bin/zsh`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Change le commentaire (nom complet) d'`awa` en `Awa Dossou-Kpade` (sudo).",
+     "hints": [
+      "Option -c, texte entre guillemets."
+     ],
+     "accept": [
+      "sudo usermod -c 'Awa Dossou-Kpade' awa",
+      "usermod -c \"Awa Dossou-Kpade\" awa",
+      "usermod -c 'Awa Dossou-Kpade' awa"
+     ],
+     "solution": "sudo usermod -c \"Awa Dossou-Kpade\" awa",
+     "explain": "`-c` modifie le champ 5 (GECOS).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Le piège n°1 de `usermod` : `-G` sans `-a`.** Sans `-a` (*append*), `-G` **REMPLACE** la liste des groupes secondaires. Tous les anciens groupes sont perdus !"
+    },
+    {
+     "type": "code",
+     "sql": "# awa est dans : awa, sudo, dev\n$ sudo usermod -G compta awa        # SANS -a : remplace !\n$ id awa\nuid=1000(awa) gid=1000(awa) groups=1000(awa),1002(compta)\n# sudo et dev ont disparu 😱\n\n$ sudo usermod -aG compta awa       # AVEC -a : ajoute",
+     "lang": "Terminal",
+     "title": "Le piège -G / -aG"
+    },
+    {
+     "type": "choice",
+     "q": "`awa` est dans les groupes secondaires `sudo` et `dev`. Que fait `usermod -G compta awa` ?",
+     "options": [
+      "Ajoute compta aux groupes existants",
+      "Remplace les groupes secondaires par compta seul",
+      "Change son groupe principal en compta"
+     ],
+     "answer": 1,
+     "explain": "Sans `-a`, `-G` **écrase** la liste. Pour ajouter : **`-aG`**. Pour le groupe principal, c'est `-g` (minuscule)."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute `awa` au groupe secondaire `dev` **sans toucher à ses autres groupes** (sudo).",
+     "hints": [
+      "-a et -G ensemble."
+     ],
+     "accept": [
+      "sudo usermod -a -G dev awa",
+      "sudo usermod -G dev -a awa",
+      "sudo usermod --append --groups dev awa",
+      "sudo gpasswd -a awa dev",
+      "usermod -aG dev awa",
+      "usermod -a -G dev awa",
+      "usermod -G dev -a awa",
+      "usermod --append --groups dev awa",
+      "gpasswd -a awa dev"
+     ],
+     "solution": "sudo usermod -aG dev awa",
+     "explain": "`usermod -aG dev awa`. Rappel : l'utilisateur doit se **reconnecter** pour que ses sessions voient le nouveau groupe.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute `awa` aux groupes `dev` **et** `compta` d'un coup, sans perdre les autres (sudo).",
+     "hints": [
+      "Liste séparée par des virgules, sans espace."
+     ],
+     "accept": [
+      "sudo usermod -aG compta,dev awa",
+      "sudo usermod -a -G dev,compta awa",
+      "sudo usermod -a -G compta,dev awa",
+      "usermod -aG dev,compta awa",
+      "usermod -aG compta,dev awa",
+      "usermod -a -G dev,compta awa",
+      "usermod -a -G compta,dev awa"
+     ],
+     "solution": "sudo usermod -aG dev,compta awa",
+     "explain": "`-aG dev,compta` : virgule, **pas d'espace**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Change le **groupe principal** d'`awa` en `compta` (sudo).",
+     "hints": [
+      "g minuscule = groupe principal."
+     ],
+     "accept": [
+      "usermod -g compta awa"
+     ],
+     "solution": "sudo usermod -g compta awa",
+     "explain": "`-g` (minuscule) = **principal**, `-G` (majuscule) = **secondaires**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Renommer ou déplacer.** `usermod -l nouveau ancien` renomme le **login** (mais pas le home, ni le groupe). `usermod -d /home/nouveau -m nom` **déplace** le home (`-m` = move)."
+    },
+    {
+     "type": "exercise",
+     "q": "Renomme le compte `koffi` en `kmensah` (sudo).",
+     "hints": [
+      "-l nouveau_nom ancien_nom."
+     ],
+     "accept": [
+      "sudo usermod --login kmensah koffi",
+      "usermod -l kmensah koffi",
+      "usermod --login kmensah koffi"
+     ],
+     "solution": "sudo usermod -l kmensah koffi",
+     "explain": "Ordre : **nouveau puis ancien**. Le home et le groupe gardent l'ancien nom : à corriger séparément si besoin.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Déplace le home de `kmensah` vers `/home/kmensah` **en déplaçant son contenu** (sudo).",
+     "hints": [
+      "-d nouveau_chemin et -m."
+     ],
+     "accept": [
+      "sudo usermod -d /home/kmensah -m kmensah",
+      "sudo usermod -m -d /home/kmensah kmensah",
+      "usermod -d /home/kmensah -m kmensah",
+      "usermod -m -d /home/kmensah kmensah"
+     ],
+     "solution": "sudo usermod -d /home/kmensah -m kmensah",
+     "explain": "Sans `-m`, `-d` change seulement le champ 6 du fichier : les fichiers restent à l'ancien endroit.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'effet de `usermod -d /home/neuf nom` **sans** `-m` ?",
+     "options": [
+      "Les fichiers sont déplacés vers /home/neuf",
+      "Seul le champ 6 de /etc/passwd change ; les fichiers ne bougent pas",
+      "La commande est refusée"
+     ],
+     "answer": 1,
+     "explain": "Sans `-m`, on **déclare** juste un nouveau chemin. Les fichiers restent là où ils étaient."
+    },
+    {
+     "type": "say",
+     "text": "**Verrouiller / déverrouiller.** `usermod -L` (*Lock*) ajoute un `!` devant le hash dans shadow : le mot de passe ne marche plus. `usermod -U` (*Unlock*) l'enlève. `passwd -l` / `passwd -u` font la même chose."
+    },
+    {
+     "type": "exercise",
+     "q": "**Verrouille** le compte `awa` (sudo).",
+     "hints": [
+      "L comme Lock."
+     ],
+     "accept": [
+      "sudo passwd -l awa",
+      "sudo usermod --lock awa",
+      "usermod -L awa",
+      "passwd -l awa",
+      "usermod --lock awa"
+     ],
+     "solution": "sudo usermod -L awa",
+     "explain": "Le hash devient `!$6$…` : aucun mot de passe ne correspond.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Déverrouille** le compte `awa` (sudo).",
+     "hints": [
+      "U comme Unlock."
+     ],
+     "accept": [
+      "sudo passwd -u awa",
+      "sudo usermod --unlock awa",
+      "usermod -U awa",
+      "passwd -u awa",
+      "usermod --unlock awa"
+     ],
+     "solution": "sudo usermod -U awa",
+     "explain": "`usermod -U` retire le `!`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🔎 **Subtilité importante** : verrouiller le mot de passe **n'empêche pas** une connexion SSH par **clé publique** ! Pour bloquer vraiment un compte : on le **expire** (`usermod -e 1` ou `chage -E 0`) et/ou on lui donne le shell `nologin`."
+    },
+    {
+     "type": "choice",
+     "q": "Un employé est parti. Tu fais `passwd -l`. Il peut encore entrer par SSH avec sa clé. Pourquoi ?",
+     "options": [
+      "Le verrouillage ne concerne que le mot de passe, pas l'authentification par clé",
+      "passwd -l est cassé",
+      "Il a un autre compte"
+     ],
+     "answer": 0,
+     "explain": "`-L` verrouille **l'authentification par mot de passe**. Pour un blocage complet : expirer le compte (`chage -E 0`) ou changer son shell en `nologin`."
+    },
+    {
+     "type": "exercise",
+     "q": "**Expire immédiatement** le compte `awa` (date d'expiration dans le passé) avec `chage` (sudo).",
+     "hints": [
+      "chage -E 0."
+     ],
+     "accept": [
+      "sudo usermod -e 1 awa",
+      "sudo usermod --expiredate 1 awa",
+      "chage -E 0 awa",
+      "usermod -e 1 awa",
+      "usermod --expiredate 1 awa"
+     ],
+     "solution": "sudo chage -E 0 awa",
+     "explain": "`-E 0` = expiré le 1ᵉʳ janvier 1970 : le compte est fermé, toutes méthodes de connexion confondues.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Programme l'**expiration du compte** `stagiaire` au `2026-12-31` (sudo, usermod).",
+     "hints": [
+      "-e + date AAAA-MM-JJ."
+     ],
+     "accept": [
+      "sudo chage -E 2026-12-31 stagiaire",
+      "sudo usermod --expiredate 2026-12-31 stagiaire",
+      "usermod -e 2026-12-31 stagiaire",
+      "chage -E 2026-12-31 stagiaire",
+      "usermod --expiredate 2026-12-31 stagiaire"
+     ],
+     "solution": "sudo usermod -e 2026-12-31 stagiaire",
+     "explain": "Idéal pour un stagiaire ou un prestataire : le compte se **ferme tout seul**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Affiche l'état** du mot de passe d'`awa` (verrouillé ? vide ? utilisable ?) (sudo).",
+     "hints": [
+      "passwd + option Status."
+     ],
+     "accept": [
+      "sudo passwd --status awa",
+      "passwd -S awa",
+      "passwd --status awa"
+     ],
+     "solution": "sudo passwd -S awa",
+     "explain": "Sortie : `awa P 2026-11-01 0 99999 7 -1`. **P** = mot de passe utilisable, **L** = verrouillé, **NP** = pas de mot de passe.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`passwd -S` affiche `awa L 2026-11-01 0 99999 7 -1`. Que signifie `L` ?",
+     "options": [
+      "Le compte est verrouillé",
+      "Le mot de passe est long",
+      "L'utilisateur est connecté"
+     ],
+     "answer": 0,
+     "explain": "`L` = **Locked**. `P` = mot de passe valide, `NP` = aucun mot de passe."
+    },
+    {
+     "type": "exercise",
+     "q": "Efface le mot de passe d'`awa` pour qu'il **change le sien à sa prochaine connexion** (sudo, avec passwd).",
+     "hints": [
+      "Option 'expire'."
+     ],
+     "accept": [
+      "sudo chage -d 0 awa",
+      "passwd -e awa",
+      "chage -d 0 awa"
+     ],
+     "solution": "sudo passwd -e awa",
+     "explain": "Utile après avoir donné un mot de passe temporaire.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `usermod` : `-s`, `-c`, `-g`, **`-aG`** (jamais `-G` seul !), `-l`, `-d -m`, `-L`/`-U`, `-e`. `passwd` : `-S`, `-l`, `-u`, `-e`. Blocage complet = expiration + nologin."
+    }
+   ]
+  },
+  {
+   "id": "chage",
+   "title": "Politique de mots de passe : chage",
+   "emoji": "⏳",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un bon administrateur ne se contente pas de créer des comptes : il impose une **politique de mots de passe** (durée de vie, avertissement…). L'outil : **`chage`** (*change age*). Il lit/écrit les champs 3 à 9 de `/etc/shadow`."
+    },
+    {
+     "type": "code",
+     "sql": "$ sudo chage -l awa\nLast password change                : Nov 01, 2026\nPassword expires                    : Jan 30, 2027\nPassword inactive                   : Feb 13, 2027\nAccount expires                     : never\nMinimum number of days between password change : 1\nMaximum number of days between password change : 90\nNumber of days of warning before password expires : 7",
+     "lang": "Terminal",
+     "title": "chage -l"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **politique d'âge** du compte `awa` (sudo).",
+     "hints": [
+      "chage + option -l (list)."
+     ],
+     "accept": [
+      "sudo chage --list awa",
+      "chage -l awa",
+      "chage --list awa"
+     ],
+     "solution": "sudo chage -l awa",
+     "explain": "`-l` liste toutes les informations d'âge. Un utilisateur peut lancer `chage -l` sur **son propre** compte.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "Les options à connaître :"
+    },
+    {
+     "type": "code",
+     "sql": "-M jours   durée MAXIMALE du mot de passe\n-m jours   durée MINIMALE avant de pouvoir le re-changer\n-W jours   préavis d'avertissement avant expiration\n-I jours   délai d'INACTIVITÉ après expiration avant fermeture du compte\n-E date    date d'expiration du COMPTE (AAAA-MM-JJ, ou -1 = jamais)\n-d date    date du dernier changement (0 = forcer un changement au prochain login)",
+     "lang": "Terminal",
+     "title": "Les options de chage"
+    },
+    {
+     "type": "exercise",
+     "q": "Impose à `awa` de changer de mot de passe **tous les 90 jours** (sudo).",
+     "hints": [
+      "-M = Maximum."
+     ],
+     "accept": [
+      "sudo chage --maxdays 90 awa",
+      "chage -M 90 awa",
+      "chage --maxdays 90 awa"
+     ],
+     "solution": "sudo chage -M 90 awa",
+     "explain": "`-M 90` : le mot de passe expire 90 jours après le dernier changement.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Empêche `awa` de re-changer son mot de passe **avant 2 jours** (sudo).",
+     "hints": [
+      "-m minuscule = minimum."
+     ],
+     "accept": [
+      "sudo chage --mindays 2 awa",
+      "chage -m 2 awa",
+      "chage --mindays 2 awa"
+     ],
+     "solution": "sudo chage -m 2 awa",
+     "explain": "Évite qu'un utilisateur enchaîne les changements pour revenir à son ancien mot de passe.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Prévient `awa` **10 jours avant** l'expiration de son mot de passe (sudo).",
+     "hints": [
+      "W comme Warning."
+     ],
+     "accept": [
+      "sudo chage --warndays 10 awa",
+      "chage -W 10 awa",
+      "chage --warndays 10 awa"
+     ],
+     "solution": "sudo chage -W 10 awa",
+     "explain": "`-W 10` : un message s'affiche à la connexion durant les 10 derniers jours.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle option de `chage` fixe la durée **maximale** de validité du mot de passe ?",
+     "options": [
+      "-m",
+      "-M",
+      "-W"
+     ],
+     "answer": 1,
+     "explain": "`-M` majuscule = **M**aximum ; `-m` minuscule = **m**inimum."
+    },
+    {
+     "type": "exercise",
+     "q": "En **une seule commande**, applique à `awa` : max 90 jours, min 1 jour, préavis 7 jours (sudo).",
+     "hints": [
+      "Combine -M, -m et -W."
+     ],
+     "accept": [
+      "sudo chage -M 90 -m 1 -W 7 awa",
+      "sudo chage -M 90 -W 7 -m 1 awa",
+      "sudo chage -m 1 -M 90 -W 7 awa",
+      "sudo chage -m 1 -W 7 -M 90 awa",
+      "sudo chage -W 7 -M 90 -m 1 awa",
+      "sudo chage -W 7 -m 1 -M 90 awa",
+      "chage -M 90 -m 1 -W 7 awa",
+      "chage -M 90 -W 7 -m 1 awa",
+      "chage -m 1 -M 90 -W 7 awa",
+      "chage -m 1 -W 7 -M 90 awa",
+      "chage -W 7 -M 90 -m 1 awa",
+      "chage -W 7 -m 1 -M 90 awa"
+     ],
+     "solution": "sudo chage -M 90 -m 1 -W 7 awa",
+     "explain": "`chage` accepte plusieurs options à la fois.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Force `awa` à **changer son mot de passe à la prochaine connexion** avec `chage` (sudo).",
+     "hints": [
+      "-d avec la valeur 0."
+     ],
+     "accept": [
+      "sudo passwd -e awa",
+      "chage -d 0 awa",
+      "passwd -e awa"
+     ],
+     "solution": "sudo chage -d 0 awa",
+     "explain": "`-d 0` met la date du dernier changement à 0 : le mot de passe est considéré comme périmé.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Ferme le compte `awa` **7 jours après l'expiration** de son mot de passe s'il ne réagit pas (sudo).",
+     "hints": [
+      "I comme Inactive."
+     ],
+     "accept": [
+      "sudo chage --inactive 7 awa",
+      "chage -I 7 awa",
+      "chage --inactive 7 awa"
+     ],
+     "solution": "sudo chage -I 7 awa",
+     "explain": "`-I 7` : 7 jours de grâce après l'expiration, puis le compte est verrouillé.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Programme la fermeture du **compte** `stagiaire` au `2027-03-31` (sudo, chage).",
+     "hints": [
+      "-E + date."
+     ],
+     "accept": [
+      "sudo usermod -e 2027-03-31 stagiaire",
+      "sudo chage --expiredate 2027-03-31 stagiaire",
+      "chage -E 2027-03-31 stagiaire",
+      "usermod -e 2027-03-31 stagiaire",
+      "chage --expiredate 2027-03-31 stagiaire"
+     ],
+     "solution": "sudo chage -E 2027-03-31 stagiaire",
+     "explain": "Ne pas confondre : `-E` ferme le **compte**, `-M` fait expirer le **mot de passe**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Supprime** l'expiration du compte `stagiaire` (il n'expire jamais) (sudo, chage).",
+     "hints": [
+      "La valeur spéciale est -1."
+     ],
+     "accept": [
+      "sudo usermod -e \"\" stagiaire",
+      "sudo usermod -e '' stagiaire",
+      "chage -E -1 stagiaire",
+      "usermod -e \"\" stagiaire",
+      "usermod -e '' stagiaire"
+     ],
+     "solution": "sudo chage -E -1 stagiaire",
+     "explain": "`-E -1` = jamais. (Équivalent : `usermod -e \"\" stagiaire`.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la différence entre « mot de passe expiré » et « compte expiré » ?",
+     "options": [
+      "Aucune",
+      "Mot de passe expiré : l'utilisateur doit en changer ; compte expiré : il ne peut plus se connecter du tout",
+      "Compte expiré : il peut encore se connecter par clé SSH"
+     ],
+     "answer": 1,
+     "explain": "Un mot de passe expiré se **renouvelle**. Un compte expiré est **fermé** (`-E`)."
+    },
+    {
+     "type": "say",
+     "text": "**Et pour tous les futurs comptes ?** `chage` agit **compte par compte**. Pour fixer les valeurs **par défaut** des nouveaux comptes, on modifie `/etc/login.defs` (`PASS_MAX_DAYS`, `PASS_MIN_DAYS`, `PASS_WARN_AGE`)."
+    },
+    {
+     "type": "choice",
+     "q": "Tu modifies `PASS_MAX_DAYS 60` dans `/etc/login.defs`. Les comptes **existants** changent-ils ?",
+     "options": [
+      "Oui, immédiatement tous",
+      "Non : seuls les comptes créés ensuite héritent de la valeur",
+      "Oui, après un redémarrage"
+     ],
+     "answer": 1,
+     "explain": "`login.defs` est lu **à la création** d'un compte. Pour les comptes existants, il faut `chage -M 60 nom` (en boucle si besoin)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel fichier de configuration définit les valeurs par défaut d'expiration pour les **nouveaux** comptes ?",
+     "hints": [
+      "On l'a vu à la leçon « Créer »."
+     ],
+     "accept": [],
+     "solution": "/etc/login.defs",
+     "explain": "Toujours `/etc/login.defs`.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `chage -l` (voir), `-M` max, `-m` min, `-W` préavis, `-I` inactivité, `-E` fin de compte (`-1` = jamais), `-d 0` = changement forcé. Défauts des futurs comptes : `/etc/login.defs`."
+    }
+   ]
+  },
+  {
+   "id": "groupes2",
+   "title": "Gérer les groupes : groupadd, groupmod, gpasswd",
+   "emoji": "🧩",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les groupes sont **l'outil de partage** : plutôt que de donner des droits à 20 personnes une par une, on les met dans un groupe `dev` et on donne les droits **au groupe**. Gérer proprement les groupes, c'est la moitié de l'administration des utilisateurs."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée le groupe `dev` (sudo).",
+     "hints": [
+      "groupadd + nom."
+     ],
+     "accept": [
+      "sudo addgroup dev",
+      "groupadd dev",
+      "addgroup dev"
+     ],
+     "solution": "sudo groupadd dev",
+     "explain": "`groupadd dev` crée une ligne dans `/etc/group` avec un GID libre.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Crée le groupe `compta` avec le **GID 2000** (sudo).",
+     "hints": [
+      "-g pour fixer le GID."
+     ],
+     "accept": [
+      "sudo groupadd --gid 2000 compta",
+      "groupadd -g 2000 compta",
+      "groupadd --gid 2000 compta"
+     ],
+     "solution": "sudo groupadd -g 2000 compta",
+     "explain": "Fixer le GID est utile pour **synchroniser** plusieurs serveurs (NFS, par exemple).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Crée un **groupe système** `svcapp` (sudo).",
+     "hints": [
+      "-r = system."
+     ],
+     "accept": [
+      "sudo groupadd --system svcapp",
+      "groupadd -r svcapp",
+      "groupadd --system svcapp"
+     ],
+     "solution": "sudo groupadd -r svcapp",
+     "explain": "`-r` choisit un GID dans la plage système (< 1000).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Renomme le groupe `dev` en `developpeurs` (sudo).",
+     "hints": [
+      "groupmod -n nouveau ancien."
+     ],
+     "accept": [
+      "sudo groupmod --new-name developpeurs dev",
+      "groupmod -n developpeurs dev",
+      "groupmod --new-name developpeurs dev"
+     ],
+     "solution": "sudo groupmod -n developpeurs dev",
+     "explain": "Le **GID ne change pas**, donc les fichiers et les membres restent cohérents.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Change le GID du groupe `compta` en `2500` (sudo).",
+     "hints": [
+      "-g = nouveau GID."
+     ],
+     "accept": [
+      "sudo groupmod --gid 2500 compta",
+      "groupmod -g 2500 compta",
+      "groupmod --gid 2500 compta"
+     ],
+     "solution": "sudo groupmod -g 2500 compta",
+     "explain": "⚠️ Les fichiers qui appartenaient à l'ancien GID deviennent « orphelins » : il faut les `chgrp` ou les corriger avec `find / -gid 2000`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Gérer les membres.** Trois façons : `usermod -aG groupe user` (vue côté utilisateur), **`gpasswd -a user groupe`** (côté groupe), et sur Debian `adduser user groupe`. Retirer : `gpasswd -d user groupe` (ou `deluser user groupe` sur Debian)."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute `awa` au groupe `dev` avec **`gpasswd`** (sudo).",
+     "hints": [
+      "gpasswd -a utilisateur groupe."
+     ],
+     "accept": [
+      "sudo gpasswd --add awa dev",
+      "sudo usermod -aG dev awa",
+      "sudo adduser awa dev",
+      "gpasswd -a awa dev",
+      "gpasswd --add awa dev",
+      "usermod -aG dev awa",
+      "adduser awa dev"
+     ],
+     "solution": "sudo gpasswd -a awa dev",
+     "explain": "Attention à l'ordre : **utilisateur d'abord, groupe ensuite**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Retire** `awa` du groupe `dev` (sudo).",
+     "hints": [
+      "gpasswd -d utilisateur groupe."
+     ],
+     "accept": [
+      "sudo gpasswd --delete awa dev",
+      "sudo deluser awa dev",
+      "gpasswd -d awa dev",
+      "gpasswd --delete awa dev",
+      "deluser awa dev"
+     ],
+     "solution": "sudo gpasswd -d awa dev",
+     "explain": "`-d` = delete. Ça ne supprime pas le compte, seulement l'appartenance.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande ajoute `koffi` au groupe `dev` **sans** affecter ses autres groupes ?",
+     "options": [
+      "usermod -G dev koffi",
+      "gpasswd -a koffi dev",
+      "groupmod -a koffi dev"
+     ],
+     "answer": 1,
+     "explain": "`gpasswd -a` (ou `usermod -aG`) ajoute. `usermod -G` seul **remplace**. `groupmod` ne gère pas les membres."
+    },
+    {
+     "type": "say",
+     "text": "🔄 **Important : un changement de groupe ne s'applique qu'aux NOUVELLES sessions.** Après un `usermod -aG`, l'utilisateur doit se déconnecter/reconnecter (ou lancer `newgrp dev`) pour que son shell voie le nouveau groupe."
+    },
+    {
+     "type": "choice",
+     "q": "Tu ajoutes `awa` au groupe `docker` alors qu'elle est connectée. Elle essaie `docker ps` : « permission denied ». Pourquoi ?",
+     "options": [
+      "Son shell actuel a gardé l'ancienne liste de groupes ; elle doit se reconnecter",
+      "Docker est cassé",
+      "gpasswd a échoué silencieusement"
+     ],
+     "answer": 0,
+     "explain": "La liste des groupes est figée **à l'ouverture de session**. Il faut se reconnecter (ou `newgrp docker`)."
+    },
+    {
+     "type": "say",
+     "text": "**Lister les membres** : `getent group dev` montre la 4ᵉ colonne. Mais attention : les gens dont `dev` est le groupe **principal** n'y apparaissent **pas** (leur GID est dans `/etc/passwd`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la ligne du groupe `dev` avec `getent`.",
+     "hints": [
+      "getent + group + nom."
+     ],
+     "accept": [
+      "grep '^dev:' /etc/group",
+      "grep dev /etc/group"
+     ],
+     "solution": "getent group dev",
+     "explain": "Résultat : `dev:x:1001:awa,koffi`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **liste des groupes** de l'utilisateur `awa`.",
+     "hints": [
+      "Commande 'groups' + nom."
+     ],
+     "accept": [
+      "id -nG awa",
+      "id awa"
+     ],
+     "solution": "groups awa",
+     "explain": "Alternative : `id -nG awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement les noms** de tous les groupes (1ᵉʳ champ de /etc/group).",
+     "hints": [
+      "Même technique que pour passwd."
+     ],
+     "accept": [
+      "getent group | cut -d: -f1",
+      "cut -f1 -d: /etc/group",
+      "cut -d':' -f1 /etc/group"
+     ],
+     "solution": "cut -d: -f1 /etc/group",
+     "explain": "`cut -d: -f1 /etc/group`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Supprimer un groupe** : `groupdel nom`. ⚠️ **Impossible** de supprimer le groupe **principal** d'un utilisateur existant (« cannot remove the primary group of user… »). Il faut d'abord changer le groupe principal de cet utilisateur ou supprimer l'utilisateur."
+    },
+    {
+     "type": "choice",
+     "q": "`groupdel compta` renvoie « cannot remove the primary group of user 'senami' ». Que faire ?",
+     "options": [
+      "Utiliser groupdel -f",
+      "Changer le groupe principal de senami (usermod -g) ou supprimer l'utilisateur, puis relancer groupdel",
+      "Éditer /etc/passwd en aveugle"
+     ],
+     "answer": 1,
+     "explain": "Linux protège la cohérence : un compte ne doit pas avoir un GID principal qui n'existe plus."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime le groupe `compta` (sudo).",
+     "hints": [
+      "groupdel + nom."
+     ],
+     "accept": [
+      "sudo delgroup compta",
+      "groupdel compta",
+      "delgroup compta"
+     ],
+     "solution": "sudo groupdel compta",
+     "explain": "Les fichiers du groupe gardent le GID numérique et deviennent « sans groupe » : pense à les rechercher.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Cas pratique : un dossier partagé.** On crée le groupe `projet`, on y met l'équipe, on donne le dossier au groupe et on active **SGID** (`chmod g+s`) pour que les nouveaux fichiers héritent du groupe `projet`."
+    },
+    {
+     "type": "code",
+     "sql": "sudo groupadd projet\nsudo usermod -aG projet awa\nsudo usermod -aG projet koffi\nsudo mkdir /srv/projet\nsudo chgrp projet /srv/projet\nsudo chmod 2770 /srv/projet",
+     "lang": "Terminal",
+     "title": "Dossier partagé par groupe",
+     "note": "2770 = SGID (2) + rwx pour propriétaire et groupe, rien pour les autres."
+    },
+    {
+     "type": "exercise",
+     "q": "Donne le dossier `/srv/projet` au **groupe** `projet` (sudo, chgrp).",
+     "hints": [
+      "chgrp groupe chemin."
+     ],
+     "accept": [
+      "sudo chown :projet /srv/projet",
+      "sudo chown root:projet /srv/projet",
+      "chgrp projet /srv/projet",
+      "chown :projet /srv/projet",
+      "chown root:projet /srv/projet"
+     ],
+     "solution": "sudo chgrp projet /srv/projet",
+     "explain": "Le propriétaire reste root, le groupe devient `projet`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Active le bit **SGID** sur `/srv/projet` avec la notation symbolique (sudo).",
+     "hints": [
+      "g+s."
+     ],
+     "accept": [
+      "sudo chmod 2770 /srv/projet",
+      "sudo chmod 2775 /srv/projet",
+      "sudo chmod 2750 /srv/projet",
+      "chmod g+s /srv/projet",
+      "chmod 2770 /srv/projet",
+      "chmod 2775 /srv/projet",
+      "chmod 2750 /srv/projet"
+     ],
+     "solution": "sudo chmod g+s /srv/projet",
+     "explain": "Avec SGID sur un dossier, les nouveaux fichiers héritent du **groupe du dossier** et pas du groupe principal de leur créateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `groupadd [-g GID] [-r]`, `groupmod -n/-g`, `groupdel` (pas un groupe principal), membres : `gpasswd -a/-d` ou `usermod -aG`. Reconnexion nécessaire. Dossier partagé : `chgrp` + `chmod g+s`."
+    }
+   ]
+  },
+  {
+   "id": "supprimer",
+   "title": "Supprimer, archiver et nettoyer",
+   "emoji": "🧹",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Supprimer un compte, c'est **irréversible** si on s'y prend mal. On va apprendre la procédure **propre** : vérifier, archiver, déconnecter, supprimer, nettoyer."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime le compte `koffi` en **gardant** son home (sudo).",
+     "hints": [
+      "userdel + nom."
+     ],
+     "accept": [
+      "sudo deluser koffi",
+      "userdel koffi",
+      "deluser koffi"
+     ],
+     "solution": "sudo userdel koffi",
+     "explain": "`userdel` seul supprime l'entrée dans `passwd`, `shadow`, `group` mais **laisse le home** et les fichiers.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime le compte `koffi` **et son home + sa boîte mail** (sudo).",
+     "hints": [
+      "Option -r (remove)."
+     ],
+     "accept": [
+      "sudo userdel --remove koffi",
+      "sudo deluser --remove-home koffi",
+      "userdel -r koffi",
+      "userdel --remove koffi",
+      "deluser --remove-home koffi"
+     ],
+     "solution": "sudo userdel -r koffi",
+     "explain": "`-r` supprime aussi `/home/koffi` et le spool de mails. **Sans retour arrière !**",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la différence entre `userdel koffi` et `userdel -r koffi` ?",
+     "options": [
+      "Aucune",
+      "-r supprime aussi le home et la boîte mail",
+      "-r supprime aussi ses fichiers partout sur le disque"
+     ],
+     "answer": 1,
+     "explain": "`-r` ne touche que **le home et le spool mail**. Les fichiers de koffi ailleurs (/srv, /var…) restent."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Avant de supprimer**, trois réflexes :\n1) **Sauvegarde** son home (tar).\n2) **Déconnecte-le** s'il est en session (`userdel` refuse si des processus tournent).\n3) **Cherche ses fichiers** hors du home."
+    },
+    {
+     "type": "exercise",
+     "q": "**Archive** le home de `koffi` dans `/backup/koffi.tar.gz` (sudo).",
+     "hints": [
+      "tar czf archive source."
+     ],
+     "accept": [
+      "sudo tar -czf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar -zcf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar zcf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar cfz /backup/koffi.tar.gz /home/koffi",
+      "tar czf /backup/koffi.tar.gz /home/koffi",
+      "tar -czf /backup/koffi.tar.gz /home/koffi",
+      "tar -zcf /backup/koffi.tar.gz /home/koffi",
+      "tar zcf /backup/koffi.tar.gz /home/koffi",
+      "tar cfz /backup/koffi.tar.gz /home/koffi"
+     ],
+     "solution": "sudo tar czf /backup/koffi.tar.gz /home/koffi",
+     "explain": "`c` créer, `z` gzip, `f` fichier. Fais **toujours** ça avant `userdel -r`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre faire les choses pour supprimer proprement un compte ?",
+     "options": [
+      "userdel -r, puis sauvegarde",
+      "sauvegarde, déconnexion des processus, userdel -r",
+      "déconnexion, userdel -r, sauvegarde"
+     ],
+     "answer": 1,
+     "explain": "La sauvegarde vient **avant** : après `-r`, c'est trop tard."
+    },
+    {
+     "type": "say",
+     "text": "**Voir ce qu'il fait tourner** : `who`, `w`, `ps -u koffi`. **Tout arrêter** : `pkill -u koffi` (ou `killall -u koffi`, ou `loginctl terminate-user koffi`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les **processus** de l'utilisateur `koffi`.",
+     "hints": [
+      "ps -u utilisateur."
+     ],
+     "accept": [
+      "ps -fu koffi",
+      "ps -U koffi",
+      "pgrep -u koffi -l",
+      "pgrep -u koffi",
+      "ps -u koffi -f",
+      "ps aux | grep koffi",
+      "ps -ef | grep koffi"
+     ],
+     "solution": "ps -u koffi",
+     "explain": "Alternative : `pgrep -u koffi -l`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Termine tous** les processus de `koffi` (sudo).",
+     "hints": [
+      "pkill -u utilisateur."
+     ],
+     "accept": [
+      "sudo killall -u koffi",
+      "sudo pkill -KILL -u koffi",
+      "sudo pkill -9 -u koffi",
+      "sudo loginctl terminate-user koffi",
+      "pkill -u koffi",
+      "killall -u koffi",
+      "pkill -KILL -u koffi",
+      "pkill -9 -u koffi",
+      "loginctl terminate-user koffi"
+     ],
+     "solution": "sudo pkill -u koffi",
+     "explain": "`pkill` envoie SIGTERM à tous les processus de l'utilisateur. Insiste avec `pkill -9 -u` si nécessaire.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Après suppression : les fichiers orphelins.** Un fichier appartient à un **UID** (nombre). Quand le compte disparaît, `ls -l` affiche le nombre au lieu du nom. Pire : si un **nouveau compte reçoit le même UID**, il hérite de ces fichiers ! 😱"
+    },
+    {
+     "type": "code",
+     "sql": "$ ls -l /srv/projet/rapport.txt\n-rw-r--r-- 1 1001 1001 2048 nov. 10 09:12 rapport.txt\n#            ^^^^ ^^^^ plus de nom : le compte n'existe plus",
+     "lang": "Terminal",
+     "title": "Fichier orphelin"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `ls -l` affiche-t-il `1001` au lieu d'un nom ?",
+     "options": [
+      "Le fichier est corrompu",
+      "L'UID 1001 n'existe plus dans /etc/passwd",
+      "Le fichier est caché"
+     ],
+     "answer": 1,
+     "explain": "Le noyau n'a que l'UID : sans entrée correspondante, `ls` affiche le nombre."
+    },
+    {
+     "type": "exercise",
+     "q": "Trouve **tous les fichiers sans propriétaire** valide sur le système (sudo).",
+     "hints": [
+      "find / + test -nouser."
+     ],
+     "accept": [
+      "sudo find / -nouser 2>/dev/null",
+      "find / -nouser",
+      "find / -nouser 2>/dev/null",
+      "find / -nouser"
+     ],
+     "solution": "sudo find / -nouser",
+     "explain": "`-nouser` : fichiers dont l'UID n'a pas de compte. `-nogroup` pour les groupes.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Trouve tous les fichiers appartenant à l'utilisateur **`koffi`** sous `/srv` (sudo).",
+     "hints": [
+      "find chemin -user nom."
+     ],
+     "accept": [
+      "find /srv -user koffi",
+      "find /srv -user koffi"
+     ],
+     "solution": "sudo find /srv -user koffi",
+     "explain": "Utile pour savoir quoi réattribuer ou archiver **avant** la suppression.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Réattribue le fichier `/srv/projet/rapport.txt` à `awa` (sudo).",
+     "hints": [
+      "chown nouveau_proprio fichier."
+     ],
+     "accept": [
+      "sudo chown awa: /srv/projet/rapport.txt",
+      "chown awa /srv/projet/rapport.txt",
+      "chown awa: /srv/projet/rapport.txt"
+     ],
+     "solution": "sudo chown awa /srv/projet/rapport.txt",
+     "explain": "Après le départ de koffi, on transfère ses fichiers à quelqu'un.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Réattribue **récursivement** tout `/srv/projet` à `awa` (sudo).",
+     "hints": [
+      "chown -R."
+     ],
+     "accept": [
+      "sudo chown -R awa: /srv/projet",
+      "sudo chown -R awa:awa /srv/projet",
+      "sudo chown --recursive awa /srv/projet",
+      "chown -R awa /srv/projet",
+      "chown -R awa: /srv/projet",
+      "chown -R awa:awa /srv/projet",
+      "chown --recursive awa /srv/projet"
+     ],
+     "solution": "sudo chown -R awa /srv/projet",
+     "explain": "`-R` descend dans tous les sous-dossiers.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Retrouve tous les fichiers de `/srv` encore à l'**UID 1001** (sudo, find).",
+     "hints": [
+      "find chemin -uid nombre."
+     ],
+     "accept": [
+      "find /srv -uid 1001",
+      "find /srv -uid 1001"
+     ],
+     "solution": "sudo find /srv -uid 1001",
+     "explain": "Utile **après** suppression, quand le nom n'existe plus.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**L'alternative à la suppression : désactiver.** Pour un départ, beaucoup d'entreprises **verrouillent** d'abord (expirer + nologin) et suppriment **plus tard**. Ainsi l'UID n'est jamais réutilisé par erreur."
+    },
+    {
+     "type": "exercise",
+     "q": "**Désactive** le compte `koffi` : expire-le (`usermod -e 1`) et verrouille-le (`-L`) en **une commande** (sudo).",
+     "hints": [
+      "usermod avec -L et -e 1."
+     ],
+     "accept": [
+      "sudo usermod -L -e 1 koffi",
+      "sudo usermod -e 1 -L koffi",
+      "sudo usermod -L --expiredate 1 koffi",
+      "sudo usermod --expiredate 1 -L koffi",
+      "usermod -L -e 1 koffi",
+      "usermod -e 1 -L koffi",
+      "usermod -L --expiredate 1 koffi",
+      "usermod --expiredate 1 -L koffi"
+     ],
+     "solution": "sudo usermod -L -e 1 koffi",
+     "explain": "Tout est conservé, mais personne ne peut plus se connecter.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Change le shell de `koffi` en `nologin` (sudo).",
+     "hints": [
+      "usermod -s + nologin."
+     ],
+     "accept": [
+      "sudo usermod -s /sbin/nologin koffi",
+      "sudo chsh -s /usr/sbin/nologin koffi",
+      "usermod -s /usr/sbin/nologin koffi",
+      "usermod -s /sbin/nologin koffi",
+      "chsh -s /usr/sbin/nologin koffi"
+     ],
+     "solution": "sudo usermod -s /usr/sbin/nologin koffi",
+     "explain": "Dernier verrou : même avec une clé SSH, aucune session shell.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 Procédure : **tar** (sauvegarde) → **pkill -u** → **userdel -r** → **find -nouser** → réattribuer avec `chown`. Variante prudente : verrouiller + expirer + nologin d'abord."
+    }
+   ]
+  },
+  {
+   "id": "surveiller",
+   "title": "Surveiller : qui est là, qui s'est connecté ?",
+   "emoji": "🔭",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Administrer des utilisateurs, c'est aussi **savoir ce qu'ils font** : qui est connecté, qui s'est connecté hier, qui a échoué à se connecter (attaque ?), qui a le droit d'utiliser `sudo`."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les utilisateurs **actuellement connectés**.",
+     "hints": [
+      "Une commande de 3 lettres."
+     ],
+     "accept": [
+      "w",
+      "users"
+     ],
+     "solution": "who",
+     "explain": "`who` donne utilisateur, terminal, date et origine de la connexion.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche qui est connecté **et ce qu'il exécute** en ce moment.",
+     "hints": [
+      "Une seule lettre."
+     ],
+     "accept": [],
+     "solution": "w",
+     "explain": "`w` ajoute la charge machine et la commande en cours de chaque utilisateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'**historique des connexions** (lecture de /var/log/wtmp).",
+     "hints": [
+      "Le mot « dernier » en anglais."
+     ],
+     "accept": [
+      "sudo last",
+      "last"
+     ],
+     "solution": "last",
+     "explain": "`last` liste connexions, déconnexions, redémarrages. `last awa` filtre par utilisateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'historique des connexions de **l'utilisateur awa**.",
+     "hints": [
+      "last + nom."
+     ],
+     "accept": [
+      "sudo last awa",
+      "last awa"
+     ],
+     "solution": "last awa",
+     "explain": "Utile pour vérifier qu'un compte n'a pas été utilisé à une heure bizarre.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les **tentatives de connexion ÉCHOUÉES** (sudo).",
+     "hints": [
+      "last + b comme bad."
+     ],
+     "accept": [
+      "lastb",
+      "lastb"
+     ],
+     "solution": "sudo lastb",
+     "explain": "`lastb` lit `/var/log/btmp`. Un afflux d'échecs sur `root` = attaque par force brute.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`lastb` montre 3 000 échecs sur `root` depuis une même IP. De quoi s'agit-il probablement ?",
+     "options": [
+      "D'une panne disque",
+      "D'une attaque par force brute",
+      "D'une mise à jour"
+     ],
+     "answer": 1,
+     "explain": "Les robots testent des mots de passe en boucle. Remèdes : clés SSH, `fail2ban`, désactiver la connexion root par mot de passe."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **dernière connexion de chaque compte** (y compris ceux qui ne se sont jamais connectés).",
+     "hints": [
+      "last + log."
+     ],
+     "accept": [
+      "sudo lastlog",
+      "lastlog"
+     ],
+     "solution": "lastlog",
+     "explain": "`lastlog` : « **Never logged in** » pour les comptes inutilisés : candidats à la suppression.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Un compte apparaît « Never logged in » dans `lastlog` depuis 2 ans. Que faire ?",
+     "options": [
+      "Rien",
+      "Le vérifier : probablement à désactiver ou supprimer",
+      "Le promouvoir en administrateur"
+     ],
+     "answer": 1,
+     "explain": "Les comptes dormants sont une **surface d'attaque** inutile. On les audite régulièrement."
+    },
+    {
+     "type": "say",
+     "text": "**Devenir quelqu'un d'autre : `su`.** `su awa` change d'utilisateur **sans** charger son environnement. **`su - awa`** (avec le tiret) simule une **vraie connexion** (son home, son PATH…). Sans nom, `su` = root."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle différence entre `su awa` et `su - awa` ?",
+     "options": [
+      "Aucune",
+      "Avec le tiret, l'environnement complet d'awa est chargé (login shell)",
+      "Avec le tiret, on n'a pas besoin du mot de passe"
+     ],
+     "answer": 1,
+     "explain": "`su -` = **shell de connexion** : on arrive dans le home d'awa avec son environnement."
+    },
+    {
+     "type": "exercise",
+     "q": "Ouvre une **session complète** en tant que `awa`.",
+     "hints": [
+      "su + tiret + nom."
+     ],
+     "accept": [
+      "su -l awa",
+      "su --login awa",
+      "sudo su - awa",
+      "sudo -iu awa",
+      "sudo -i -u awa",
+      "su - awa",
+      "-iu awa",
+      "-i -u awa"
+     ],
+     "solution": "su - awa",
+     "explain": "Mot de passe d'**awa** demandé (sauf si tu es root).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**`sudo`** : exécuter **une commande** avec les droits d'un autre (par défaut root), en tapant **son propre** mot de passe. Qui y a droit ? Les membres du groupe **`sudo`** (Debian/Ubuntu) ou **`wheel`** (RHEL/Rocky), et ce qui est défini dans `/etc/sudoers`."
+    },
+    {
+     "type": "exercise",
+     "q": "Donne les droits sudo à `awa` sur Debian/Ubuntu (ajout au groupe `sudo`) (sudo).",
+     "hints": [
+      "Le groupe s'appelle sudo."
+     ],
+     "accept": [
+      "sudo gpasswd -a awa sudo",
+      "sudo adduser awa sudo",
+      "sudo usermod -a -G sudo awa",
+      "usermod -aG sudo awa",
+      "gpasswd -a awa sudo",
+      "adduser awa sudo",
+      "usermod -a -G sudo awa"
+     ],
+     "solution": "sudo usermod -aG sudo awa",
+     "explain": "Sur RHEL/Rocky : `usermod -aG wheel awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Donne les droits sudo à `awa` sur **RHEL/Rocky** (groupe wheel) (sudo).",
+     "hints": [
+      "Le groupe s'appelle wheel."
+     ],
+     "accept": [
+      "sudo gpasswd -a awa wheel",
+      "sudo usermod -a -G wheel awa",
+      "usermod -aG wheel awa",
+      "gpasswd -a awa wheel",
+      "usermod -a -G wheel awa"
+     ],
+     "solution": "sudo usermod -aG wheel awa",
+     "explain": "`wheel` est l'équivalent RHEL du groupe `sudo`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tes propres droits sudo**.",
+     "hints": [
+      "sudo + option list."
+     ],
+     "accept": [
+      "sudo --list",
+      "-l",
+      "--list"
+     ],
+     "solution": "sudo -l",
+     "explain": "`sudo -l` liste ce que tu as le droit de lancer.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Exécute la commande `whoami` **en tant qu'utilisateur `awa`** (sudo).",
+     "hints": [
+      "sudo -u utilisateur commande."
+     ],
+     "accept": [
+      "-u awa whoami"
+     ],
+     "solution": "sudo -u awa whoami",
+     "explain": "`-u` choisit l'utilisateur cible. Très utile pour tester les droits d'un compte.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Éditer les règles sudo : toujours avec `visudo`.** Il vérifie la syntaxe avant d'enregistrer. Une erreur dans `/etc/sudoers` édité à la main peut **te bloquer** hors de sudo !"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi utiliser `visudo` plutôt qu'éditer `/etc/sudoers` avec nano ?",
+     "options": [
+      "C'est plus joli",
+      "visudo contrôle la syntaxe : évite de casser sudo",
+      "visudo est plus rapide"
+     ],
+     "answer": 1,
+     "explain": "Une faute de syntaxe peut rendre sudo inutilisable pour tout le monde."
+    },
+    {
+     "type": "exercise",
+     "q": "Édite le fichier des règles sudo **de façon sécurisée** (sudo).",
+     "hints": [
+      "Un nom qui mélange vi et sudo."
+     ],
+     "accept": [
+      "visudo",
+      "visudo"
+     ],
+     "solution": "sudo visudo",
+     "explain": "Pour des règles par utilisateur, crée plutôt un fichier dans `/etc/sudoers.d/` avec `sudo visudo -f /etc/sudoers.d/awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `who`/`w` (présents), `last`/`lastb`/`lastlog` (historique), `su -`, `sudo -l`, groupe `sudo`/`wheel`, **`visudo`**."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : administrateur système",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** Je te donne des **situations réelles** d'administrateur. Pas de théorie : tu agis. Objectif : prouver que tu administres les utilisateurs **parfaitement**."
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 1 — Arrivée d'une recrue.** Awa Dossou rejoint l'équipe développement. Tu dois : créer le groupe `dev` (s'il n'existe pas), créer son compte `awa` avec home, shell bash, nom complet « Awa Dossou », groupe principal `awa` (automatique), groupe secondaire `dev`."
+    },
+    {
+     "type": "exercise",
+     "q": "**1/12** — Crée le groupe `dev` (sudo).",
+     "hints": [
+      "groupadd + nom."
+     ],
+     "accept": [
+      "groupadd dev"
+     ],
+     "solution": "sudo groupadd dev",
+     "explain": "Les groupes doivent exister avant de s'en servir dans `useradd -G`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**2/12** — Crée le compte `awa` : home, shell `/bin/bash`, commentaire `Awa Dossou`, groupe secondaire `dev` (sudo).",
+     "hints": [
+      "-m, -s, -c, -G, puis le nom."
+     ],
+     "accept": [
+      "sudo useradd -m -s /bin/bash -c \"Awa Dossou\" -G dev awa",
+      "sudo useradd -m -s /bin/bash -G dev -c \"Awa Dossou\" awa",
+      "sudo useradd -m -c \"Awa Dossou\" -s /bin/bash -G dev awa",
+      "sudo useradd -m -c \"Awa Dossou\" -G dev -s /bin/bash awa",
+      "sudo useradd -m -G dev -s /bin/bash -c \"Awa Dossou\" awa",
+      "sudo useradd -m -G dev -c \"Awa Dossou\" -s /bin/bash awa",
+      "sudo useradd -s /bin/bash -m -c \"Awa Dossou\" -G dev awa",
+      "sudo useradd -s /bin/bash -m -G dev -c \"Awa Dossou\" awa",
+      "sudo useradd -s /bin/bash -c \"Awa Dossou\" -m -G dev awa",
+      "sudo useradd -s /bin/bash -c \"Awa Dossou\" -G dev -m awa",
+      "sudo useradd -s /bin/bash -G dev -m -c \"Awa Dossou\" awa",
+      "sudo useradd -s /bin/bash -G dev -c \"Awa Dossou\" -m awa",
+      "sudo useradd -c \"Awa Dossou\" -m -s /bin/bash -G dev awa",
+      "sudo useradd -c \"Awa Dossou\" -m -G dev -s /bin/bash awa",
+      "sudo useradd -c \"Awa Dossou\" -s /bin/bash -m -G dev awa",
+      "sudo useradd -c \"Awa Dossou\" -s /bin/bash -G dev -m awa",
+      "sudo useradd -c \"Awa Dossou\" -G dev -m -s /bin/bash awa",
+      "sudo useradd -c \"Awa Dossou\" -G dev -s /bin/bash -m awa",
+      "sudo useradd -G dev -m -s /bin/bash -c \"Awa Dossou\" awa",
+      "sudo useradd -G dev -m -c \"Awa Dossou\" -s /bin/bash awa",
+      "sudo useradd -G dev -s /bin/bash -m -c \"Awa Dossou\" awa",
+      "sudo useradd -G dev -s /bin/bash -c \"Awa Dossou\" -m awa",
+      "sudo useradd -G dev -c \"Awa Dossou\" -m -s /bin/bash awa",
+      "sudo useradd -G dev -c \"Awa Dossou\" -s /bin/bash -m awa",
+      "sudo useradd -m -s /bin/bash -c 'Awa Dossou' -G dev awa",
+      "sudo useradd -m -s /bin/bash -G dev -c 'Awa Dossou' awa",
+      "sudo useradd -m -c 'Awa Dossou' -s /bin/bash -G dev awa",
+      "sudo useradd -m -c 'Awa Dossou' -G dev -s /bin/bash awa",
+      "sudo useradd -m -G dev -s /bin/bash -c 'Awa Dossou' awa",
+      "sudo useradd -m -G dev -c 'Awa Dossou' -s /bin/bash awa",
+      "sudo useradd -s /bin/bash -m -c 'Awa Dossou' -G dev awa",
+      "sudo useradd -s /bin/bash -m -G dev -c 'Awa Dossou' awa",
+      "sudo useradd -s /bin/bash -c 'Awa Dossou' -m -G dev awa",
+      "sudo useradd -s /bin/bash -c 'Awa Dossou' -G dev -m awa",
+      "sudo useradd -s /bin/bash -G dev -m -c 'Awa Dossou' awa",
+      "sudo useradd -s /bin/bash -G dev -c 'Awa Dossou' -m awa",
+      "sudo useradd -c 'Awa Dossou' -m -s /bin/bash -G dev awa",
+      "sudo useradd -c 'Awa Dossou' -m -G dev -s /bin/bash awa",
+      "sudo useradd -c 'Awa Dossou' -s /bin/bash -m -G dev awa",
+      "sudo useradd -c 'Awa Dossou' -s /bin/bash -G dev -m awa",
+      "sudo useradd -c 'Awa Dossou' -G dev -m -s /bin/bash awa",
+      "sudo useradd -c 'Awa Dossou' -G dev -s /bin/bash -m awa",
+      "sudo useradd -G dev -m -s /bin/bash -c 'Awa Dossou' awa",
+      "sudo useradd -G dev -m -c 'Awa Dossou' -s /bin/bash awa",
+      "sudo useradd -G dev -s /bin/bash -m -c 'Awa Dossou' awa",
+      "sudo useradd -G dev -s /bin/bash -c 'Awa Dossou' -m awa",
+      "sudo useradd -G dev -c 'Awa Dossou' -m -s /bin/bash awa",
+      "sudo useradd -G dev -c 'Awa Dossou' -s /bin/bash -m awa",
+      "useradd -m -s /bin/bash -c \"Awa Dossou\" -G dev awa",
+      "useradd -m -s /bin/bash -G dev -c \"Awa Dossou\" awa",
+      "useradd -m -c \"Awa Dossou\" -s /bin/bash -G dev awa",
+      "useradd -m -c \"Awa Dossou\" -G dev -s /bin/bash awa",
+      "useradd -m -G dev -s /bin/bash -c \"Awa Dossou\" awa",
+      "useradd -m -G dev -c \"Awa Dossou\" -s /bin/bash awa",
+      "useradd -s /bin/bash -m -c \"Awa Dossou\" -G dev awa",
+      "useradd -s /bin/bash -m -G dev -c \"Awa Dossou\" awa",
+      "useradd -s /bin/bash -c \"Awa Dossou\" -m -G dev awa",
+      "useradd -s /bin/bash -c \"Awa Dossou\" -G dev -m awa",
+      "useradd -s /bin/bash -G dev -m -c \"Awa Dossou\" awa",
+      "useradd -s /bin/bash -G dev -c \"Awa Dossou\" -m awa",
+      "useradd -c \"Awa Dossou\" -m -s /bin/bash -G dev awa",
+      "useradd -c \"Awa Dossou\" -m -G dev -s /bin/bash awa",
+      "useradd -c \"Awa Dossou\" -s /bin/bash -m -G dev awa",
+      "useradd -c \"Awa Dossou\" -s /bin/bash -G dev -m awa",
+      "useradd -c \"Awa Dossou\" -G dev -m -s /bin/bash awa",
+      "useradd -c \"Awa Dossou\" -G dev -s /bin/bash -m awa",
+      "useradd -G dev -m -s /bin/bash -c \"Awa Dossou\" awa",
+      "useradd -G dev -m -c \"Awa Dossou\" -s /bin/bash awa",
+      "useradd -G dev -s /bin/bash -m -c \"Awa Dossou\" awa",
+      "useradd -G dev -s /bin/bash -c \"Awa Dossou\" -m awa",
+      "useradd -G dev -c \"Awa Dossou\" -m -s /bin/bash awa",
+      "useradd -G dev -c \"Awa Dossou\" -s /bin/bash -m awa",
+      "useradd -m -s /bin/bash -c 'Awa Dossou' -G dev awa",
+      "useradd -m -s /bin/bash -G dev -c 'Awa Dossou' awa",
+      "useradd -m -c 'Awa Dossou' -s /bin/bash -G dev awa",
+      "useradd -m -c 'Awa Dossou' -G dev -s /bin/bash awa",
+      "useradd -m -G dev -s /bin/bash -c 'Awa Dossou' awa",
+      "useradd -m -G dev -c 'Awa Dossou' -s /bin/bash awa",
+      "useradd -s /bin/bash -m -c 'Awa Dossou' -G dev awa",
+      "useradd -s /bin/bash -m -G dev -c 'Awa Dossou' awa",
+      "useradd -s /bin/bash -c 'Awa Dossou' -m -G dev awa",
+      "useradd -s /bin/bash -c 'Awa Dossou' -G dev -m awa",
+      "useradd -s /bin/bash -G dev -m -c 'Awa Dossou' awa",
+      "useradd -s /bin/bash -G dev -c 'Awa Dossou' -m awa",
+      "useradd -c 'Awa Dossou' -m -s /bin/bash -G dev awa",
+      "useradd -c 'Awa Dossou' -m -G dev -s /bin/bash awa",
+      "useradd -c 'Awa Dossou' -s /bin/bash -m -G dev awa",
+      "useradd -c 'Awa Dossou' -s /bin/bash -G dev -m awa",
+      "useradd -c 'Awa Dossou' -G dev -m -s /bin/bash awa",
+      "useradd -c 'Awa Dossou' -G dev -s /bin/bash -m awa",
+      "useradd -G dev -m -s /bin/bash -c 'Awa Dossou' awa",
+      "useradd -G dev -m -c 'Awa Dossou' -s /bin/bash awa",
+      "useradd -G dev -s /bin/bash -m -c 'Awa Dossou' awa",
+      "useradd -G dev -s /bin/bash -c 'Awa Dossou' -m awa",
+      "useradd -G dev -c 'Awa Dossou' -m -s /bin/bash awa",
+      "useradd -G dev -c 'Awa Dossou' -s /bin/bash -m awa"
+     ],
+     "solution": "sudo useradd -m -s /bin/bash -c \"Awa Dossou\" -G dev awa",
+     "explain": "Le groupe principal `awa` est créé automatiquement (User Private Group).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**3/12** — Donne-lui un mot de passe (sudo).",
+     "hints": [
+      "passwd + nom."
+     ],
+     "accept": [
+      "passwd awa"
+     ],
+     "solution": "sudo passwd awa",
+     "explain": "On définit un mot de passe temporaire.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**4/12** — Oblige-la à le **changer à sa première connexion** (sudo).",
+     "hints": [
+      "passwd + option expire."
+     ],
+     "accept": [
+      "sudo chage -d 0 awa",
+      "passwd -e awa",
+      "chage -d 0 awa"
+     ],
+     "solution": "sudo passwd -e awa",
+     "explain": "Bonne pratique : un mot de passe temporaire ne doit **pas** durer.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**5/12** — Impose-lui un mot de passe valable **90 jours** maximum (sudo).",
+     "hints": [
+      "chage -M."
+     ],
+     "accept": [
+      "chage -M 90 awa"
+     ],
+     "solution": "sudo chage -M 90 awa",
+     "explain": "Politique de sécurité appliquée dès l'arrivée.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**6/12** — Vérifie son identité complète (UID, groupes) avec une commande **sans sudo**.",
+     "hints": [
+      "id + nom."
+     ],
+     "accept": [
+      "groups awa",
+      "id -nG awa"
+     ],
+     "solution": "id awa",
+     "explain": "On contrôle toujours le résultat : `uid=1000(awa) gid=1000(awa) groups=1000(awa),1001(dev)`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 2 — Changement de service.** Awa passe à la comptabilité. Elle doit **rejoindre** le groupe `compta` **tout en gardant** `dev`."
+    },
+    {
+     "type": "exercise",
+     "q": "**7/12** — Ajoute `awa` au groupe `compta` **sans perdre** `dev` (sudo).",
+     "hints": [
+      "Quelle option évite d'écraser ?"
+     ],
+     "accept": [
+      "sudo usermod -a -G compta awa",
+      "sudo gpasswd -a awa compta",
+      "sudo adduser awa compta",
+      "usermod -aG compta awa",
+      "usermod -a -G compta awa",
+      "gpasswd -a awa compta",
+      "adduser awa compta"
+     ],
+     "solution": "sudo usermod -aG compta awa",
+     "explain": "Le piège classique : `-G` seul aurait fait perdre `dev`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 3 — Audit de sécurité.** Ton responsable te demande : « Y a-t-il des comptes UID 0 autres que root ? Des comptes **sans mot de passe** ? »"
+    },
+    {
+     "type": "exercise",
+     "q": "**8/12** — Affiche les noms de **tous les comptes d'UID 0** avec `awk` sur /etc/passwd.",
+     "hints": [
+      "awk -F: et test sur le champ 3."
+     ],
+     "accept": [
+      "awk -F: '$3 == 0 {print $1}' /etc/passwd",
+      "awk -F: '$3==0{print $1}' /etc/passwd",
+      "awk -F: '($3==0){print $1}' /etc/passwd",
+      "awk -F: '($3 == 0) {print $1}' /etc/passwd",
+      "awk -F':' '$3==0 {print $1}' /etc/passwd",
+      "awk -F':' '$3 == 0 {print $1}' /etc/passwd",
+      "getent passwd | awk -F: '$3==0 {print $1}'",
+      "getent passwd | awk -F: '$3 == 0 {print $1}'"
+     ],
+     "solution": "awk -F: '$3==0 {print $1}' /etc/passwd",
+     "explain": "Résultat attendu : **root** uniquement. Tout autre nom est **très suspect**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**9/12** — Affiche les comptes dont le **champ mot de passe est vide** dans /etc/shadow (sudo + awk).",
+     "hints": [
+      "awk -F: sur le champ 2 égal à \"\"."
+     ],
+     "accept": [
+      "sudo awk -F: '$2 == \"\" {print $1}' /etc/shadow",
+      "sudo awk -F: '($2==\"\") {print $1}' /etc/shadow",
+      "sudo awk -F: '($2 == \"\") {print $1}' /etc/shadow",
+      "sudo awk -F: '!$2 {print $1}' /etc/shadow",
+      "sudo awk -F: '$2==\"\"{print $1}' /etc/shadow",
+      "awk -F: '$2==\"\" {print $1}' /etc/shadow",
+      "awk -F: '$2 == \"\" {print $1}' /etc/shadow",
+      "awk -F: '($2==\"\") {print $1}' /etc/shadow",
+      "awk -F: '($2 == \"\") {print $1}' /etc/shadow",
+      "awk -F: '!$2 {print $1}' /etc/shadow",
+      "awk -F: '$2==\"\"{print $1}' /etc/shadow"
+     ],
+     "solution": "sudo awk -F: '$2==\"\" {print $1}' /etc/shadow",
+     "explain": "Un mot de passe **vide** = connexion sans mot de passe possible. À corriger immédiatement (`passwd -l` ou mot de passe).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 4 — Départ.** Koffi quitte l'entreprise. Procédure propre : archive du home, arrêt de ses processus, suppression avec home."
+    },
+    {
+     "type": "exercise",
+     "q": "**10/12** — Archive `/home/koffi` dans `/backup/koffi.tar.gz` (sudo).",
+     "hints": [
+      "tar czf archive source."
+     ],
+     "accept": [
+      "sudo tar -czf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar zcf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar -zcf /backup/koffi.tar.gz /home/koffi",
+      "sudo tar cfz /backup/koffi.tar.gz /home/koffi",
+      "tar czf /backup/koffi.tar.gz /home/koffi",
+      "tar -czf /backup/koffi.tar.gz /home/koffi",
+      "tar zcf /backup/koffi.tar.gz /home/koffi",
+      "tar -zcf /backup/koffi.tar.gz /home/koffi",
+      "tar cfz /backup/koffi.tar.gz /home/koffi"
+     ],
+     "solution": "sudo tar czf /backup/koffi.tar.gz /home/koffi",
+     "explain": "La sauvegarde **d'abord**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**11/12** — Termine ses processus (sudo).",
+     "hints": [
+      "pkill -u."
+     ],
+     "accept": [
+      "sudo killall -u koffi",
+      "sudo pkill -9 -u koffi",
+      "sudo pkill -KILL -u koffi",
+      "sudo loginctl terminate-user koffi",
+      "pkill -u koffi",
+      "killall -u koffi",
+      "pkill -9 -u koffi",
+      "pkill -KILL -u koffi",
+      "loginctl terminate-user koffi"
+     ],
+     "solution": "sudo pkill -u koffi",
+     "explain": "Sinon `userdel` refuse : « user koffi is currently used by process… ».",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**12/12 (boss)** — Supprime le compte `koffi` **avec** son home (sudo).",
+     "hints": [
+      "userdel + option remove."
+     ],
+     "accept": [
+      "sudo userdel --remove koffi",
+      "sudo deluser --remove-home koffi",
+      "userdel -r koffi",
+      "userdel --remove koffi",
+      "deluser --remove-home koffi"
+     ],
+     "solution": "sudo userdel -r koffi",
+     "explain": "Tu as sauvegardé, déconnecté, supprimé : procédure **propre**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Question de réflexion.** Pour finir, vérifions que tu as bien compris les points qui piègent même les professionnels."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande ajoute `awa` à `dev` **sans** retirer ses autres groupes ?",
+     "options": [
+      "usermod -G dev awa",
+      "usermod -aG dev awa",
+      "usermod -g dev awa"
+     ],
+     "answer": 1,
+     "explain": "`-aG` : *append* + groupes secondaires."
+    },
+    {
+     "type": "choice",
+     "q": "Un compte de service pour une application doit exister mais **personne ne doit pouvoir s'y connecter**. Quelle création est correcte ?",
+     "options": [
+      "useradd -m -s /bin/bash svcapp",
+      "useradd -r -s /usr/sbin/nologin svcapp",
+      "useradd -G root svcapp"
+     ],
+     "answer": 1,
+     "explain": "Compte système (`-r`) avec shell `nologin`. Jamais dans `root` !"
+    },
+    {
+     "type": "choice",
+     "q": "Un compte `toto` a l'UID 0. Que cela signifie-t-il ?",
+     "options": [
+      "Rien de particulier",
+      "`toto` a les pleins pouvoirs, comme root, et c'est suspect",
+      "`toto` est un compte système sans droits"
+     ],
+     "answer": 1,
+     "explain": "C'est **l'UID** qui donne les droits : un UID 0 autre que root est un grave indice de compromission."
+    },
+    {
+     "type": "choice",
+     "q": "Où sont stockés les **hash** des mots de passe, et qui peut les lire ?",
+     "options": [
+      "Dans /etc/passwd, tout le monde",
+      "Dans /etc/shadow, seulement root",
+      "Dans /etc/group, les membres du groupe"
+     ],
+     "answer": 1,
+     "explain": "`/etc/shadow` (droits 640 ou 600) : seul root (ou le groupe shadow) peut le lire."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo, tu es maintenant capable d'administrer des utilisateurs de A à Z** : lire `passwd`/`shadow`/`group`, créer (`useradd`), modifier (`usermod`, `passwd`, `chage`), gérer les groupes, déléguer avec `sudo`, auditer, désactiver et supprimer proprement. Un vrai travail d'administrateur système ! 🚀"
+    }
+   ]
+  }
+ ]
+}
