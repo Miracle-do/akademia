@@ -1,0 +1,1885 @@
+{
+ "id": "dhcp-dns-nat",
+ "order": 5,
+ "title": "DHCP, DNS, NAT : les trois services indispensables",
+ "tagline": "Adresses automatiques, noms de domaine, sortie Internet : comprends et configure les 3 services de tout réseau.",
+ "emoji": "🌐",
+ "color": "#14B8A6",
+ "level": "Intermédiaire",
+ "minutes": 110,
+ "pitch": [
+  "Salut ! Je te présente **« DHCP, DNS, NAT : les trois services indispensables »** 🌐.",
+  "Chaque fois qu'un appareil se connecte à un réseau, **trois services** travaillent dans l'ombre : le **DHCP** lui donne une adresse, le **DNS** traduit les noms en adresses, le **NAT** le fait sortir sur Internet. Sans eux, rien ne marche… et quand l'un tombe en panne, il faut savoir lequel !",
+  "On suit le parcours d'un PC qui arrive sur le réseau : l'échange **DORA**, la configuration d'un serveur DHCP sur routeur, le **relais** quand le serveur est ailleurs, la **hiérarchie DNS** et ses enregistrements, puis le **NAT statique, dynamique et PAT**.",
+  "Beaucoup de commandes Cisco concrètes, des check-lists de dépannage, et un défi final : installer le routeur d'une agence de A à Z."
+ ],
+ "benefits": [
+  "Comprendre l'échange DORA et le rôle du bail DHCP",
+  "Configurer un serveur DHCP et un relais sur un routeur Cisco",
+  "Lire un nom DNS, connaître les enregistrements et utiliser nslookup/dig",
+  "Choisir et configurer NAT statique, dynamique ou PAT, puis le dépanner"
+ ],
+ "lessons": [
+  {
+   "id": "trois-services",
+   "title": "Les trois services invisibles",
+   "emoji": "🧩",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! **Nimbo** ☁️ ici. Chaque fois que tu ouvres un navigateur, **trois services** travaillent dans ton dos, sans que tu les voies : **DHCP**, **DNS** et **NAT**. Sans eux, ton ordinateur n'aurait ni adresse, ni moyen de trouver `google.com`, ni accès à Internet. Cette formation t'apprend à les **comprendre**, les **configurer** et les **dépanner**."
+    },
+    {
+     "type": "code",
+     "sql": "1. DHCP   →  « Quelle est mon adresse IP ? »          donne une configuration IP automatiquement\n2. DNS    →  « Quelle est l'adresse de google.com ? »   traduit les noms en adresses IP\n3. NAT    →  « Comment sortir sur Internet ? »          traduit les adresses privées en adresses publiques",
+     "lang": "Réseau",
+     "title": "Les trois services"
+    },
+    {
+     "type": "say",
+     "text": "Imagine que tu arrives dans un **nouvel immeuble**. **DHCP** = le gardien qui te donne **ton numéro d'appartement** à l'arrivée. **DNS** = **l'annuaire** : tu cherches « Boulangerie Awa », il te donne le numéro. **NAT** = **l'accueil de l'immeuble** : vers l'extérieur, tout le monde parle avec **la même adresse postale**, et la réceptionniste sait à quel appartement remettre chaque réponse."
+    },
+    {
+     "type": "choice",
+     "q": "Quel service attribue automatiquement une adresse IP à un ordinateur qui se connecte au réseau ?",
+     "options": [
+      "DNS",
+      "DHCP",
+      "NAT"
+     ],
+     "answer": 1,
+     "explain": "**DHCP** (*Dynamic Host Configuration Protocol*) distribue adresse IP, masque, passerelle et serveur DNS."
+    },
+    {
+     "type": "choice",
+     "q": "Quel service traduit `www.exemple.bj` en `203.0.113.25` ?",
+     "options": [
+      "DNS",
+      "DHCP",
+      "NAT"
+     ],
+     "answer": 0,
+     "explain": "**DNS** (*Domain Name System*) : l'annuaire d'Internet."
+    },
+    {
+     "type": "choice",
+     "q": "Quel service permet à des machines en adresses **privées** d'accéder à Internet ?",
+     "options": [
+      "DNS",
+      "DHCP",
+      "NAT"
+     ],
+     "answer": 2,
+     "explain": "**NAT** (*Network Address Translation*) : il remplace les adresses privées par une adresse publique."
+    },
+    {
+     "type": "say",
+     "text": "Un ordinateur qui démarre dans un réseau ordinaire fait toujours la même chaîne : **1) DHCP** pour obtenir sa configuration, **2) DNS** pour trouver le serveur dont il a besoin, **3) NAT** (sur le routeur) pour sortir vers Internet. Dans cette formation, on va suivre **ce parcours** dans l'ordre, avec cette topologie :"
+    },
+    {
+     "type": "code",
+     "sql": "   PC1      PC2      PC3                         INTERNET\n    |        |        |                             |\n [ SW ]--------+------+                              |\n    |                                               |\n   G0/0 .1                         G0/1 203.0.113.1/24     .254\n  [  R1  ]=====================================[ Routeur FAI ]\n LAN 192.168.1.0/24",
+     "lang": "Réseau",
+     "title": "Notre réseau fil rouge"
+    },
+    {
+     "type": "say",
+     "text": "Le **R1** va jouer trois rôles : **serveur DHCP** pour le LAN, **relais** pour d'autres réseaux, et **routeur NAT** vers le FAI (Fournisseur d'Accès Internet)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le nom du service qui donne **une adresse IP automatiquement** ? (sigle en 4 lettres)",
+     "hints": [
+      "Dynamic Host Configuration Protocol."
+     ],
+     "accept": [
+      "dhcp"
+     ],
+     "solution": "DHCP",
+     "explain": "**DHCP**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel sigle désigne la traduction des **noms de domaine** en adresses IP ? (3 lettres)",
+     "hints": [
+      "Domain Name System."
+     ],
+     "accept": [
+      "dns"
+     ],
+     "solution": "DNS",
+     "explain": "**DNS**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel sigle désigne la traduction d'**adresses privées en adresses publiques** ? (3 lettres)",
+     "hints": [
+      "Network Address Translation."
+     ],
+     "accept": [
+      "nat"
+     ],
+     "solution": "NAT",
+     "explain": "**NAT**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Dans notre topologie, quel équipement fera la traduction NAT ?",
+     "options": [
+      "Le switch",
+      "Le routeur R1",
+      "Le PC"
+     ],
+     "answer": 1,
+     "explain": "C'est le **routeur de bordure** (R1) qui connaît à la fois le réseau privé et le réseau public. Un switch (couche 2) ne fait pas de NAT."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **DHCP** = configuration automatique. **DNS** = noms ↔ adresses. **NAT** = adresses privées ↔ publiques. Direction : le DHCP d'abord !"
+    }
+   ]
+  },
+  {
+   "id": "dhcp",
+   "title": "DHCP : comment un PC obtient son adresse",
+   "emoji": "📬",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un PC vient d'être branché. Il n'a **aucune adresse IP** et ne connaît personne. Comment demande-t-il de l'aide ? Il **crie dans le réseau** (un message *broadcast*) : « Y a-t-il un serveur DHCP ici ? ». Le dialogue en 4 étapes s'appelle **DORA**."
+    },
+    {
+     "type": "code",
+     "sql": "1. D iscover   Client → tous (broadcast)   « Je cherche un serveur DHCP ! »\n2. O ffer      Serveur → client            « Je te propose 192.168.1.50 »\n3. R equest    Client → tous (broadcast)   « J'accepte l'offre de ce serveur-là »\n4. A cknowledge Serveur → client           « Confirmé, c'est à toi pour 24 h »",
+     "lang": "Réseau",
+     "title": "DORA"
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre se déroule l'échange DHCP ?",
+     "options": [
+      "Offer, Discover, Acknowledge, Request",
+      "Discover, Offer, Request, Acknowledge",
+      "Request, Offer, Discover, Acknowledge"
+     ],
+     "answer": 1,
+     "explain": "**DORA** : Discover, Offer, Request, Acknowledge."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'**acronyme** des quatre étapes d'un échange DHCP ? (4 lettres)",
+     "hints": [
+      "D, O, R, A : les initiales des 4 messages."
+     ],
+     "accept": [
+      "dora"
+     ],
+     "solution": "DORA",
+     "explain": "**DORA** : Discover, Offer, Request, Acknowledge.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi un broadcast ?** Au début, le client n'a **pas d'adresse** (il utilise `0.0.0.0` comme source) et ne connaît pas l'adresse du serveur. Il envoie donc à `255.255.255.255` (broadcast). Les messages utilisent **UDP** : le **serveur écoute sur le port 67**, le **client sur le port 68**."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le message DHCP Discover est-il envoyé en broadcast ?",
+     "options": [
+      "Pour économiser de la bande passante",
+      "Le client n'a pas encore d'adresse IP et ne connaît pas le serveur",
+      "Parce que DHCP utilise TCP"
+     ],
+     "answer": 1,
+     "explain": "Le client est « aveugle » : il ne connaît ni sa propre adresse, ni celle du serveur."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro de port UDP du **serveur** DHCP ?",
+     "hints": [
+      "Le client utilise 68, le serveur l'autre."
+     ],
+     "accept": [
+      "udp 67",
+      "port 67",
+      "udp/67"
+     ],
+     "solution": "67",
+     "explain": "**UDP 67** pour le serveur, **UDP 68** pour le client.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro de port UDP du **client** DHCP ?",
+     "hints": [
+      "Le serveur utilise 67."
+     ],
+     "accept": [
+      "udp 68",
+      "port 68",
+      "udp/68"
+     ],
+     "solution": "68",
+     "explain": "**UDP 68** pour le client.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Que reçoit le client ?** Pas seulement une adresse IP, mais un **kit complet** :"
+    },
+    {
+     "type": "code",
+     "sql": "• Adresse IP            192.168.1.50\n• Masque de sous-réseau  255.255.255.0\n• Passerelle par défaut  192.168.1.1     (default gateway)\n• Serveur(s) DNS         8.8.8.8\n• Durée du bail          24 h            (lease)",
+     "lang": "Réseau",
+     "title": "Ce que distribue le DHCP"
+    },
+    {
+     "type": "choice",
+     "q": "Un PC obtient une adresse mais ne peut pas sortir du réseau local. Quelle information DHCP manque probablement ?",
+     "options": [
+      "Le masque",
+      "La passerelle par défaut",
+      "La durée du bail"
+     ],
+     "answer": 1,
+     "explain": "Sans **passerelle par défaut**, le PC ne sait pas à qui envoyer les paquets destinés à un autre réseau."
+    },
+    {
+     "type": "choice",
+     "q": "Le PC joint `192.168.1.20` mais pas `google.com` (alors que `8.8.8.8` répond au ping). Que manque-t-il ?",
+     "options": [
+      "Le serveur DNS",
+      "La passerelle",
+      "L'adresse IP"
+     ],
+     "answer": 0,
+     "explain": "Il accède à Internet par adresse mais ne sait pas résoudre les noms : il manque le **DNS**."
+    },
+    {
+     "type": "say",
+     "text": "**Le bail (lease).** L'adresse n'est pas donnée pour toujours : elle est **prêtée** pour une durée. À **50 %** du bail, le client demande **discrètement** (en unicast) à son serveur de la renouveler. Sans réponse, à **87,5 %** il lance un broadcast vers n'importe quel serveur. Si le bail expire sans renouvellement, il doit abandonner l'adresse."
+    },
+    {
+     "type": "choice",
+     "q": "Un bail DHCP dure 8 heures. Au bout de combien de temps le client tente-t-il un premier renouvellement (50 %) ?",
+     "options": [
+      "2 heures",
+      "4 heures",
+      "7 heures"
+     ],
+     "answer": 1,
+     "explain": "50 % de 8 h = **4 h**. (87,5 % correspond à 7 h.)"
+    },
+    {
+     "type": "exercise",
+     "q": "Un bail dure 24 heures. Après combien d'heures le client essaie-t-il de **renouveler** (à 50 %) ?",
+     "hints": [
+      "24 × 0,5."
+     ],
+     "accept": [
+      "12 h",
+      "12h",
+      "12 heures"
+     ],
+     "solution": "12",
+     "explain": "**12 heures**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**APIPA : quand le DHCP ne répond pas.** Si aucun serveur ne répond, Windows s'attribue lui-même une adresse **169.254.x.x** (réseau `169.254.0.0/16`). Elle permet de parler aux autres machines du même segment, mais **pas de sortir**. Quand tu vois 169.254… sur un PC, c'est le signe que **le DHCP est injoignable**."
+    },
+    {
+     "type": "choice",
+     "q": "Un PC affiche `169.254.37.12`. Que peut-on conclure ?",
+     "options": [
+      "Il a une adresse publique",
+      "Il n'a pas réussi à joindre un serveur DHCP",
+      "Il est configuré en statique"
+     ],
+     "answer": 1,
+     "explain": "L'adresse **APIPA** 169.254.0.0/16 est auto-attribuée quand le DHCP ne répond pas."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande Windows affiche **toute la configuration IP** (adresse, passerelle, DNS, bail…) ?",
+     "hints": [
+      "ipconfig avec l'option « tout »."
+     ],
+     "accept": [
+      "ipconfig/all"
+     ],
+     "solution": "ipconfig /all",
+     "explain": "`ipconfig /all` affiche aussi l'adresse du serveur DHCP et les dates du bail.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande Windows **libère** l'adresse obtenue par DHCP ?",
+     "hints": [
+      "ipconfig + option pour relâcher."
+     ],
+     "accept": [
+      "ipconfig/release"
+     ],
+     "solution": "ipconfig /release",
+     "explain": "`ipconfig /release` renonce au bail actuel.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande Windows **demande** une nouvelle adresse au serveur DHCP ?",
+     "hints": [
+      "ipconfig + option pour renouveler."
+     ],
+     "accept": [
+      "ipconfig/renew"
+     ],
+     "solution": "ipconfig /renew",
+     "explain": "`ipconfig /renew` relance un échange DHCP. Les deux commandes `/release` puis `/renew` servent à « réinitialiser » une adresse.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Réservation d'adresse.** Pour qu'un équipement important (imprimante, serveur) garde **toujours la même adresse** sans la configurer à la main, on fait une **réservation DHCP** : le serveur associe l'adresse **MAC** de l'appareil à une adresse IP fixe. Pratique : le côté « statique » sans quitter la gestion centralisée."
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux qu'une imprimante garde toujours `192.168.1.10`, tout en restant gérée par le DHCP. Que fais-tu ?",
+     "options": [
+      "Une réservation DHCP liée à son adresse MAC",
+      "Tu allonges le bail à l'infini",
+      "Tu désactives le DHCP"
+     ],
+     "answer": 0,
+     "explain": "La **réservation** (MAC → IP) combine confort du DHCP et stabilité d'une adresse fixe."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **DORA** (broadcast, UDP 67/68), le client reçoit **IP + masque + passerelle + DNS + bail**, renouvellement à **50 %**, **169.254.x.x** = DHCP injoignable, `ipconfig /all /release /renew`."
+    }
+   ]
+  },
+  {
+   "id": "dhcp-config",
+   "title": "Configurer un serveur DHCP sur un routeur",
+   "emoji": "⚙️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un routeur Cisco peut faire serveur DHCP pour son LAN. Parfait pour les petits réseaux. On suit **trois étapes** : 1) **exclure** les adresses fixes, 2) **créer un pool**, 3) **vérifier**."
+    },
+    {
+     "type": "code",
+     "sql": "   PC1      PC2      PC3                         INTERNET\n    |        |        |                             |\n [ SW ]--------+------+                              |\n    |                                               |\n   G0/0 .1                         G0/1 203.0.113.1/24     .254\n  [  R1  ]=====================================[ Routeur FAI ]\n LAN 192.168.1.0/24",
+     "lang": "Réseau",
+     "title": "Notre réseau"
+    },
+    {
+     "type": "say",
+     "text": "**1) Exclure les adresses réservées.** Le routeur lui-même (`192.168.1.1`), les serveurs, les imprimantes… ne doivent **pas** être distribués par erreur. Commande en mode configuration globale : `ip dhcp excluded-address <première> <dernière>`."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip dhcp excluded-address 192.168.1.1 192.168.1.10",
+     "lang": "Cisco IOS",
+     "title": "Exclure .1 à .10"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande pour **exclure les adresses de 192.168.1.1 à 192.168.1.20** du DHCP.",
+     "hints": [
+      "ip dhcp excluded-address <première> <dernière>"
+     ],
+     "accept": [],
+     "solution": "ip dhcp excluded-address 192.168.1.1 192.168.1.20",
+     "explain": "Le routeur ne distribuera plus aucune adresse de cette plage. On le fait **avant** de créer le pool pour éviter les conflits.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment exclure **une seule** adresse, `192.168.1.1` ?",
+     "hints": [
+      "Une seule adresse : pas besoin de seconde borne."
+     ],
+     "accept": [
+      "ip dhcp excluded-address 192.168.1.1 192.168.1.1"
+     ],
+     "solution": "ip dhcp excluded-address 192.168.1.1",
+     "explain": "Avec une seule adresse, on n'indique pas de plage.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**2) Créer le pool.** On donne un **nom** au pool, puis on décrit ce qu'il distribue :"
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip dhcp pool LAN1\nR1(dhcp-config)# network 192.168.1.0 255.255.255.0\nR1(dhcp-config)# default-router 192.168.1.1\nR1(dhcp-config)# dns-server 8.8.8.8\nR1(dhcp-config)# domain-name akademia.local\nR1(dhcp-config)# lease 7",
+     "lang": "Cisco IOS",
+     "title": "Un pool complet",
+     "note": "lease 7 = 7 jours (par défaut : 1 jour). lease infinite = bail illimité."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui **crée le pool** nommé `LAN1`.",
+     "hints": [
+      "ip dhcp pool <nom>"
+     ],
+     "accept": [],
+     "solution": "ip dhcp pool LAN1",
+     "explain": "Le prompt passe en `(dhcp-config)#`, où l'on décrit le pool.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le pool, déclare le **réseau** `192.168.1.0` avec le masque `255.255.255.0`.",
+     "hints": [
+      "network <adresse réseau> <masque>"
+     ],
+     "accept": [
+      "network 192.168.1.0 /24"
+     ],
+     "solution": "network 192.168.1.0 255.255.255.0",
+     "explain": "Définit la plage d'où viennent les adresses (moins les adresses exclues).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le pool, indique la **passerelle** `192.168.1.1`.",
+     "hints": [
+      "Le mot-clé évoque « routeur par défaut »."
+     ],
+     "accept": [],
+     "solution": "default-router 192.168.1.1",
+     "explain": "`default-router` = la passerelle que le client recevra.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le pool, indique le **serveur DNS** `8.8.8.8`.",
+     "hints": [
+      "dns-server <adresse>"
+     ],
+     "accept": [],
+     "solution": "dns-server 8.8.8.8",
+     "explain": "On peut donner plusieurs serveurs : `dns-server 8.8.8.8 1.1.1.1`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le pool, fixe la durée du bail à **3 jours**.",
+     "hints": [
+      "lease <jours>"
+     ],
+     "accept": [
+      "lease 3 0",
+      "lease 3 0 0"
+     ],
+     "solution": "lease 3",
+     "explain": "`lease 3` = 3 jours. `lease 0 8` = 8 heures (jours puis heures).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le pool, fixe la durée du bail à **8 heures** (0 jour, 8 heures).",
+     "hints": [
+      "lease <jours> <heures>"
+     ],
+     "accept": [
+      "lease 0 8 0"
+     ],
+     "solution": "lease 0 8",
+     "explain": "Format : `lease jours heures minutes`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi exclut-on les adresses **avant** de créer le pool ?",
+     "options": [
+      "Pour que le routeur ne distribue pas par erreur l'adresse de ses propres interfaces ou de serveurs",
+      "Sinon le pool ne marche pas",
+      "Pour accélérer le DHCP"
+     ],
+     "answer": 0,
+     "explain": "Sans exclusion, un client pourrait recevoir `192.168.1.1` qui est déjà celle du routeur : **conflit d'adresses**."
+    },
+    {
+     "type": "say",
+     "text": "**3) Vérifier.** Trois commandes en mode privilégié :"
+    },
+    {
+     "type": "code",
+     "sql": "R1# show ip dhcp binding        → adresses déjà attribuées (IP, MAC, date d'expiration)\nR1# show ip dhcp pool           → statistiques du pool (adresses libres, utilisées)\nR1# show ip dhcp conflict       → adresses en conflit détectées",
+     "lang": "Cisco IOS",
+     "title": "Vérifications"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les adresses attribuées** et les MAC associées ?",
+     "hints": [
+      "show ip dhcp ..."
+     ],
+     "accept": [],
+     "solution": "show ip dhcp binding",
+     "explain": "`show ip dhcp binding` : la liste des baux actifs.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche les **statistiques d'un pool** (utilisation) ?",
+     "hints": [
+      "show ip dhcp ..."
+     ],
+     "accept": [],
+     "solution": "show ip dhcp pool",
+     "explain": "Indique le nombre d'adresses utilisées et disponibles.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche les **conflits d'adresses** détectés ?",
+     "hints": [
+      "show ip dhcp ..."
+     ],
+     "accept": [],
+     "solution": "show ip dhcp conflict",
+     "explain": "Un conflit survient quand une adresse à distribuer répond déjà au ping.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande **efface tous les baux** (pour repartir de zéro) ?",
+     "hints": [
+      "clear ip dhcp binding + joker."
+     ],
+     "accept": [],
+     "solution": "clear ip dhcp binding *",
+     "explain": "`clear ip dhcp binding *` supprime tous les baux ; on peut aussi indiquer une adresse précise.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Le routeur comme client DHCP.** Sur une interface reliée à un FAI qui distribue des adresses : `ip address dhcp` au lieu d'une adresse statique. Pratique pour la sortie Internet des petites agences."
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'interface vers le FAI, indique que le routeur obtient son adresse **par DHCP**.",
+     "hints": [
+      "ip address + mot-clé dhcp."
+     ],
+     "accept": [],
+     "solution": "ip address dhcp",
+     "explain": "Le routeur devient client DHCP sur cette interface.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande n'est **pas** nécessaire pour qu'un pool DHCP minimal fonctionne ?",
+     "options": [
+      "network",
+      "default-router",
+      "domain-name"
+     ],
+     "answer": 2,
+     "explain": "`network` est indispensable. `default-router` est indispensable en pratique. `domain-name` est facultatif."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `ip dhcp excluded-address`, `ip dhcp pool`, `network`, `default-router`, `dns-server`, `lease`, vérifications `show ip dhcp binding|pool|conflict`."
+    }
+   ]
+  },
+  {
+   "id": "relais",
+   "title": "Le relais DHCP : quand le serveur est ailleurs",
+   "emoji": "🔁",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dans une vraie entreprise, il y a **plusieurs réseaux** (VLAN, agences) mais souvent **un seul serveur DHCP** central. Problème : un **broadcast ne traverse pas un routeur** ! Le Discover du client ne peut donc jamais atteindre le serveur. Solution : **le relais DHCP** (*DHCP relay*)."
+    },
+    {
+     "type": "code",
+     "sql": "PC ----(broadcast)----> [ R1 ] ----(unicast)----> Serveur DHCP 10.0.0.10\n                           relais\n\nLe routeur capte le broadcast, le transforme en message unicast\net l'envoie directement au serveur.",
+     "lang": "Réseau",
+     "title": "Le principe"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le serveur DHCP d'un autre réseau ne reçoit-il pas les Discover des PC ?",
+     "options": [
+      "Parce que les routeurs ne transmettent pas les broadcasts",
+      "Parce que DHCP utilise TCP",
+      "Parce que le serveur est éteint"
+     ],
+     "answer": 0,
+     "explain": "Un **broadcast** reste dans son domaine de diffusion : le routeur le bloque."
+    },
+    {
+     "type": "say",
+     "text": "**La commande magique** : `ip helper-address <adresse du serveur DHCP>`. Elle se tape **sur l'interface du routeur qui est du côté des clients**, pas du côté du serveur !"
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# interface g0/0\nR1(config-if)# ip helper-address 10.0.0.10",
+     "lang": "Cisco IOS",
+     "title": "Relais sur R1",
+     "note": "G0/0 est l'interface côté LAN des clients. 10.0.0.10 est le serveur DHCP."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui **configure le relais DHCP** vers le serveur `10.0.0.10`.",
+     "hints": [
+      "ip helper-address <adresse du serveur>"
+     ],
+     "accept": [],
+     "solution": "ip helper-address 10.0.0.10",
+     "explain": "À taper sur l'interface côté clients. Le routeur transforme alors les broadcasts DHCP en messages unicast vers le serveur.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Sur quelle interface tapes-tu `ip helper-address` ?",
+     "options": [
+      "Celle qui est côté clients (là où arrivent les broadcasts)",
+      "Celle qui est côté serveur",
+      "Sur toutes les interfaces"
+     ],
+     "answer": 0,
+     "explain": "On configure le relais là où **les broadcasts arrivent**, c'est-à-dire côté clients."
+    },
+    {
+     "type": "say",
+     "text": "**Comment le serveur choisit-il le bon pool ?** Le routeur inscrit **sa propre adresse** (celle de l'interface côté clients) dans le message : le champ **giaddr** (*gateway IP address*). Le serveur compare cette adresse avec ses pools et choisit celui dont le `network` la contient."
+    },
+    {
+     "type": "choice",
+     "q": "Le relais est sur G0/0 = `192.168.5.1`. Le serveur DHCP doit avoir…",
+     "options": [
+      "Un pool dont le network contient 192.168.5.0/24",
+      "Un pool 10.0.0.0/24",
+      "Aucun pool particulier"
+     ],
+     "answer": 0,
+     "explain": "Le serveur choisit le pool d'après **giaddr** (192.168.5.1) : il lui faut un pool pour `192.168.5.0/24`."
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle le champ qui indique au serveur DHCP de **quel réseau** vient la demande relayée ? (5 lettres)",
+     "hints": [
+      "Gateway IP ADDRess."
+     ],
+     "accept": [
+      "gi addr",
+      "giaddr field"
+     ],
+     "solution": "giaddr",
+     "explain": "**giaddr** : l'adresse du relais (côté clients).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "Par défaut, `ip helper-address` relaie **plusieurs services UDP** (pas seulement DHCP) : le temps (37), TACACS (49), **DNS (53)**, **DHCP (67 et 68)**, TFTP (69) et NetBIOS (137, 138). Attention donc aux broadcasts inutiles."
+    },
+    {
+     "type": "choice",
+     "q": "Quel port UDP est relayé en plus de DHCP par défaut par `ip helper-address` ?",
+     "options": [
+      "DNS (53)",
+      "HTTP (80)",
+      "SSH (22)"
+     ],
+     "answer": 0,
+     "explain": "Le helper relaie notamment le **DNS (53)**, TFTP (69), etc. (UDP uniquement)."
+    },
+    {
+     "type": "say",
+     "text": "**Dépanner « mon PC n'a pas d'adresse » (169.254…).** Vérifie dans l'ordre :"
+    },
+    {
+     "type": "code",
+     "sql": "1. Le PC est-il bien dans le bon VLAN / sur le bon port ?\n2. Le serveur DHCP est-il joignable (ping depuis le routeur) ?\n3. Le relais est-il configuré sur la BONNE interface (côté clients) ?\n4. Existe-t-il un pool correspondant au réseau (giaddr) ?\n5. Le pool est-il épuisé ? (show ip dhcp pool)\n6. Le bail est-il en conflit ? (show ip dhcp conflict)",
+     "lang": "Réseau",
+     "title": "Check-list de dépannage"
+    },
+    {
+     "type": "choice",
+     "q": "Les PC d'un VLAN reçoivent du `169.254.x.x`, les autres VLAN fonctionnent. Première hypothèse ?",
+     "options": [
+      "Le relais `ip helper-address` manque sur l'interface de ce VLAN",
+      "Le DNS est en panne",
+      "Le NAT est mal réglé"
+     ],
+     "answer": 0,
+     "explain": "Si seul un VLAN pose problème, c'est souvent un **relais oublié** ou un **pool manquant** pour ce réseau."
+    },
+    {
+     "type": "choice",
+     "q": "Le pool est plein : `show ip dhcp pool` indique 0 adresse disponible. Que faire ?",
+     "options": [
+      "Réduire la durée du bail ou agrandir la plage du pool",
+      "Redémarrer les PC",
+      "Supprimer la passerelle"
+     ],
+     "answer": 0,
+     "explain": "Un bail plus court libère les adresses plus vite ; on peut aussi élargir le `network` ou réduire les exclusions."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Broadcast ne traverse pas le routeur → `ip helper-address <serveur>` sur l'interface **côté clients**. Le **giaddr** désigne le pool. Dépannage méthodique : VLAN, joignabilité, relais, pool, conflits."
+    }
+   ]
+  },
+  {
+   "id": "dns",
+   "title": "DNS : l'annuaire d'Internet",
+   "emoji": "📖",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les humains retiennent `www.exemple.bj`, les machines utilisent `203.0.113.25`. Le **DNS** fait la traduction. Mais il n'existe pas un annuaire géant unique : c'est **une hiérarchie distribuée** de millions de serveurs. Vue d'ensemble :"
+    },
+    {
+     "type": "code",
+     "sql": "                     .   (la racine)\n            ┌────────┼────────┐\n          .com     .org      .bj     (domaines de premier niveau : TLD)\n                              │\n                          exemple.bj  (domaine)\n                              │\n                       www.exemple.bj (nom d'hôte)",
+     "lang": "Réseau",
+     "title": "La hiérarchie DNS"
+    },
+    {
+     "type": "choice",
+     "q": "Dans `www.exemple.bj`, quel est le **TLD** (domaine de premier niveau) ?",
+     "options": [
+      "www",
+      "exemple",
+      "bj"
+     ],
+     "answer": 2,
+     "explain": "On lit un nom **de droite à gauche** : `bj` (TLD), `exemple` (domaine), `www` (hôte)."
+    },
+    {
+     "type": "say",
+     "text": "**Comment une résolution se passe.** Ton PC ne parcourt pas la hiérarchie lui-même. Il demande à **son serveur DNS (le résolveur)**, qui fait le travail à sa place :"
+    },
+    {
+     "type": "code",
+     "sql": "PC ──► Résolveur (ex. 8.8.8.8) ──► Racine   « Qui gère .bj ? »\n                                  ──► Serveur .bj   « Qui gère exemple.bj ? »\n                                  ──► Serveur exemple.bj   « www ? » → 203.0.113.25\nPC ◄── 203.0.113.25 (mise en cache par le résolveur)",
+     "lang": "Réseau",
+     "title": "Résolution récursive"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le rôle du **résolveur** (serveur DNS récursif) ?",
+     "options": [
+      "Stocker tous les sites web",
+      "Interroger la hiérarchie DNS à la place du PC et mémoriser la réponse",
+      "Distribuer les adresses IP"
+     ],
+     "answer": 1,
+     "explain": "Il mène l'enquête pour le PC et garde la réponse en **cache** le temps indiqué par le **TTL**."
+    },
+    {
+     "type": "say",
+     "text": "**Le cache et le TTL.** Chaque réponse DNS porte un **TTL** (*Time To Live*, en secondes). Pendant ce temps, les caches **réutilisent** la réponse sans reposer la question. Avantage : rapidité. Inconvénient : si tu changes l'adresse d'un site, l'ancienne persiste jusqu'à expiration du TTL."
+    },
+    {
+     "type": "choice",
+     "q": "Tu migres un site vers un nouveau serveur. Que faire **avant** la migration pour que le changement se propage vite ?",
+     "options": [
+      "Baisser le TTL de l'enregistrement quelques jours avant",
+      "Augmenter le TTL",
+      "Supprimer l'enregistrement"
+     ],
+     "answer": 0,
+     "explain": "Un **TTL court** (par exemple 300 s) à l'avance garantit que les caches oublient vite l'ancienne adresse."
+    },
+    {
+     "type": "say",
+     "text": "**Les types d'enregistrements** (*resource records*) à connaître :"
+    },
+    {
+     "type": "code",
+     "sql": "A       nom  →  adresse IPv4         www.exemple.bj   A      203.0.113.25\nAAAA    nom  →  adresse IPv6         www.exemple.bj   AAAA   2001:db8::25\nCNAME   alias → autre nom            ftp.exemple.bj   CNAME  www.exemple.bj\nMX      serveur de messagerie        exemple.bj       MX     10 mail.exemple.bj\nNS      serveur de noms du domaine   exemple.bj       NS     ns1.exemple.bj\nPTR     adresse → nom (inverse)      25.113.0.203.in-addr.arpa  PTR  www.exemple.bj\nTXT     texte libre (SPF, vérifs)    exemple.bj       TXT    \"v=spf1 ...\"",
+     "lang": "Réseau",
+     "title": "Enregistrements DNS"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel type d'enregistrement associe un nom à une **adresse IPv4** ? (1 lettre)",
+     "hints": [
+      "Le plus simple, une seule lettre."
+     ],
+     "accept": [
+      "enregistrement a",
+      "record a"
+     ],
+     "solution": "A",
+     "explain": "**A** pour IPv4, **AAAA** pour IPv6.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel type d'enregistrement associe un nom à une **adresse IPv6** ?",
+     "hints": [
+      "Quatre fois la lettre du précédent."
+     ],
+     "accept": [
+      "aaaa"
+     ],
+     "solution": "AAAA",
+     "explain": "**AAAA** : quatre fois plus de bits que IPv4 (128 contre 32).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel type d'enregistrement désigne le **serveur de messagerie** d'un domaine ? (2 lettres)",
+     "hints": [
+      "Mail eXchanger."
+     ],
+     "accept": [
+      "mx"
+     ],
+     "solution": "MX",
+     "explain": "**MX** (*Mail eXchanger*) : où livrer les e-mails.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel type d'enregistrement fait d'un nom un **alias** d'un autre nom ?",
+     "hints": [
+      "Canonical NAME."
+     ],
+     "accept": [
+      "cname"
+     ],
+     "solution": "CNAME",
+     "explain": "**CNAME** : `ftp.exemple.bj` devient un alias de `www.exemple.bj`.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel type d'enregistrement permet la **résolution inverse** (adresse IP → nom) ? (3 lettres)",
+     "hints": [
+      "PoinTeR."
+     ],
+     "accept": [
+      "ptr"
+     ],
+     "solution": "PTR",
+     "explain": "**PTR** : utilisé dans la zone `in-addr.arpa`.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "`mail.exemple.bj` doit pointer vers la même machine que `serveur1.exemple.bj`. Quel enregistrement est le plus adapté ?",
+     "options": [
+      "Un CNAME vers serveur1.exemple.bj",
+      "Un MX",
+      "Un PTR"
+     ],
+     "answer": 0,
+     "explain": "Le **CNAME** crée un alias : si l'adresse de `serveur1` change, `mail` suit automatiquement."
+    },
+    {
+     "type": "say",
+     "text": "**Le protocole.** DNS utilise **UDP port 53** (requêtes courtes) et **TCP port 53** quand la réponse est trop longue ou pour les transferts de zone entre serveurs. Pense-y dans tes règles de pare-feu !"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel numéro de port utilise le DNS ?",
+     "hints": [
+      "Il est aussi relayé par ip helper-address."
+     ],
+     "accept": [
+      "port 53",
+      "udp 53",
+      "udp/53",
+      "tcp/udp 53"
+     ],
+     "solution": "53",
+     "explain": "**53**, en UDP (et TCP pour les longues réponses).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Interroger le DNS à la main.** Deux outils : **`nslookup`** (Windows et Linux) et **`dig`** (Linux/macOS). Très utiles pour **vérifier** si le problème vient du DNS."
+    },
+    {
+     "type": "code",
+     "sql": "nslookup www.exemple.bj\nnslookup -type=MX exemple.bj\nnslookup www.exemple.bj 8.8.8.8      ← interroger CE serveur\n\ndig www.exemple.bj\ndig exemple.bj MX\ndig +short www.exemple.bj",
+     "lang": "Réseau",
+     "title": "Exemples"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande `nslookup` qui interroge le **nom** `www.exemple.bj`.",
+     "hints": [
+      "nslookup + nom."
+     ],
+     "accept": [],
+     "solution": "nslookup www.exemple.bj",
+     "explain": "Retourne l'adresse IP et le serveur DNS qui a répondu.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande `nslookup` pour obtenir les **enregistrements MX** de `exemple.bj`.",
+     "hints": [
+      "nslookup avec l'option -type=..."
+     ],
+     "accept": [
+      "nslookup -q=mx exemple.bj",
+      "nslookup -type=mx exemple.bj",
+      "nslookup -querytype=mx exemple.bj"
+     ],
+     "solution": "nslookup -type=MX exemple.bj",
+     "explain": "`-type=MX` (ou `-q=mx`) choisit le type d'enregistrement.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande `nslookup` qui interroge **le serveur 8.8.8.8** pour résoudre `www.exemple.bj`.",
+     "hints": [
+      "Le serveur à interroger se met à la fin."
+     ],
+     "accept": [],
+     "solution": "nslookup www.exemple.bj 8.8.8.8",
+     "explain": "On compare ainsi les réponses de deux serveurs DNS pour isoler une panne.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec `dig`, affiche **seulement l'adresse** (réponse courte) de `www.exemple.bj`.",
+     "hints": [
+      "dig + option +short."
+     ],
+     "accept": [
+      "dig www.exemple.bj +short"
+     ],
+     "solution": "dig +short www.exemple.bj",
+     "explain": "`+short` supprime tous les détails.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Le fichier `hosts`.** Avant d'interroger le DNS, le PC regarde son **fichier local** : `C:\\Windows\\System32\\drivers\\etc\\hosts` (Windows) ou `/etc/hosts` (Linux). Une ligne `192.168.1.10  serveur.local` suffit. Pratique pour tester, mais ça ne passe pas à l'échelle."
+    },
+    {
+     "type": "choice",
+     "q": "Un site fonctionne sur tous les PC sauf un. Sur celui-ci, `nslookup` donne la bonne adresse mais le navigateur va ailleurs. Suspect n°1 ?",
+     "options": [
+      "Une ligne dans le fichier hosts locale",
+      "Le serveur DHCP",
+      "Le NAT"
+     ],
+     "answer": 0,
+     "explain": "Le fichier `hosts` est consulté **avant** le DNS et peut contredire la réponse."
+    },
+    {
+     "type": "say",
+     "text": "**Sur un routeur Cisco**, le DNS sert à : 1) résoudre les noms tapés dans les commandes (`ping serveur1`), 2) éviter les attentes agaçantes quand on tape une commande **fausse** (le routeur essaie de la résoudre comme un nom !)."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip name-server 8.8.8.8          ← serveur DNS à interroger\nR1(config)# ip domain-name akademia.local     ← domaine par défaut\nR1(config)# ip host SRV1 192.168.1.10         ← table de noms locale\nR1(config)# no ip domain-lookup               ← désactive la résolution",
+     "lang": "Cisco IOS",
+     "title": "DNS sur un routeur"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur R1, indique le **serveur DNS** `8.8.8.8`.",
+     "hints": [
+      "ip name-server <adresse>"
+     ],
+     "accept": [],
+     "solution": "ip name-server 8.8.8.8",
+     "explain": "Le routeur interrogera ce serveur pour les noms.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur R1, crée une **entrée locale** `SRV1` → `192.168.1.10`.",
+     "hints": [
+      "ip host <nom> <adresse>"
+     ],
+     "accept": [],
+     "solution": "ip host SRV1 192.168.1.10",
+     "explain": "Le routeur pourra faire `ping SRV1`, sans serveur DNS.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur R1, **désactive la résolution de noms** (pour éviter l'attente après une faute de frappe).",
+     "hints": [
+      "On nie la commande ip domain-lookup."
+     ],
+     "accept": [
+      "no ip domain lookup"
+     ],
+     "solution": "no ip domain-lookup",
+     "explain": "Sans cela, taper `shw run` fait attendre le routeur qui essaie de résoudre « shw ».",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "🏁 Hiérarchie racine → TLD → domaine, **résolveur + cache + TTL**, enregistrements **A/AAAA/CNAME/MX/NS/PTR/TXT**, port **53**, `nslookup`/`dig`, fichier `hosts`, `ip name-server`, `ip host`, `no ip domain-lookup`."
+    }
+   ]
+  },
+  {
+   "id": "nat-concepts",
+   "title": "NAT : pourquoi et comment",
+   "emoji": "🔄",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Le problème.** IPv4 offre environ 4,3 milliards d'adresses… et il y a bien plus d'appareils. Solution : réserver des **plages privées** à usage interne (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) et n'utiliser qu'**une ou quelques adresses publiques** pour sortir. Le **NAT** fait la traduction **à la volée** sur le routeur."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle adresse est **privée** ?",
+     "options": [
+      "172.20.5.9",
+      "172.32.5.9",
+      "11.0.0.1"
+     ],
+     "answer": 0,
+     "explain": "La plage privée 172.16.0.0/12 va de 172.16.0.0 à **172.31.255.255**. 172.20.x.x est privée ; 172.32.x.x est publique."
+    },
+    {
+     "type": "say",
+     "text": "Les adresses privées **ne sont pas routées sur Internet**. Un paquet qui part avec `192.168.1.10` en source ne recevrait **jamais de réponse** : personne ne saurait lui répondre. Le NAT **remplace la source** par une adresse publique à la sortie, et **remet l'adresse d'origine** au retour."
+    },
+    {
+     "type": "code",
+     "sql": "   PC1      PC2      PC3                         INTERNET\n    |        |        |                             |\n [ SW ]--------+------+                              |\n    |                                               |\n   G0/0 .1                         G0/1 203.0.113.1/24     .254\n  [  R1  ]=====================================[ Routeur FAI ]\n LAN 192.168.1.0/24",
+     "lang": "Réseau",
+     "title": "Notre réseau"
+    },
+    {
+     "type": "code",
+     "sql": "PC1 192.168.1.10 ──► R1 ──► Internet\n        source 192.168.1.10   →   source 203.0.113.10   (à la sortie)\n        destination 203.0.113.10   →   destination 192.168.1.10   (au retour)",
+     "lang": "Réseau",
+     "title": "Ce que fait le NAT"
+    },
+    {
+     "type": "say",
+     "text": "**Le vocabulaire Cisco (4 termes) à connaître par cœur.** Il décrit **où** se trouve l'hôte (inside/outside) et **de quel point de vue** on regarde l'adresse (local/global) :"
+    },
+    {
+     "type": "code",
+     "sql": "INSIDE   = le réseau de l'entreprise (que contrôle le NAT)\nOUTSIDE  = le réseau extérieur (Internet)\n\nLOCAL    = adresse vue DEPUIS l'intérieur\nGLOBAL   = adresse vue DEPUIS l'extérieur\n\nInside local     adresse privée du PC (192.168.1.10)\nInside global    adresse publique qui REPRÉSENTE le PC (203.0.113.10)\nOutside global   vraie adresse du serveur distant (198.51.100.7)\nOutside local    adresse du serveur distant vue de l'intérieur (en général identique)",
+     "lang": "Réseau",
+     "title": "Les 4 adresses NAT"
+    },
+    {
+     "type": "choice",
+     "q": "`192.168.1.10` (l'adresse privée d'un PC du LAN) est une adresse…",
+     "options": [
+      "Inside local",
+      "Inside global",
+      "Outside global"
+     ],
+     "answer": 0,
+     "explain": "**Inside** (le PC est dans le réseau), **local** (vue depuis l'intérieur)."
+    },
+    {
+     "type": "choice",
+     "q": "`203.0.113.10` qui représente ce PC sur Internet est une adresse…",
+     "options": [
+      "Inside local",
+      "Inside global",
+      "Outside local"
+     ],
+     "answer": 1,
+     "explain": "**Inside** (représente un hôte de l'intérieur), **global** (vue depuis l'extérieur)."
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle l'adresse **publique** qui représente un PC interne sur Internet ? (deux mots : « inside … »)",
+     "hints": [
+      "Inside + l'adresse vue de l'extérieur."
+     ],
+     "accept": [
+      "Inside Global"
+     ],
+     "solution": "inside global",
+     "explain": "**Inside global**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle l'adresse **privée** d'un PC dans le LAN ? (deux mots : « inside … »)",
+     "hints": [
+      "Inside + l'adresse vue de l'intérieur."
+     ],
+     "accept": [
+      "Inside Local"
+     ],
+     "solution": "inside local",
+     "explain": "**Inside local**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Les trois types de NAT** :"
+    },
+    {
+     "type": "code",
+     "sql": "NAT STATIQUE     1 adresse privée  ⇄  1 adresse publique, TOUJOURS la même\n                 → pour PUBLIER un serveur\n\nNAT DYNAMIQUE    plusieurs privées  ⇄  un POOL d'adresses publiques, premier arrivé premier servi\n                 → il faut autant d'adresses publiques que de machines SIMULTANÉES\n\nPAT (surcharge)  plusieurs privées  ⇄  UNE SEULE adresse publique, distinguées par le PORT\n                 → la solution utilisée partout (box Internet, entreprises)",
+     "lang": "Réseau",
+     "title": "Les 3 types"
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux publier un **serveur web interne** sur Internet avec une adresse publique fixe. Quel NAT ?",
+     "options": [
+      "NAT statique",
+      "NAT dynamique",
+      "PAT"
+     ],
+     "answer": 0,
+     "explain": "Le NAT **statique** associe une adresse interne à une adresse publique fixe, dans les deux sens."
+    },
+    {
+     "type": "choice",
+     "q": "200 PC doivent naviguer sur Internet avec **une seule** adresse publique. Quel NAT ?",
+     "options": [
+      "NAT statique",
+      "NAT dynamique",
+      "PAT (NAT overload)"
+     ],
+     "answer": 2,
+     "explain": "Le **PAT** distingue les connexions par leurs **numéros de port** : une seule adresse publique suffit."
+    },
+    {
+     "type": "choice",
+     "q": "Un pool dynamique contient 5 adresses publiques. Que se passe-t-il quand 6 PC veulent sortir **en même temps** ?",
+     "options": [
+      "Tous sortent grâce aux ports",
+      "Le 6ᵉ PC ne peut pas sortir (pool épuisé)",
+      "Le routeur redémarre"
+     ],
+     "answer": 1,
+     "explain": "Sans `overload`, **une adresse publique = un PC à la fois**. Le pool s'épuise."
+    },
+    {
+     "type": "say",
+     "text": "**Ordre des opérations (à connaître !)** : de l'intérieur vers l'extérieur, le routeur **route d'abord, traduit ensuite**. De l'extérieur vers l'intérieur, il **traduit d'abord, route ensuite**. Il faut donc que la route vers l'adresse **après** traduction existe."
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet arrive de l'extérieur vers une adresse publique NATée. Que fait le routeur en premier ?",
+     "options": [
+      "Il route puis traduit",
+      "Il traduit puis route",
+      "Il jette le paquet"
+     ],
+     "answer": 1,
+     "explain": "Entrant : **traduction puis routage**. Sortant : **routage puis traduction**."
+    },
+    {
+     "type": "say",
+     "text": "**Les inconvénients du NAT** : casse la transparence de bout en bout (certains protocoles intègrent l'adresse IP dans leurs données : FTP actif, SIP…), complique le suivi (logs), ajoute du travail au routeur. **IPv6** supprime le besoin du NAT grâce à son immense espace d'adresses."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle solution rend le NAT inutile à long terme ?",
+     "options": [
+      "IPv6",
+      "Plus de switchs",
+      "Le DNS"
+     ],
+     "answer": 0,
+     "explain": "IPv6 offre assez d'adresses pour donner une adresse publique à chaque appareil."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Privé ↔ public. **Inside/Outside** (où), **local/global** (vue). **Statique** (1:1 fixe), **dynamique** (pool), **PAT** (1 adresse + ports). Entrant : traduire puis router."
+    }
+   ]
+  },
+  {
+   "id": "nat-config",
+   "title": "NAT statique et dynamique sur Cisco",
+   "emoji": "🛠️",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Direction la configuration ! Quel que soit le type de NAT, il y a **toujours deux étapes communes** : 1) dire quelle interface est **inside** et laquelle est **outside**, 2) décrire **la règle de traduction**."
+    },
+    {
+     "type": "code",
+     "sql": "   PC1      PC2      PC3                         INTERNET\n    |        |        |                             |\n [ SW ]--------+------+                              |\n    |                                               |\n   G0/0 .1                         G0/1 203.0.113.1/24     .254\n  [  R1  ]=====================================[ Routeur FAI ]\n LAN 192.168.1.0/24",
+     "lang": "Réseau",
+     "title": "Notre réseau"
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# interface g0/0\nR1(config-if)# ip nat inside         ← côté LAN\nR1(config-if)# exit\nR1(config)# interface g0/1\nR1(config-if)# ip nat outside        ← côté Internet",
+     "lang": "Cisco IOS",
+     "title": "Étape 1 : inside / outside"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'interface côté **LAN**, déclare-la comme interface **intérieure** NAT.",
+     "hints": [
+      "ip nat + inside"
+     ],
+     "accept": [],
+     "solution": "ip nat inside",
+     "explain": "À taper en mode interface. Sans cette commande, aucune traduction ne se déclenche.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'interface côté **Internet**, déclare-la comme interface **extérieure** NAT.",
+     "hints": [
+      "ip nat + outside"
+     ],
+     "accept": [],
+     "solution": "ip nat outside",
+     "explain": "Les deux commandes sont **obligatoires** (une de chaque côté).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Tu as configuré la règle de traduction mais `ip nat inside` est oublié sur G0/0. Que se passe-t-il ?",
+     "options": [
+      "Aucun paquet du LAN n'est traduit",
+      "Tout marche",
+      "Le routeur plante"
+     ],
+     "answer": 0,
+     "explain": "Sans `inside`/`outside`, le routeur ne sait pas **où** appliquer la règle : la table de traduction reste vide."
+    },
+    {
+     "type": "say",
+     "text": "**NAT statique.** Syntaxe : `ip nat inside source static <inside local> <inside global>`. Le serveur web `192.168.1.10` sera **toujours** joint par `203.0.113.5` depuis Internet."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip nat inside source static 192.168.1.10 203.0.113.5",
+     "lang": "Cisco IOS",
+     "title": "NAT statique"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande de **NAT statique** qui associe `192.168.1.10` à `203.0.113.5`.",
+     "hints": [
+      "ip nat inside source static <privée> <publique>"
+     ],
+     "accept": [],
+     "solution": "ip nat inside source static 192.168.1.10 203.0.113.5",
+     "explain": "Association permanente, dans les deux sens.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Associe le serveur FTP `192.168.1.20` à l'adresse publique `203.0.113.6` en NAT statique.",
+     "hints": [
+      "Même syntaxe qu'avant."
+     ],
+     "accept": [],
+     "solution": "ip nat inside source static 192.168.1.20 203.0.113.6",
+     "explain": "Chaque serveur publié a sa propre adresse publique en NAT statique pur.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Redirection de port (port forwarding).** Quand on n'a qu'une adresse publique mais plusieurs serveurs, on redirige **un port précis** : `ip nat inside source static tcp <privée> <port> <publique> <port>`."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip nat inside source static tcp 192.168.1.10 80 203.0.113.1 80\nR1(config)# ip nat inside source static tcp 192.168.1.11 22 203.0.113.1 2222",
+     "lang": "Cisco IOS",
+     "title": "Port forwarding",
+     "note": "Le web est joignable sur 203.0.113.1:80, le SSH de l'autre serveur sur 203.0.113.1:2222."
+    },
+    {
+     "type": "exercise",
+     "q": "Redirige le **port TCP 80** de l'adresse publique `203.0.113.1` vers le serveur web `192.168.1.10:80`.",
+     "hints": [
+      "static tcp <privée> <port> <publique> <port>"
+     ],
+     "accept": [],
+     "solution": "ip nat inside source static tcp 192.168.1.10 80 203.0.113.1 80",
+     "explain": "Seul le port 80 est ouvert vers ce serveur.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Redirige le port TCP `2222` de `203.0.113.1` vers le **SSH (port 22)** de `192.168.1.11`.",
+     "hints": [
+      "Port privé 22, port public 2222."
+     ],
+     "accept": [],
+     "solution": "ip nat inside source static tcp 192.168.1.11 22 203.0.113.1 2222",
+     "explain": "On expose SSH sur un port non standard pour éviter une partie des attaques automatiques.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**NAT dynamique : pool + ACL + règle.** Trois commandes. 1) un **pool** d'adresses publiques, 2) une **ACL** qui désigne **qui a le droit** d'être traduit, 3) la **règle** qui lie les deux."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip nat pool PUB 203.0.113.10 203.0.113.20 netmask 255.255.255.0\nR1(config)# access-list 1 permit 192.168.1.0 0.0.0.255\nR1(config)# ip nat inside source list 1 pool PUB",
+     "lang": "Cisco IOS",
+     "title": "NAT dynamique"
+    },
+    {
+     "type": "exercise",
+     "q": "Crée un **pool** `PUB` de `203.0.113.10` à `203.0.113.20` avec le masque `255.255.255.0`.",
+     "hints": [
+      "ip nat pool <nom> <début> <fin> netmask <masque>"
+     ],
+     "accept": [
+      "ip nat pool PUB 203.0.113.10 203.0.113.20 prefix-length 24"
+     ],
+     "solution": "ip nat pool PUB 203.0.113.10 203.0.113.20 netmask 255.255.255.0",
+     "explain": "Le pool contient 11 adresses publiques (de .10 à .20 compris).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Un mot sur les ACL : le masque inverse (wildcard).** Dans une ACL, on n'écrit **pas** `255.255.255.0` mais son **inverse** : `0.0.0.255`. Là où le masque a des **1** (partie réseau), le wildcard a des **0** (« doit correspondre »), et inversement. Règle rapide : **wildcard = 255.255.255.255 − masque**."
+    },
+    {
+     "type": "code",
+     "sql": "masque 255.255.255.0    →  wildcard 0.0.0.255\nmasque 255.255.255.192  →  wildcard 0.0.0.63\nmasque 255.255.255.240  →  wildcard 0.0.0.15\nmasque 255.255.252.0    →  wildcard 0.0.3.255",
+     "lang": "Réseau",
+     "title": "Masque → wildcard"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** du masque `255.255.255.192` ?",
+     "hints": [
+      "255 − 192 sur le dernier octet."
+     ],
+     "accept": [],
+     "solution": "0.0.0.63",
+     "explain": "255 − 192 = **63** : `0.0.0.63`.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** du masque `255.255.255.240` ?",
+     "hints": [
+      "255 − 240."
+     ],
+     "accept": [],
+     "solution": "0.0.0.15",
+     "explain": "**0.0.0.15**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** du masque `255.255.252.0` ?",
+     "hints": [
+      "255 − 252 sur le 3ᵉ octet, et 255 − 0 sur le dernier."
+     ],
+     "accept": [],
+     "solution": "0.0.3.255",
+     "explain": "**0.0.3.255**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'ACL numéro **1** qui **autorise** le réseau `192.168.1.0/24`.",
+     "hints": [
+      "access-list <n°> permit <réseau> <wildcard>"
+     ],
+     "accept": [],
+     "solution": "access-list 1 permit 192.168.1.0 0.0.0.255",
+     "explain": "Cette ACL ne filtre rien ici : elle **désigne** les adresses à traduire.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'ACL **2** qui autorise le réseau `192.168.2.0/24`.",
+     "hints": [
+      "Même schéma, numéro 2."
+     ],
+     "accept": [],
+     "solution": "access-list 2 permit 192.168.2.0 0.0.0.255",
+     "explain": "Autre numéro, autre réseau.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **règle NAT dynamique** qui traduit les adresses de l'ACL `1` avec le pool `PUB`.",
+     "hints": [
+      "ip nat inside source list <n°> pool <nom>"
+     ],
+     "accept": [],
+     "solution": "ip nat inside source list 1 pool PUB",
+     "explain": "Les hôtes de l'ACL 1 reçoivent une adresse du pool `PUB`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Le pool `PUB` contient 11 adresses. 12 PC essaient de sortir en même temps (NAT dynamique **sans** overload). Que se passe-t-il ?",
+     "options": [
+      "Le 12ᵉ PC n'a pas d'accès tant qu'une adresse n'est pas libérée",
+      "Tous sortent",
+      "Le pool s'agrandit seul"
+     ],
+     "answer": 0,
+     "explain": "Dynamique sans `overload` : **1 adresse = 1 hôte**. C'est pourquoi on préfère le PAT."
+    },
+    {
+     "type": "say",
+     "text": "**Vérifier et dépanner.** `show ip nat translations` affiche la table des traductions actives ; `show ip nat statistics` donne les compteurs (hits, misses) ; `clear ip nat translation *` vide la table (utile après un changement de règle)."
+    },
+    {
+     "type": "code",
+     "sql": "R1# show ip nat translations\nPro Inside global      Inside local       Outside local      Outside global\n--- 203.0.113.5        192.168.1.10       ---                ---\nicmp 203.0.113.10:1    192.168.1.30:1     198.51.100.7:1     198.51.100.7:1",
+     "lang": "Cisco IOS",
+     "title": "Table des traductions"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche la **table de traduction NAT** ?",
+     "hints": [
+      "show ip nat ..."
+     ],
+     "accept": [],
+     "solution": "show ip nat translations",
+     "explain": "On y retrouve les 4 types d'adresses : inside global, inside local, outside local, outside global.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les compteurs NAT** (hits, misses) ?",
+     "hints": [
+      "show ip nat ..."
+     ],
+     "accept": [],
+     "solution": "show ip nat statistics",
+     "explain": "Utile pour vérifier que les paquets sont réellement traduits.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande **vide** toutes les traductions dynamiques ?",
+     "hints": [
+      "clear ip nat translation + joker"
+     ],
+     "accept": [],
+     "solution": "clear ip nat translation *",
+     "explain": "Après une modification de la règle NAT, vide la table pour repartir proprement.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Dans la table ci-dessus, la 1ʳᵉ ligne n'a pas de ports et reste affichée même sans trafic. De quel type de NAT s'agit-il ?",
+     "options": [
+      "NAT statique (entrée permanente)",
+      "PAT",
+      "NAT dynamique expiré"
+     ],
+     "answer": 0,
+     "explain": "Une entrée **statique** reste dans la table en permanence."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `ip nat inside`/`outside` sur les interfaces, **statique** : `ip nat inside source static <priv> <pub>`, **port forwarding** : `static tcp …`, **dynamique** : pool + ACL (wildcard !) + `ip nat inside source list N pool NOM`, vérifs `show ip nat translations|statistics`."
+    }
+   ]
+  },
+  {
+   "id": "pat",
+   "title": "PAT : une seule adresse pour tout le monde",
+   "emoji": "🌐",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le **PAT** (*Port Address Translation*), aussi appelé **NAT overload** ou **NAT surchargé**, est **la** forme de NAT utilisée partout : ta box Internet, la 4G, le Wi-Fi d'un café. Idée : **une seule adresse publique** pour tout le monde, et on distingue les connexions par **le numéro de port source**."
+    },
+    {
+     "type": "code",
+     "sql": "PC1 192.168.1.10:51000 ──► R1 ──► 203.0.113.1:51000  ──► Serveur 198.51.100.7:80\nPC2 192.168.1.20:51000 ──► R1 ──► 203.0.113.1:1024   ──► Serveur 198.51.100.7:80\n\nLes deux PC ont choisi le MÊME port source 51000.\nR1 change le port de PC2 pour éviter la collision.",
+     "lang": "Réseau",
+     "title": "Deux PC, une adresse publique"
+    },
+    {
+     "type": "choice",
+     "q": "Deux PC différents utilisent le même port source 51000. Comment le routeur PAT les distingue-t-il à la sortie ?",
+     "options": [
+      "Il traduit les ports de l'un d'eux en un autre port libre",
+      "Il refuse le second",
+      "Il utilise deux adresses publiques"
+     ],
+     "answer": 0,
+     "explain": "Le routeur choisit un **port source unique** pour chaque connexion : c'est ce qui permet de retrouver le bon PC au retour."
+    },
+    {
+     "type": "say",
+     "text": "La **table PAT** associe **(adresse privée : port)** ↔ **(adresse publique : port)**. Quand la réponse revient sur `203.0.113.1:1024`, le routeur consulte sa table, voit « c'est PC2 » et lui renvoie le paquet. **Combien de connexions ?** Environ **65 000 ports** par adresse publique (65 535 max)."
+    },
+    {
+     "type": "choice",
+     "q": "Combien de connexions simultanées peut-on théoriquement faire passer par UNE seule adresse publique en PAT ?",
+     "options": [
+      "254",
+      "Environ 65 000 (nombre de ports)",
+      "Une seule"
+     ],
+     "answer": 1,
+     "explain": "Les ports vont de 0 à 65 535 : de l'ordre de 64 000 conversations par adresse publique."
+    },
+    {
+     "type": "say",
+     "text": "**Configuration** : comme le NAT dynamique, mais le mot **`overload`** à la fin. Deux variantes : avec **l'adresse de l'interface publique** (fréquent quand le FAI donne une adresse unique, souvent dynamique) ou avec un **pool**."
+    },
+    {
+     "type": "code",
+     "sql": "! Variante 1 : l'adresse de l'interface de sortie (la plus courante)\nR1(config)# access-list 1 permit 192.168.1.0 0.0.0.255\nR1(config)# ip nat inside source list 1 interface g0/1 overload\n\n! Variante 2 : un pool\nR1(config)# ip nat pool PUB 203.0.113.10 203.0.113.10 netmask 255.255.255.0\nR1(config)# ip nat inside source list 1 pool PUB overload",
+     "lang": "Cisco IOS",
+     "title": "Deux manières de faire du PAT"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la règle **PAT** qui traduit les adresses de l'ACL `1` avec l'adresse de l'interface `GigabitEthernet0/1`.",
+     "hints": [
+      "ip nat inside source list <n°> interface <interface> overload"
+     ],
+     "accept": [
+      "ip nat inside source list 1 interface GigabitEthernet0/1 overload",
+      "ip nat inside source list 1 interface g0/1 overload",
+      "ip nat inside source list 1 interface gi0/1 overload",
+      "ip nat inside source list 1 interface gig0/1 overload",
+      "ip nat inside source list 1 interface GigabitEthernet 0/1 overload",
+      "ip nat inside source list 1 interface g 0/1 overload"
+     ],
+     "solution": "ip nat inside source list 1 interface GigabitEthernet0/1 overload",
+     "explain": "C'est **LA** commande PAT classique : une ligne suffit (avec l'ACL et les `inside`/`outside`).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Même règle pour l'ACL `2`, toujours avec l'adresse de `GigabitEthernet0/1`.",
+     "hints": [
+      "Change seulement le numéro d'ACL."
+     ],
+     "accept": [
+      "ip nat inside source list 2 interface GigabitEthernet0/1 overload",
+      "ip nat inside source list 2 interface g0/1 overload",
+      "ip nat inside source list 2 interface gi0/1 overload",
+      "ip nat inside source list 2 interface gig0/1 overload",
+      "ip nat inside source list 2 interface GigabitEthernet 0/1 overload",
+      "ip nat inside source list 2 interface g 0/1 overload"
+     ],
+     "solution": "ip nat inside source list 2 interface GigabitEthernet0/1 overload",
+     "explain": "On peut avoir plusieurs règles pour plusieurs réseaux.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la règle **PAT** avec ACL `1` et le pool `PUB` (une seule adresse dans le pool).",
+     "hints": [
+      "Le mot-clé est le même ; seul « interface » change en « pool »."
+     ],
+     "accept": [],
+     "solution": "ip nat inside source list 1 pool PUB overload",
+     "explain": "`overload` est ce qui transforme le NAT dynamique en PAT.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel mot-clé transforme un NAT dynamique en PAT ?",
+     "options": [
+      "overload",
+      "static",
+      "pool"
+     ],
+     "answer": 0,
+     "explain": "**`overload`** : plusieurs hôtes internes partagent la même adresse publique grâce aux ports."
+    },
+    {
+     "type": "choice",
+     "q": "Tu oublies `overload` avec un pool d'**une seule** adresse. Que se passe-t-il ?",
+     "options": [
+      "Un seul PC peut sortir à la fois",
+      "Tout fonctionne comme avec overload",
+      "Le routeur refuse la commande"
+     ],
+     "answer": 0,
+     "explain": "Sans `overload`, c'est du NAT dynamique : **1 adresse = 1 hôte**."
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi l'ACL et pas un `permit any` ?** Mettre `access-list 1 permit any` traduirait aussi du trafic que tu ne veux pas NATer (par exemple, vers un VPN). Mieux vaut **lister les réseaux internes**. Et n'oublie pas : l'ACL ne filtre pas ici, elle **sélectionne** les paquets à traduire."
+    },
+    {
+     "type": "say",
+     "text": "**Dépannage : « mes PC ne sortent pas sur Internet »** :"
+    },
+    {
+     "type": "code",
+     "sql": "1. ip nat inside / ip nat outside bien placés sur les bonnes interfaces ?\n2. L'ACL correspond-elle aux bons réseaux (wildcard !) ?\n3. La règle comporte-t-elle 'overload' ?\n4. Le routeur a-t-il une route par défaut vers le FAI ?   (ip route 0.0.0.0 0.0.0.0 ...)\n5. Le PC a-t-il la bonne passerelle (DHCP) et un DNS (DHCP) ?\n6. show ip nat translations : y a-t-il des entrées ? clear ip nat translation * puis retester.",
+     "lang": "Réseau",
+     "title": "Check-list NAT"
+    },
+    {
+     "type": "choice",
+     "q": "`show ip nat translations` est **vide** alors que les PC essaient de sortir. Cause la plus probable ?",
+     "options": [
+      "`ip nat inside` / `outside` mal placés, ou ACL qui ne correspond pas",
+      "Le serveur DHCP",
+      "Le DNS"
+     ],
+     "answer": 0,
+     "explain": "Aucune traduction = les paquets ne correspondent à **aucune règle** (ou les interfaces ne sont pas marquées)."
+    },
+    {
+     "type": "choice",
+     "q": "Les traductions existent, mais aucune réponse ne revient. Que vérifier ?",
+     "options": [
+      "La route par défaut vers le FAI",
+      "La durée du bail DHCP",
+      "Le TTL DNS"
+     ],
+     "answer": 0,
+     "explain": "Sans route par défaut, le routeur ne sait pas où envoyer les paquets traduits."
+    },
+    {
+     "type": "choice",
+     "q": "Un PC joint `8.8.8.8` mais pas `www.exemple.bj`. Le NAT fonctionne-t-il ?",
+     "options": [
+      "Oui : le problème est le DNS, pas le NAT",
+      "Non, le NAT est cassé",
+      "Le problème est le bail DHCP"
+     ],
+     "answer": 0,
+     "explain": "Joindre `8.8.8.8` prouve que **NAT et routage** marchent. C'est la **résolution de noms** qui échoue."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande ajoute une **route par défaut** vers le FAI `203.0.113.254` ?",
+     "hints": [
+      "ip route 0.0.0.0 0.0.0.0 <next-hop>"
+     ],
+     "accept": [],
+     "solution": "ip route 0.0.0.0 0.0.0.0 203.0.113.254",
+     "explain": "Rappel de la formation sur le routage statique : la route par défaut sert à tout ce qui n'est pas connu.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Résumé des 3 types** — 1 : **statique** (publier un serveur, 1:1) ; 2 : **dynamique** (pool, plusieurs adresses, 1:1 à la fois) ; 3 : **PAT** (une seule adresse publique, des ports). En pratique, **99 % des réseaux d'accès** utilisent le PAT."
+    },
+    {
+     "type": "say",
+     "text": "🏁 PAT = `ip nat inside source list N interface <int> overload`. Une table (IP:port ↔ IP:port). ~65 000 ports. Pas de `overload` = NAT dynamique 1:1. Dépannage : interfaces inside/outside, ACL, overload, route par défaut."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : l'agence connectée",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** Tu installes le routeur **R1** d'une agence : DHCP pour le LAN, DNS, NAT/PAT vers Internet et publication d'un serveur web. Chaque question reprend une étape réelle. 12 questions."
+    },
+    {
+     "type": "code",
+     "sql": "   PC1      PC2      PC3                         INTERNET\n    |        |        |                             |\n [ SW ]--------+------+                              |\n    |                                               |\n   G0/0 .1                         G0/1 203.0.113.1/24     .254\n  [  R1  ]=====================================[ Routeur FAI ]\n LAN 192.168.1.0/24",
+     "lang": "Réseau",
+     "title": "Rappel de la topologie"
+    },
+    {
+     "type": "code",
+     "sql": "LAN                : 192.168.1.0/24   (R1 G0/0 = 192.168.1.1)\nServeur web        : 192.168.1.10\nSortie Internet    : R1 G0/1 = 203.0.113.1/24, FAI = 203.0.113.254\nDNS public         : 8.8.8.8\nBail souhaité      : 2 jours\nAdresses exclues du DHCP : 192.168.1.1 à 192.168.1.20",
+     "lang": "Réseau",
+     "title": "Cahier des charges"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 1/12** — Exclus les adresses `192.168.1.1` à `192.168.1.20` du DHCP.",
+     "hints": [
+      "ip dhcp excluded-address <première> <dernière>"
+     ],
+     "accept": [],
+     "solution": "ip dhcp excluded-address 192.168.1.1 192.168.1.20",
+     "explain": "On protège d'abord les adresses fixes.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/12** — Crée le pool DHCP nommé `AGENCE`.",
+     "hints": [
+      "ip dhcp pool <nom>"
+     ],
+     "accept": [],
+     "solution": "ip dhcp pool AGENCE",
+     "explain": "On passe en mode `dhcp-config`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/12** — Dans le pool, déclare le réseau du LAN.",
+     "hints": [
+      "network <adresse> <masque>"
+     ],
+     "accept": [
+      "network 192.168.1.0 /24"
+     ],
+     "solution": "network 192.168.1.0 255.255.255.0",
+     "explain": "Plage d'adresses du pool.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/12** — Dans le pool, donne la passerelle.",
+     "hints": [
+      "default-router <adresse>"
+     ],
+     "accept": [],
+     "solution": "default-router 192.168.1.1",
+     "explain": "La passerelle est l'adresse de R1 côté LAN.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/12** — Dans le pool, donne le serveur DNS public.",
+     "hints": [
+      "dns-server <adresse>"
+     ],
+     "accept": [],
+     "solution": "dns-server 8.8.8.8",
+     "explain": "Sans DNS, les PC ne résoudraient aucun nom.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/12** — Dans le pool, fixe le bail à 2 jours.",
+     "hints": [
+      "lease <jours>"
+     ],
+     "accept": [
+      "lease 2 0",
+      "lease 2 0 0"
+     ],
+     "solution": "lease 2",
+     "explain": "2 jours de bail.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/12** — Sur `G0/0` (côté LAN), déclare l'interface **intérieure** NAT.",
+     "hints": [
+      "ip nat inside"
+     ],
+     "accept": [],
+     "solution": "ip nat inside",
+     "explain": "Côté LAN = inside.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/12** — Sur `G0/1` (côté FAI), déclare l'interface **extérieure** NAT.",
+     "hints": [
+      "ip nat outside"
+     ],
+     "accept": [],
+     "solution": "ip nat outside",
+     "explain": "Côté FAI = outside.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 9/12** — Écris l'ACL `1` qui désigne le LAN `192.168.1.0/24` pour la traduction.",
+     "hints": [
+      "access-list <n°> permit <réseau> <wildcard>"
+     ],
+     "accept": [],
+     "solution": "access-list 1 permit 192.168.1.0 0.0.0.255",
+     "explain": "Wildcard de /24 = 0.0.0.255.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 10/12** — Écris la règle **PAT** : ACL `1`, interface `GigabitEthernet0/1`.",
+     "hints": [
+      "… list 1 interface <int> overload"
+     ],
+     "accept": [
+      "ip nat inside source list 1 interface GigabitEthernet0/1 overload",
+      "ip nat inside source list 1 interface g0/1 overload",
+      "ip nat inside source list 1 interface gi0/1 overload",
+      "ip nat inside source list 1 interface gig0/1 overload",
+      "ip nat inside source list 1 interface GigabitEthernet 0/1 overload",
+      "ip nat inside source list 1 interface g 0/1 overload"
+     ],
+     "solution": "ip nat inside source list 1 interface GigabitEthernet0/1 overload",
+     "explain": "Tout le LAN sort avec l'adresse de G0/1.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 11/12** — Publie le serveur web : redirige le port TCP `80` de `203.0.113.1` vers `192.168.1.10:80`.",
+     "hints": [
+      "static tcp <privée> <port> <publique> <port>"
+     ],
+     "accept": [],
+     "solution": "ip nat inside source static tcp 192.168.1.10 80 203.0.113.1 80",
+     "explain": "Seul le port web est ouvert vers l'extérieur : bonne pratique de sécurité.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 12/12 (boss)** — Ajoute la **route par défaut** vers le FAI.",
+     "hints": [
+      "ip route 0.0.0.0 0.0.0.0 <next-hop>"
+     ],
+     "accept": [],
+     "solution": "ip route 0.0.0.0 0.0.0.0 203.0.113.254",
+     "explain": "Sans cette route, les paquets traduits n'ont aucun chemin vers Internet.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Bonus — Un PC de l'agence a `169.254.8.4`. Premier réflexe ?",
+     "options": [
+      "Vérifier que le DHCP répond (pool, exclusions, relais)",
+      "Changer le NAT",
+      "Réinitialiser le DNS"
+     ],
+     "answer": 0,
+     "explain": "`169.254.x.x` = **DHCP injoignable**."
+    },
+    {
+     "type": "choice",
+     "q": "Bonus — Un PC joint `8.8.8.8` mais pas `google.com`. Où chercher ?",
+     "options": [
+      "Le DNS (serveur DNS distribué par DHCP)",
+      "Le NAT",
+      "L'ACL"
+     ],
+     "answer": 0,
+     "explain": "Le trafic IP passe (NAT et routage OK) : c'est la **résolution de noms**."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais maintenant configurer **DHCP, DNS et NAT/PAT**, relayer le DHCP, publier un serveur et dépanner les pannes classiques d'une agence. Prochaine étape : les ACL et le routage dynamique. 🚀"
+    }
+   ]
+  }
+ ]
+}
