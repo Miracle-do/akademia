@@ -1,0 +1,1922 @@
+{
+ "id": "ospf",
+ "order": 6,
+ "title": "OSPF de zéro à héros",
+ "tagline": "Voisins, états, coût, DR/BDR, aires : maîtrise le protocole de routage des réseaux d'entreprise.",
+ "emoji": "🚀",
+ "color": "#6366F1",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 130,
+ "pitch": [
+  "Salut ! Je te présente **« OSPF de zéro à héros »** 🚀.",
+  "Le routage statique, c'est bien pour 3 routeurs. Au-delà, il faut que les routeurs **se parlent** et calculent leurs routes eux-mêmes. **OSPF** est LE protocole des réseaux d'entreprise… et un incontournable des examens réseau.",
+  "On part de zéro : pourquoi OSPF, la configuration de base, les **voisins et leurs 7 états**, le **coût** et ses pièges, l'élection **DR/BDR**, les **aires** (ABR, ASBR, LSA), puis une vraie méthode de **dépannage**.",
+  "Chaque notion est suivie de commandes Cisco et de calculs à faire toi-même, et on termine par un défi complet sur un réseau d'entreprise."
+ ],
+ "benefits": [
+  "Configurer OSPF avec router-id, network, wildcard et interfaces passives",
+  "Lire les états des voisins et diagnostiquer un voisinage bloqué",
+  "Calculer le coût OSPF et corriger le piège de la bande passante de référence",
+  "Comprendre l'élection DR/BDR et le découpage en aires"
+ ],
+ "lessons": [
+  {
+   "id": "pourquoi",
+   "title": "Pourquoi OSPF ? La carte plutôt que le bouche-à-oreille",
+   "emoji": "🗺️",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! **Nimbo** ☁️ ici. Avec le routage statique, tu écris chaque route à la main : sur 3 routeurs c'est jouable, sur 300 c'est un cauchemar, et si un lien tombe, rien ne s'adapte. Il faut que **les routeurs se parlent** et construisent leurs routes **tout seuls**. C'est le rôle d'un **protocole de routage dynamique** et **OSPF** est le roi des réseaux d'entreprise."
+    },
+    {
+     "type": "say",
+     "text": "OSPF = **Open Shortest Path First**. *Open* : standard ouvert (RFC 2328 pour OSPFv2), pas propriétaire. *Shortest Path First* : il calcule le **chemin le plus court** avec l'algorithme de **Dijkstra**."
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie le « O » de OSPF ?",
+     "options": [
+      "Optimal",
+      "Open (standard ouvert)",
+      "Ordered"
+     ],
+     "answer": 1,
+     "explain": "**Open** : un standard public, interopérable entre tous les constructeurs. EIGRP, lui, était propriétaire Cisco à l'origine."
+    },
+    {
+     "type": "say",
+     "text": "**Deux grandes familles** de protocoles dynamiques :"
+    },
+    {
+     "type": "code",
+     "sql": "VECTEUR DE DISTANCE (RIP)        « Mon voisin dit que 10.0.0.0 est à 3 sauts. »\n                                   → on se fie aux ragots, on ne voit pas la carte entière.\n\nÉTAT DE LIENS (OSPF, IS-IS)        « Voilà l'état de MES liens. »\n                                   → tout le monde reçoit TOUTES les infos et dessine la\n                                     MÊME carte du réseau (la LSDB), puis calcule seul.",
+     "lang": "Réseau",
+     "title": "Deux familles"
+    },
+    {
+     "type": "choice",
+     "q": "Dans un protocole à état de liens comme OSPF, chaque routeur…",
+     "options": [
+      "Connaît seulement ses voisins directs",
+      "Construit une carte complète du réseau (base de données identique chez tous)",
+      "N'envoie jamais rien"
+     ],
+     "answer": 1,
+     "explain": "Tous les routeurs d'une aire possèdent la **même base de données d'états de liens** (LSDB) et exécutent Dijkstra dessus."
+    },
+    {
+     "type": "say",
+     "text": "**Le travail d'OSPF en 3 temps :**"
+    },
+    {
+     "type": "code",
+     "sql": "1. SE FAIRE DES VOISINS   → échange de messages Hello, adjacences\n2. PARTAGER LA CARTE       → échange des LSA (Link State Advertisements) → la LSDB\n3. CALCULER ET INSTALLER   → algorithme SPF → table de routage (routes « O »)",
+     "lang": "Réseau",
+     "title": "Les 3 étapes"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle la **base de données** qui contient la carte du réseau chez chaque routeur OSPF ? (sigle de 4 lettres)",
+     "hints": [
+      "Link State DataBase."
+     ],
+     "accept": [
+      "lsdb",
+      "link state database"
+     ],
+     "solution": "LSDB",
+     "explain": "**LSDB** : *Link State Database*. Elle est alimentée par les **LSA**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appellent les **messages** qui décrivent l'état des liens ? (sigle de 3 lettres)",
+     "hints": [
+      "Link State Advertisement."
+     ],
+     "accept": [
+      "lsa",
+      "link state advertisement"
+     ],
+     "solution": "LSA",
+     "explain": "**LSA** : chaque routeur publie les siens, tous les autres les mémorisent.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Les atouts d'OSPF** : convergence **rapide** (réagit en secondes à une panne), **pas de boucles** (chacun calcule sur la même carte), **hiérarchique** (découpage en **aires** pour les grands réseaux), **coût** basé sur la **bande passante**, **sans limite de sauts** (RIP s'arrête à 15). Il utilise l'**IP directement (protocole 89)**, pas TCP ni UDP."
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le numéro de protocole IP utilisé par OSPF ?",
+     "options": [
+      "6 (TCP)",
+      "17 (UDP)",
+      "89"
+     ],
+     "answer": 2,
+     "explain": "OSPF est encapsulé **directement dans IP**, protocole **89**."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **distance administrative** d'OSPF ?",
+     "options": [
+      "90",
+      "110",
+      "120"
+     ],
+     "answer": 1,
+     "explain": "**110** (EIGRP interne 90, RIP 120). Une route statique (1) l'emporte donc sur OSPF."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la distance administrative d'OSPF ? (un nombre)",
+     "hints": [
+      "Entre EIGRP (90) et RIP (120)."
+     ],
+     "accept": [],
+     "solution": "110",
+     "explain": "**110**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Le vocabulaire minimal** pour la suite :"
+    },
+    {
+     "type": "code",
+     "sql": "Router ID (RID)     identité unique du routeur, écrite comme une adresse IPv4 (1.1.1.1)\nVoisin (neighbor)  routeur directement relié, qui parle OSPF avec toi\nAdjacence          relation « pour de vrai » où l'on échange les bases de données\nCoût (cost)        la métrique d'OSPF : plus c'est petit, mieux c'est\nAire (area)        zone de découpage ; l'aire 0 est le cœur (backbone)",
+     "lang": "Réseau",
+     "title": "Vocabulaire"
+    },
+    {
+     "type": "code",
+     "sql": "LAN 1                                                           LAN 3\n192.168.1.0/24                                           192.168.3.0/24\n     |                                                         |\n   G0/0 .1      S0/0/0 .1       10.0.12.0/30    S0/0/0 .2     S0/0/1 .1   10.0.23.0/30  S0/0/1 .2     G0/0 .1\n  [  R1  ]=====================================[  R2  ]===========================[  R3  ]\n RID 1.1.1.1                                     RID 2.2.2.2                         RID 3.3.3.3",
+     "lang": "Réseau",
+     "title": "Notre réseau fil rouge"
+    },
+    {
+     "type": "say",
+     "text": "On va configurer **ces trois routeurs** pour qu'ils échangent leurs routes sans une seule route statique. Les LAN `192.168.1.0/24` et `192.168.3.0/24` doivent se joindre via R2."
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'avantage principal d'OSPF sur le routage statique dans un grand réseau ?",
+     "options": [
+      "Il consomme moins de mémoire",
+      "Il s'adapte automatiquement aux pannes et aux ajouts de réseaux",
+      "Il est plus simple à comprendre"
+     ],
+     "answer": 1,
+     "explain": "Les routes **s'adaptent toutes seules** : lien coupé → nouveau chemin calculé en quelques secondes."
+    },
+    {
+     "type": "say",
+     "text": "🏁 OSPF = **état de liens**, standard ouvert, protocole IP **89**, **AD 110**, carte commune (**LSDB**) remplie par les **LSA**, algorithme **SPF** (Dijkstra). Prochaine étape : la configuration de base !"
+    }
+   ]
+  },
+  {
+   "id": "config",
+   "title": "Première configuration OSPF",
+   "emoji": "⚙️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe à la pratique. Une configuration OSPF minimale demande **trois idées** : lancer le processus, choisir un identifiant de routeur, et dire **quelles interfaces** participent."
+    },
+    {
+     "type": "code",
+     "sql": "LAN 1                                                           LAN 3\n192.168.1.0/24                                           192.168.3.0/24\n     |                                                         |\n   G0/0 .1      S0/0/0 .1       10.0.12.0/30    S0/0/0 .2     S0/0/1 .1   10.0.23.0/30  S0/0/1 .2     G0/0 .1\n  [  R1  ]=====================================[  R2  ]===========================[  R3  ]\n RID 1.1.1.1                                     RID 2.2.2.2                         RID 3.3.3.3",
+     "lang": "Réseau",
+     "title": "Rappel de la topologie"
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# router ospf 1\nR1(config-router)# router-id 1.1.1.1\nR1(config-router)# network 192.168.1.0 0.0.0.255 area 0\nR1(config-router)# network 10.0.12.0 0.0.0.3 area 0",
+     "lang": "Cisco IOS",
+     "title": "Configuration de R1"
+    },
+    {
+     "type": "say",
+     "text": "**`router ospf 1`** : le « 1 » est le **numéro de processus** (*process ID*). Il n'a de sens que **localement** : deux routeurs peuvent avoir des numéros différents et devenir voisins sans problème."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui **démarre OSPF** avec le numéro de processus 1.",
+     "hints": [
+      "router ospf <numéro>"
+     ],
+     "accept": [],
+     "solution": "router ospf 1",
+     "explain": "On entre en mode `(config-router)#`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "R1 utilise `router ospf 1` et R2 `router ospf 99`. Peuvent-ils devenir voisins ?",
+     "options": [
+      "Non, le numéro doit être identique",
+      "Oui, le numéro de processus est local",
+      "Seulement dans l'aire 0"
+     ],
+     "answer": 1,
+     "explain": "Le numéro de processus est **local à chaque routeur** (contrairement à l'AS d'EIGRP)."
+    },
+    {
+     "type": "say",
+     "text": "**Le Router ID.** Chaque routeur a un identifiant unique de 32 bits, noté comme une IPv4. Choix **dans l'ordre** : 1) `router-id` configuré à la main ; 2) sinon **la plus haute adresse IP des interfaces loopback** ; 3) sinon la **plus haute adresse IP des interfaces physiques actives**."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui fixe le Router ID de R1 à `1.1.1.1`.",
+     "hints": [
+      "router-id <adresse>"
+     ],
+     "accept": [],
+     "solution": "router-id 1.1.1.1",
+     "explain": "À taper dans `(config-router)#`. C'est la bonne pratique : un RID **fixé à la main** ne change pas si une interface tombe.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Aucun `router-id` n'est configuré. R1 a la loopback `10.255.0.1`, G0/0 `192.168.1.1` et S0/0/0 `10.0.12.1`. Quel RID sera choisi ?",
+     "options": [
+      "192.168.1.1",
+      "10.255.0.1",
+      "10.0.12.1"
+     ],
+     "answer": 1,
+     "explain": "La **loopback prime** sur les interfaces physiques, même avec une adresse plus basse."
+    },
+    {
+     "type": "choice",
+     "q": "Aucune loopback. Interfaces actives : G0/0 `192.168.1.1`, S0/0/0 `10.0.12.1`. Quel RID ?",
+     "options": [
+      "192.168.1.1",
+      "10.0.12.1",
+      "Aucun, le processus ne démarre pas"
+     ],
+     "answer": 0,
+     "explain": "Sans loopback : la **plus haute IP** parmi les interfaces actives : 192.168.1.1."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Changer le Router ID** après coup n'a d'effet qu'après un redémarrage du processus : `clear ip ospf process` (le routeur vide ses voisinages et recommence)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande **redémarre** le processus OSPF pour prendre en compte un nouveau Router ID ?",
+     "hints": [
+      "clear ip ospf ..."
+     ],
+     "accept": [],
+     "solution": "clear ip ospf process",
+     "explain": "Le routeur te demandera confirmation `[confirm]`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**La commande `network`.** Syntaxe : `network <adresse> <wildcard> area <n°>`. Elle fait **deux choses** : toute interface dont l'adresse **est comprise** dans ce réseau (1) **participe** à OSPF et (2) **annonce** son réseau. Le **wildcard** est l'inverse du masque : /24 → `0.0.0.255`, /30 → `0.0.0.3`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui active OSPF sur le LAN `192.168.1.0/24` de R1, dans l'**aire 0**.",
+     "hints": [
+      "network <adresse> <wildcard> area <n°>"
+     ],
+     "accept": [],
+     "solution": "network 192.168.1.0 0.0.0.255 area 0",
+     "explain": "/24 → wildcard `0.0.0.255`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande pour la liaison `10.0.12.0/30` (R1-R2), dans l'**aire 0**.",
+     "hints": [
+      "Wildcard d'un /30 : 255 − 252."
+     ],
+     "accept": [],
+     "solution": "network 10.0.12.0 0.0.0.3 area 0",
+     "explain": "/30 → masque `255.255.255.252` → wildcard **`0.0.0.3`**.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande pour la liaison `10.0.23.0/30` (R2-R3), dans l'**aire 0**.",
+     "hints": [
+      "Même wildcard que précédemment."
+     ],
+     "accept": [],
+     "solution": "network 10.0.23.0 0.0.0.3 area 0",
+     "explain": "Une ligne `network` par réseau directement connecté à annoncer.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** correspondant à `255.255.255.0` ?",
+     "hints": [
+      "255 − 255 = 0 ; 255 − 0 = 255."
+     ],
+     "accept": [],
+     "solution": "0.0.0.255",
+     "explain": "**0.0.0.255**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** correspondant à `255.255.255.252` ?",
+     "hints": [
+      "255 − 252."
+     ],
+     "accept": [],
+     "solution": "0.0.0.3",
+     "explain": "**0.0.0.3**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **wildcard** correspondant à `255.255.255.128` ?",
+     "hints": [
+      "255 − 128."
+     ],
+     "accept": [],
+     "solution": "0.0.0.127",
+     "explain": "**0.0.0.127**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'effet de `network 10.0.0.0 0.255.255.255 area 0` ?",
+     "options": [
+      "Active OSPF sur toutes les interfaces dont l'adresse commence par 10",
+      "Active OSPF uniquement sur 10.0.0.0",
+      "Une erreur de syntaxe"
+     ],
+     "answer": 0,
+     "explain": "Le wildcard `0.255.255.255` : seul le 1ᵉʳ octet doit correspondre. Toute interface en `10.x.x.x` participe."
+    },
+    {
+     "type": "say",
+     "text": "**Alternative moderne : configurer directement sur l'interface** avec `ip ospf <processus> area <n°>`. Plus précis, plus lisible, pas de wildcard à calculer."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# interface g0/0\nR1(config-if)# ip ospf 1 area 0",
+     "lang": "Cisco IOS",
+     "title": "Activer OSPF sur une interface"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'interface en cours, active OSPF (processus 1, aire 0) **sans** commande network.",
+     "hints": [
+      "ip ospf <processus> area <n°>"
+     ],
+     "accept": [],
+     "solution": "ip ospf 1 area 0",
+     "explain": "Mode interface. Pas de wildcard à calculer.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Interface passive.** Sur un LAN d'utilisateurs, il n'y a **pas de routeur OSPF** à qui parler. Envoyer des Hello là-bas est inutile (et un risque : quelqu'un pourrait y brancher un faux routeur). On rend l'interface **passive** : son réseau est **annoncé** mais **aucun Hello** n'est émis."
+    },
+    {
+     "type": "exercise",
+     "q": "Rends l'interface `g0/0` **passive** pour OSPF (côté LAN, dans `router ospf`).",
+     "hints": [
+      "passive-interface <interface>"
+     ],
+     "accept": [
+      "passive-interface GigabitEthernet0/0",
+      "passive-interface GigabitEthernet 0/0",
+      "passive-interface g0/0",
+      "passive-interface g 0/0",
+      "passive-interface gi0/0",
+      "passive-interface gi 0/0",
+      "passive-interface gig0/0",
+      "passive-interface gig 0/0",
+      "passive-interface gigabitethernet0/0",
+      "passive-interface gigabitethernet 0/0"
+     ],
+     "solution": "passive-interface g0/0",
+     "explain": "Le LAN reste annoncé aux autres routeurs, mais aucun voisinage n'est tenté dessus.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Rends **toutes** les interfaces passives par défaut.",
+     "hints": [
+      "passive-interface + mot clé « default »."
+     ],
+     "accept": [],
+     "solution": "passive-interface default",
+     "explain": "Puis on **réactive** seulement les liens vers d'autres routeurs avec `no passive-interface`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Réactive OSPF (Hello) sur l'interface `s0/0/0` après un `passive-interface default`.",
+     "hints": [
+      "On nie la commande passive-interface."
+     ],
+     "accept": [
+      "no passive-interface Serial0/0/0",
+      "no passive-interface Serial 0/0/0",
+      "no passive-interface s0/0/0",
+      "no passive-interface s 0/0/0",
+      "no passive-interface se0/0/0",
+      "no passive-interface se 0/0/0",
+      "no passive-interface serial0/0/0",
+      "no passive-interface serial 0/0/0"
+     ],
+     "solution": "no passive-interface s0/0/0",
+     "explain": "Les interfaces liées à d'autres routeurs doivent émettre des Hello.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Vérifier.** Quatre commandes de base :"
+    },
+    {
+     "type": "code",
+     "sql": "R1# show ip protocols             processus OSPF, router ID, réseaux annoncés\nR1# show ip ospf neighbor         voisins et leur état\nR1# show ip ospf interface brief  interfaces OSPF, aire, coût, nombre de voisins\nR1# show ip route ospf            seulement les routes apprises par OSPF",
+     "lang": "Cisco IOS",
+     "title": "Les 4 vérifications"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les voisins OSPF** et leur état ?",
+     "hints": [
+      "show ip ospf ..."
+     ],
+     "accept": [],
+     "solution": "show ip ospf neighbor",
+     "explain": "On y lit le Router ID du voisin, son état (FULL), l'interface et l'adresse.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **uniquement les routes apprises par OSPF** ?",
+     "hints": [
+      "show ip route + le protocole."
+     ],
+     "accept": [],
+     "solution": "show ip route ospf",
+     "explain": "Chaque route est précédée de la lettre **O**.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche le **résumé des interfaces OSPF** (aire, coût, nombre de voisins) ?",
+     "hints": [
+      "show ip ospf interface + brief."
+     ],
+     "accept": [],
+     "solution": "show ip ospf interface brief",
+     "explain": "Pratique pour vérifier d'un coup d'œil que chaque interface est dans la bonne aire.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche le **Router ID** et les réseaux annoncés ?",
+     "hints": [
+      "show ip protocols."
+     ],
+     "accept": [],
+     "solution": "show ip protocols",
+     "explain": "Il liste aussi les interfaces passives et la distance administrative (110).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "🏁 `router ospf N`, `router-id`, `network <adr> <wildcard> area N` (ou `ip ospf N area N`), `passive-interface`, vérifs `show ip protocols|ospf neighbor|ospf interface brief|route ospf`."
+    }
+   ]
+  },
+  {
+   "id": "voisins",
+   "title": "Les voisins et leurs 7 états",
+   "emoji": "🤝",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Avant d'échanger leurs cartes, deux routeurs doivent **devenir voisins**. Cela passe par des **messages Hello**, puis par une danse en plusieurs **états**. Comprendre ces états, c'est **savoir dépanner** : l'état dans lequel un voisin reste bloqué indique la cause."
+    },
+    {
+     "type": "code",
+     "sql": "Hello  →  envoyé périodiquement à 224.0.0.5 (« tous les routeurs OSPF »)\n           toutes les 10 s (liens Ethernet et point à point)\n           toutes les 30 s (liens NBMA, type Frame Relay)\nDead    →  4 × Hello = 40 s (120 s en NBMA)\n           si aucun Hello reçu pendant ce délai, le voisin est déclaré MORT",
+     "lang": "Réseau",
+     "title": "Hello et Dead"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **valeur par défaut du Hello** sur un lien Ethernet (en secondes) ?",
+     "hints": [
+      "Dead interval = 4 fois cette valeur = 40."
+     ],
+     "accept": [
+      "10 s",
+      "10s",
+      "10 secondes"
+     ],
+     "solution": "10",
+     "explain": "**10 secondes**, et un Dead de 40 secondes.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **valeur par défaut du Dead interval** sur un lien Ethernet (en secondes) ?",
+     "hints": [
+      "4 × Hello."
+     ],
+     "accept": [
+      "40 s",
+      "40s",
+      "40 secondes"
+     ],
+     "solution": "40",
+     "explain": "**40 secondes**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'**adresse multicast** utilisée pour les Hello OSPF ?",
+     "hints": [
+      "« AllSPFRouters »."
+     ],
+     "accept": [],
+     "solution": "224.0.0.5",
+     "explain": "**224.0.0.5** pour tous les routeurs OSPF (224.0.0.6 pour DR/BDR).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Les 5 types de paquets OSPF** :"
+    },
+    {
+     "type": "code",
+     "sql": "1  Hello                     se présenter, découvrir/maintenir les voisins\n2  DBD  (Database Description) résumé de ma LSDB (liste des LSA que je possède)\n3  LSR  (Link State Request)   « envoie-moi les LSA qu'il me manque »\n4  LSU  (Link State Update)    les LSA complets\n5  LSAck (Acknowledgment)      accusé de réception",
+     "lang": "Réseau",
+     "title": "5 types de paquets"
+    },
+    {
+     "type": "choice",
+     "q": "Quel paquet OSPF sert à **découvrir et maintenir** les voisins ?",
+     "options": [
+      "Hello",
+      "LSU",
+      "DBD"
+     ],
+     "answer": 0,
+     "explain": "Le **Hello** : il est répété en permanence et sert aussi de signal de vie."
+    },
+    {
+     "type": "choice",
+     "q": "Quel paquet contient les **LSA complets** ?",
+     "options": [
+      "LSR",
+      "LSU",
+      "LSAck"
+     ],
+     "answer": 1,
+     "explain": "**LSU** (*Link State Update*). La **LSR** les demande, l'**LSAck** accuse réception."
+    },
+    {
+     "type": "say",
+     "text": "**Les 7 états d'un voisin** :"
+    },
+    {
+     "type": "code",
+     "sql": "DOWN       aucun Hello reçu\nINIT       j'ai reçu un Hello de lui, mais mon RID n'y figure pas encore\n2-WAY      il m'a vu aussi : communication bidirectionnelle (voisinage établi)\nEXSTART    on désigne un maître et un esclave pour l'échange des bases\nEXCHANGE   échange des DBD (résumés de LSDB)\nLOADING    demande (LSR) et envoi (LSU) des LSA manquants\nFULL       bases synchronisées : ADJACENCE COMPLÈTE",
+     "lang": "Réseau",
+     "title": "Les états"
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre passent les états ?",
+     "options": [
+      "Down, Init, 2-Way, ExStart, Exchange, Loading, Full",
+      "Down, 2-Way, Init, Full, Exchange",
+      "Init, Down, Loading, Full"
+     ],
+     "answer": 0,
+     "explain": "**Down → Init → 2-Way → ExStart → Exchange → Loading → Full**."
+    },
+    {
+     "type": "choice",
+     "q": "Quel état indique que les deux routeurs ont **synchronisé** leurs bases de données ?",
+     "options": [
+      "2-Way",
+      "Exchange",
+      "Full"
+     ],
+     "answer": 2,
+     "explain": "**Full** : adjacence complète, les LSDB sont identiques."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'état **final** d'une adjacence OSPF qui fonctionne ? (un mot)",
+     "hints": [
+      "Les bases sont complètement synchronisées."
+     ],
+     "accept": [
+      "FULL",
+      "full"
+     ],
+     "solution": "Full",
+     "explain": "**Full**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Pour devenir voisins, deux routeurs doivent s'accorder sur ces points** (sinon ils restent bloqués) :"
+    },
+    {
+     "type": "code",
+     "sql": "✔ Même AIRE sur le lien\n✔ Même SOUS-RÉSEAU et même masque sur le lien\n✔ Mêmes valeurs Hello et Dead\n✔ Même type d'aire (normal, stub…)\n✔ Même authentification (si configurée)\n✔ Router ID DIFFÉRENTS\n✔ Même MTU (sinon bloqué en ExStart/Exchange)",
+     "lang": "Réseau",
+     "title": "Conditions du voisinage"
+    },
+    {
+     "type": "choice",
+     "q": "R1 a un Hello de 10 s, R2 un Hello de 5 s sur le même lien. Que se passe-t-il ?",
+     "options": [
+      "Ils deviennent voisins quand même",
+      "Ils ne deviennent pas voisins : les timers doivent être identiques",
+      "Le plus petit gagne"
+     ],
+     "answer": 1,
+     "explain": "Hello/Dead doivent **correspondre exactement** pour former un voisinage."
+    },
+    {
+     "type": "choice",
+     "q": "R1 est en `10.0.12.1/30` et R2 en `10.0.12.6/30` sur le même lien. Voisins ?",
+     "options": [
+      "Oui",
+      "Non : ils ne sont pas dans le même sous-réseau",
+      "Oui, si les aires sont identiques"
+     ],
+     "answer": 1,
+     "explain": "10.0.12.6/30 appartient à `10.0.12.4/30`, pas à `10.0.12.0/30` : **sous-réseaux différents**."
+    },
+    {
+     "type": "choice",
+     "q": "R1 et R2 ont tous deux le Router ID `1.1.1.1`. Que se passe-t-il ?",
+     "options": [
+      "Tout fonctionne",
+      "Le voisinage échoue ou devient instable : les RID doivent être uniques",
+      "L'un des deux prend l'ID 0"
+     ],
+     "answer": 1,
+     "explain": "Un RID doit être **unique** dans le domaine OSPF."
+    },
+    {
+     "type": "say",
+     "text": "**Où voir bloquer un voisin ?** Le diagnostic par état :"
+    },
+    {
+     "type": "code",
+     "sql": "Bloqué en INIT        → je reçois ses Hello, lui ne reçoit pas les miens (ACL, mauvaise configuration,\n                         passive-interface, problème de sens unique)\nBloqué en 2-WAY        → NORMAL entre deux routeurs « DROTHER » sur un réseau à DR (voir leçon DR/BDR)\nBloqué en EXSTART/EXCHANGE  → MTU différent entre les deux interfaces\nAbsent / pas de voisin → timers, aire, sous-réseau, authentification ou interface passive",
+     "lang": "Réseau",
+     "title": "Diagnostic par état"
+    },
+    {
+     "type": "choice",
+     "q": "Un voisin reste bloqué en **ExStart**, alors que les timers et aires sont corrects. Cause classique ?",
+     "options": [
+      "Un MTU différent sur les deux interfaces",
+      "Un Router ID dupliqué",
+      "Un Hello trop court"
+     ],
+     "answer": 0,
+     "explain": "MTU différents : les DBD ne passent pas, la négociation reste bloquée."
+    },
+    {
+     "type": "choice",
+     "q": "Un voisin reste en **Init**. Que suspectes-tu ?",
+     "options": [
+      "Un trafic OSPF qui ne passe que dans un seul sens (ACL, passive-interface…)",
+      "Un MTU incompatible",
+      "Un bon fonctionnement"
+     ],
+     "answer": 0,
+     "explain": "En **Init**, tu vois **ses** Hello mais lui ne voit pas les tiens."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande règle le **Hello interval** à 5 secondes sur l'interface en cours ?",
+     "hints": [
+      "ip ospf hello-interval <secondes>"
+     ],
+     "accept": [],
+     "solution": "ip ospf hello-interval 5",
+     "explain": "Mode interface. Le dead interval s'ajuste alors automatiquement à 4 × 5 = 20 s.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande règle le **Dead interval** à 20 secondes sur l'interface en cours ?",
+     "hints": [
+      "ip ospf dead-interval <secondes>"
+     ],
+     "accept": [],
+     "solution": "ip ospf dead-interval 20",
+     "explain": "Si Hello = 5 s, un Dead à 20 s respecte la règle 4 × Hello.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **en direct** les événements d'adjacence OSPF (pour trouver pourquoi un voisin reste bloqué) ?",
+     "hints": [
+      "debug ip ospf + adj."
+     ],
+     "accept": [
+      "debug ip ospf adjacency"
+     ],
+     "solution": "debug ip ospf adj",
+     "explain": "Attention : `debug` est gourmand. On l'utilise brièvement puis `undebug all`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Hello 10 s / Dead 40 s** (224.0.0.5), 5 paquets (**Hello, DBD, LSR, LSU, LSAck**), 7 états **jusqu'à FULL**. Conditions : aire, sous-réseau, timers, authentification, **RID uniques**, MTU."
+    }
+   ]
+  },
+  {
+   "id": "cout",
+   "title": "Le coût : comment OSPF choisit son chemin",
+   "emoji": "💰",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "OSPF choisit toujours le chemin au **coût total le plus faible**. Mais qu'est-ce que ce coût ? Une formule simple, basée sur **la vitesse du lien** : plus il est rapide, plus le coût est petit."
+    },
+    {
+     "type": "code",
+     "sql": "coût d'une interface = bande passante de RÉFÉRENCE ÷ bande passante de l'interface\n\nPar défaut : référence = 100 Mb/s (100 000 000 b/s)\nCoût minimum = 1 (arrondi à l'inférieur)",
+     "lang": "Réseau",
+     "title": "La formule"
+    },
+    {
+     "type": "code",
+     "sql": "Ethernet 10 Mb/s       100 / 10     = 10\nFast Ethernet 100 Mb/s 100 / 100    = 1\nGigabit 1000 Mb/s      100 / 1000   = 0,1  → 1  (minimum !)\n10 Gigabit             100 / 10000  → 1\nSérie T1 1,544 Mb/s    100 / 1,544  = 64,7 → 64",
+     "lang": "Réseau",
+     "title": "Coûts avec la référence par défaut"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le coût OSPF d'un lien **Ethernet 10 Mb/s** avec la référence par défaut ?",
+     "hints": [
+      "100 ÷ 10."
+     ],
+     "accept": [],
+     "solution": "10",
+     "explain": "**10**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le coût OSPF d'un lien **Fast Ethernet 100 Mb/s** avec la référence par défaut ?",
+     "hints": [
+      "100 ÷ 100."
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "**1**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le coût OSPF d'un lien **Gigabit** avec la référence par défaut ?",
+     "hints": [
+      "100 ÷ 1000 = 0,1, mais le minimum est…"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "**1** : le coût ne peut pas être inférieur à 1.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le coût d'un lien série **T1 (1,544 Mb/s)** avec la référence par défaut ? (arrondi à l'inférieur)",
+     "hints": [
+      "100 000 000 ÷ 1 544 000 = 64,76…"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "**64** (OSPF tronque).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Le piège de la référence par défaut** : Fast Ethernet, Gigabit et 10 Gigabit ont **tous un coût de 1** ! OSPF ne voit **aucune différence** entre un lien à 100 Mb/s et un lien à 10 Gb/s et peut choisir le plus lent. Solution : **augmenter la référence** (sur **tous** les routeurs)."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config-router)# auto-cost reference-bandwidth 10000\n\nAvec 10 000 Mb/s comme référence :\n  Fast Ethernet 100 Mb/s   10000/100   = 100\n  Gigabit 1000 Mb/s        10000/1000  = 10\n  10 Gigabit               10000/10000 = 1\n  Série T1 1,544           10000/1,544 = 6,4 → 6",
+     "lang": "Cisco IOS",
+     "title": "Corriger la référence",
+     "note": "La valeur est en Mb/s. À configurer à l'identique sur TOUS les routeurs, sinon les coûts divergent."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui fixe la bande passante de **référence à 10 000 Mb/s** (dans `router ospf`).",
+     "hints": [
+      "auto-cost reference-bandwidth <Mb/s>"
+     ],
+     "accept": [],
+     "solution": "auto-cost reference-bandwidth 10000",
+     "explain": "Utile dès qu'on a des liens Gigabit ou plus.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi augmenter la bande passante de référence ?",
+     "options": [
+      "Pour que OSPF distingue les liens rapides des liens très rapides",
+      "Pour accélérer les Hello",
+      "Pour économiser du CPU"
+     ],
+     "answer": 0,
+     "explain": "Avec 100 Mb/s comme référence, tous les liens ≥ 100 Mb/s coûtent **1** : OSPF ne sait plus les différencier."
+    },
+    {
+     "type": "choice",
+     "q": "Tu modifies la référence sur R1 mais pas sur R2 et R3. Conséquence ?",
+     "options": [
+      "Aucune",
+      "Les coûts calculés divergent entre routeurs : choix de chemins incohérents",
+      "OSPF s'arrête"
+     ],
+     "answer": 1,
+     "explain": "Chaque routeur calcule le coût de **ses** interfaces : il faut une **référence identique partout**."
+    },
+    {
+     "type": "exercise",
+     "q": "Avec la référence à 10 000 Mb/s, quel est le coût d'un lien **Gigabit** ?",
+     "hints": [
+      "10 000 ÷ 1 000."
+     ],
+     "accept": [],
+     "solution": "10",
+     "explain": "**10**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec la référence à 10 000 Mb/s, quel est le coût d'un lien **Fast Ethernet** ?",
+     "hints": [
+      "10 000 ÷ 100."
+     ],
+     "accept": [],
+     "solution": "100",
+     "explain": "**100**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Le coût d'un chemin = la SOMME des coûts des interfaces de SORTIE** traversées, jusqu'au réseau de destination. OSPF compare les sommes et retient la plus petite."
+    },
+    {
+     "type": "code",
+     "sql": "De R1 vers LAN 3 (192.168.3.0/24) avec la référence par défaut :\n   R1 → R2 par un lien série T1 (64), R2 → R3 par un Fast Ethernet (1), puis le LAN de R3 en Gigabit (1)\n   Coût total = 64 + 1 + 1 = 66",
+     "lang": "Réseau",
+     "title": "Calculer un chemin"
+    },
+    {
+     "type": "exercise",
+     "q": "Chemin : R1 → R2 en **Fast Ethernet** (1), R2 → R3 en **Fast Ethernet** (1), LAN de R3 en **Gigabit** (1). Quel est le coût total (référence par défaut) ?",
+     "hints": [
+      "1 + 1 + 1."
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "**3**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Deux chemins vers un réseau : A passe par un T1 (64) puis un Fast Ethernet (1) ; B passe par 3 liens Fast Ethernet (1 chacun). Lequel est retenu ?",
+     "options": [
+      "A (moins de sauts)",
+      "B (coût 3 < 65)",
+      "Les deux en alternance"
+     ],
+     "answer": 1,
+     "explain": "OSPF ignore le **nombre de sauts** ; il compare les **coûts** : B (3) contre A (65)."
+    },
+    {
+     "type": "choice",
+     "q": "Deux chemins ont **exactement le même coût** vers un réseau. Que fait OSPF ?",
+     "options": [
+      "Il choisit au hasard et ignore l'autre",
+      "Il installe les deux et répartit la charge (ECMP)",
+      "Il refuse les deux"
+     ],
+     "answer": 1,
+     "explain": "OSPF fait du **load balancing** sur les chemins de coût égal (jusqu'à 4 par défaut sur IOS)."
+    },
+    {
+     "type": "say",
+     "text": "**Forcer un coût à la main.** `ip ospf cost <valeur>` sur l'interface, pour imposer ton choix (par exemple, faire passer le trafic par le lien principal et garder l'autre en secours). Autre levier : la commande `bandwidth <kb/s>` change la bande passante **vue par OSPF**, donc le coût (mais aussi d'autres calculs)."
+    },
+    {
+     "type": "exercise",
+     "q": "Fixe à la main le coût de l'interface en cours à **50**.",
+     "hints": [
+      "ip ospf cost <valeur>"
+     ],
+     "accept": [],
+     "solution": "ip ospf cost 50",
+     "explain": "Mode interface. Le coût manuel **remplace** la valeur calculée.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Indique que la bande passante de l'interface série est de **1544 kb/s** (pour OSPF).",
+     "hints": [
+      "bandwidth <kb/s>"
+     ],
+     "accept": [],
+     "solution": "bandwidth 1544",
+     "explain": "La commande `bandwidth` est en **kb/s**. Elle n'accélère rien : elle sert d'**information** aux protocoles.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "`bandwidth 64` sur une interface Fast Ethernet. Quel effet réel ?",
+     "options": [
+      "La vitesse du lien tombe à 64 kb/s",
+      "Le lien reste à 100 Mb/s ; seul le calcul du coût OSPF change",
+      "Rien"
+     ],
+     "answer": 1,
+     "explain": "`bandwidth` est **déclaratif** : le matériel ne ralentit pas. Mais le coût OSPF passe à 1 562 (100 000 / 64)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **le coût** de chaque interface OSPF ?",
+     "hints": [
+      "show ip ospf interface + brief."
+     ],
+     "accept": [
+      "show ip ospf interface"
+     ],
+     "solution": "show ip ospf interface brief",
+     "explain": "La colonne **Cost** donne le coût de chaque interface.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Lire une route OSPF** : `O 192.168.3.0/24 [110/66] via 10.0.12.2, 00:05:12, Serial0/0/0` : **110** = AD, **66** = coût total, `via` = prochain saut, le temps indique l'âge de la route."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `O 192.168.3.0/24 [110/66] via 10.0.12.2`, quel est le **coût OSPF** total ?",
+     "hints": [
+      "[AD/coût]."
+     ],
+     "accept": [],
+     "solution": "66",
+     "explain": "**66**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "🏁 Coût = **référence ÷ bande passante** (référence par défaut 100 Mb/s, minimum 1). Piège : Fast/Gig/10G = 1. **`auto-cost reference-bandwidth`** (identique partout). Chemin = **somme** des coûts sortants. Égalité = répartition de charge. `ip ospf cost` / `bandwidth` pour ajuster."
+    }
+   ]
+  },
+  {
+   "id": "dr-bdr",
+   "title": "DR et BDR : l'élection sur un réseau partagé",
+   "emoji": "🗳️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Imagine **dix routeurs** branchés sur le même switch. Si chacun devenait voisin « complet » avec chacun des autres, ça ferait **45 adjacences** et 45 fois les mêmes LSA échangés. Trop de bruit ! OSPF élit donc **un chef** par réseau partagé."
+    },
+    {
+     "type": "code",
+     "sql": "n routeurs, adjacence avec chacun :  n × (n − 1) / 2\n   5 routeurs  →  10 adjacences\n  10 routeurs  →  45 adjacences\n  20 routeurs  → 190 adjacences",
+     "lang": "Réseau",
+     "title": "Le problème du maillage complet"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'adjacences faut-il pour **6 routeurs** en maillage complet ? (n × (n−1) ÷ 2)",
+     "hints": [
+      "6 × 5 ÷ 2."
+     ],
+     "accept": [],
+     "solution": "15",
+     "explain": "**15**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'adjacences pour **8 routeurs** en maillage complet ?",
+     "hints": [
+      "8 × 7 ÷ 2."
+     ],
+     "accept": [],
+     "solution": "28",
+     "explain": "**28**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**La solution : le DR et le BDR.** Sur un réseau **à accès multiple** (Ethernet partagé), OSPF élit un **DR** (*Designated Router*, le chef) et un **BDR** (*Backup DR*, le suppléant). Les autres routeurs (**DROTHER**) ne forment une adjacence complète **qu'avec le DR et le BDR**."
+    },
+    {
+     "type": "code",
+     "sql": "DR       reçoit les mises à jour de tous, les redistribue (écoute 224.0.0.6)\nBDR      suppléant : prend le relais si le DR tombe (écoute aussi 224.0.0.6)\nDROTHER  tous les autres : ils ne font Full qu'avec le DR et le BDR\n         entre DROTHER : l'état reste 2-WAY (et c'est NORMAL)",
+     "lang": "Réseau",
+     "title": "Les rôles"
+    },
+    {
+     "type": "choice",
+     "q": "Entre deux routeurs **DROTHER** sur le même segment, quel est l'état normal ?",
+     "options": [
+      "Full",
+      "2-Way",
+      "Down"
+     ],
+     "answer": 1,
+     "explain": "Les DROTHER restent en **2-Way** entre eux : ils n'échangent leurs LSA qu'avec le DR/BDR. C'est **normal**, pas une panne."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse multicast utilisée pour parler **au DR et au BDR** ?",
+     "hints": [
+      "« AllDRouters »."
+     ],
+     "accept": [],
+     "solution": "224.0.0.6",
+     "explain": "**224.0.0.6**. (224.0.0.5 s'adresse à tous les routeurs OSPF.)",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Comment se déroule l'élection ?** Deux critères, dans l'ordre :"
+    },
+    {
+     "type": "code",
+     "sql": "1. La PRIORITÉ OSPF de l'interface la plus haute      (0 à 255, défaut = 1)\n   priorité 0 → ne participe JAMAIS à l'élection\n2. À égalité : le Router ID le plus HAUT\n\nL'élu devient DR, le second devient BDR.",
+     "lang": "Réseau",
+     "title": "Critères d'élection"
+    },
+    {
+     "type": "choice",
+     "q": "Quatre routeurs, tous de priorité 1. RID : R1 = 1.1.1.1, R2 = 2.2.2.2, R3 = 3.3.3.3, R4 = 4.4.4.4. Qui devient DR ?",
+     "options": [
+      "R1",
+      "R4",
+      "R2"
+     ],
+     "answer": 1,
+     "explain": "À priorité égale, le **RID le plus haut** gagne : R4 est DR, R3 est BDR."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans cette même situation (4 routeurs, priorités égales à 1, RID de 1.1.1.1 à 4.4.4.4), quel routeur devient **BDR** ? (R1, R2, R3 ou R4)",
+     "hints": [
+      "Le deuxième plus haut RID."
+     ],
+     "accept": [
+      "r3"
+     ],
+     "solution": "R3",
+     "explain": "**R3** (RID 3.3.3.3), après le DR R4.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "R1 (RID 1.1.1.1) a une priorité de **100**, les autres 1 (dont R4 : 4.4.4.4). Qui est DR ?",
+     "options": [
+      "R4, car son RID est le plus haut",
+      "R1, la priorité passe avant le RID",
+      "Aucun"
+     ],
+     "answer": 1,
+     "explain": "La **priorité** est examinée **avant** le RID : R1 gagne avec 100."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **L'élection est « non préemptive »** : un nouveau routeur avec une meilleure priorité **ne détrône pas** le DR existant. Le DR reste en place **tant qu'il ne tombe pas** (ou que le processus n'est pas redémarré). Seul le **BDR** devient DR en cas de panne."
+    },
+    {
+     "type": "choice",
+     "q": "Le DR est R2. R5, avec la priorité 255, est branché après coup. Qui est DR ?",
+     "options": [
+      "R5, il a la plus haute priorité",
+      "R2 : l'élection n'est pas préemptive",
+      "Une nouvelle élection a lieu"
+     ],
+     "answer": 1,
+     "explain": "**Non préemptif** : R2 reste DR. R5 ne le remplacera qu'après une panne ou un redémarrage d'OSPF."
+    },
+    {
+     "type": "choice",
+     "q": "Le DR tombe en panne. Qui prend sa place ?",
+     "options": [
+      "Un routeur DROTHER tiré au sort",
+      "Le BDR, puis une nouvelle élection désigne un nouveau BDR",
+      "Personne"
+     ],
+     "answer": 1,
+     "explain": "Le **BDR** devient DR immédiatement, puis on élit un nouveau BDR parmi les DROTHER."
+    },
+    {
+     "type": "say",
+     "text": "**Contrôler l'élection.** Pour imposer un routeur DR (le plus puissant, le plus central), on lui donne une **priorité haute** ; pour **exclure** un routeur, on met **0**. Sur l'interface : `ip ospf priority <0-255>`."
+    },
+    {
+     "type": "exercise",
+     "q": "Fixe la priorité OSPF de l'interface en cours à **0** (ce routeur ne sera jamais DR ni BDR).",
+     "hints": [
+      "ip ospf priority <valeur>"
+     ],
+     "accept": [],
+     "solution": "ip ospf priority 0",
+     "explain": "Mode interface. `0` exclut le routeur de l'élection.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Fixe la priorité de l'interface en cours à **200** (pour favoriser son élection).",
+     "hints": [
+      "ip ospf priority <valeur>"
+     ],
+     "accept": [],
+     "solution": "ip ospf priority 200",
+     "explain": "Plus la valeur est haute, plus on a de chances d'être DR (au moment de l'élection).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle priorité empêche un routeur de devenir DR ?",
+     "options": [
+      "1",
+      "0",
+      "255"
+     ],
+     "answer": 1,
+     "explain": "**0** : le routeur n'est jamais candidat."
+    },
+    {
+     "type": "say",
+     "text": "**Cas particulier : les liens point à point.** Entre **deux** routeurs seulement (lien série, lien routé), il n'y a rien à élire. OSPF **n'élit pas de DR** sur un lien de **type point à point**. Pour cela, on peut même **forcer** le type sur une interface Ethernet qui relie seulement deux routeurs : cela **supprime l'élection** et accélère la convergence."
+    },
+    {
+     "type": "exercise",
+     "q": "Force le type de réseau **point à point** sur l'interface en cours.",
+     "hints": [
+      "ip ospf network + type."
+     ],
+     "accept": [],
+     "solution": "ip ospf network point-to-point",
+     "explain": "Plus d'élection DR/BDR, plus de DROTHER. Les Hello restent à 10 s.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Une liaison Ethernet relie exactement **deux routeurs**. Quelle est la bonne pratique ?",
+     "options": [
+      "La laisser en type broadcast",
+      "La configurer en point-to-point pour éviter l'élection DR/BDR",
+      "Mettre une priorité de 255"
+     ],
+     "answer": 1,
+     "explain": "Sans nécessité d'élection, le type **point-to-point** simplifie et accélère."
+    },
+    {
+     "type": "say",
+     "text": "**Combien d'adjacences avec DR/BDR ?** Chaque DROTHER forme **2** adjacences (DR et BDR), et DR↔BDR en forme **1**. Pour n routeurs : **2 × (n − 2) + 1**."
+    },
+    {
+     "type": "exercise",
+     "q": "Avec DR/BDR, combien d'adjacences complètes pour **6 routeurs** ? (2 × (n−2) + 1)",
+     "hints": [
+      "2 × 4 + 1."
+     ],
+     "accept": [],
+     "solution": "9",
+     "explain": "**9** adjacences (au lieu de 15).",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec DR/BDR, combien d'adjacences complètes pour **10 routeurs** ?",
+     "hints": [
+      "2 × 8 + 1."
+     ],
+     "accept": [],
+     "solution": "17",
+     "explain": "**17** au lieu de 45.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Lire le résultat.** Dans `show ip ospf neighbor`, la colonne **State** affiche `FULL/DR`, `FULL/BDR`, `FULL/DROTHER` ou `2WAY/DROTHER`. Le **rôle** est celui du **voisin**."
+    },
+    {
+     "type": "code",
+     "sql": "Neighbor ID  Pri  State        Dead Time  Address      Interface\n2.2.2.2       1   FULL/DR      00:00:36   192.168.10.2 GigabitEthernet0/0\n3.3.3.3       1   2WAY/DROTHER 00:00:33   192.168.10.3 GigabitEthernet0/0",
+     "lang": "Cisco IOS",
+     "title": "Lecture d'un show ip ospf neighbor"
+    },
+    {
+     "type": "choice",
+     "q": "Dans l'extrait ci-dessus, quel est le rôle du routeur local ?",
+     "options": [
+      "Le DR",
+      "Le BDR",
+      "Un DROTHER"
+     ],
+     "answer": 2,
+     "explain": "Le local est **Full avec le DR** (2.2.2.2) mais seulement en **2-Way avec 3.3.3.3**, un DROTHER. Or le BDR serait Full avec **tous** ; seul un autre DROTHER reste en 2-Way avec un DROTHER. Le local est donc un **DROTHER**."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Réseau partagé → **DR + BDR**. Élection : **priorité** (0 = jamais), puis **RID**. **Non préemptive**. DROTHER = 2-Way entre eux. **point-to-point** = pas d'élection. Commandes : `ip ospf priority`, `ip ospf network point-to-point`."
+    }
+   ]
+  },
+  {
+   "id": "aires",
+   "title": "Les aires : découper pour grandir",
+   "emoji": "🏙️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dans un grand réseau, **tous les routeurs ne peuvent pas connaître tous les liens** : la LSDB deviendrait énorme, Dijkstra serait recalculé à chaque panne même lointaine. Solution : **découper en aires** (*areas*). Chaque aire est un « quartier » avec sa propre carte détaillée."
+    },
+    {
+     "type": "code",
+     "sql": "                 ┌────────── AIRE 0 (backbone) ──────────┐\n                 │   R-A       R-B         R-C           │\n                 └────┬─────────┬────────────┬───────────┘\n                      │ ABR     │ ABR        │ ABR\n               ┌──────┴───┐ ┌───┴─────┐ ┌────┴────┐\n               │ AIRE 1   │ │ AIRE 2  │ │ AIRE 3  │\n               └──────────┘ └─────────┘ └─────────┘",
+     "lang": "Réseau",
+     "title": "Architecture à deux niveaux"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **règle d'or** de la hiérarchie OSPF ?",
+     "options": [
+      "Toutes les aires doivent se connecter à l'aire 0 (le backbone)",
+      "Toutes les aires doivent avoir la même taille",
+      "Une aire ne peut contenir que 3 routeurs"
+     ],
+     "answer": 0,
+     "explain": "Les aires **non-backbone** communiquent **via l'aire 0**. Pas de liaison directe aire 1 ↔ aire 2."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro de l'aire **centrale** (backbone) ?",
+     "hints": [
+      "Le cœur de tout réseau OSPF multi-aires."
+     ],
+     "accept": [
+      "aire 0",
+      "area 0"
+     ],
+     "solution": "0",
+     "explain": "**Aire 0**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Les types de routeurs** selon leur position :"
+    },
+    {
+     "type": "code",
+     "sql": "INTERNE            toutes ses interfaces dans la MÊME aire\nBACKBONE           au moins une interface dans l'aire 0\nABR (Area Border Router)   interfaces dans PLUSIEURS aires (dont la 0) : il relie les aires\nASBR (Autonomous System Boundary Router)   relie OSPF à l'EXTÉRIEUR (autre protocole, route statique, Internet)",
+     "lang": "Réseau",
+     "title": "Types de routeurs"
+    },
+    {
+     "type": "choice",
+     "q": "Un routeur a une interface en aire 0 et une autre en aire 1. C'est un…",
+     "options": [
+      "Routeur interne",
+      "ABR",
+      "ASBR"
+     ],
+     "answer": 1,
+     "explain": "**ABR** : il est à la frontière entre deux aires."
+    },
+    {
+     "type": "choice",
+     "q": "Un routeur relie votre réseau OSPF à Internet via une route statique qu'il redistribue dans OSPF. C'est un…",
+     "options": [
+      "ABR",
+      "ASBR",
+      "DR"
+     ],
+     "answer": 1,
+     "explain": "**ASBR** : frontière entre OSPF et un autre domaine de routage."
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle le routeur qui **relie plusieurs aires** ? (sigle de 3 lettres)",
+     "hints": [
+      "Area Border Router."
+     ],
+     "accept": [
+      "abr"
+     ],
+     "solution": "ABR",
+     "explain": "**ABR**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle le routeur qui relie OSPF à **l'extérieur** (autre protocole, Internet) ? (sigle de 4 lettres)",
+     "hints": [
+      "Autonomous System Boundary Router."
+     ],
+     "accept": [
+      "asbr"
+     ],
+     "solution": "ASBR",
+     "explain": "**ASBR**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi découper ?** 1) LSDB **plus petite** par aire ; 2) un lien qui oscille dans l'aire 1 **ne fait pas recalculer** les aires 2 et 3 ; 3) l'ABR peut **résumer** les réseaux de son aire en une seule route ; 4) **moins de CPU/mémoire** sur les routeurs."
+    },
+    {
+     "type": "choice",
+     "q": "Un lien instable dans l'aire 2 provoque des recalculs SPF. Où se limitent-ils ?",
+     "options": [
+      "Dans toute la hiérarchie",
+      "Dans l'aire 2 seulement (les autres aires voient juste une route inter-aire)",
+      "Nulle part"
+     ],
+     "answer": 1,
+     "explain": "Les détails topologiques **ne franchissent pas la frontière** d'aire : isolation des pannes."
+    },
+    {
+     "type": "say",
+     "text": "**Configuration multi-aires** : on indique simplement des **numéros d'aire différents** dans les commandes `network`. Un routeur dont les interfaces sont dans deux aires **devient ABR** automatiquement."
+    },
+    {
+     "type": "code",
+     "sql": "R2(config)# router ospf 1\nR2(config-router)# network 10.0.12.0 0.0.0.3 area 0\nR2(config-router)# network 10.0.23.0 0.0.0.3 area 1",
+     "lang": "Cisco IOS",
+     "title": "R2 devient ABR"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui met la liaison `10.0.23.0/30` dans l'**aire 1** (sur R2).",
+     "hints": [
+      "network <adresse> <wildcard> area 1"
+     ],
+     "accept": [],
+     "solution": "network 10.0.23.0 0.0.0.3 area 1",
+     "explain": "R2 a alors une interface en aire 0 et une en aire 1 : c'est un **ABR**.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui place le LAN `192.168.3.0/24` dans l'**aire 1** (sur R3).",
+     "hints": [
+      "network <adresse> <wildcard> area 1"
+     ],
+     "accept": [],
+     "solution": "network 192.168.3.0 0.0.0.255 area 1",
+     "explain": "R3 est interne à l'aire 1.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Les types de LSA** (les 5 premiers à connaître) :"
+    },
+    {
+     "type": "code",
+     "sql": "Type 1  Router LSA        chaque routeur décrit ses liens   (reste DANS l'aire)\nType 2  Network LSA       le DR décrit le segment partagé   (reste DANS l'aire)\nType 3  Summary LSA       l'ABR annonce les réseaux d'une aire aux autres   (inter-aires)\nType 4  ASBR Summary LSA  l'ABR indique OÙ est l'ASBR\nType 5  External LSA      l'ASBR annonce une route EXTERNE   (toute l'OSPF)",
+     "lang": "Réseau",
+     "title": "Les LSA 1 à 5"
+    },
+    {
+     "type": "choice",
+     "q": "Quel type de LSA l'**ABR** utilise-t-il pour annoncer les réseaux d'une aire aux autres aires ?",
+     "options": [
+      "Type 1",
+      "Type 3 (Summary)",
+      "Type 5"
+     ],
+     "answer": 1,
+     "explain": "Le **LSA de type 3** (résumé inter-aires)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel type de LSA annonce une **route externe** injectée par un ASBR ?",
+     "options": [
+      "Type 2",
+      "Type 3",
+      "Type 5"
+     ],
+     "answer": 2,
+     "explain": "**LSA de type 5** (External)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel numéro de LSA décrit **les liens d'un routeur** dans son aire ?",
+     "hints": [
+      "Router LSA."
+     ],
+     "accept": [
+      "type 1",
+      "lsa 1"
+     ],
+     "solution": "1",
+     "explain": "**Type 1**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Dans la table de routage**, les codes OSPF sont : **O** = route de la même aire ; **O IA** = route d'une **autre aire** (*Inter Area*) ; **O E1 / O E2** = route **externe**. `E2` (par défaut) garde le **coût externe fixe** ; `E1` **ajoute** le coût interne."
+    },
+    {
+     "type": "choice",
+     "q": "Une route apparaît avec `O IA`. D'où vient-elle ?",
+     "options": [
+      "D'une autre aire OSPF",
+      "D'un protocole externe",
+      "D'une route statique locale"
+     ],
+     "answer": 0,
+     "explain": "**IA** = *Inter Area* : apprise via un LSA de type 3, d'une autre aire."
+    },
+    {
+     "type": "choice",
+     "q": "Une route apparaît avec `O E2`. D'où vient-elle ?",
+     "options": [
+      "De la même aire",
+      "D'une autre aire",
+      "D'une source externe à OSPF (redistribuée)"
+     ],
+     "answer": 2,
+     "explain": "**E2** = externe type 2 : redistribuée par un ASBR."
+    },
+    {
+     "type": "say",
+     "text": "**Propager une route par défaut** : sur le routeur qui a la sortie Internet (ASBR), on déclare une route statique par défaut, puis `default-information originate` dans OSPF diffuse cette route par défaut à **tous** les routeurs."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.254\nR1(config)# router ospf 1\nR1(config-router)# default-information originate",
+     "lang": "Cisco IOS",
+     "title": "Distribuer la route par défaut"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `router ospf`, écris la commande qui **annonce la route par défaut** à tous les routeurs OSPF.",
+     "hints": [
+      "default-information + originate."
+     ],
+     "accept": [],
+     "solution": "default-information originate",
+     "explain": "Les autres routeurs recevront une route `O*E2 0.0.0.0/0`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Résumé d'itinéraires.** Un ABR peut agréger plusieurs réseaux d'une aire en un seul préfixe : `area <n°> range <réseau> <masque>`. Moins de routes à propager, moins de recalculs."
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'ABR, résume les réseaux de l'aire 1 en `192.168.0.0/16`.",
+     "hints": [
+      "area <n°> range <réseau> <masque>"
+     ],
+     "accept": [],
+     "solution": "area 1 range 192.168.0.0 255.255.0.0",
+     "explain": "Les autres aires ne voient qu'**une** route `192.168.0.0/16`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Pour les aires très stables**, on peut encore réduire les LSA que reçoit une aire : **stub** (pas de LSA externes), **totally stubby** (rien sauf une route par défaut), **NSSA** (stub, mais avec un ASBR). Un sujet à approfondir plus tard."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Aire 0** = cœur ; les autres aires s'y connectent. **ABR** (entre aires), **ASBR** (vers l'extérieur). LSA **1/2** (dans l'aire), **3** (inter-aires), **5** (externe). Codes **O / O IA / O E2**. `default-information originate`, `area N range`."
+    }
+   ]
+  },
+  {
+   "id": "depannage",
+   "title": "Dépanner OSPF : méthode et réflexes",
+   "emoji": "🔧",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un réseau OSPF qui ne marche pas, c'est **toujours** l'un des problèmes qu'on a croisés : voisin qui ne monte pas, route manquante, mauvais chemin. Voici la **méthode** : vérifier **dans l'ordre** les trois niveaux."
+    },
+    {
+     "type": "code",
+     "sql": "NIVEAU 1 → les VOISINS         show ip ospf neighbor            sont-ils FULL (ou 2-WAY avec DROTHER) ?\nNIVEAU 2 → les INTERFACES      show ip ospf interface brief     bonne aire ? coût ? voisins ?\nNIVEAU 3 → les ROUTES          show ip route ospf               la route attendue est-elle là ?\n                               show ip ospf database            la LSA correspondante existe-t-elle ?",
+     "lang": "Réseau",
+     "title": "Méthode en 3 niveaux"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **la base de données OSPF** (les LSA connues) ?",
+     "hints": [
+      "show ip ospf + database."
+     ],
+     "accept": [],
+     "solution": "show ip ospf database",
+     "explain": "On y voit les LSA par type (Router, Net, Summary, External).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche les **détails d'OSPF sur une interface** (timers, coût, DR/BDR) ? (interface `g0/0`)",
+     "hints": [
+      "show ip ospf interface <interface>"
+     ],
+     "accept": [
+      "show ip ospf interface GigabitEthernet0/0",
+      "show ip ospf interface GigabitEthernet 0/0",
+      "show ip ospf interface g0/0",
+      "show ip ospf interface g 0/0",
+      "show ip ospf interface gi0/0",
+      "show ip ospf interface gi 0/0",
+      "show ip ospf interface gig0/0",
+      "show ip ospf interface gig 0/0",
+      "show ip ospf interface gigabitethernet0/0",
+      "show ip ospf interface gigabitethernet 0/0"
+     ],
+     "solution": "show ip ospf interface g0/0",
+     "explain": "Elle affiche le Hello/Dead, le coût, le type de réseau, l'état et les DR/BDR.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 1 : « pas de voisin du tout »** — `show ip ospf neighbor` est vide. Cherche :"
+    },
+    {
+     "type": "code",
+     "sql": "• L'interface est-elle UP/UP ?   (show ip interface brief)\n• L'interface est-elle dans OSPF ? (show ip ospf interface brief : absente → network faux)\n• Est-elle PASSIVE ?              (show ip protocols)\n• Hello/Dead identiques ?         (show ip ospf interface)\n• Même aire, même sous-réseau ?\n• Authentification identique ?\n• ACL qui bloque le protocole 89 ou le multicast 224.0.0.5 ?",
+     "lang": "Réseau",
+     "title": "Pas de voisin"
+    },
+    {
+     "type": "choice",
+     "q": "`show ip ospf interface brief` n'affiche pas l'interface vers R2. Première hypothèse ?",
+     "options": [
+      "L'instruction `network` ne couvre pas l'adresse de cette interface",
+      "Le DR est mal élu",
+      "Le MTU est différent"
+     ],
+     "answer": 0,
+     "explain": "Si l'interface n'est pas listée, **OSPF n'est pas actif dessus** : le `network` (adresse/wildcard) ne la couvre pas."
+    },
+    {
+     "type": "choice",
+     "q": "R1 : `network 10.0.12.0 0.0.0.3 area 0`, mais l'interface est en `10.0.12.5/30`. Que se passe-t-il ?",
+     "options": [
+      "Elle participe à OSPF",
+      "Elle ne participe pas : 10.0.12.5 n'est pas dans 10.0.12.0/30",
+      "Elle participe en aire 1"
+     ],
+     "answer": 1,
+     "explain": "`10.0.12.0/30` couvre .0 à .3. L'adresse `.5` est dans `10.0.12.4/30` : **non couverte**."
+    },
+    {
+     "type": "say",
+     "text": "**Cas 2 : « voisin bloqué »** — rappel : **Init** = trafic à sens unique ; **ExStart/Exchange** = MTU différents ; **2-Way** = normal entre DROTHER. Pour le MTU : `ip mtu` ou `ip ospf mtu-ignore` (rustine)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **le MTU** et l'état d'une interface (par exemple `g0/0`) pour comparer les deux extrémités ?",
+     "hints": [
+      "show interfaces <interface>"
+     ],
+     "accept": [
+      "show interfaces GigabitEthernet0/0",
+      "show interfaces GigabitEthernet 0/0",
+      "show interfaces g0/0",
+      "show interfaces g 0/0",
+      "show interfaces gi0/0",
+      "show interfaces gi 0/0",
+      "show interfaces gig0/0",
+      "show interfaces gig 0/0",
+      "show interfaces gigabitethernet0/0",
+      "show interfaces gigabitethernet 0/0"
+     ],
+     "solution": "show interfaces g0/0",
+     "explain": "La ligne `MTU 1500 bytes` donne la valeur à comparer.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Un voisin reste en ExStart. Tu mets `ip ospf mtu-ignore` sur les deux interfaces et ça marche. Est-ce la bonne solution ?",
+     "options": [
+      "Oui, définitive",
+      "Un contournement : mieux vaut aligner les MTU",
+      "Non, ça ne marche jamais"
+     ],
+     "answer": 1,
+     "explain": "La **vraie** correction est d'avoir le **même MTU**. `mtu-ignore` masque le symptôme."
+    },
+    {
+     "type": "say",
+     "text": "**Cas 3 : « le voisin est FULL, mais il manque une route »**. Causes fréquentes : le réseau **n'est pas annoncé** (pas de `network`), l'interface est **passive** (OK si c'est un LAN, on annonce quand même le réseau), la route est **filtrée** ou **résumée**, ou ce n'est pas la même **aire** que prévu."
+    },
+    {
+     "type": "choice",
+     "q": "Le LAN de R3 n'apparaît pas dans la table de R1, mais R1-R2-R3 sont tous FULL. Que vérifier en premier ?",
+     "options": [
+      "Que R3 annonce bien le LAN (network … area …)",
+      "La priorité DR",
+      "Le Hello"
+     ],
+     "answer": 0,
+     "explain": "Si les voisinages sont bons mais que la route manque, souvent le réseau **n'est pas annoncé** par le routeur d'origine."
+    },
+    {
+     "type": "choice",
+     "q": "Un LAN est annoncé, mais en **passive-interface**. Le réseau est-il annoncé aux autres ?",
+     "options": [
+      "Oui : passive bloque les Hello, pas l'annonce du réseau",
+      "Non, il disparaît",
+      "Seulement en aire 0"
+     ],
+     "answer": 0,
+     "explain": "**Passive** = pas de Hello (donc pas de voisin sur ce lien), mais le réseau est **toujours annoncé**."
+    },
+    {
+     "type": "say",
+     "text": "**Cas 4 : « le trafic ne prend pas le bon chemin »**. Regarde le **coût** : `show ip route` donne `[110/coût]`, `show ip ospf interface brief` donne le coût de chaque interface. Souvent la cause est **la référence par défaut** (tous les liens ≥ 100 Mb/s coûtent 1) ou une **`bandwidth`** erronée."
+    },
+    {
+     "type": "choice",
+     "q": "OSPF passe par un lien Fast Ethernet plutôt que par un lien Gigabit disponible, alors que les deux coûtent 1. Correction ?",
+     "options": [
+      "Augmenter `auto-cost reference-bandwidth` sur tous les routeurs",
+      "Supprimer le lien Fast Ethernet",
+      "Baisser le Hello"
+     ],
+     "answer": 0,
+     "explain": "Avec une référence plus élevée, Gigabit (10) coûte moins que Fast Ethernet (100) : OSPF prend le bon lien."
+    },
+    {
+     "type": "say",
+     "text": "**Commandes de diagnostic en direct** (à utiliser brièvement car elles chargent le routeur) :"
+    },
+    {
+     "type": "code",
+     "sql": "debug ip ospf hello       voir les Hello émis/reçus (et les erreurs de timers)\ndebug ip ospf adj         voir la formation des adjacences\ndebug ip ospf events      événements divers\nundebug all               TOUT arrêter",
+     "lang": "Cisco IOS",
+     "title": "debug OSPF"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande affiche **les Hello** OSPF en temps réel ?",
+     "hints": [
+      "debug ip ospf + hello."
+     ],
+     "accept": [],
+     "solution": "debug ip ospf hello",
+     "explain": "Les erreurs de **timers** ou de **sous-réseau** y apparaissent clairement.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle commande **arrête tous les debug** ?",
+     "hints": [
+      "undebug + all."
+     ],
+     "accept": [
+      "no debug all"
+     ],
+     "solution": "undebug all",
+     "explain": "Toujours arrêter les debug après usage (ou `no debug all`).",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Tu dois changer le Router ID d'un routeur en production. Quelle précaution ?",
+     "options": [
+      "Aucune",
+      "Prévoir une courte coupure : `clear ip ospf process` redémarre le processus",
+      "Redémarrer tous les switches"
+     ],
+     "answer": 1,
+     "explain": "Le redémarrage du processus **casse temporairement les adjacences**. Fais-le dans une fenêtre de maintenance."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Méthode : **voisins → interfaces → routes → base de données**. Pas de voisin : interface, `network`, passive, timers, aire/sous-réseau, authentification, ACL. Bloqué : Init (sens unique), ExStart (**MTU**). Route manquante : annonce. Mauvais chemin : **coût/référence**."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : un réseau OSPF d'entreprise",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** Tu déploies OSPF sur le réseau fil rouge : R1 – R2 – R3. 14 questions : configuration, calculs et diagnostic."
+    },
+    {
+     "type": "code",
+     "sql": "LAN 1                                                           LAN 3\n192.168.1.0/24                                           192.168.3.0/24\n     |                                                         |\n   G0/0 .1      S0/0/0 .1       10.0.12.0/30    S0/0/0 .2     S0/0/1 .1   10.0.23.0/30  S0/0/1 .2     G0/0 .1\n  [  R1  ]=====================================[  R2  ]===========================[  R3  ]\n RID 1.1.1.1                                     RID 2.2.2.2                         RID 3.3.3.3",
+     "lang": "Réseau",
+     "title": "Rappel de la topologie"
+    },
+    {
+     "type": "code",
+     "sql": "Processus OSPF : 1       Aire : 0 partout\nRID : R1 = 1.1.1.1, R2 = 2.2.2.2, R3 = 3.3.3.3\nLAN 1 : 192.168.1.0/24 (R1 G0/0)    LAN 3 : 192.168.3.0/24 (R3 G0/0)\nLiaison R1-R2 : 10.0.12.0/30        Liaison R2-R3 : 10.0.23.0/30\nLes LANs sont des réseaux d'utilisateurs (aucun routeur dessus)",
+     "lang": "Réseau",
+     "title": "Cahier des charges"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 1/14** — Lance le processus OSPF 1 sur R1.",
+     "hints": [
+      "router ospf <n°>"
+     ],
+     "accept": [],
+     "solution": "router ospf 1",
+     "explain": "On entre dans `(config-router)#`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/14** — Fixe le Router ID de R1.",
+     "hints": [
+      "router-id <adresse>"
+     ],
+     "accept": [],
+     "solution": "router-id 1.1.1.1",
+     "explain": "Un RID fixé à la main ne change jamais.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/14** — Annonce le LAN 1 de R1 dans l'aire 0.",
+     "hints": [
+      "network <adr> <wildcard> area 0"
+     ],
+     "accept": [],
+     "solution": "network 192.168.1.0 0.0.0.255 area 0",
+     "explain": "/24 → wildcard 0.0.0.255.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/14** — Annonce la liaison R1-R2 dans l'aire 0.",
+     "hints": [
+      "Wildcard d'un /30 : 0.0.0.3"
+     ],
+     "accept": [],
+     "solution": "network 10.0.12.0 0.0.0.3 area 0",
+     "explain": "/30 → wildcard 0.0.0.3.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/14** — Empêche les Hello sur le LAN de R1 (interface `g0/0`).",
+     "hints": [
+      "passive-interface <interface>"
+     ],
+     "accept": [
+      "passive-interface GigabitEthernet0/0",
+      "passive-interface GigabitEthernet 0/0",
+      "passive-interface g0/0",
+      "passive-interface g 0/0",
+      "passive-interface gi0/0",
+      "passive-interface gi 0/0",
+      "passive-interface gig0/0",
+      "passive-interface gig 0/0",
+      "passive-interface gigabitethernet0/0",
+      "passive-interface gigabitethernet 0/0"
+     ],
+     "solution": "passive-interface g0/0",
+     "explain": "Le LAN reste annoncé mais ne reçoit aucun Hello.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/14** — Sur R2, annonce la liaison R2-R3 dans l'aire 0.",
+     "hints": [
+      "Même wildcard que précédemment."
+     ],
+     "accept": [],
+     "solution": "network 10.0.23.0 0.0.0.3 area 0",
+     "explain": "Une ligne `network` par réseau connecté.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/14** — Sur R3, annonce son LAN dans l'aire 0.",
+     "hints": [
+      "network <adr> <wildcard> area 0"
+     ],
+     "accept": [],
+     "solution": "network 192.168.3.0 0.0.0.255 area 0",
+     "explain": "Le LAN 3 de R3.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/14** — Quelle commande vérifie que R1 est **voisin de R2** (état Full) ?",
+     "hints": [
+      "show ip ospf ..."
+     ],
+     "accept": [],
+     "solution": "show ip ospf neighbor",
+     "explain": "On doit voir `FULL/ -` sur un lien point à point série, ou `FULL/DR` ou `FULL/BDR` en Ethernet.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 9/14** — Quelle commande affiche **seulement les routes OSPF** de R1 ?",
+     "hints": [
+      "show ip route + protocole."
+     ],
+     "accept": [],
+     "solution": "show ip route ospf",
+     "explain": "R1 doit voir `O 192.168.3.0/24` et `O 10.0.23.0/30`.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 10/14** — Sur les trois routeurs (liens Gigabit/Fast Ethernet), règle la **bande passante de référence** à 10 000 Mb/s.",
+     "hints": [
+      "auto-cost reference-bandwidth <Mb/s>"
+     ],
+     "accept": [],
+     "solution": "auto-cost reference-bandwidth 10000",
+     "explain": "Sans cela, Fast Ethernet et Gigabit coûteraient tous deux 1.",
+     "placeholder": "Écris la commande Cisco ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 11/14** — Avec la référence à 10 000 Mb/s : coût d'un lien **Gigabit** ?",
+     "hints": [
+      "10 000 ÷ 1 000."
+     ],
+     "accept": [],
+     "solution": "10",
+     "explain": "**10**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 12/14** — Avec la référence à 10 000 Mb/s : de R1 à LAN 3 par deux liens **Gigabit** (10 chacun) puis le LAN de R3 en **Gigabit** (10). Coût total ?",
+     "hints": [
+      "10 + 10 + 10."
+     ],
+     "accept": [],
+     "solution": "30",
+     "explain": "**30**.",
+     "placeholder": "Écris ta réponse ou ta commande ici…"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 13/14** — R1 et R2 restent bloqués en **ExStart**. Cause la plus probable ?",
+     "options": [
+      "MTU différents sur les deux interfaces",
+      "Un Hello différent",
+      "Une aire différente"
+     ],
+     "answer": 0,
+     "explain": "ExStart/Exchange bloqués = problème de **MTU**."
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 14/14 (boss)** — Sur un segment Ethernet partagé, R1 (priorité 1, RID 1.1.1.1), R2 (priorité 1, RID 2.2.2.2), R3 (priorité 50, RID 3.3.3.3), R4 (priorité 0, RID 4.4.4.4). Qui sont DR et BDR ?",
+     "options": [
+      "DR = R3, BDR = R2",
+      "DR = R4, BDR = R3",
+      "DR = R3, BDR = R1"
+     ],
+     "answer": 0,
+     "explain": "R4 (priorité 0) ne participe pas. R3 (priorité 50) est **DR**. À priorité égale entre R1 et R2, le RID le plus haut gagne : R2 est **BDR**."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais configurer OSPF, comprendre l'état des voisins, calculer et ajuster le coût, maîtriser DR/BDR, découper en aires et dépanner. **OSPF de zéro à héros** ? Mission accomplie. 🚀"
+    }
+   ]
+  }
+ ]
+}
