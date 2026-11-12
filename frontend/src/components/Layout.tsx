@@ -27,6 +27,9 @@ import { ConfettiBackdrop, FlameBadgeIcon } from './Decor';
 import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
 import InstallPwaModal from './InstallPwaModal';
+import PushPrompt from './PushPrompt';
+import { UnreadBadge } from './UnreadBadge';
+import { useUnreadMessages } from '@/state/useUnread';
 import { fetchBattle, WeeklyBattleInfo } from '@/data/repo';
 
 const MOBILE_NAV = [
@@ -166,6 +169,7 @@ export default function Layout() {
   const { state, online, pendingSync, syncError } = useStore();
   const { filiere, customPseudo } = useTheme();
   const loc = useLocation();
+  const unread = useUnreadMessages();
   const inReader = loc.pathname.includes('/lire/');
 
   const [battle, setBattle] = useState<WeeklyBattleInfo | null>(null);
@@ -242,6 +246,7 @@ export default function Layout() {
             >
               <n.icon size={20} />
               <span>{n.label}</span>
+              {n.to === '/messages' && <UnreadBadge count={unread} className="ml-auto" />}
             </NavLink>
           ))}
         </nav>
@@ -282,11 +287,12 @@ export default function Layout() {
             <XpChip />
             <Link
               to="/messages"
-              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"
-              aria-label="Messagerie"
-              title="Messagerie"
+              className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"
+              aria-label={unread > 0 ? `Messagerie : ${unread} message${unread > 1 ? 's' : ''} non lu${unread > 1 ? 's' : ''}` : 'Messagerie'}
+              title={unread > 0 ? `${unread} message${unread > 1 ? 's' : ''} non lu${unread > 1 ? 's' : ''}` : 'Messagerie'}
             >
               <TextBubble size={18} />
+              <UnreadBadge count={unread} className="absolute -right-1.5 -top-1.5" />
             </Link>
             <Link to="/profil" className="ml-1 flex items-center" aria-label="Voir mon profil">
               <CustomAvatar name={displayName} filiere={filiere} size={34} showBadge />
@@ -352,6 +358,7 @@ export default function Layout() {
       <WeeklyBattleWinnerModal battle={battle} />
       <FilierePromptModal />
       <InstallPwaModal />
+      <PushPrompt />
       <Celebrations />
     </div>
   );

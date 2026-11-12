@@ -27,6 +27,7 @@ import { renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 import { FlameBadgeIcon, TrophyBadgeIcon } from '@/components/Decor';
 import { CustomAvatar } from '@/components/CustomAvatar';
 import { isStandalone, triggerInstallPrompt } from '@/components/InstallPwaModal';
+import PushToggle from '@/components/PushToggle';
 import { Empty, PageTitle, Spinner, Stat } from '@/components/ui';
 
 export default function ProfilePage() {
@@ -409,6 +410,8 @@ export default function ProfilePage() {
               <Lock size={12} /> La filière ne peut plus être modifiée une fois définie.
             </p>
           </div>
+
+          {cloud && !user?.guest && <PushToggle />}
 
           <div className="pt-3 border-t border-line/60 space-y-2">
             {!isStandalone() && (

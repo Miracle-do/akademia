@@ -99,19 +99,37 @@ async function notifyOvertaken(userIds, username) {
   });
 }
 
-async function notifyMessage(recipientId, senderId, senderName, body) {
-  if (!isConfigured()) return 0;
+function buildMessagePayload(senderId, senderName, body, unread) {
   const preview = String(body).replace(/\s+/g, ' ').trim().slice(0, 140);
-  return sendToUsers([recipientId], {
+  return {
     title: `Nouveau message de ${senderName}`,
     body: preview,
     url: `/messages/${senderId}`,
-    tag: `message-${recipientId}-${Date.now()}`,
-  });
+    // Un seul « fil » de notification par expéditeur : un nouveau message remplace (et re-sonne) le précédent.
+    tag: `message-${senderId}`,
+    unread: Number.isInteger(unread) && unread > 0 ? unread : undefined,
+  };
+}
+
+async function countUnreadMessages(recipientId) {
+  try {
+    const query = new URLSearchParams({ select: 'id', recipient_id: `eq.${recipientId}`, read_at: 'is.null', limit: '100' });
+    const rows = await adminRequest(`/rest/v1/messages?${query}`);
+    return Array.isArray(rows) ? rows.length : undefined;
+  } catch {
+    return undefined; // le compteur est un bonus : on n'empêche jamais la notification
+  }
+}
+
+async function notifyMessage(recipientId, senderId, senderName, body) {
+  if (!isConfigured()) return 0;
+  const unread = await countUnreadMessages(recipientId);
+  return sendToUsers([recipientId], buildMessagePayload(senderId, senderName, body, unread));
 }
 
 module.exports = {
   adminRequest,
+  buildMessagePayload,
   isConfigured,
   notifyMessage,
   notifyOvertaken,

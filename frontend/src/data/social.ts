@@ -1,6 +1,7 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { apiRequest } from './repo';
 import { supabase } from './supabase';
+import { notifyMessagesChanged } from './unread';
 
 export interface PublicProfile {
   id: string;
@@ -115,6 +116,7 @@ export async function deleteMessageForUser(userId: string, messageId: string): P
     { onConflict: 'user_id,message_id', ignoreDuplicates: true },
   );
   if (error) throw error;
+  notifyMessagesChanged();
 }
 
 export async function deleteConversationForUser(userId: string, partnerId: string): Promise<void> {
@@ -122,10 +124,12 @@ export async function deleteConversationForUser(userId: string, partnerId: strin
   if (sessionError || session.session?.user.id !== userId) throw new Error('Reconnecte-toi pour supprimer cette discussion.');
   const { error } = await client().rpc('hide_conversation', { p_partner_id: partnerId });
   if (error) throw error;
+  notifyMessagesChanged();
 }
 
 async function deleteForEveryone(_userId: string, path: string): Promise<void> {
   await apiRequest(path, { method: 'DELETE' });
+  notifyMessagesChanged();
 }
 
 export function deleteMessageForEveryone(userId: string, messageId: string): Promise<void> {
@@ -156,6 +160,7 @@ export async function markConversationRead(userId: string, senderId: string): Pr
     .eq('sender_id', senderId)
     .is('read_at', null);
   if (error) throw error;
+  notifyMessagesChanged();
 }
 
 export function subscribeToConversation(

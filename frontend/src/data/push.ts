@@ -37,6 +37,32 @@ async function pushRequest(path: string, token: string, init?: RequestInit) {
   return response.status === 204 ? null : response.json().catch(() => null);
 }
 
+export type PushPermission = 'unsupported' | 'denied' | 'granted' | 'default';
+
+export function pushSupported(): boolean {
+  return typeof window !== 'undefined'
+    && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+
+export function getPushPermission(): PushPermission {
+  if (!pushSupported()) return 'unsupported';
+  return Notification.permission as PushPermission;
+}
+
+/**
+ * Au chargement de l'app, si l'utilisateur a déjà autorisé les notifications, on ré-enregistre
+ * silencieusement l'abonnement (il est supprimé à la déconnexion ou peut expirer côté navigateur).
+ * Ne demande jamais la permission.
+ */
+export async function syncPushSubscription(): Promise<void> {
+  if (getPushPermission() !== 'granted') return;
+  try {
+    await enablePush();
+  } catch {
+    /* serveur push non configuré ou hors ligne : rien à signaler à l'utilisateur */
+  }
+}
+
 export async function getPushEnabled(): Promise<boolean> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !supabase) return false;
   const registration = await navigator.serviceWorker.getRegistration('/');

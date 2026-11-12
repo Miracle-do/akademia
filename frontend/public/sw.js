@@ -72,13 +72,33 @@ self.addEventListener('push', (event) => {
     payload = { body: event.data?.text() || '' };
   }
 
-  event.waitUntil(self.registration.showNotification(payload.title || 'Akademia', {
-    body: payload.body || 'Tu as une nouvelle notification.',
-    icon: '/img.png',
-    badge: '/favicon.svg',
-    tag: payload.tag || 'akademia-notification',
-    data: { url: payload.url || '/' },
-  }));
+  event.waitUntil((async () => {
+    // Pastille sur l'icône de l'application installée.
+    try {
+      if (typeof payload.unread === 'number' && 'setAppBadge' in self.navigator) {
+        await (payload.unread > 0 ? self.navigator.setAppBadge(payload.unread) : self.navigator.clearAppBadge());
+      }
+    } catch {
+      /* API de pastille non disponible */
+    }
+
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    windows.forEach((windowClient) => windowClient.postMessage({ type: 'akademia-push', payload }));
+    // Si l'application est ouverte et visible, le compteur se met à jour en direct : pas de notification en double.
+    // (Exception iOS : Safari exige une notification pour CHAQUE push, sinon l'abonnement est révoqué.)
+    const isIos = /iphone|ipad|ipod/i.test(self.navigator.userAgent || '');
+    if (!isIos && windows.some((windowClient) => windowClient.visibilityState === 'visible' && windowClient.focused)) return;
+
+    await self.registration.showNotification(payload.title || 'Akademia', {
+      body: payload.body || 'Tu as une nouvelle notification.',
+      icon: '/img.png',
+      badge: '/favicon.svg',
+      tag: payload.tag || 'akademia-notification',
+      renotify: true,
+      timestamp: Date.now(),
+      data: { url: payload.url || '/' },
+    });
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
