@@ -1,0 +1,1676 @@
+{
+ "id": "sudo-pam",
+ "order": 8,
+ "title": "sudo et PAM : les bons droits, rien de plus",
+ "tagline": "visudo, règles fines, audit des journaux et PAM : donne juste les droits nécessaires et verrouille l'authentification.",
+ "emoji": "🛡️",
+ "color": "#DC2626",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 110,
+ "pitch": [
+  "Bonjour ! Je te présente **« sudo et PAM : les bons droits, rien de plus »** 🛡️.",
+  "Donner `ALL=(ALL) ALL` à tout le monde, c'est facile… et dangereux. Un bon administrateur applique le **moindre privilège** : chacun reçoit **juste** ce dont il a besoin, tout est **tracé**, et l'authentification est **durcie**.",
+  "On part de la raison d'être de `sudo`, on apprend à lire et écrire `/etc/sudoers` avec **visudo**, à écrire des **règles fines** (commandes précises, alias, `sudoedit`) en évitant les pièges classiques, puis à **auditer** les journaux. Ensuite, on ouvre **PAM** : la pile de modules, les 4 types, les contrôles, et des recettes concrètes (`pam_wheel`, `limits.conf`, `pam_pwquality`, `faillock`).",
+  "Chaque règle est à écrire toi-même, avec les pièges réels, et on termine par un défi d'administrateur sécurité."
+ ],
+ "benefits": [
+  "Écrire des règles sudoers précises et sans faille (alias, sudoedit, NOPASSWD maîtrisé)",
+  "Éditer sudoers en sécurité avec visudo et sudoers.d",
+  "Lire un fichier PAM : types, contrôles, modules",
+  "Durcir l'authentification : su restreint, limites, qualité des mots de passe, verrouillage"
+ ],
+ "lessons": [
+  {
+   "id": "pourquoi",
+   "title": "Pourquoi sudo ? Le pouvoir, mais sous contrôle",
+   "emoji": "🔐",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! **Nimbo** ☁️. Sur un serveur, **root** peut tout faire, y compris tout casser en une faute de frappe (`rm -rf /`). Se connecter en root toute la journée est donc une **très mauvaise idée**. La solution moderne : travailler en utilisateur normal et **emprunter les droits de root le temps d'une commande** avec **`sudo`**."
+    },
+    {
+     "type": "code",
+     "sql": "su -          devenir root : on tape le mot de passe de ROOT (partagé entre tous les admins)\nsudo cmd      lancer UNE commande en root : on tape SON PROPRE mot de passe\n              + c'est JOURNALISÉ (qui, quand, quoi) + droits LIMITABLES finement",
+     "lang": "Terminal",
+     "title": "su contre sudo"
+    },
+    {
+     "type": "choice",
+     "q": "Avec `sudo`, quel mot de passe tape-t-on ?",
+     "options": [
+      "Celui de root",
+      "Son propre mot de passe",
+      "Aucun"
+     ],
+     "answer": 1,
+     "explain": "Par défaut `sudo` demande **ton** mot de passe (et vérifie que tu es autorisé). Aucun mot de passe de root à partager."
+    },
+    {
+     "type": "say",
+     "text": "**Les 4 avantages de sudo sur la connexion en root :**"
+    },
+    {
+     "type": "code",
+     "sql": "1. TRAÇABILITÉ     chaque commande est journalisée avec le nom de l'utilisateur\n2. MOINDRE PRIVILÈGE on peut ne donner que certaines commandes\n3. PAS DE MOT DE PASSE ROOT PARTAGÉ  : si quelqu'un part, on retire ses droits, pas besoin de changer le mot de passe de tout le monde\n4. PRUDENCE         on lance UNE commande privilégiée, puis on revient en utilisateur normal",
+     "lang": "Terminal",
+     "title": "Pourquoi sudo ?"
+    },
+    {
+     "type": "choice",
+     "q": "Un administrateur quitte l'entreprise. Avec sudo, que fait-on ?",
+     "options": [
+      "On change le mot de passe root pour tous",
+      "On supprime ses droits sudo (ou son compte) : les autres ne sont pas touchés",
+      "Rien"
+     ],
+     "answer": 1,
+     "explain": "Chacun s'authentifie avec son propre compte : retirer ses droits suffit."
+    },
+    {
+     "type": "choice",
+     "q": "Le principe de **moindre privilège** consiste à…",
+     "options": [
+      "Donner à chacun uniquement les droits dont il a besoin",
+      "Donner tous les droits aux administrateurs",
+      "Supprimer tous les droits"
+     ],
+     "answer": 0,
+     "explain": "**Juste les droits nécessaires**, pas plus. C'est tout l'objet de cette formation."
+    },
+    {
+     "type": "say",
+     "text": "**Qui a le droit d'utiliser sudo ?** Les utilisateurs listés dans **`/etc/sudoers`** (ou dans `/etc/sudoers.d/`). Sur **Debian/Ubuntu**, le groupe **`sudo`** reçoit tous les droits ; sur **RHEL/Rocky/Fedora**, c'est le groupe **`wheel`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Donne les droits sudo à `awa` sur **Debian/Ubuntu** (ajout au groupe) (sudo).",
+     "hints": [
+      "usermod -aG + groupe sudo."
+     ],
+     "accept": [
+      "sudo gpasswd -a awa sudo",
+      "sudo adduser awa sudo",
+      "sudo usermod -a -G sudo awa"
+     ],
+     "solution": "sudo usermod -aG sudo awa",
+     "explain": "Ne pas oublier `-a` : sinon tu écrases les autres groupes d'awa. Elle doit se **reconnecter**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Donne les droits sudo à `awa` sur **RHEL/Rocky** (groupe wheel) (sudo).",
+     "hints": [
+      "Le groupe s'appelle wheel."
+     ],
+     "accept": [
+      "sudo gpasswd -a awa wheel",
+      "sudo usermod -a -G wheel awa"
+     ],
+     "solution": "sudo usermod -aG wheel awa",
+     "explain": "`wheel` est l'équivalent RHEL du groupe `sudo`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Les options de `sudo` à connaître :**"
+    },
+    {
+     "type": "code",
+     "sql": "sudo cmd         exécuter cmd en root\nsudo -u user cmd  exécuter cmd en tant que user (pas forcément root)\nsudo -i           shell de connexion root (environnement de root)\nsudo -s           shell root en gardant ton environnement\nsudo -l           LISTER mes droits sudo\nsudo -v           renouveler le « ticket » sans lancer de commande\nsudo -k           OUBLIER le ticket (le prochain sudo redemandera le mot de passe)\nsudo !!           relancer la commande précédente avec sudo",
+     "lang": "Terminal",
+     "title": "Options de sudo"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **la liste de tes droits sudo**.",
+     "hints": [
+      "sudo + option list."
+     ],
+     "accept": [
+      "sudo --list"
+     ],
+     "solution": "sudo -l",
+     "explain": "Montre les commandes autorisées, et pour qui. Le meilleur réflexe pour comprendre un « Sorry, user … is not allowed… ».",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance **la commande `whoami` en tant qu'utilisateur `www-data`**.",
+     "hints": [
+      "sudo -u utilisateur commande."
+     ],
+     "accept": [
+      "sudo --user=www-data whoami",
+      "sudo --user www-data whoami"
+     ],
+     "solution": "sudo -u www-data whoami",
+     "explain": "Très utile pour tester les droits d'un compte de service.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Ouvre **un shell root complet** (environnement de connexion de root).",
+     "hints": [
+      "sudo + option login."
+     ],
+     "accept": [
+      "sudo --login",
+      "sudo su -",
+      "sudo -s"
+     ],
+     "solution": "sudo -i",
+     "explain": "Pratique pour une longue séance d'administration. Pense à `exit` ensuite.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Oublie le ticket** : le prochain `sudo` devra redemander le mot de passe.",
+     "hints": [
+      "sudo -k (kill)."
+     ],
+     "accept": [
+      "sudo --reset-timestamp"
+     ],
+     "solution": "sudo -k",
+     "explain": "À taper avant de laisser ton poste sans surveillance.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Relance la commande précédente** avec les droits root (tu as oublié `sudo`).",
+     "hints": [
+      "Deux points d'exclamation."
+     ],
+     "accept": [],
+     "solution": "sudo !!",
+     "explain": "`!!` est remplacé par la dernière commande de l'historique.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Tu tapes `apt update` et reçois « Permission denied ». Que fais-tu ?",
+     "options": [
+      "Tu relances avec `sudo !!`",
+      "Tu te connectes en root pour toute la journée",
+      "Tu changes les permissions de /etc"
+     ],
+     "answer": 0,
+     "explain": "`sudo !!` relance la commande précédente avec `sudo` : rapide et ciblé."
+    },
+    {
+     "type": "say",
+     "text": "**Le « ticket » (timestamp).** Après un mot de passe réussi, sudo te laisse enchaîner **quelques minutes** (5 à 15 selon la distribution) **sans le redemander**. Passé ce délai, il le redemande. C'est configurable (leçon « options »)."
+    },
+    {
+     "type": "choice",
+     "q": "Tu laisses ton poste ouvert 2 minutes juste après un `sudo`. Quel est le risque ?",
+     "options": [
+      "Aucun",
+      "Quelqu'un peut lancer sudo sans mot de passe tant que le ticket est valide",
+      "sudo se désinstalle"
+     ],
+     "answer": 1,
+     "explain": "Tant que le **ticket** est valide, `sudo` ne redemande pas le mot de passe. Verrouille ta session ou tape `sudo -k`."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **sudo** = droits de root **à la commande**, avec **ton** mot de passe, **traçable** et **limitable**. Groupes **sudo** (Debian) / **wheel** (RHEL). `sudo -l`, `-u`, `-i`, `-k`, `!!`."
+    }
+   ]
+  },
+  {
+   "id": "sudoers",
+   "title": "/etc/sudoers et visudo : qui peut quoi",
+   "emoji": "📜",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les règles de `sudo` vivent dans **`/etc/sudoers`** et dans les fichiers de **`/etc/sudoers.d/`**. Un fichier **sensible** : une erreur de syntaxe peut **bloquer sudo pour tout le monde** (et si tu n'as pas de session root ouverte, tu es coincé !). C'est pourquoi on l'édite **toujours avec `visudo`**."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi utiliser `visudo` plutôt que `nano /etc/sudoers` ?",
+     "options": [
+      "visudo verrouille le fichier et vérifie la syntaxe avant d'enregistrer",
+      "visudo est plus joli",
+      "nano ne peut pas ouvrir ce fichier"
+     ],
+     "answer": 0,
+     "explain": "`visudo` **verrouille** le fichier (une seule édition à la fois), **contrôle la syntaxe** et refuse de sauvegarder une erreur."
+    },
+    {
+     "type": "exercise",
+     "q": "Ouvre le fichier `/etc/sudoers` **de façon sécurisée** (sudo).",
+     "hints": [
+      "Un nom qui mélange « vi » et « sudo »."
+     ],
+     "accept": [
+      "visudo"
+     ],
+     "solution": "sudo visudo",
+     "explain": "Sur Debian/Ubuntu, l'éditeur par défaut est nano ; sur d'autres, vi. Tu peux choisir avec `EDITOR=nano sudo visudo` (ou `sudo EDITOR=nano visudo`).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Vérifie la syntaxe** de tous les fichiers sudoers sans rien modifier (sudo).",
+     "hints": [
+      "visudo + option check."
+     ],
+     "accept": [
+      "visudo -c",
+      "sudo visudo --check"
+     ],
+     "solution": "sudo visudo -c",
+     "explain": "Affiche « parsed OK » pour chaque fichier, ou l'erreur avec la ligne et la colonne.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Anatomie d'une règle** (la plus importante de la formation) :"
+    },
+    {
+     "type": "code",
+     "sql": "awa   ALL = (ALL:ALL)   ALL\n │     │       │          └─ 4 : les COMMANDES autorisées\n │     │       └─ 3 : l'utilisateur:groupe EN TANT QUE qui\n │     └─ 2 : sur quelle MACHINE (ALL = n'importe laquelle)\n └─ 1 : QUI (utilisateur, ou %groupe)\n\nLecture : « awa peut, sur toutes les machines, devenir n'importe quel utilisateur:groupe et lancer n'importe quelle commande. »",
+     "lang": "Terminal",
+     "title": "Utilisateur Hôte=(RunAs) Commandes"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `awa ALL=(ALL:ALL) ALL`, que désigne le **premier champ** ?",
+     "hints": [
+      "Qui a le droit."
+     ],
+     "accept": [
+      "qui",
+      "utilisateur",
+      "user",
+      "awa"
+     ],
+     "solution": "l'utilisateur",
+     "explain": "Le **premier champ** désigne **qui** : un utilisateur (`awa`) ou un groupe (`%dev`).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le rôle du champ entre **parenthèses** `(ALL:ALL)` ?",
+     "options": [
+      "Les machines autorisées",
+      "Les utilisateurs:groupes EN TANT QUE lesquels la commande peut s'exécuter",
+      "Les commandes interdites"
+     ],
+     "answer": 1,
+     "explain": "C'est le champ **RunAs** : sous quelle identité (utilisateur:groupe) les commandes peuvent tourner."
+    },
+    {
+     "type": "choice",
+     "q": "Quel préfixe désigne un **groupe** (au lieu d'un utilisateur) dans sudoers ?",
+     "options": [
+      "@",
+      "%",
+      "#"
+     ],
+     "answer": 1,
+     "explain": "**`%`** : `%dev ALL=(ALL) ALL` = tous les membres du groupe `dev`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui donne à `koffi` **tous les droits** (toute commande, sur toute machine, en tant que tout utilisateur:groupe).",
+     "hints": [
+      "utilisateur ALL=(ALL:ALL) ALL"
+     ],
+     "accept": [
+      "koffi ALL=(ALL) ALL"
+     ],
+     "solution": "koffi ALL=(ALL:ALL) ALL",
+     "explain": "C'est exactement la règle de root. À n'accorder qu'aux vrais administrateurs.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui donne à **tous les membres du groupe `admins`** tous les droits.",
+     "hints": [
+      "Le groupe se préfixe par %."
+     ],
+     "accept": [
+      "%admins ALL=(ALL) ALL"
+     ],
+     "solution": "%admins ALL=(ALL:ALL) ALL",
+     "explain": "Gérer par **groupes** est bien plus simple que ligne par ligne.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Ne touche pas à `/etc/sudoers` pour tes règles : crée un fichier dans `/etc/sudoers.d/`.** Une règle par sujet (`/etc/sudoers.d/koffi`, `/etc/sudoers.d/web`). Avantages : plus lisible, facile à supprimer, pas de conflit lors des mises à jour. La ligne `@includedir /etc/sudoers.d` (ou `#includedir`, le `#` n'est **pas** un commentaire ici) charge ces fichiers."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée/édite **le fichier de règles** `/etc/sudoers.d/koffi` **avec vérification de syntaxe** (sudo).",
+     "hints": [
+      "visudo -f + chemin du fichier."
+     ],
+     "accept": [
+      "sudo visudo --file=/etc/sudoers.d/koffi"
+     ],
+     "solution": "sudo visudo -f /etc/sudoers.d/koffi",
+     "explain": "`-f` indique le fichier à éditer, toujours avec les protections de visudo.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Un fichier de `/etc/sudoers.d/` est nommé `koffi.conf`. Sera-t-il lu ?",
+     "options": [
+      "Oui",
+      "Non : les noms contenant un point (.) ou finissant par ~ sont ignorés",
+      "Seulement par root"
+     ],
+     "answer": 1,
+     "explain": "sudo **ignore** les fichiers de `sudoers.d` dont le nom contient un `.` ou finit par `~` (fichiers de sauvegarde). Utilise des noms simples comme `koffi`."
+    },
+    {
+     "type": "exercise",
+     "q": "Mets les **permissions 440** (lecture seule pour le propriétaire et le groupe) sur `/etc/sudoers.d/koffi` (sudo).",
+     "hints": [
+      "chmod 440 + fichier."
+     ],
+     "accept": [
+      "sudo chmod 0440 /etc/sudoers.d/koffi",
+      "sudo chmod u=r,g=r,o= /etc/sudoers.d/koffi",
+      "sudo chmod ug=r,o= /etc/sudoers.d/koffi"
+     ],
+     "solution": "sudo chmod 440 /etc/sudoers.d/koffi",
+     "explain": "Les fichiers sudoers doivent être en **0440** (propriétaire root).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Règle d'or de la lecture : la DERNIÈRE règle qui correspond l'emporte** (et non la première, comme dans un pare-feu). Mets donc les règles **générales d'abord** et les **exceptions à la fin**."
+    },
+    {
+     "type": "choice",
+     "q": "Fichier : `%dev ALL=(ALL) NOPASSWD: ALL` puis `awa ALL=(ALL) ALL` (awa est dans dev). Awa doit-elle taper son mot de passe ?",
+     "options": [
+      "Non : la première règle s'applique",
+      "Oui : la dernière règle correspondante l'emporte",
+      "Impossible à dire"
+     ],
+     "answer": 1,
+     "explain": "**Dernier match gagne** : la ligne d'awa (qui demande un mot de passe) remplace la précédente."
+    },
+    {
+     "type": "say",
+     "text": "**Lire un fichier par défaut Ubuntu** :"
+    },
+    {
+     "type": "code",
+     "sql": "root    ALL=(ALL:ALL) ALL\n%admin  ALL=(ALL) ALL\n%sudo   ALL=(ALL:ALL) ALL\n@includedir /etc/sudoers.d",
+     "lang": "Terminal",
+     "title": "Extrait par défaut"
+    },
+    {
+     "type": "choice",
+     "q": "Dans cet extrait, qui a les droits complets ?",
+     "options": [
+      "root et les membres des groupes admin et sudo",
+      "Seulement root",
+      "Tous les utilisateurs"
+     ],
+     "answer": 0,
+     "explain": "`root`, le groupe `admin` (ancien) et le groupe `sudo`. Voilà pourquoi `usermod -aG sudo awa` suffit."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **`visudo`** (jamais d'édition directe), règle **Qui Hôte=(RunAs) Commandes**, `%groupe`, fichiers dans **`/etc/sudoers.d/`** (0440, pas de point dans le nom), `visudo -c`, `visudo -f`, **dernier match gagnant**."
+    }
+   ]
+  },
+  {
+   "id": "precis",
+   "title": "Juste les droits nécessaires : règles fines",
+   "emoji": "🎯",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Donner `ALL=(ALL) ALL` à tout le monde, c'est comme donner les clés de toute l'entreprise. L'art de `sudo`, c'est de n'accorder **que ce dont chacun a besoin**. Exemple : l'équipe web doit pouvoir **redémarrer nginx**, **rien d'autre**."
+    },
+    {
+     "type": "say",
+     "text": "**Première règle d'écriture : toujours le chemin complet de la commande.** Sinon sudo refuse (ou pire : un attaquant place un faux programme dans le `PATH`). Pour le trouver : `command -v nom` ou `which nom`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **le chemin complet** de la commande `systemctl`.",
+     "hints": [
+      "command -v + nom."
+     ],
+     "accept": [
+      "which systemctl",
+      "type -p systemctl"
+     ],
+     "solution": "command -v systemctl",
+     "explain": "Résultat typique : `/usr/bin/systemctl`. `which systemctl` fonctionne aussi.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui autorise `awa` à lancer **uniquement** `/usr/bin/systemctl restart nginx` en tant que root.",
+     "hints": [
+      "utilisateur ALL=(root) commande complète avec ses arguments"
+     ],
+     "accept": [
+      "awa ALL=(ALL) /usr/bin/systemctl restart nginx",
+      "awa ALL=(ALL:ALL) /usr/bin/systemctl restart nginx",
+      "awa ALL=(root:root) /usr/bin/systemctl restart nginx"
+     ],
+     "solution": "awa ALL=(root) /usr/bin/systemctl restart nginx",
+     "explain": "Avec les arguments précisés, **seule cette forme exacte** est autorisée. `systemctl stop nginx` sera refusé.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`awa ALL=(root) /usr/bin/systemctl restart nginx`. Awa tape `sudo systemctl stop nginx`. Résultat ?",
+     "options": [
+      "Ça marche",
+      "Refusé : seule la commande exacte `restart nginx` est autorisée",
+      "Ça marche après mot de passe"
+     ],
+     "answer": 1,
+     "explain": "Quand une règle précise les **arguments**, seuls **ces arguments** sont acceptés."
+    },
+    {
+     "type": "choice",
+     "q": "`awa ALL=(root) /usr/bin/systemctl` (sans arguments). Que peut faire awa ?",
+     "options": [
+      "Rien",
+      "Lancer `systemctl` avec n'importe quel argument (donc tout arrêter, tout démarrer…)",
+      "Seulement `systemctl status`"
+     ],
+     "answer": 1,
+     "explain": "Sans arguments dans la règle, **tous les arguments** sont permis : trop large !"
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise `awa` à lancer **deux commandes** : `/usr/bin/systemctl restart nginx` **et** `/usr/bin/systemctl status nginx`, en tant que root.",
+     "hints": [
+      "Sépare les commandes par une virgule."
+     ],
+     "accept": [
+      "awa ALL=(root) /usr/bin/systemctl restart nginx,/usr/bin/systemctl status nginx",
+      "awa ALL=(ALL) /usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx",
+      "awa ALL=(ALL) /usr/bin/systemctl restart nginx,/usr/bin/systemctl status nginx"
+     ],
+     "solution": "awa ALL=(root) /usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx",
+     "explain": "Une virgule (suivie d'un espace) sépare les commandes autorisées.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise **tout le groupe `web`** à lancer `/usr/bin/systemctl restart nginx` en tant que root.",
+     "hints": [
+      "Le groupe se préfixe par %."
+     ],
+     "accept": [
+      "%web ALL=(ALL) /usr/bin/systemctl restart nginx",
+      "%web ALL=(ALL:ALL) /usr/bin/systemctl restart nginx",
+      "%web ALL=(root:root) /usr/bin/systemctl restart nginx"
+     ],
+     "solution": "%web ALL=(root) /usr/bin/systemctl restart nginx",
+     "explain": "Ajoute ou retire des personnes du groupe `web` : tu n'as plus à modifier sudoers.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**`NOPASSWD:`** supprime la demande de mot de passe. Utile pour les **scripts automatiques**, dangereux pour un humain (un poste volé devient une porte ouverte). À réserver à des **commandes précises et peu risquées**."
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise `deploy` à lancer `/usr/bin/systemctl restart nginx` **sans mot de passe**, en tant que root.",
+     "hints": [
+      "Ajoute NOPASSWD: avant la commande."
+     ],
+     "accept": [
+      "deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx",
+      "deploy ALL=(ALL:ALL) NOPASSWD: /usr/bin/systemctl restart nginx",
+      "deploy ALL=(root:root) NOPASSWD: /usr/bin/systemctl restart nginx"
+     ],
+     "solution": "deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx",
+     "explain": "Le `NOPASSWD:` se place **juste avant** la liste de commandes.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Laquelle de ces lignes est la **plus dangereuse** ?",
+     "options": [
+      "deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx",
+      "deploy ALL=(ALL) NOPASSWD: ALL",
+      "deploy ALL=(root) /usr/bin/systemctl status nginx"
+     ],
+     "answer": 1,
+     "explain": "`NOPASSWD: ALL` = root complet **sans mot de passe** : à éviter, sauf cas très encadrés."
+    },
+    {
+     "type": "say",
+     "text": "**Les alias** évitent de répéter : `User_Alias` (groupes d'utilisateurs), `Cmnd_Alias` (groupes de commandes), `Host_Alias` (machines)."
+    },
+    {
+     "type": "code",
+     "sql": "Cmnd_Alias WEB = /usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx\n%web ALL=(root) WEB\nawa ALL=(root) NOPASSWD: /usr/bin/systemctl status nginx",
+     "lang": "Terminal",
+     "title": "Avec un alias"
+    },
+    {
+     "type": "exercise",
+     "q": "Définis l'alias de commandes `WEB` contenant `/usr/bin/systemctl restart nginx` et `/usr/bin/systemctl status nginx`.",
+     "hints": [
+      "Cmnd_Alias NOM = cmd1, cmd2"
+     ],
+     "accept": [
+      "Cmnd_Alias WEB=/usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx",
+      "Cmnd_Alias WEB = /usr/bin/systemctl restart nginx,/usr/bin/systemctl status nginx"
+     ],
+     "solution": "Cmnd_Alias WEB = /usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx",
+     "explain": "Un alias porte un **nom en majuscules** ; on le réutilise dans plusieurs règles.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise **le groupe `web`** à utiliser l'alias `WEB` en tant que root.",
+     "hints": [
+      "Remplace la liste de commandes par le nom de l'alias."
+     ],
+     "accept": [
+      "%web ALL=(ALL) WEB",
+      "%web ALL=(ALL:ALL) WEB",
+      "%web ALL=(root:root) WEB"
+     ],
+     "solution": "%web ALL=(root) WEB",
+     "explain": "Plus lisible, et modifier l'alias met à jour toutes les règles qui l'utilisent.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Exécuter en tant qu'un autre utilisateur (pas root !)** : le champ `(RunAs)` peut désigner un compte de service. Pratique quand quelqu'un doit agir **comme `www-data`** sans jamais devenir root."
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise `awa` à lancer **n'importe quelle commande en tant que `www-data`** (uniquement).",
+     "hints": [
+      "Le seul RunAs autorisé est www-data."
+     ],
+     "accept": [
+      "awa ALL=(www-data:www-data) ALL"
+     ],
+     "solution": "awa ALL=(www-data) ALL",
+     "explain": "Bien plus sûr que `(ALL)` : elle n'obtient pas les droits de root. Usage : `sudo -u www-data commande`.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Les pièges classiques qui rendent une règle « précise » dangereuse :**"
+    },
+    {
+     "type": "code",
+     "sql": "1. LES ÉCHAPPEMENTS VERS UN SHELL\n   vi, vim, less, more, man, find, awk, tar, git, nano… peuvent ouvrir un SHELL.\n   Donner « sudo vi » = donner un shell root (dans vi : :!sh).\n\n2. LES JOKERS\n   /bin/cat /var/log/*   autorise aussi : cat /var/log/../../etc/shadow\n\n3. LES NÉGATIONS\n   ALL, !/bin/su         se contourne : copier /bin/bash ailleurs...\n\n4. LES SCRIPTS MODIFIABLES\n   autoriser /opt/script.sh alors que l'utilisateur peut l'ÉDITER = root.",
+     "lang": "Terminal",
+     "title": "Les 4 pièges"
+    },
+    {
+     "type": "choice",
+     "q": "Tu autorises `awa` à lancer `sudo /usr/bin/vi /etc/nginx/nginx.conf`. Quel est le problème ?",
+     "options": [
+      "Aucun",
+      "Dans vi, `:!sh` ouvre un shell root : awa a effectivement tous les droits",
+      "vi est trop lent"
+     ],
+     "answer": 1,
+     "explain": "Un éditeur lancé en root permet d'**exécuter des commandes** : c'est un root déguisé."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la bonne façon de laisser éditer **un seul fichier** de configuration avec sudo ?",
+     "options": [
+      "sudo vi fichier",
+      "sudoedit (sudo -e) : l'édition se fait avec les droits de l'utilisateur sur une copie",
+      "chmod 777 sur le fichier"
+     ],
+     "answer": 1,
+     "explain": "**`sudoedit`** copie le fichier, l'édite avec **tes** droits dans ton éditeur, puis le recopie : pas de shell root possible."
+    },
+    {
+     "type": "exercise",
+     "q": "Autorise `awa` à éditer **uniquement** `/etc/nginx/nginx.conf` avec `sudoedit`.",
+     "hints": [
+      "Le « programme » à autoriser s'appelle sudoedit."
+     ],
+     "accept": [
+      "awa ALL=(ALL) sudoedit /etc/nginx/nginx.conf",
+      "awa ALL=(ALL:ALL) sudoedit /etc/nginx/nginx.conf",
+      "awa ALL=(root:root) sudoedit /etc/nginx/nginx.conf"
+     ],
+     "solution": "awa ALL=(root) sudoedit /etc/nginx/nginx.conf",
+     "explain": "Usage : `sudoedit /etc/nginx/nginx.conf` (ou `sudo -e`). C'est la bonne pratique pour un fichier précis.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`awa ALL=(root) /bin/cat /var/log/*`. Quel risque ?",
+     "options": [
+      "Aucun",
+      "`*` permet aussi des chemins comme /var/log/../../etc/shadow",
+      "Elle ne peut lire que les logs"
+     ],
+     "answer": 1,
+     "explain": "Le joker `*` accepte `..` : awa peut lire n'importe quel fichier. Évite les jokers dans les chemins."
+    },
+    {
+     "type": "exercise",
+     "q": "**Affiche les droits sudo de l'utilisateur `awa`** (en tant qu'administrateur) (sudo).",
+     "hints": [
+      "sudo -l -U + utilisateur."
+     ],
+     "accept": [
+      "sudo -U awa -l",
+      "sudo --list --other-user=awa",
+      "sudo -lU awa"
+     ],
+     "solution": "sudo -l -U awa",
+     "explain": "Indispensable pour **vérifier** une règle sans te connecter en tant qu'awa.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Chemins complets**, arguments précis, `%groupe`, **`NOPASSWD:` avec parcimonie**, **alias** (`Cmnd_Alias`), `(www-data)` plutôt que `(ALL)`, **`sudoedit`** (jamais `vi`/`less`/`find`…), pas de jokers, pas de négations. Vérifier : `sudo -l -U utilisateur`."
+    }
+   ]
+  },
+  {
+   "id": "options",
+   "title": "Options, journaux et audit de sudo",
+   "emoji": "🧾",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Au-delà des règles, la ligne **`Defaults`** règle le **comportement** de sudo : durée du ticket, journalisation, nombre d'essais… C'est ainsi qu'on durcit un serveur."
+    },
+    {
+     "type": "code",
+     "sql": "Defaults timestamp_timeout=5       ticket valable 5 minutes (0 = toujours demander)\nDefaults passwd_tries=3             3 essais de mot de passe\nDefaults use_pty                    exécuter dans un pseudo-terminal (évite certaines attaques)\nDefaults logfile=\"/var/log/sudo.log\"  journal dédié\nDefaults:awa timestamp_timeout=0    valable pour l'utilisateur awa seulement\nDefaults secure_path=\"...\"          PATH imposé (protège contre les faux programmes)",
+     "lang": "Terminal",
+     "title": "Quelques Defaults"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui fixe la durée du ticket sudo à **5 minutes**.",
+     "hints": [
+      "Defaults + timestamp_timeout=<minutes>"
+     ],
+     "accept": [],
+     "solution": "Defaults timestamp_timeout=5",
+     "explain": "`timestamp_timeout=0` redemande le mot de passe à **chaque** commande.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui oblige sudo à **toujours redemander le mot de passe** (ticket de durée nulle).",
+     "hints": [
+      "Un timeout de 0 minute."
+     ],
+     "accept": [],
+     "solution": "Defaults timestamp_timeout=0",
+     "explain": "Plus sûr, un peu plus pénible.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui limite à **3 essais** de mot de passe.",
+     "hints": [
+      "Defaults passwd_tries=<n>"
+     ],
+     "accept": [],
+     "solution": "Defaults passwd_tries=3",
+     "explain": "Au-delà, sudo abandonne et journalise l'échec.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui active le journal dédié `/var/log/sudo.log`.",
+     "hints": [
+      "Defaults logfile=\"chemin\""
+     ],
+     "accept": [
+      "Defaults logfile=/var/log/sudo.log"
+     ],
+     "solution": "Defaults logfile=\"/var/log/sudo.log\"",
+     "explain": "Sans cela, les événements sont dans le journal d'authentification du système.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui applique un `timestamp_timeout=0` **uniquement à l'utilisateur `awa`**.",
+     "hints": [
+      "Defaults:<utilisateur> option=valeur"
+     ],
+     "accept": [],
+     "solution": "Defaults:awa timestamp_timeout=0",
+     "explain": "La forme `Defaults:utilisateur` limite le réglage à cet utilisateur (`Defaults@hôte` pour une machine).",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Où sont les traces ?** Chaque `sudo` est journalisé. Debian/Ubuntu : **`/var/log/auth.log`** ; RHEL/Rocky : **`/var/log/secure`** ; partout avec systemd : **`journalctl _COMM=sudo`**."
+    },
+    {
+     "type": "code",
+     "sql": "Nov 12 09:15:02 srv sudo:  awa : TTY=pts/0 ; PWD=/home/awa ; USER=root ; COMMAND=/usr/bin/systemctl restart nginx\nNov 12 09:20:11 srv sudo:  koffi : 3 incorrect password attempts ; TTY=pts/1 ; PWD=/home/koffi ; USER=root ; COMMAND=/bin/cat /etc/shadow\nNov 12 09:31:40 srv sudo:  yao : user NOT in sudoers ; TTY=pts/2 ; PWD=/home/yao ; USER=root ; COMMAND=/bin/ls /root",
+     "lang": "Terminal",
+     "title": "Un journal sudo"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans l'extrait, **quelle commande** awa a-t-elle lancée en root ? (chemin complet de la commande + argument)",
+     "hints": [
+      "Champ COMMAND de la 1ʳᵉ ligne."
+     ],
+     "accept": [
+      "systemctl restart nginx"
+     ],
+     "solution": "/usr/bin/systemctl restart nginx",
+     "explain": "`COMMAND=/usr/bin/systemctl restart nginx`.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie la 2ᵉ ligne ?",
+     "options": [
+      "koffi s'est trompé 3 fois de mot de passe en essayant de lire /etc/shadow",
+      "koffi a réussi à lire /etc/shadow",
+      "koffi a changé son mot de passe"
+     ],
+     "answer": 0,
+     "explain": "« 3 incorrect password attempts » : échec d'authentification. **Suspect** : le fichier visé est `/etc/shadow`."
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie la 3ᵉ ligne (`NOT in sudoers`) ?",
+     "options": [
+      "Le compte yao n'a aucun droit sudo : la tentative est journalisée",
+      "yao est administrateur",
+      "yao a changé de shell"
+     ],
+     "answer": 0,
+     "explain": "yao n'est pas dans sudoers : l'incident est signalé dans les logs (« This incident will be reported »)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **toutes les lignes sudo** du journal d'authentification Debian/Ubuntu (`/var/log/auth.log`) (sudo).",
+     "hints": [
+      "grep sudo + fichier."
+     ],
+     "accept": [
+      "grep sudo /var/log/auth.log"
+     ],
+     "solution": "sudo grep sudo /var/log/auth.log",
+     "explain": "Remplace par `/var/log/secure` sur RHEL/Rocky.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **les entrées sudo** du journal systemd (sudo).",
+     "hints": [
+      "journalctl _COMM=sudo"
+     ],
+     "accept": [
+      "journalctl _COMM=sudo"
+     ],
+     "solution": "sudo journalctl _COMM=sudo",
+     "explain": "Fonctionne sur toutes les distributions à systemd.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche seulement **les 20 dernières** lignes sudo du journal d'authentification `/var/log/auth.log` (sudo + pipe vers tail).",
+     "hints": [
+      "grep … | tail -n 20"
+     ],
+     "accept": [
+      "sudo grep sudo /var/log/auth.log | tail -20",
+      "grep sudo /var/log/auth.log | tail -n 20",
+      "grep sudo /var/log/auth.log | tail -20"
+     ],
+     "solution": "sudo grep sudo /var/log/auth.log | tail -n 20",
+     "explain": "Un pipe pour ne garder que la fin.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Cherche dans le journal d'authentification (`/var/log/auth.log`) les lignes avec **`incorrect password`** (sudo).",
+     "hints": [
+      "grep \"incorrect password\" fichier"
+     ],
+     "accept": [
+      "sudo grep 'incorrect password' /var/log/auth.log",
+      "grep \"incorrect password\" /var/log/auth.log",
+      "grep 'incorrect password' /var/log/auth.log"
+     ],
+     "solution": "sudo grep \"incorrect password\" /var/log/auth.log",
+     "explain": "Repère les tentatives ratées : base d'une alerte de sécurité.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 **`Defaults`** : `timestamp_timeout`, `passwd_tries`, `logfile`, `use_pty`, `Defaults:user`. **Journaux** : `/var/log/auth.log` (Debian), `/var/log/secure` (RHEL), `journalctl _COMM=sudo`. Lire une ligne : **TTY, PWD, USER, COMMAND**."
+    }
+   ]
+  },
+  {
+   "id": "pam",
+   "title": "PAM : le chef d'orchestre de l'authentification",
+   "emoji": "🎼",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Quand tu te connectes (SSH, console, `su`, `sudo`, `passwd`…), qui vérifie ton mot de passe ? Pas chaque programme à sa façon : tous passent par **PAM** (*Pluggable Authentication Modules*). Les programmes **délèguent** l'authentification à des **modules** enfichables, configurés par des fichiers texte. Changer la politique (mot de passe, verrouillage, restrictions) = changer un fichier PAM, **sans toucher aux programmes**."
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie PAM ?",
+     "options": [
+      "Password Access Manager",
+      "Pluggable Authentication Modules",
+      "Protected Account Mode"
+     ],
+     "answer": 1,
+     "explain": "**Pluggable Authentication Modules** : des modules enfichables qui assemblent la politique d'authentification."
+    },
+    {
+     "type": "say",
+     "text": "**Où est la configuration ?** Un fichier par service dans **`/etc/pam.d/`** : `sshd`, `sudo`, `su`, `login`, `passwd`… Chaque fichier décrit **la pile de modules** appliquée à ce service. Les modules eux-mêmes sont des bibliothèques `.so`."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers de configuration PAM des services.",
+     "hints": [
+      "ls + le dossier de PAM."
+     ],
+     "accept": [
+      "ls /etc/pam.d/",
+      "ls -l /etc/pam.d",
+      "ls -la /etc/pam.d",
+      "ls -l /etc/pam.d/",
+      "ls -a /etc/pam.d",
+      "ls -al /etc/pam.d"
+     ],
+     "solution": "ls /etc/pam.d",
+     "explain": "Un fichier par service : `sshd`, `sudo`, `su`, `login`, `passwd`, `common-auth`…",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la configuration PAM du service `sudo`.",
+     "hints": [
+      "cat + fichier du service."
+     ],
+     "accept": [
+      "less /etc/pam.d/sudo",
+      "more /etc/pam.d/sudo",
+      "sudo cat /etc/pam.d/sudo"
+     ],
+     "solution": "cat /etc/pam.d/sudo",
+     "explain": "Tu y verras `@include common-auth`, `session required pam_limits.so`…",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Anatomie d'une ligne PAM :**"
+    },
+    {
+     "type": "code",
+     "sql": "auth    required    pam_unix.so   nullok\n │         │           │            └─ 4 : arguments du module (facultatifs)\n │         │           └─ 3 : le MODULE (bibliothèque .so)\n │         └─ 2 : le CONTRÔLE (que faire du résultat ?)\n └─ 1 : le TYPE (quelle étape ?)",
+     "lang": "Terminal",
+     "title": "Type  Contrôle  Module  Arguments"
+    },
+    {
+     "type": "say",
+     "text": "**Les 4 types de modules (les 4 étapes d'une connexion) :**"
+    },
+    {
+     "type": "code",
+     "sql": "auth      QUI ES-TU ?          vérifier l'identité (mot de passe, clé, code…)\naccount   AS-TU LE DROIT ?     compte valide ? expiré ? heure/lieu autorisés ?\npassword  CHANGER LE MOT DE PASSE   qualité, historique, mise à jour\nsession   PRÉPARER LA SESSION  limites, montage du home, journalisation, nettoyage à la fin",
+     "lang": "Terminal",
+     "title": "Les 4 types"
+    },
+    {
+     "type": "choice",
+     "q": "Quel type de module vérifie le **mot de passe** saisi ?",
+     "options": [
+      "auth",
+      "account",
+      "session"
+     ],
+     "answer": 0,
+     "explain": "**auth** : *Qui es-tu ?* (le mot de passe est vérifié ici). **account** : *As-tu le droit ?*"
+    },
+    {
+     "type": "choice",
+     "q": "Un compte a un mot de passe correct mais est **expiré**. Quel type de module le refuse ?",
+     "options": [
+      "auth",
+      "account",
+      "password"
+     ],
+     "answer": 1,
+     "explain": "**account** gère la validité du compte (expiration, plage horaire, accès…), après l'authentification."
+    },
+    {
+     "type": "choice",
+     "q": "Quel type s'occupe d'**appliquer les limites de ressources** (nombre de processus…) à l'ouverture de la session ?",
+     "options": [
+      "auth",
+      "password",
+      "session"
+     ],
+     "answer": 2,
+     "explain": "**session** : préparation et nettoyage autour de la session (`pam_limits.so`, `pam_mkhomedir.so`…)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel type s'applique quand l'utilisateur tape `passwd` pour **changer** son mot de passe ?",
+     "options": [
+      "password",
+      "auth",
+      "account"
+     ],
+     "answer": 0,
+     "explain": "**password** : mise à jour du secret (et vérification de sa qualité avec `pam_pwquality.so`)."
+    },
+    {
+     "type": "say",
+     "text": "**Les contrôles (flags)** décident de ce qu'on fait **du résultat** d'un module :"
+    },
+    {
+     "type": "code",
+     "sql": "required     doit RÉUSSIR ; en cas d'échec on CONTINUE la pile (sans révéler où ça a échoué) puis on refuse\nrequisite    doit RÉUSSIR ; en cas d'échec on s'ARRÊTE IMMÉDIATEMENT et on refuse\nsufficient   si réussi (et aucun required avant n'a échoué) → ACCEPTÉ tout de suite ; si échec, on ignore\noptional     le résultat compte seulement si c'est le SEUL module de la pile\ninclude / substack   charger les lignes d'un autre fichier (ex. common-auth)",
+     "lang": "Terminal",
+     "title": "Les contrôles"
+    },
+    {
+     "type": "choice",
+     "q": "Quel contrôle **arrête immédiatement** l'authentification en cas d'échec ?",
+     "options": [
+      "required",
+      "requisite",
+      "optional"
+     ],
+     "answer": 1,
+     "explain": "**requisite** : échec = on s'arrête là. **required** : échec = on continue la pile avant de refuser (pour ne pas indiquer quel module a échoué)."
+    },
+    {
+     "type": "choice",
+     "q": "Un module `sufficient` réussit (et aucun `required` précédent n'a échoué). Que se passe-t-il ?",
+     "options": [
+      "L'authentification est acceptée immédiatement",
+      "On continue la pile jusqu'au bout",
+      "L'authentification est refusée"
+     ],
+     "answer": 0,
+     "explain": "`sufficient` réussi = **accepté sans lire la suite** (c'est le « laissez-passer »)."
+    },
+    {
+     "type": "choice",
+     "q": "Un module `sufficient` échoue. Que se passe-t-il ?",
+     "options": [
+      "L'authentification est refusée",
+      "L'échec est ignoré, on passe au module suivant",
+      "La pile est interrompue"
+     ],
+     "answer": 1,
+     "explain": "`sufficient` en échec est **ignoré** : c'est la suite qui décide."
+    },
+    {
+     "type": "say",
+     "text": "**Un vrai fichier (Debian) : `common-auth`.** Il utilise la syntaxe avancée `[valeur=action]` :"
+    },
+    {
+     "type": "code",
+     "sql": "auth  [success=1 default=ignore]  pam_unix.so nullok\nauth  requisite                   pam_deny.so\nauth  required                    pam_permit.so",
+     "lang": "Terminal",
+     "title": "/etc/pam.d/common-auth",
+     "note": "Ligne 1 : si pam_unix réussit, SAUTER 1 ligne (donc pam_deny). Sinon, ignorer et continuer vers pam_deny qui refuse. pam_permit est la sortie « accepté »."
+    },
+    {
+     "type": "choice",
+     "q": "Dans ce `common-auth`, que se passe-t-il quand `pam_unix.so` **réussit** ?",
+     "options": [
+      "On saute `pam_deny.so` et on arrive à `pam_permit.so` : accepté",
+      "pam_deny refuse quand même",
+      "La pile s'arrête"
+     ],
+     "answer": 0,
+     "explain": "`success=1` = « saute 1 ligne » : on évite `pam_deny` et on termine sur `pam_permit` → **accepté**."
+    },
+    {
+     "type": "choice",
+     "q": "Dans ce même fichier, que se passe-t-il quand `pam_unix.so` **échoue** ?",
+     "options": [
+      "On saute pam_deny",
+      "pam_deny.so (requisite) refuse immédiatement",
+      "pam_permit accepte"
+     ],
+     "answer": 1,
+     "explain": "`default=ignore` : on continue sur `pam_deny.so`, qui **refuse** toujours."
+    },
+    {
+     "type": "say",
+     "text": "**Les modules les plus courants :**"
+    },
+    {
+     "type": "code",
+     "sql": "pam_unix.so        mots de passe classiques (/etc/shadow)\npam_deny.so        refuse toujours\npam_permit.so      accepte toujours\npam_wheel.so       réserve une action à un groupe (typiquement : su → wheel)\npam_limits.so      applique /etc/security/limits.conf (limites de ressources)\npam_faillock.so    verrouille après N échecs\npam_pwquality.so   impose une qualité de mot de passe\npam_time.so        restreint selon l'heure (/etc/security/time.conf)\npam_access.so      restreint selon l'origine/utilisateur (/etc/security/access.conf)\npam_nologin.so     bloque les connexions si /etc/nologin existe\npam_mkhomedir.so   crée le home à la première connexion (annuaire LDAP/AD)",
+     "lang": "Terminal",
+     "title": "Modules courants"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel module PAM **refuse toujours** ?",
+     "hints": [
+      "Il porte bien son nom : « deny »."
+     ],
+     "accept": [
+      "pam_deny",
+      "deny"
+     ],
+     "solution": "pam_deny.so",
+     "explain": "**pam_deny.so**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel module PAM **réserve l'accès à un groupe** (par exemple pour `su`) ?",
+     "hints": [
+      "Comme le groupe wheel."
+     ],
+     "accept": [
+      "pam_wheel",
+      "wheel"
+     ],
+     "solution": "pam_wheel.so",
+     "explain": "**pam_wheel.so**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel module PAM applique les **limites de ressources** de `/etc/security/limits.conf` ?",
+     "hints": [
+      "Comme « limits »."
+     ],
+     "accept": [
+      "pam_limits",
+      "limits"
+     ],
+     "solution": "pam_limits.so",
+     "explain": "**pam_limits.so**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel module PAM **verrouille un compte après trop d'échecs** de mot de passe ?",
+     "hints": [
+      "Fail + lock."
+     ],
+     "accept": [
+      "pam_faillock",
+      "faillock",
+      "pam_tally2.so",
+      "pam_tally2"
+     ],
+     "solution": "pam_faillock.so",
+     "explain": "**pam_faillock.so** (ou `pam_tally2.so` sur d'anciens systèmes).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel module PAM **vérifie la qualité** d'un nouveau mot de passe ?",
+     "hints": [
+      "Password quality."
+     ],
+     "accept": [
+      "pam_pwquality",
+      "pwquality",
+      "pam_cracklib.so",
+      "pam_cracklib"
+     ],
+     "solution": "pam_pwquality.so",
+     "explain": "**pam_pwquality.so** (remplace l'ancien `pam_cracklib.so`).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **L'ordre compte.** PAM lit les lignes **de haut en bas**. Un `sufficient` placé trop haut peut **court-circuiter** toute la sécurité qui suit. Toute modification de PAM doit être **testée avec une session root déjà ouverte**, sinon une erreur te bloque dehors (voir la leçon suivante)."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **PAM** = modules enfichables ; **`/etc/pam.d/<service>`** ; ligne **type contrôle module args** ; types **auth, account, password, session** ; contrôles **required, requisite, sufficient, optional** ; `[success=1 default=ignore]` ; modules **pam_unix, pam_deny, pam_permit, pam_wheel, pam_limits, pam_faillock, pam_pwquality**."
+    }
+   ]
+  },
+  {
+   "id": "pam-pratique",
+   "title": "PAM en pratique : verrouiller, limiter, durcir",
+   "emoji": "🛡️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe aux **recettes** : réserver `su` aux administrateurs, limiter les ressources, imposer des mots de passe solides, verrouiller après des échecs. Mais d'abord **la règle de survie** :"
+    },
+    {
+     "type": "code",
+     "sql": "1. OUVRE une session root dans un AUTRE terminal et GARDE-LA OUVERTE\n2. SAUVEGARDE le fichier avant de le modifier\n3. MODIFIE, puis TESTE dans un 3ᵉ terminal (nouvelle connexion)\n4. Si ça échoue, restaure depuis la session root restée ouverte",
+     "lang": "Terminal",
+     "title": "Règle de survie PAM"
+    },
+    {
+     "type": "choice",
+     "q": "Tu modifies `/etc/pam.d/sshd` et commets une erreur. Pourquoi une session root ouverte à côté te sauve-t-elle ?",
+     "options": [
+      "Elle accélère PAM",
+      "Elle reste connectée : tu peux corriger le fichier même si les nouvelles connexions sont refusées",
+      "Elle désactive PAM"
+     ],
+     "answer": 1,
+     "explain": "Les sessions **déjà ouvertes** ne sont pas affectées : tu peux revenir en arrière même si **plus personne ne peut se connecter**."
+    },
+    {
+     "type": "exercise",
+     "q": "**Sauvegarde** `/etc/pam.d/sshd` dans `/etc/pam.d/sshd.bak` avant de le modifier (sudo).",
+     "hints": [
+      "cp source destination."
+     ],
+     "accept": [
+      "sudo cp -a /etc/pam.d/sshd /etc/pam.d/sshd.bak",
+      "sudo cp -p /etc/pam.d/sshd /etc/pam.d/sshd.bak"
+     ],
+     "solution": "sudo cp /etc/pam.d/sshd /etc/pam.d/sshd.bak",
+     "explain": "`cp -a` conserve aussi les permissions et propriétaires.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Recette 1 : réserver `su` aux administrateurs.** Par défaut, tout utilisateur peut tenter `su` (avec le mot de passe de root). On peut restreindre aux membres d'un groupe avec `pam_wheel.so` dans `/etc/pam.d/su` :"
+    },
+    {
+     "type": "code",
+     "sql": "# /etc/pam.d/su\nauth  required  pam_wheel.so use_uid\n# (Debian : pour utiliser un autre groupe)\nauth  required  pam_wheel.so use_uid group=sudo",
+     "lang": "Terminal",
+     "title": "pam_wheel dans su",
+     "note": "Sans l'option group=, c'est le groupe « wheel » (RHEL) ; sur Debian il n'existe pas par défaut : on précise group=sudo."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne PAM (type **auth**, contrôle **required**) qui réserve `su` au groupe **`sudo`** avec `pam_wheel.so` (options `use_uid group=sudo`).",
+     "hints": [
+      "auth required pam_wheel.so use_uid group=<groupe>"
+     ],
+     "accept": [],
+     "solution": "auth required pam_wheel.so use_uid group=sudo",
+     "explain": "Les non-membres du groupe recevront un refus immédiat, même avec le bon mot de passe de root.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`pam_wheel.so use_uid group=sudo` est actif. `yao` (hors du groupe sudo) tape `su -` avec le **bon** mot de passe root. Résultat ?",
+     "options": [
+      "Il devient root",
+      "Refusé : il n'est pas membre du groupe autorisé",
+      "Il devient awa"
+     ],
+     "answer": 1,
+     "explain": "`pam_wheel` refuse **avant même** de regarder le mot de passe."
+    },
+    {
+     "type": "say",
+     "text": "**Recette 2 : limiter les ressources (`limits.conf`).** `pam_limits.so` (type `session`) lit **`/etc/security/limits.conf`** (et `/etc/security/limits.d/*.conf`). Format : **`domaine  type  élément  valeur`**."
+    },
+    {
+     "type": "code",
+     "sql": "# domaine   type   élément   valeur\nawa         hard   nproc     100        # max 100 processus\n@dev        soft   nofile    4096       # fichiers ouverts (limite souple)\n*           hard   core      0          # pas de core dump pour personne\n@dev        hard   maxlogins 2          # 2 sessions simultanées au plus",
+     "lang": "Terminal",
+     "title": "limits.conf",
+     "note": "soft = limite modifiable par l'utilisateur jusqu'à la limite hard ; hard = plafond absolu fixé par l'administrateur."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la différence entre une limite `soft` et `hard` ?",
+     "options": [
+      "Aucune",
+      "hard est un plafond que l'utilisateur ne peut pas dépasser ; soft peut être relevée par l'utilisateur jusqu'au plafond hard",
+      "soft est interdite"
+     ],
+     "answer": 1,
+     "explain": "`soft` = valeur effective (relevable) ; `hard` = **plafond absolu** que seul root peut changer."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne de `limits.conf` qui limite **à 100 le nombre de processus** de l'utilisateur `awa` (limite hard, élément `nproc`).",
+     "hints": [
+      "domaine type élément valeur"
+     ],
+     "accept": [],
+     "solution": "awa hard nproc 100",
+     "explain": "Contre les « fork bombs » et les programmes qui s'emballent.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui limite à **2 sessions simultanées** les membres du groupe `dev` (hard, `maxlogins`).",
+     "hints": [
+      "Un groupe se préfixe par @ dans limits.conf."
+     ],
+     "accept": [],
+     "solution": "@dev hard maxlogins 2",
+     "explain": "Dans `limits.conf`, un groupe s'écrit **`@groupe`** (et non `%groupe` comme dans sudoers).",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **toutes les limites actuelles** de ton shell.",
+     "hints": [
+      "ulimit + option all."
+     ],
+     "accept": [],
+     "solution": "ulimit -a",
+     "explain": "`ulimit -u` = nombre de processus, `ulimit -n` = fichiers ouverts.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **la limite du nombre de processus** de ton compte.",
+     "hints": [
+      "ulimit + option u."
+     ],
+     "accept": [
+      "ulimit -Hu",
+      "ulimit -Su"
+     ],
+     "solution": "ulimit -u",
+     "explain": "Correspond à l'élément `nproc` de limits.conf.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Recette 3 : imposer des mots de passe solides** avec `pam_pwquality.so` (type `password`). Options courantes : `retry=3` (essais), `minlen=12` (longueur), `dcredit/ucredit/lcredit/ocredit` (chiffres, majuscules, minuscules, symboles ; une valeur négative **impose** un minimum)."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne PAM (type **password**, contrôle **requisite**) qui active `pam_pwquality.so` avec **3 essais** et **12 caractères minimum**.",
+     "hints": [
+      "password requisite pam_pwquality.so retry=… minlen=…"
+     ],
+     "accept": [
+      "password requisite pam_pwquality.so minlen=12 retry=3"
+     ],
+     "solution": "password requisite pam_pwquality.so retry=3 minlen=12",
+     "explain": "Le mot de passe sera refusé s'il fait moins de 12 caractères (3 tentatives).",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Recette 4 : verrouiller après des échecs.** Avec `pam_faillock.so` : après N échecs, le compte est verrouillé pour une durée. Sur les systèmes récents, les réglages se mettent dans **`/etc/security/faillock.conf`** (`deny = 3`, `unlock_time = 600`). Pour gérer les compteurs : la commande **`faillock`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **les échecs d'authentification enregistrés** pour l'utilisateur `awa` (sudo).",
+     "hints": [
+      "faillock --user + nom."
+     ],
+     "accept": [
+      "faillock --user awa"
+     ],
+     "solution": "sudo faillock --user awa",
+     "explain": "Liste la date et la source des échecs ; au-delà du seuil (`deny`), le compte est verrouillé.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Réinitialise** le compteur d'échecs de `awa` (déverrouille son compte) (sudo).",
+     "hints": [
+      "faillock --user nom --reset."
+     ],
+     "accept": [
+      "faillock --user awa --reset",
+      "sudo faillock --reset --user awa"
+     ],
+     "solution": "sudo faillock --user awa --reset",
+     "explain": "À faire quand un utilisateur légitime est verrouillé après des erreurs.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Recette 5 : bloquer toutes les connexions pendant une maintenance.** Si le fichier **`/etc/nologin`** existe, `pam_nologin.so` refuse la connexion aux utilisateurs **non-root** et affiche son contenu comme message. On le supprime pour rouvrir."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée le fichier qui **bloque les connexions** des utilisateurs normaux (maintenance) (sudo).",
+     "hints": [
+      "Un fichier vide dont le nom est un nom de chemin évident."
+     ],
+     "accept": [
+      "touch /etc/nologin"
+     ],
+     "solution": "sudo touch /etc/nologin",
+     "explain": "Les sessions root restent possibles. On y met un message avec `echo`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Rétablis** les connexions en supprimant ce fichier (sudo).",
+     "hints": [
+      "rm + fichier."
+     ],
+     "accept": [
+      "sudo rm -f /etc/nologin",
+      "rm /etc/nologin",
+      "rm -f /etc/nologin"
+     ],
+     "solution": "sudo rm /etc/nologin",
+     "explain": "Après la maintenance, **n'oublie pas** de le supprimer, sinon plus personne ne se connecte !",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Autres recettes** à connaître de nom : **`pam_time.so`** (heures : `/etc/security/time.conf`, ex. `sshd;*;awa;Wk0800-1800` = awa en semaine de 8 h à 18 h), **`pam_access.so`** (origine : `/etc/security/access.conf`, ex. `- : ALL : ALL EXCEPT awa koffi`), **`pam_mkhomedir.so`** (crée le home au premier login, utile avec LDAP/AD)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel module permet de **limiter la connexion d'un compte à certaines heures** ?",
+     "options": [
+      "pam_time.so",
+      "pam_limits.so",
+      "pam_wheel.so"
+     ],
+     "answer": 0,
+     "explain": "**pam_time.so** (avec `/etc/security/time.conf`)."
+    },
+    {
+     "type": "choice",
+     "q": "Un utilisateur d'un annuaire (LDAP) se connecte pour la première fois mais n'a pas de dossier personnel. Quel module le crée ?",
+     "options": [
+      "pam_mkhomedir.so",
+      "pam_deny.so",
+      "pam_wheel.so"
+     ],
+     "answer": 0,
+     "explain": "**pam_mkhomedir.so** (type `session`) crée `/home/<user>` à la première connexion."
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Survie** : session root ouverte + sauvegarde + test dans un autre terminal. Recettes : **pam_wheel** (su), **limits.conf** (`domaine type élément valeur`), **pam_pwquality** (`minlen`), **pam_faillock** (`faillock --user … --reset`), **`/etc/nologin`**, `pam_time`, `pam_access`, `pam_mkhomedir`."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : administrateur sécurité",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** L'entreprise te confie l'accès privilégié de ses serveurs. Tu dois accorder **juste les bons droits**, auditer, puis durcir l'authentification. 14 questions."
+    },
+    {
+     "type": "exercise",
+     "q": "**1/14** — L'équipe web (groupe `web`) doit pouvoir **redémarrer nginx, rien d'autre**, en tant que root. Écris la ligne sudoers.",
+     "hints": [
+      "%groupe ALL=(root) commande complète"
+     ],
+     "accept": [
+      "%web ALL=(ALL) /usr/bin/systemctl restart nginx",
+      "%web ALL=(ALL:ALL) /usr/bin/systemctl restart nginx",
+      "%web ALL=(root:root) /usr/bin/systemctl restart nginx"
+     ],
+     "solution": "%web ALL=(root) /usr/bin/systemctl restart nginx",
+     "explain": "Moindre privilège : une seule commande précise.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**2/14** — Tu veux placer cette règle dans un fichier à part, **avec vérification de syntaxe** : `/etc/sudoers.d/web` (sudo).",
+     "hints": [
+      "visudo -f + fichier."
+     ],
+     "accept": [],
+     "solution": "sudo visudo -f /etc/sudoers.d/web",
+     "explain": "Jamais d'éditeur direct sur les fichiers sudoers.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**3/14** — Applique les permissions requises (**440**) à ce fichier (sudo).",
+     "hints": [
+      "chmod 440 + fichier."
+     ],
+     "accept": [
+      "sudo chmod 0440 /etc/sudoers.d/web"
+     ],
+     "solution": "sudo chmod 440 /etc/sudoers.d/web",
+     "explain": "Fichiers sudoers : 0440, propriétaire root.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**4/14** — Vérifie la syntaxe de **tous** les fichiers sudoers (sudo).",
+     "hints": [
+      "visudo -c."
+     ],
+     "accept": [
+      "visudo -c"
+     ],
+     "solution": "sudo visudo -c",
+     "explain": "« parsed OK » partout = tu peux fermer ta session root.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**5/14** — Vérifie les droits **effectifs** de l'utilisateur `awa` (qui est dans le groupe `web`) (sudo).",
+     "hints": [
+      "sudo -l -U + utilisateur."
+     ],
+     "accept": [
+      "sudo -U awa -l",
+      "sudo -lU awa"
+     ],
+     "solution": "sudo -l -U awa",
+     "explain": "Tu dois voir **uniquement** `restart nginx`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "**6/14** — Un collègue propose : « donnons `ALL=(ALL) NOPASSWD: /usr/bin/vim /etc/nginx/nginx.conf` à awa pour éditer la config ». Ton avis ?",
+     "options": [
+      "Parfait",
+      "Dangereux : vim permet un shell root (`:!sh`) ; utiliser sudoedit",
+      "Il faut ajouter un joker"
+     ],
+     "answer": 1,
+     "explain": "Un éditeur en root = shell root. La bonne règle : **`sudoedit /etc/nginx/nginx.conf`**."
+    },
+    {
+     "type": "exercise",
+     "q": "**7/14** — Écris la règle correcte : `awa` peut **éditer uniquement** `/etc/nginx/nginx.conf` avec `sudoedit`.",
+     "hints": [
+      "Le programme autorisé s'appelle sudoedit."
+     ],
+     "accept": [
+      "awa ALL=(ALL) sudoedit /etc/nginx/nginx.conf",
+      "awa ALL=(ALL:ALL) sudoedit /etc/nginx/nginx.conf",
+      "awa ALL=(root:root) sudoedit /etc/nginx/nginx.conf"
+     ],
+     "solution": "awa ALL=(root) sudoedit /etc/nginx/nginx.conf",
+     "explain": "Édition sûre, un seul fichier.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**8/14** — **Audit** : cherche dans le journal d'authentification (`/var/log/auth.log`) les lignes contenant `incorrect password` (sudo).",
+     "hints": [
+      "grep \"incorrect password\" fichier"
+     ],
+     "accept": [
+      "sudo grep 'incorrect password' /var/log/auth.log",
+      "grep \"incorrect password\" /var/log/auth.log",
+      "grep 'incorrect password' /var/log/auth.log"
+     ],
+     "solution": "sudo grep \"incorrect password\" /var/log/auth.log",
+     "explain": "Les tentatives ratées d'élévation de privilèges : à surveiller.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**9/14** — Durcissement sudo : **le ticket doit expirer immédiatement** (redemander le mot de passe à chaque fois). Écris la ligne `Defaults`.",
+     "hints": [
+      "Defaults timestamp_timeout=<minutes>"
+     ],
+     "accept": [],
+     "solution": "Defaults timestamp_timeout=0",
+     "explain": "Plus sûr sur les serveurs sensibles.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**10/14** — PAM : écris la ligne qui réserve `su` aux membres du groupe `sudo` (`pam_wheel.so`, options `use_uid group=sudo`, type auth, contrôle required).",
+     "hints": [
+      "auth required pam_wheel.so use_uid group=sudo"
+     ],
+     "accept": [],
+     "solution": "auth required pam_wheel.so use_uid group=sudo",
+     "explain": "À placer dans `/etc/pam.d/su`.",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**11/14** — PAM : impose des mots de passe d'**au moins 12 caractères**, 3 essais (`pam_pwquality.so`, type password, contrôle requisite).",
+     "hints": [
+      "password requisite pam_pwquality.so retry=3 minlen=12"
+     ],
+     "accept": [
+      "password requisite pam_pwquality.so minlen=12 retry=3"
+     ],
+     "solution": "password requisite pam_pwquality.so retry=3 minlen=12",
+     "explain": "À placer dans `/etc/pam.d/common-password` (Debian) ou `system-auth` (RHEL).",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**12/14** — Limite à **50 le nombre de processus** de `yao` (`limits.conf`, limite hard `nproc`).",
+     "hints": [
+      "domaine type élément valeur"
+     ],
+     "accept": [],
+     "solution": "yao hard nproc 50",
+     "explain": "Protège le serveur d'une « fork bomb ».",
+     "placeholder": "Écris la ligne ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**13/14** — `koffi` est verrouillé après 3 échecs de mot de passe. **Réinitialise** son compteur (sudo, `faillock`).",
+     "hints": [
+      "faillock --user nom --reset."
+     ],
+     "accept": [
+      "faillock --user koffi --reset",
+      "sudo faillock --reset --user koffi"
+     ],
+     "solution": "sudo faillock --user koffi --reset",
+     "explain": "Le compte est de nouveau utilisable.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "**14/14 (boss)** — Avant de modifier `/etc/pam.d/sshd` sur un serveur distant, quelle est LA précaution indispensable ?",
+     "options": [
+      "Rien de spécial",
+      "Garder une session root ouverte dans un autre terminal et sauvegarder le fichier",
+      "Redémarrer le serveur avant"
+     ],
+     "answer": 1,
+     "explain": "Une erreur PAM peut **bloquer toutes les nouvelles connexions**. La session déjà ouverte te permet de restaurer."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais accorder **juste les droits nécessaires** avec sudo, lire et écrire des règles sûres, **auditer** les journaux, et **durcir** l'authentification avec PAM. Un administrateur sécurité accompli. 🛡️"
+    }
+   ]
+  }
+ ]
+}

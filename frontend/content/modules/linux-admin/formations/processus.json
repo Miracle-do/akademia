@@ -1,0 +1,2207 @@
+{
+ "id": "processus",
+ "order": 7,
+ "title": "Maîtriser les processus",
+ "tagline": "ps, top, kill, nice, jobs, systemd : observe, arrête et priorise les programmes de ton serveur.",
+ "emoji": "⚙️",
+ "color": "#F97316",
+ "level": "Intermédiaire",
+ "minutes": 100,
+ "pitch": [
+  "Bonjour ! Je te présente **« Maîtriser les processus »** ⚙️.",
+  "Un serveur Linux fait tourner des centaines de processus en même temps. Quand il devient lent, qu'un programme se fige ou qu'un port est déjà pris, l'administrateur doit **trouver le coupable en quelques commandes** : qui consomme quoi, qui est bloqué, comment l'arrêter proprement.",
+  "On part de ce qu'est vraiment un processus (PID, parent, zombie, orphelin), puis on **observe** (`ps`, `pgrep`, `pstree`, `top`, `free`), on **signale** (`kill`, `pkill`, la règle TERM avant KILL), on **priorise** (`nice`, `renice`, `ionice`), on gère les **jobs** (`&`, `fg`, `bg`, `nohup`) et les **services** (`systemctl`, `journalctl`, `ss`).",
+  "Beaucoup d'exercices pratiques, et un défi final : mener l'enquête sur un serveur lent."
+ ],
+ "benefits": [
+  "Lire ps et top comme un pro (load average, états, mémoire)",
+  "Arrêter un processus proprement : TERM avant KILL, pkill, signaux",
+  "Régler les priorités CPU et disque avec nice, renice et ionice",
+  "Gérer jobs, nohup et services systemd, et trouver qui occupe un port"
+ ],
+ "lessons": [
+  {
+   "id": "notion",
+   "title": "Programme, processus, PID : les bases",
+   "emoji": "🧬",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! **Nimbo** ☁️. Quand tu lances une commande, tu crées un **processus**. Sur un serveur, il y en a des centaines qui tournent en même temps : le serveur web, SSH, la base de données… Un administrateur doit savoir **les voir, les arrêter et les gérer**. C'est tout l'objet de cette formation."
+    },
+    {
+     "type": "say",
+     "text": "**Programme ≠ processus.** Un **programme** est un fichier sur le disque (`/usr/bin/ls`). Un **processus** est **ce programme en cours d'exécution**, avec sa mémoire, ses fichiers ouverts et son identité. Un même programme peut donner plusieurs processus (dix `bash` ouverts en même temps)."
+    },
+    {
+     "type": "choice",
+     "q": "Que devient un programme quand on l'exécute ?",
+     "options": [
+      "Un fichier",
+      "Un processus",
+      "Un service"
+     ],
+     "answer": 1,
+     "explain": "Programme au repos = fichier ; **processus** = programme en cours d'exécution."
+    },
+    {
+     "type": "say",
+     "text": "Chaque processus a un **PID** (*Process ID*), un numéro unique, et un **PPID** : le PID de son **parent** (celui qui l'a lancé). Tous les processus forment un **arbre** dont la racine est le **PID 1** (`systemd` ou `init`), lancé par le noyau au démarrage."
+    },
+    {
+     "type": "code",
+     "sql": "systemd (PID 1)\n ├─ sshd (PID 812)\n │   └─ sshd (PID 2210)         ← ta connexion\n │       └─ bash (PID 2211)     ← ton shell\n │           └─ sleep 100 (PID 2300)   ← la commande lancée\n └─ nginx (PID 905)\n     ├─ nginx worker (PID 906)\n     └─ nginx worker (PID 907)",
+     "lang": "Terminal",
+     "title": "L'arbre des processus"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le PID du premier processus, ancêtre de tous les autres ?",
+     "options": [
+      "0",
+      "1",
+      "100"
+     ],
+     "answer": 1,
+     "explain": "Le **PID 1** (`systemd` sur les distributions modernes) lance tout le reste et adopte les orphelins."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans l'arbre ci-dessus, quel est le **PPID** du processus `sleep 100` (PID 2300) ?",
+     "hints": [
+      "Le parent est le shell qui l'a lancé."
+     ],
+     "accept": [],
+     "solution": "2211",
+     "explain": "Son parent est `bash` (PID **2211**).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Comment naît un processus ?** Deux étapes : le parent se **duplique** (`fork`), puis l'enfant **remplace son contenu** par le nouveau programme (`exec`). C'est ce que fait ton shell chaque fois que tu tapes une commande."
+    },
+    {
+     "type": "choice",
+     "q": "Quand tu tapes `ls` dans ton terminal, quel est le parent du processus `ls` ?",
+     "options": [
+      "systemd",
+      "Ton shell (bash)",
+      "Le noyau"
+     ],
+     "answer": 1,
+     "explain": "Le shell fait `fork` puis `exec` : **bash est le parent** de `ls`."
+    },
+    {
+     "type": "say",
+     "text": "**Les états d'un processus** (colonne STAT de `ps`, ou S de `top`) :"
+    },
+    {
+     "type": "code",
+     "sql": "R   Running      en cours d'exécution (ou prêt à l'être)\nS   Sleeping     attend un événement (le cas le plus courant)\nD   Disk sleep   attend une E/S disque, NE PEUT PAS être interrompu\nT   Stopped      suspendu (Ctrl+Z, signal STOP)\nZ   Zombie       terminé, mais son parent n'a pas encore lu son code de retour",
+     "lang": "Terminal",
+     "title": "États principaux"
+    },
+    {
+     "type": "choice",
+     "q": "Un processus est à l'état `T`. Que signifie-t-il ?",
+     "options": [
+      "Il est terminé",
+      "Il est suspendu (stoppé)",
+      "Il est zombie"
+     ],
+     "answer": 1,
+     "explain": "`T` = *stopped* : suspendu par **Ctrl+Z** ou un signal STOP. Il pourra reprendre avec `fg`/`bg` ou `kill -CONT`."
+    },
+    {
+     "type": "say",
+     "text": "**Le zombie.** Quand un processus termine, il laisse une petite trace (son code de sortie) le temps que son **parent** vienne la lire. Si le parent ne le fait jamais, l'enfant reste **zombie** (`Z`, `<defunct>`). Il **ne consomme ni CPU ni mémoire**, mais occupe une entrée dans la table des processus. On ne peut pas le « tuer » (il est déjà mort) : on corrige ou on arrête son **parent**."
+    },
+    {
+     "type": "choice",
+     "q": "Un processus zombie ne disparaît pas avec `kill -9`. Pourquoi ?",
+     "options": [
+      "Il est déjà mort : il attend que son parent lise son statut",
+      "Il est trop puissant",
+      "kill ne marche pas sur les zombies d'une autre machine"
+     ],
+     "answer": 0,
+     "explain": "Rien à tuer : il suffit que le parent appelle `wait()`, ou qu'on termine le parent (alors `init` adopte et nettoie)."
+    },
+    {
+     "type": "say",
+     "text": "**Orphelin ≠ zombie.** Un **orphelin** est un processus **vivant** dont le parent est mort : il est **adopté par le PID 1**. Un zombie est **mort** et attend son parent."
+    },
+    {
+     "type": "choice",
+     "q": "Un processus actif dont le parent vient de mourir est…",
+     "options": [
+      "Un zombie",
+      "Un orphelin, adopté par le PID 1",
+      "Immédiatement tué"
+     ],
+     "answer": 1,
+     "explain": "**Orphelin** : il continue de tourner, son nouveau parent est `systemd` (PID 1)."
+    },
+    {
+     "type": "say",
+     "text": "**Tout est dans `/proc`.** Linux expose chaque processus comme un **dossier** : `/proc/2211/` contient son état, ses fichiers ouverts, sa ligne de commande… `$$` est le PID de ton shell actuel, `$!` le PID du dernier processus lancé en arrière-plan."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **le PID de ton shell actuel**.",
+     "hints": [
+      "Une variable spéciale composée de deux dollars."
+     ],
+     "accept": [
+      "echo \"$$\"",
+      "printf '%s\\n' $$"
+     ],
+     "solution": "echo $$",
+     "explain": "`$$` est remplacé par le PID du shell. Dans un script, c'est le PID du script.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le contenu du fichier d'état du processus de PID 1 (`/proc/1/status`).",
+     "hints": [
+      "cat + /proc/<PID>/status."
+     ],
+     "accept": [
+      "less /proc/1/status",
+      "head /proc/1/status"
+     ],
+     "solution": "cat /proc/1/status",
+     "explain": "On y lit le nom, l'état (`State:`), le PPID, l'UID, la mémoire utilisée…",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **la ligne de commande** complète du processus de PID 1 (`/proc/1/cmdline`).",
+     "hints": [
+      "cat + /proc/<PID>/cmdline."
+     ],
+     "accept": [],
+     "solution": "cat /proc/1/cmdline",
+     "explain": "Les arguments sont séparés par des caractères nuls ; on les voit mieux avec `tr '\\0' ' '`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 **Processus** = programme en exécution, **PID/PPID**, arbre depuis le **PID 1**, états **R S D T Z**, **zombie** (mort non récupéré) ≠ **orphelin** (vivant, adopté par PID 1), `/proc/<PID>`, `$$` et `$!`."
+    }
+   ]
+  },
+  {
+   "id": "ps",
+   "title": "Observer avec ps, pgrep et pstree",
+   "emoji": "🔍",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Pour **voir** les processus, l'outil de base est **`ps`** (*process status*). Sans option, il n'affiche que **ceux de ton terminal** : peu utile. Il faut lui demander **tout**. Il existe deux « styles » d'options, mais on retient surtout deux combinaisons."
+    },
+    {
+     "type": "code",
+     "sql": "ps aux     tous les processus, de tous les utilisateurs, avec CPU/mémoire (style BSD, sans tiret)\nps -ef     tous les processus, avec PPID (style Unix, avec tiret)",
+     "lang": "Terminal",
+     "title": "Les deux incontournables"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tous les processus** du système (format avec utilisateur, %CPU et %MEM).",
+     "hints": [
+      "ps + aux (sans tiret)."
+     ],
+     "accept": [
+      "ps -aux",
+      "ps auxw"
+     ],
+     "solution": "ps aux",
+     "explain": "`a` = tous les utilisateurs, `u` = format détaillé, `x` = inclure les processus sans terminal.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tous les processus** avec leur **PPID** (format « full »).",
+     "hints": [
+      "ps + -ef."
+     ],
+     "accept": [
+      "ps -e -f",
+      "ps -fe"
+     ],
+     "solution": "ps -ef",
+     "explain": "`-e` = tous les processus, `-f` = format détaillé (UID, PID, PPID, C, STIME, TTY, TIME, CMD).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Lire `ps aux`** : les colonnes importantes."
+    },
+    {
+     "type": "code",
+     "sql": "USER  PID  %CPU %MEM    VSZ   RSS TTY   STAT START  TIME COMMAND\nawa  2211   0.0  0.1  10024  5120 pts/0 Ss   09:12  0:00 -bash\nroot  905   0.3  2.4 250000 98000 ?     Ss   08:00  1:12 nginx: master\nawa  2300  95.0  0.2   8000  1000 pts/0 R+   09:30  3:21 ./calcul",
+     "lang": "Terminal",
+     "title": "Une sortie de ps aux"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans cette sortie, quel est l'**utilisateur** qui fait tourner `./calcul` ?",
+     "hints": [
+      "Première colonne."
+     ],
+     "accept": [],
+     "solution": "awa",
+     "explain": "La colonne `USER` : **awa**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel processus consomme le plus de **CPU** ?",
+     "hints": [
+      "Cherche %CPU = 95.0."
+     ],
+     "accept": [
+      "calcul",
+      "2300"
+     ],
+     "solution": "./calcul",
+     "explain": "`./calcul` (95 % de CPU) : candidat à surveiller.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie `TTY = ?` pour le processus `nginx: master` ?",
+     "options": [
+      "Il n'est rattaché à aucun terminal (service d'arrière-plan)",
+      "Il est en erreur",
+      "Il est suspendu"
+     ],
+     "answer": 0,
+     "explain": "`?` = **pas de terminal de contrôle** : typique d'un démon."
+    },
+    {
+     "type": "choice",
+     "q": "`RSS` désigne…",
+     "options": [
+      "La mémoire réellement utilisée en RAM",
+      "La taille du fichier exécutable",
+      "Le nombre de threads"
+     ],
+     "answer": 0,
+     "explain": "**RSS** = *Resident Set Size* : la mémoire **physique** occupée. **VSZ** = mémoire **virtuelle** totale demandée."
+    },
+    {
+     "type": "say",
+     "text": "**Filtrer.** Trois approches : `ps -u awa` (par utilisateur), `ps -p 2300` (par PID), ou **`pgrep`/`grep`** (par nom). Préfère **`pgrep`** : `pgrep nginx` renvoie directement les PID."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les processus de l'utilisateur **awa**.",
+     "hints": [
+      "ps -u + nom."
+     ],
+     "accept": [
+      "ps -fu awa",
+      "ps -U awa",
+      "ps -u awa -f",
+      "ps u -u awa",
+      "ps -fU awa"
+     ],
+     "solution": "ps -u awa",
+     "explain": "`-u` filtre sur l'utilisateur effectif.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le processus de PID **2300**.",
+     "hints": [
+      "ps -p + PID."
+     ],
+     "accept": [
+      "ps -fp 2300",
+      "ps -f -p 2300",
+      "ps u -p 2300",
+      "ps -p 2300 -f"
+     ],
+     "solution": "ps -p 2300",
+     "explain": "`-p` accepte une liste : `ps -p 1,2300`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement les PID** des processus nommés `nginx` (avec la commande dédiée).",
+     "hints": [
+      "pgrep + nom."
+     ],
+     "accept": [
+      "pidof nginx"
+     ],
+     "solution": "pgrep nginx",
+     "explain": "`pgrep` imprime les PID correspondants. `-l` ajoute le nom, `-u user` filtre par utilisateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **PID et nom** des processus dont le nom contient `ssh` avec `pgrep`.",
+     "hints": [
+      "pgrep + option pour afficher le nom."
+     ],
+     "accept": [
+      "pgrep -a ssh",
+      "pgrep ssh -l"
+     ],
+     "solution": "pgrep -l ssh",
+     "explain": "`-l` (*list-name*) affiche aussi le nom du processus.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **les PID** des processus appartenant à `awa` avec `pgrep`.",
+     "hints": [
+      "pgrep -u + utilisateur."
+     ],
+     "accept": [],
+     "solution": "pgrep -u awa",
+     "explain": "Pratique avant un `pkill -u awa`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Choisir les colonnes et le tri.** `ps -eo colonnes` permet de composer sa sortie ; `--sort=-%cpu` trie par CPU **décroissant** (`-` devant = décroissant)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tous les processus triés par mémoire** décroissante (`--sort=-%mem`, format `aux`).",
+     "hints": [
+      "ps aux + --sort=-%mem."
+     ],
+     "accept": [
+      "ps -aux --sort=-%mem",
+      "ps aux --sort -%mem"
+     ],
+     "solution": "ps aux --sort=-%mem",
+     "explain": "Le signe `-` devant le critère = ordre décroissant. Ajoute `| head` pour garder les premiers.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tous les processus triés par CPU** décroissant (`--sort=-%cpu`, format `aux`).",
+     "hints": [
+      "ps aux + --sort=-%cpu."
+     ],
+     "accept": [
+      "ps -aux --sort=-%cpu",
+      "ps aux --sort -%cpu"
+     ],
+     "solution": "ps aux --sort=-%cpu",
+     "explain": "Les plus gourmands en haut.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **PID, PPID, utilisateur, %CPU et commande** de tous les processus, avec `ps -eo` et ces cinq colonnes (`pid,ppid,user,%cpu,cmd`).",
+     "hints": [
+      "ps -eo + liste de colonnes séparées par des virgules, sans espace."
+     ],
+     "accept": [],
+     "solution": "ps -eo pid,ppid,user,%cpu,cmd",
+     "explain": "`-o` choisit les colonnes. Sans espaces entre les noms.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Voir l'arbre.** `pstree` dessine la hiérarchie ; `-p` ajoute les PID. Alternative : `ps -ef --forest`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'**arbre** des processus avec les **PID**.",
+     "hints": [
+      "pstree + option pid."
+     ],
+     "accept": [
+      "pstree -p",
+      "pstree -ap",
+      "pstree -pa"
+     ],
+     "solution": "pstree -p",
+     "explain": "L'arbre montre les relations parent-enfant d'un coup d'œil.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche tous les processus **sous forme d'arbre** avec `ps -ef` et l'option de forêt.",
+     "hints": [
+      "ps -ef + --forest."
+     ],
+     "accept": [
+      "ps -ef f",
+      "ps -eF --forest",
+      "ps -ejH",
+      "ps axjf",
+      "ps auxf",
+      "ps aux --forest",
+      "ps axf"
+     ],
+     "solution": "ps -ef --forest",
+     "explain": "Les enfants sont indentés sous leur parent.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Combiner avec `grep`.** Réflexe courant : `ps aux | grep nginx`. Piège : le `grep` lui-même apparaît dans la liste ! Astuce : `grep '[n]ginx'` ou plus simple, utiliser `pgrep`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les lignes de `ps aux` qui contiennent `nginx`.",
+     "hints": [
+      "ps aux | grep <mot>"
+     ],
+     "accept": [
+      "ps -ef | grep nginx",
+      "ps -aux | grep nginx"
+     ],
+     "solution": "ps aux | grep nginx",
+     "explain": "Tu verras souvent une ligne en trop : la commande `grep nginx` elle-même.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Compte le **nombre de processus** de l'utilisateur `awa` (`ps -u awa` puis `wc -l`, en retirant l'en-tête n'est pas nécessaire ici).",
+     "hints": [
+      "Un tube vers wc -l."
+     ],
+     "accept": [
+      "ps -u awa --no-headers | wc -l",
+      "pgrep -c -u awa",
+      "pgrep -u awa | wc -l",
+      "ps -fu awa | wc -l"
+     ],
+     "solution": "ps -u awa | wc -l",
+     "explain": "`wc -l` compte les lignes (l'en-tête compte pour une ; retire-la avec `tail -n +2` si besoin).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `ps aux` / `ps -ef`, colonnes **USER PID %CPU %MEM VSZ RSS TTY STAT**, `ps -u/-p`, `pgrep` (`-l`, `-u`), `ps -eo`, `--sort=-%cpu`, `pstree -p`, `ps -ef --forest`."
+    }
+   ]
+  },
+  {
+   "id": "top",
+   "title": "top : le tableau de bord en direct",
+   "emoji": "📊",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`ps` prend une **photo** à un instant. **`top`** montre un **film** : il se rafraîchit toutes les 3 secondes et trie les processus par consommation de CPU. C'est l'outil qu'on ouvre en premier quand « le serveur est lent »."
+    },
+    {
+     "type": "code",
+     "sql": "top - 14:02:11 up 12 days,  3:45,  2 users,  load average: 0.52, 0.80, 1.02\nTasks: 210 total,   2 running, 207 sleeping,   0 stopped,   1 zombie\n%Cpu(s):  7.0 us,  2.0 sy,  0.0 ni, 90.0 id,  1.0 wa,  0.0 hi,  0.0 si\nMiB Mem :  7900.0 total,  1200.0 free,  3400.0 used,  3300.0 buff/cache\nMiB Swap:  2048.0 total,  2048.0 free,     0.0 used.  4100.0 avail Mem\n\n  PID USER   PR  NI    VIRT    RES    SHR S  %CPU  %MEM   TIME+ COMMAND\n 2300 awa    20   0    8000   1000    500 R  95.0   0.2  3:21.10 calcul\n  905 root   20   0  250000  98000  5000 S   0.3   2.4  1:12.00 nginx",
+     "lang": "Terminal",
+     "title": "Lecture de top"
+    },
+    {
+     "type": "say",
+     "text": "**Les 3 nombres du « load average »** : la **charge moyenne** sur **1, 5 et 15 minutes** (nombre moyen de processus qui demandent le CPU). Règle d'or : **comparer au nombre de cœurs**. Charge de 4 sur une machine à 4 cœurs = pleine capacité ; sur 1 cœur = énorme file d'attente."
+    },
+    {
+     "type": "choice",
+     "q": "Un serveur de 4 cœurs affiche un load average de `0.52, 0.80, 1.02`. Dans quel état est-il ?",
+     "options": [
+      "Très chargé",
+      "Tranquille (charge bien inférieure aux 4 cœurs)",
+      "En panne"
+     ],
+     "answer": 1,
+     "explain": "1,02 sur 4 cœurs : environ 25 % d'utilisation. Pas d'inquiétude."
+    },
+    {
+     "type": "choice",
+     "q": "Un serveur d'un seul cœur affiche `8.0, 7.5, 6.0`. Que conclure ?",
+     "options": [
+      "Il est largement saturé",
+      "Tout va bien",
+      "Il est inactif"
+     ],
+     "answer": 0,
+     "explain": "8 processus se disputent un cœur : **saturation** durable (les 3 valeurs sont hautes)."
+    },
+    {
+     "type": "choice",
+     "q": "Les trois valeurs sont `0.2, 1.5, 6.0` (1, 5, 15 min). Quelle est la tendance ?",
+     "options": [
+      "La charge diminue (le pic est passé)",
+      "La charge augmente",
+      "Stable"
+     ],
+     "answer": 0,
+     "explain": "La valeur à **15 min** est la plus haute : le gros de la charge date d'il y a un moment et **redescend**."
+    },
+    {
+     "type": "say",
+     "text": "**La ligne `%Cpu(s)`** :"
+    },
+    {
+     "type": "code",
+     "sql": "us  user      temps dans les programmes utilisateurs\nsy  system    temps dans le noyau\nni  nice      temps des processus à priorité modifiée\nid  idle      CPU INOCCUPÉ\nwa  wait      attente d'E/S (disque, réseau) : un wa élevé = disque lent\nhi/si  interruptions matérielles/logicielles\nst  steal     temps volé par l'hyperviseur (machine virtuelle)",
+     "lang": "Terminal",
+     "title": "Colonnes CPU"
+    },
+    {
+     "type": "choice",
+     "q": "`%Cpu(s)` affiche `wa` à 60 %. Quelle est la cause la plus probable ?",
+     "options": [
+      "Le CPU est saturé par du calcul",
+      "Le système attend beaucoup des E/S (disque ou réseau lents)",
+      "Une mémoire insuffisante"
+     ],
+     "answer": 1,
+     "explain": "**wa** = *I/O wait* : le CPU attend des entrées/sorties. Cherche un **disque saturé**."
+    },
+    {
+     "type": "say",
+     "text": "**Les colonnes processus** : `PR` priorité interne ; **`NI` valeur nice** (-20 à 19) ; `VIRT` mémoire virtuelle ; **`RES` mémoire réellement utilisée** ; `SHR` partagée ; `S` état ; `%CPU`, `%MEM`, `TIME+` (temps CPU cumulé)."
+    },
+    {
+     "type": "say",
+     "text": "**Les touches de `top`** (à connaître) :"
+    },
+    {
+     "type": "code",
+     "sql": "q        quitter\nh        aide\nP        trier par CPU (défaut)\nM        trier par MÉMOIRE\nT        trier par TEMPS CPU cumulé\n1        afficher chaque cœur séparément\nu        filtrer par utilisateur\nk        envoyer un signal (kill) à un PID\nr        changer la priorité (renice)\nc        afficher la ligne de commande complète\nd        changer le délai de rafraîchissement",
+     "lang": "Terminal",
+     "title": "Touches interactives"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle touche de `top` **trie par mémoire** ?",
+     "hints": [
+      "Majuscule : mémoire."
+     ],
+     "accept": [
+      "m"
+     ],
+     "solution": "M",
+     "explain": "**M** (majuscule). **P** trie par CPU.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle touche de `top` permet de **tuer** un processus (envoyer un signal) ?",
+     "hints": [
+      "Comme « kill »."
+     ],
+     "accept": [
+      "K"
+     ],
+     "solution": "k",
+     "explain": "**k**, puis le PID, puis le signal (15 par défaut).",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle touche de `top` permet de **quitter** ?",
+     "hints": [
+      "Comme « quit »."
+     ],
+     "accept": [
+      "Q"
+     ],
+     "solution": "q",
+     "explain": "**q**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux voir la **charge de chaque cœur** dans top. Quelle touche presses-tu ?",
+     "options": [
+      "1",
+      "c",
+      "u"
+     ],
+     "answer": 0,
+     "explain": "**1** bascule l'affichage global/par cœur."
+    },
+    {
+     "type": "say",
+     "text": "**`top` en mode script.** `top -b -n 1` = **b**atch (sortie texte, sans interactivité), **n** 1 = une seule itération : parfait pour les logs ou pour `| head`. `top -u awa` filtre par utilisateur. `top -p 2300` suit un PID."
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `top` **une seule fois** en mode texte (pour le rediriger vers un fichier).",
+     "hints": [
+      "top avec -b (batch) et -n 1."
+     ],
+     "accept": [
+      "top -bn1",
+      "top -n 1 -b",
+      "top -n1 -b",
+      "top -b -n1",
+      "top -bn 1"
+     ],
+     "solution": "top -b -n 1",
+     "explain": "Idéal dans un script ou une tâche planifiée.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `top` en ne montrant que les processus de **l'utilisateur awa**.",
+     "hints": [
+      "top -u + utilisateur."
+     ],
+     "accept": [],
+     "solution": "top -u awa",
+     "explain": "On peut aussi presser `u` dans top.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `top` pour **suivre uniquement le PID 2300**.",
+     "hints": [
+      "top -p + PID."
+     ],
+     "accept": [
+      "top -p2300"
+     ],
+     "solution": "top -p 2300",
+     "explain": "Pratique pour surveiller un seul processus problématique.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Mémoire : lire `free -h`.** Ne te fie **pas** à la colonne `free` : Linux utilise la RAM libre comme **cache disque** (`buff/cache`), qu'il rend dès que nécessaire. Regarde **`available`** : la mémoire réellement disponible pour de nouveaux programmes."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'**utilisation de la mémoire** en unités lisibles (Mo/Go).",
+     "hints": [
+      "free + option « human »."
+     ],
+     "accept": [
+      "free -m",
+      "free -g",
+      "free -h -t"
+     ],
+     "solution": "free -h",
+     "explain": "Surveille la colonne **available**, pas **free**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **depuis quand** la machine tourne, ses utilisateurs connectés et son load average (une seule ligne).",
+     "hints": [
+      "Un mot anglais : « temps de fonctionnement »."
+     ],
+     "accept": [
+      "w"
+     ],
+     "solution": "uptime",
+     "explain": "`uptime` : heure, durée de fonctionnement, utilisateurs, **load average** (1, 5, 15 min).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`free -h` affiche : free = 200 Mo, available = 3 Go. Faut-il s'inquiéter ?",
+     "options": [
+      "Oui, il ne reste que 200 Mo",
+      "Non : la mémoire « utilisée » comme cache est récupérable ; 3 Go sont disponibles",
+      "Oui, il faut redémarrer"
+     ],
+     "answer": 1,
+     "explain": "Linux remplit la RAM de cache ; **available** (3 Go) est la valeur à surveiller."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `top` : **load average** (à comparer au nombre de cœurs), `us/sy/id/wa/st`, colonnes **NI RES %CPU**, touches **P M 1 u k r c q**, `top -b -n 1`, `free -h` (**available**), `uptime`. Alternative plus agréable : `htop`."
+    }
+   ]
+  },
+  {
+   "id": "signaux",
+   "title": "Signaux et kill : arrêter proprement (ou pas)",
+   "emoji": "🛑",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un processus fait la sourde oreille ? On lui envoie un **signal**. Un signal est un **petit message numéroté** que le noyau (ou un autre processus) envoie à un processus : « arrête-toi », « recharge ta configuration », « suspends-toi »… Le processus peut parfois **intercepter** le signal et réagir à sa façon."
+    },
+    {
+     "type": "code",
+     "sql": "1   SIGHUP    « raccroche » : souvent utilisé pour RECHARGER la config\n2   SIGINT    interruption : c'est Ctrl+C\n3   SIGQUIT   quitter avec core dump : Ctrl+\\\n9   SIGKILL   TUE immédiatement, ne peut PAS être intercepté\n15  SIGTERM   demande de terminer proprement (le défaut de kill)\n18  SIGCONT   reprendre un processus stoppé\n19  SIGSTOP   suspendre, ne peut PAS être intercepté\n20  SIGTSTP   suspension demandée au clavier : Ctrl+Z",
+     "lang": "Terminal",
+     "title": "Les signaux à connaître"
+    },
+    {
+     "type": "choice",
+     "q": "Quel signal est envoyé par **Ctrl+C** ?",
+     "options": [
+      "SIGINT (2)",
+      "SIGKILL (9)",
+      "SIGTERM (15)"
+     ],
+     "answer": 0,
+     "explain": "**SIGINT**. Ctrl+Z envoie **SIGTSTP**."
+    },
+    {
+     "type": "choice",
+     "q": "Quel signal est envoyé par `kill 1234` (sans option) ?",
+     "options": [
+      "SIGKILL (9)",
+      "SIGTERM (15)",
+      "SIGHUP (1)"
+     ],
+     "answer": 1,
+     "explain": "Par défaut, `kill` envoie **SIGTERM (15)** : une demande polie."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **numéro** du signal SIGKILL ?",
+     "hints": [
+      "Le signal « irrattrapable »."
+     ],
+     "accept": [
+      "kill 9",
+      "signal 9",
+      "sigkill 9"
+     ],
+     "solution": "9",
+     "explain": "**9**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **numéro** du signal SIGTERM ?",
+     "hints": [
+      "Le défaut de kill."
+     ],
+     "accept": [
+      "signal 15"
+     ],
+     "solution": "15",
+     "explain": "**15**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**SIGTERM vs SIGKILL — la règle d'or.** `SIGTERM` (15) permet au programme de **fermer ses fichiers, finir ses transactions, supprimer ses fichiers temporaires**. `SIGKILL` (9) l'arrache **sans préavis** : risque de données corrompues. Donc : **toujours essayer 15 d'abord**, attendre quelques secondes, et **9 en dernier recours**."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la bonne démarche pour arrêter un processus récalcitrant ?",
+     "options": [
+      "kill -9 tout de suite",
+      "kill (SIGTERM), patienter, puis kill -9 seulement s'il ne répond pas",
+      "Redémarrer le serveur"
+     ],
+     "answer": 1,
+     "explain": "Escalade : **TERM → patienter → KILL**."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `kill -9` peut-il corrompre des données ?",
+     "options": [
+      "Le processus n'a pas le temps de terminer ses écritures et de nettoyer",
+      "Il efface le disque",
+      "Il tue aussi le parent"
+     ],
+     "answer": 0,
+     "explain": "Il ne peut pas intercepter SIGKILL : aucune sauvegarde ni fermeture propre."
+    },
+    {
+     "type": "say",
+     "text": "**La commande `kill`.** Syntaxe : `kill [-signal] PID…`. Le signal peut être donné par **numéro** (`-9`) ou par **nom** (`-KILL`, `-SIGKILL`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Demande poliment au processus **2300** de terminer (signal par défaut).",
+     "hints": [
+      "kill + PID."
+     ],
+     "accept": [
+      "kill -15 2300",
+      "kill -TERM 2300",
+      "kill -SIGTERM 2300",
+      "kill -s TERM 2300",
+      "kill -s 15 2300"
+     ],
+     "solution": "kill 2300",
+     "explain": "Envoie SIGTERM (15).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Tue immédiatement** le processus **2300** (SIGKILL).",
+     "hints": [
+      "kill -9 + PID."
+     ],
+     "accept": [
+      "kill -KILL 2300",
+      "kill -SIGKILL 2300",
+      "kill -s KILL 2300",
+      "kill -s 9 2300",
+      "kill -s SIGKILL 2300"
+     ],
+     "solution": "kill -9 2300",
+     "explain": "À réserver aux processus qui ignorent SIGTERM.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Suspends** le processus **2300** (SIGSTOP), sans le tuer.",
+     "hints": [
+      "kill -STOP + PID."
+     ],
+     "accept": [
+      "kill -19 2300",
+      "kill -SIGSTOP 2300",
+      "kill -s STOP 2300",
+      "kill -s 19 2300"
+     ],
+     "solution": "kill -STOP 2300",
+     "explain": "Il passe à l'état `T`. Il consomme de la mémoire mais plus de CPU.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Reprends** le processus **2300** qui était suspendu (SIGCONT).",
+     "hints": [
+      "kill -CONT + PID."
+     ],
+     "accept": [
+      "kill -18 2300",
+      "kill -SIGCONT 2300",
+      "kill -s CONT 2300",
+      "kill -s 18 2300"
+     ],
+     "solution": "kill -CONT 2300",
+     "explain": "Il repart là où il s'était arrêté.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Demande au service de PID **905** de **recharger sa configuration** (SIGHUP).",
+     "hints": [
+      "kill -HUP + PID."
+     ],
+     "accept": [
+      "kill -1 905",
+      "kill -SIGHUP 905",
+      "kill -s HUP 905",
+      "kill -s 1 905"
+     ],
+     "solution": "kill -HUP 905",
+     "explain": "Beaucoup de démons (nginx, sshd, rsyslog) rechargent leur config à la réception de SIGHUP, **sans coupure**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **liste de tous les signaux** disponibles.",
+     "hints": [
+      "kill + option list."
+     ],
+     "accept": [
+      "kill -L"
+     ],
+     "solution": "kill -l",
+     "explain": "`kill -l` donne la correspondance nom ↔ numéro.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Par nom au lieu de PID** : `pkill nom` et `killall nom` envoient un signal à **tous** les processus de ce nom. `pkill -u awa` vise **tous les processus d'un utilisateur**. `pkill -f motif` cherche dans **la ligne de commande complète**."
+    },
+    {
+     "type": "exercise",
+     "q": "Envoie SIGTERM à **tous les processus nommés `firefox`**.",
+     "hints": [
+      "pkill + nom."
+     ],
+     "accept": [
+      "killall firefox",
+      "pkill -15 firefox",
+      "pkill -TERM firefox"
+     ],
+     "solution": "pkill firefox",
+     "explain": "Attention : tous les processus de ce nom, de tous les utilisateurs que tu as le droit de signaler.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Tue** (SIGKILL) tous les processus nommés `calcul` avec `pkill`.",
+     "hints": [
+      "pkill -9 + nom."
+     ],
+     "accept": [
+      "pkill -KILL calcul",
+      "killall -9 calcul",
+      "killall -KILL calcul",
+      "pkill -SIGKILL calcul"
+     ],
+     "solution": "pkill -9 calcul",
+     "explain": "À utiliser avec précaution.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Termine **tous les processus de l'utilisateur `koffi`** (sudo).",
+     "hints": [
+      "pkill -u + utilisateur."
+     ],
+     "accept": [
+      "sudo killall -u koffi",
+      "pkill -u koffi",
+      "killall -u koffi"
+     ],
+     "solution": "sudo pkill -u koffi",
+     "explain": "Très utile avant de supprimer un compte (voir formation « utilisateurs »).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Termine le processus dont **la ligne de commande contient** `python3 serveur.py` (`pkill -f`).",
+     "hints": [
+      "pkill -f + motif entre guillemets."
+     ],
+     "accept": [
+      "pkill -f 'python3 serveur.py'",
+      "pkill -f serveur.py"
+     ],
+     "solution": "pkill -f \"python3 serveur.py\"",
+     "explain": "Sans `-f`, `pkill` ne regarde que le **nom** (`python3`) : tu tuerais tous les scripts Python.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Droits** : un utilisateur ne peut signaler **que ses propres processus**. **root** peut signaler tout le monde. Si tu vois `Operation not permitted`, c'est généralement un `sudo` qui manque."
+    },
+    {
+     "type": "choice",
+     "q": "`kill 905` répond « Operation not permitted ». Que faire ?",
+     "options": [
+      "Utiliser sudo : le processus n'est pas le tien",
+      "Recommencer avec -9 sans sudo",
+      "Redémarrer le shell"
+     ],
+     "answer": 0,
+     "explain": "Le processus appartient à un autre utilisateur (souvent root) : `sudo kill 905`."
+    },
+    {
+     "type": "say",
+     "text": "**Cas des services.** Si un processus est géré par **systemd** (nginx, mysql…), évite de le tuer à la main : systemd le **relancera** peut-être, ou l'état affiché sera faux. Préfère `systemctl stop nginx` (voir la leçon « services »)."
+    },
+    {
+     "type": "choice",
+     "q": "Un service géré par systemd est bloqué. Quelle est la meilleure façon de l'arrêter ?",
+     "options": [
+      "kill -9 sur son PID",
+      "systemctl stop <service>",
+      "Éteindre la machine"
+     ],
+     "answer": 1,
+     "explain": "`systemctl` informe **systemd** de l'arrêt et nettoie correctement. `kill` pourrait provoquer un redémarrage automatique."
+    },
+    {
+     "type": "say",
+     "text": "🏁 Signaux **1 HUP, 2 INT, 9 KILL, 15 TERM, 18 CONT, 19 STOP, 20 TSTP**. `kill [-sig] PID`, **TERM d'abord, KILL en dernier recours**, `pkill/killall` (par nom, `-u`, `-f`), `kill -l`. Services → `systemctl`."
+    }
+   ]
+  },
+  {
+   "id": "priorites",
+   "title": "Priorités : nice et renice",
+   "emoji": "⚖️",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Plusieurs processus se disputent le CPU. Le noyau les ordonnance, mais **tu peux influencer** son choix avec la **valeur nice** (« gentillesse »). Un processus très **gentil** (nice élevé) cède volontiers la place ; un processus **peu gentil** (nice bas) passe devant."
+    },
+    {
+     "type": "code",
+     "sql": "nice : de -20 à +19\n  -20  le moins gentil   → la PLUS HAUTE priorité\n    0  valeur par défaut\n  +19  le plus gentil    → la PLUS BASSE priorité",
+     "lang": "Terminal",
+     "title": "L'échelle nice"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle valeur nice donne la **priorité la plus haute** ?",
+     "options": [
+      "19",
+      "0",
+      "-20"
+     ],
+     "answer": 2,
+     "explain": "**-20** = très peu « gentil » = plus prioritaire. **+19** = très gentil = moins prioritaire."
+    },
+    {
+     "type": "choice",
+     "q": "Un script de sauvegarde lourd ne doit pas gêner les utilisateurs. Quelle valeur nice choisis-tu ?",
+     "options": [
+      "-10",
+      "0",
+      "15"
+     ],
+     "answer": 2,
+     "explain": "Une valeur **positive et haute** (15) rend le script « poli » : il laisse le CPU aux autres."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur nice **par défaut** d'un processus ?",
+     "hints": [
+      "Ni gentil ni égoïste."
+     ],
+     "accept": [],
+     "solution": "0",
+     "explain": "**0**.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Lancer avec une priorité : `nice`.** `nice -n 10 commande` lance la commande avec un nice de **+10**. Sans `-n`, GNU `nice` ajoute 10 par défaut."
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./sauvegarde.sh` avec une valeur nice de **10**.",
+     "hints": [
+      "nice -n <valeur> commande"
+     ],
+     "accept": [
+      "nice -10 ./sauvegarde.sh",
+      "nice -n10 ./sauvegarde.sh",
+      "nice --adjustment=10 ./sauvegarde.sh"
+     ],
+     "solution": "nice -n 10 ./sauvegarde.sh",
+     "explain": "Le script tourne en tâche de fond « polie ».",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./compression.sh` avec une valeur nice de **19** (le plus gentil).",
+     "hints": [
+      "nice -n 19 …"
+     ],
+     "accept": [
+      "nice -19 ./compression.sh",
+      "nice -n19 ./compression.sh"
+     ],
+     "solution": "nice -n 19 ./compression.sh",
+     "explain": "19 est le maximum : le processus ne prend le CPU que s'il est inoccupé.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./urgent.sh` avec la **haute priorité** -5 (sudo).",
+     "hints": [
+      "Valeur négative = sudo obligatoire."
+     ],
+     "accept": [
+      "sudo nice -n -5 ./urgent.sh",
+      "sudo nice --adjustment=-5 ./urgent.sh",
+      "sudo nice -n-5 ./urgent.sh",
+      "nice -n -5 ./urgent.sh",
+      "nice --adjustment=-5 ./urgent.sh",
+      "nice -n-5 ./urgent.sh"
+     ],
+     "solution": "sudo nice -n -5 ./urgent.sh",
+     "explain": "Seul **root** peut abaisser le nice sous 0.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Un utilisateur normal tente `nice -n -5 ./prog`. Résultat ?",
+     "options": [
+      "Ça marche",
+      "Refusé : seul root peut diminuer le nice (augmenter la priorité)",
+      "Le programme est ignoré"
+     ],
+     "answer": 1,
+     "explain": "Un utilisateur peut **seulement augmenter** la valeur nice (être plus gentil). Le contraire est réservé à **root**."
+    },
+    {
+     "type": "say",
+     "text": "**Changer en cours de route : `renice`.** `renice -n <valeur> -p PID` modifie un processus **déjà lancé**. `-u user` agit sur tous les processus d'un utilisateur. Dans `top`, la touche **r** fait la même chose."
+    },
+    {
+     "type": "exercise",
+     "q": "Passe le processus **2300** à la valeur nice **10**.",
+     "hints": [
+      "renice -n <valeur> -p <PID>"
+     ],
+     "accept": [
+      "renice 10 -p 2300",
+      "renice 10 2300",
+      "renice -n 10 2300",
+      "sudo renice -n 10 -p 2300",
+      "renice +10 -p 2300",
+      "renice +10 2300",
+      "renice -n 10 -p 2300"
+     ],
+     "solution": "renice -n 10 -p 2300",
+     "explain": "Affiche : `2300 (process ID) old priority 0, new priority 10`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Donne au processus **2300** la valeur nice **-5** (haute priorité) (sudo).",
+     "hints": [
+      "Valeur négative : root."
+     ],
+     "accept": [
+      "sudo renice -5 -p 2300",
+      "sudo renice -5 2300",
+      "sudo renice -n -5 2300",
+      "renice -n -5 -p 2300",
+      "renice -5 -p 2300",
+      "renice -5 2300",
+      "renice -n -5 2300"
+     ],
+     "solution": "sudo renice -n -5 -p 2300",
+     "explain": "Réservé à root.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Passe **tous les processus de l'utilisateur `awa`** à la valeur nice **10** (sudo).",
+     "hints": [
+      "renice -n 10 -u <utilisateur>"
+     ],
+     "accept": [
+      "sudo renice 10 -u awa",
+      "sudo renice +10 -u awa",
+      "renice -n 10 -u awa",
+      "renice 10 -u awa",
+      "renice +10 -u awa"
+     ],
+     "solution": "sudo renice -n 10 -u awa",
+     "explain": "Pratique quand un utilisateur lance beaucoup de calculs.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`awa` (non root) a lancé un processus avec nice 5. Peut-il le repasser à 0 ?",
+     "options": [
+      "Oui",
+      "Non : un utilisateur ne peut pas diminuer un nice déjà augmenté",
+      "Seulement avec -9"
+     ],
+     "answer": 1,
+     "explain": "Un non-root peut **augmenter** le nice, **pas** le diminuer, même sur ses propres processus."
+    },
+    {
+     "type": "say",
+     "text": "**Les priorités sur disque : `ionice`.** Un processus qui lit/écrit énormément peut saturer le disque (et provoquer un `wa` élevé dans `top`). `ionice -c3 commande` (classe **idle**) ne touche au disque que si personne d'autre ne s'en sert."
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./sauvegarde.sh` avec une priorité disque **minimale** (classe 3 : idle).",
+     "hints": [
+      "ionice -c3 + commande."
+     ],
+     "accept": [
+      "ionice -c 3 ./sauvegarde.sh",
+      "ionice --class idle ./sauvegarde.sh"
+     ],
+     "solution": "ionice -c3 ./sauvegarde.sh",
+     "explain": "Combine souvent avec `nice` : `nice -n 19 ionice -c3 ./sauvegarde.sh`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./sauvegarde.sh` en **combinant** nice 19 et ionice classe 3 (nice en premier).",
+     "hints": [
+      "nice -n 19 ionice -c3 …"
+     ],
+     "accept": [
+      "nice -n 19 ionice -c 3 ./sauvegarde.sh",
+      "nice -19 ionice -c3 ./sauvegarde.sh"
+     ],
+     "solution": "nice -n 19 ionice -c3 ./sauvegarde.sh",
+     "explain": "CPU **et** disque sont ménagés : parfait pour les sauvegardes de nuit.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 **nice** de -20 (prioritaire) à +19 (poli), défaut 0. `nice -n N cmd`, `renice -n N -p PID` (`-u` pour un utilisateur), **non-root = on ne peut qu'augmenter**, `ionice -c3` pour le disque."
+    }
+   ]
+  },
+  {
+   "id": "jobs",
+   "title": "Jobs : arrière-plan, premier plan, nohup",
+   "emoji": "🎛️",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tu lances une longue commande et ton terminal est bloqué ? Le shell te laisse **jongler** : mettre une commande **en arrière-plan** pendant que tu continues à travailler. Ces commandes surveillées par le shell s'appellent des **jobs**."
+    },
+    {
+     "type": "code",
+     "sql": "commande &       lancer directement en ARRIÈRE-PLAN\nCtrl+Z           SUSPENDRE la commande au premier plan\nbg [%n]          reprendre un job suspendu en ARRIÈRE-PLAN\nfg [%n]          ramener un job au PREMIER PLAN\njobs             lister les jobs du shell\nCtrl+C           INTERROMPRE le job au premier plan (SIGINT)",
+     "lang": "Terminal",
+     "title": "Les 6 outils de base"
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `sleep 300` **en arrière-plan**.",
+     "hints": [
+      "Un symbole à la fin de la commande."
+     ],
+     "accept": [
+      "sleep 300&"
+     ],
+     "solution": "sleep 300 &",
+     "explain": "Le shell affiche `[1] 2410` : le numéro de job entre crochets et le PID.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **la liste des jobs** du shell.",
+     "hints": [
+      "Le mot « jobs »."
+     ],
+     "accept": [],
+     "solution": "jobs",
+     "explain": "Chaque ligne : numéro, état (Running, Stopped), commande. Un `+` marque le job « courant », un `-` le précédent.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la liste des jobs **avec leurs PID**.",
+     "hints": [
+      "jobs + option long."
+     ],
+     "accept": [
+      "jobs -l"
+     ],
+     "solution": "jobs -l",
+     "explain": "`-l` ajoute le PID de chaque job.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Tu as lancé `sleep 300 &`. Le shell affiche `[1] 2410`. Que représentent ces deux nombres ?",
+     "options": [
+      "Numéro de job 1 et PID 2410",
+      "PID 1 et numéro de job 2410",
+      "Priorité 1 et durée 2410"
+     ],
+     "answer": 0,
+     "explain": "`[1]` = numéro de **job** (propre au shell) ; `2410` = **PID** du processus."
+    },
+    {
+     "type": "say",
+     "text": "**Job vs PID.** Les jobs sont **locaux à ton shell** (`%1`, `%2`…). On les désigne avec `%` : `fg %1`, `bg %2`, `kill %1`. `%%` ou `%+` = job courant."
+    },
+    {
+     "type": "exercise",
+     "q": "Ramène le **job numéro 1** au premier plan.",
+     "hints": [
+      "fg + %numéro."
+     ],
+     "accept": [
+      "fg 1"
+     ],
+     "solution": "fg %1",
+     "explain": "Le job reprend le contrôle du terminal. Sans argument, `fg` ramène le job courant.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Relance en **arrière-plan** le job suspendu **numéro 2**.",
+     "hints": [
+      "bg + %numéro."
+     ],
+     "accept": [
+      "bg 2"
+     ],
+     "solution": "bg %2",
+     "explain": "Le job reprend son exécution mais sans bloquer le terminal.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Tue** le job numéro **1** (sans connaître son PID).",
+     "hints": [
+      "kill + %numéro."
+     ],
+     "accept": [
+      "kill -9 %1",
+      "kill -TERM %1",
+      "kill -15 %1"
+     ],
+     "solution": "kill %1",
+     "explain": "`kill` accepte le numéro de job précédé de %.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Tu lances `./calcul` au premier plan et tu veux récupérer ton terminal **sans l'arrêter**. Quelle séquence ?",
+     "options": [
+      "Ctrl+C",
+      "Ctrl+Z puis bg",
+      "Ctrl+D"
+     ],
+     "answer": 1,
+     "explain": "**Ctrl+Z** suspend, **bg** relance en arrière-plan. Ctrl+C **tuerait** le programme."
+    },
+    {
+     "type": "choice",
+     "q": "Que fait **Ctrl+Z** ?",
+     "options": [
+      "Tue le processus",
+      "Suspend le processus (SIGTSTP) ; il peut reprendre avec fg ou bg",
+      "Le met en arrière-plan en train de tourner"
+     ],
+     "answer": 1,
+     "explain": "Il **suspend** : le job passe en `Stopped`, il ne tourne pas tant qu'on ne fait pas `bg` ou `fg`."
+    },
+    {
+     "type": "choice",
+     "q": "`bg` sur un job suspendu fait…",
+     "options": [
+      "Il reprend en arrière-plan",
+      "Il est tué",
+      "Il passe au premier plan"
+     ],
+     "answer": 0,
+     "explain": "`bg` = **relancer en arrière-plan** (`fg` = premier plan)."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Fermer le terminal tue les jobs.** À la fermeture, le shell envoie **SIGHUP** à ses jobs, qui meurent. Pour qu'une commande survive : **`nohup`** (ignore SIGHUP, redirige la sortie vers `nohup.out`), ou **`disown`** (détache un job déjà lancé), ou un multiplexeur comme **`tmux`/`screen`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./longue_tache.sh` **en arrière-plan** et **immunisé** contre la fermeture du terminal (nohup).",
+     "hints": [
+      "nohup commande &"
+     ],
+     "accept": [
+      "nohup ./longue_tache.sh&"
+     ],
+     "solution": "nohup ./longue_tache.sh &",
+     "explain": "La sortie va dans `nohup.out`. Le `&` est important, sinon le terminal reste bloqué.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `./longue_tache.sh` avec `nohup`, **en envoyant la sortie vers `/dev/null`** et en arrière-plan.",
+     "hints": [
+      "nohup cmd > /dev/null 2>&1 &"
+     ],
+     "accept": [
+      "nohup ./longue_tache.sh >/dev/null 2>&1 &",
+      "nohup ./longue_tache.sh &> /dev/null &",
+      "nohup ./longue_tache.sh &>/dev/null &"
+     ],
+     "solution": "nohup ./longue_tache.sh > /dev/null 2>&1 &",
+     "explain": "`> /dev/null 2>&1` jette la sortie standard **et** les erreurs : plus de `nohup.out`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Détache le **job 1** du shell pour qu'il survive à la fermeture du terminal.",
+     "hints": [
+      "disown + %numéro."
+     ],
+     "accept": [
+      "disown -h %1",
+      "disown 1"
+     ],
+     "solution": "disown %1",
+     "explain": "Le job n'est plus suivi par `jobs` et ne reçoit plus SIGHUP.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Tu as oublié nohup sur une commande déjà lancée et tu dois fermer le terminal. Que faire ?",
+     "options": [
+      "Ctrl+Z, bg, puis disown",
+      "Rien, c'est trop tard",
+      "Tuer le shell"
+     ],
+     "answer": 0,
+     "explain": "**Ctrl+Z** (suspend), **bg** (arrière-plan), **disown** (détache) : la commande survit."
+    },
+    {
+     "type": "say",
+     "text": "**Récupérer le PID du dernier job** : `$!`. Utile pour le surveiller ou l'attendre : `./tache.sh & echo $!`. La commande `wait` bloque le shell **jusqu'à la fin** des jobs en arrière-plan."
+    },
+    {
+     "type": "exercise",
+     "q": "Lance `sleep 60` en arrière-plan puis affiche **son PID** (une seule ligne).",
+     "hints": [
+      "... & echo $!"
+     ],
+     "accept": [
+      "sleep 60 & echo \"$!\"",
+      "sleep 60& echo $!"
+     ],
+     "solution": "sleep 60 & echo $!",
+     "explain": "`$!` contient le PID du **dernier** processus lancé en arrière-plan.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Attends la **fin de tous** les jobs d'arrière-plan.",
+     "hints": [
+      "Le mot « attendre »."
+     ],
+     "accept": [],
+     "solution": "wait",
+     "explain": "`wait` bloque jusqu'à ce que les jobs aient fini ; `wait PID` n'attend qu'un seul processus.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🏁 `cmd &`, `jobs`, **Ctrl+Z / bg / fg**, `%n`, `kill %n`, **`nohup`** (ou `disown`/`tmux`) pour survivre à la fermeture du terminal, `$!`, `wait`."
+    }
+   ]
+  },
+  {
+   "id": "services",
+   "title": "Processus, services et ports (systemd)",
+   "emoji": "🧰",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les processus qui tournent **en permanence** (serveur web, SSH, base de données) s'appellent des **services** (ou **démons**). Sur les Linux modernes, c'est **systemd** qui les démarre, les surveille et les relance. Son outil : **`systemctl`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **l'état** du service `nginx` (actif ? PID ? derniers logs ?).",
+     "hints": [
+      "systemctl + status + service."
+     ],
+     "accept": [
+      "sudo systemctl status nginx",
+      "systemctl status nginx.service",
+      "systemctl status nginx"
+     ],
+     "solution": "systemctl status nginx",
+     "explain": "On y voit `Active: active (running)`, le PID principal, la mémoire, et les dernières lignes de log.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Démarre** le service `nginx` (sudo).",
+     "hints": [
+      "systemctl start + service."
+     ],
+     "accept": [
+      "systemctl start nginx"
+     ],
+     "solution": "sudo systemctl start nginx",
+     "explain": "`start` lance le service **maintenant** (mais pas forcément au prochain démarrage).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Arrête** le service `nginx` (sudo).",
+     "hints": [
+      "systemctl stop + service."
+     ],
+     "accept": [
+      "systemctl stop nginx"
+     ],
+     "solution": "sudo systemctl stop nginx",
+     "explain": "Arrêt propre, géré par systemd.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Redémarre** le service `nginx` (sudo).",
+     "hints": [
+      "systemctl restart + service."
+     ],
+     "accept": [
+      "systemctl restart nginx"
+     ],
+     "solution": "sudo systemctl restart nginx",
+     "explain": "Arrête puis relance : **courte coupure**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Fais **recharger la configuration** de `nginx` **sans coupure** (sudo).",
+     "hints": [
+      "systemctl reload + service."
+     ],
+     "accept": [
+      "systemctl reload nginx"
+     ],
+     "solution": "sudo systemctl reload nginx",
+     "explain": "`reload` envoie souvent SIGHUP : les connexions en cours ne sont pas coupées. À préférer à `restart` quand le service le supporte.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande applique un changement de configuration **sans couper** les connexions en cours (si le service le supporte) ?",
+     "options": [
+      "systemctl restart",
+      "systemctl reload",
+      "systemctl stop"
+     ],
+     "answer": 1,
+     "explain": "`reload` recharge la configuration à chaud ; `restart` interrompt le service."
+    },
+    {
+     "type": "say",
+     "text": "**Démarrage automatique.** `start` ne concerne que **maintenant**. Pour qu'un service démarre **à chaque boot** : `enable`. Pour les deux à la fois : `enable --now`."
+    },
+    {
+     "type": "exercise",
+     "q": "Fais démarrer `nginx` **automatiquement au boot** (sudo).",
+     "hints": [
+      "systemctl enable + service."
+     ],
+     "accept": [
+      "systemctl enable nginx"
+     ],
+     "solution": "sudo systemctl enable nginx",
+     "explain": "`enable` crée un lien : le service sera lancé au démarrage. Il ne démarre pas pour autant **tout de suite**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Active au démarrage ET lance maintenant** le service `nginx` en une commande (sudo).",
+     "hints": [
+      "systemctl enable --now + service."
+     ],
+     "accept": [
+      "sudo systemctl --now enable nginx",
+      "systemctl enable --now nginx",
+      "systemctl --now enable nginx"
+     ],
+     "solution": "sudo systemctl enable --now nginx",
+     "explain": "`--now` fait aussi le `start`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Empêche `nginx` de démarrer automatiquement au boot (sudo).",
+     "hints": [
+      "systemctl disable + service."
+     ],
+     "accept": [
+      "systemctl disable nginx"
+     ],
+     "solution": "sudo systemctl disable nginx",
+     "explain": "Il continue de tourner jusqu'au prochain arrêt, mais ne redémarrera pas seul.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "`systemctl stop nginx` puis redémarrage de la machine. nginx est `enabled`. Que se passe-t-il ?",
+     "options": [
+      "nginx reste arrêté",
+      "nginx redémarre : enabled signifie « au boot »",
+      "Erreur"
+     ],
+     "answer": 1,
+     "explain": "`stop` arrête **maintenant** ; `enable` règle le **démarrage automatique**. Les deux sont indépendants."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement** si `nginx` est actif (réponse `active` ou `inactive`).",
+     "hints": [
+      "systemctl is-active + service."
+     ],
+     "accept": [],
+     "solution": "systemctl is-active nginx",
+     "explain": "Pratique dans les scripts : la commande renvoie aussi un code de sortie.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche la **liste des services** actifs (type service).",
+     "hints": [
+      "systemctl list-units + --type=service"
+     ],
+     "accept": [
+      "systemctl list-units --type service",
+      "systemctl --type=service",
+      "systemctl list-units --type=service --state=running"
+     ],
+     "solution": "systemctl list-units --type=service",
+     "explain": "Ajoute `--state=running` pour les seuls services en cours d'exécution.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Les journaux : `journalctl`.** Les services écrivent dans le **journal systemd**. `journalctl -u nginx` filtre sur un service, `-f` suit en direct (comme `tail -f`), `-n 50` affiche les 50 dernières lignes, `--since` borne dans le temps."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les **journaux du service** `nginx` (sudo).",
+     "hints": [
+      "journalctl -u + service."
+     ],
+     "accept": [
+      "journalctl -u nginx",
+      "sudo journalctl -u nginx.service",
+      "journalctl -u nginx",
+      "journalctl -u nginx.service"
+     ],
+     "solution": "sudo journalctl -u nginx",
+     "explain": "Tout l'historique du service.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Suis **en direct** les journaux de `nginx` (sudo).",
+     "hints": [
+      "journalctl -u + service + option follow."
+     ],
+     "accept": [
+      "journalctl -u nginx -f",
+      "sudo journalctl -fu nginx",
+      "journalctl -fu nginx",
+      "sudo journalctl -f -u nginx",
+      "journalctl -f -u nginx",
+      "journalctl -u nginx -f"
+     ],
+     "solution": "sudo journalctl -u nginx -f",
+     "explain": "Ctrl+C pour arrêter. Parfait pour voir les erreurs en temps réel pendant un test.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les **50 dernières lignes** du journal de `nginx` (sudo).",
+     "hints": [
+      "-n + nombre de lignes."
+     ],
+     "accept": [
+      "journalctl -u nginx -n 50",
+      "sudo journalctl -n 50 -u nginx",
+      "journalctl -n 50 -u nginx",
+      "sudo journalctl -u nginx -n50",
+      "journalctl -u nginx -n 50",
+      "journalctl -u nginx -n50"
+     ],
+     "solution": "sudo journalctl -u nginx -n 50",
+     "explain": "Rapide pour voir la cause d'un échec de démarrage.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Qui occupe un port ?** Classique : « Address already in use » au lancement d'un serveur. Trois outils pour trouver **quel processus écoute** : `ss -ltnp`, `lsof -i :port`, `fuser port/tcp`."
+    },
+    {
+     "type": "code",
+     "sql": "ss -ltnp\n  l  listening (en écoute)    t  TCP    n  numérique (pas de noms)    p  processus\n\nState  Recv-Q Send-Q  Local Address:Port   Process\nLISTEN 0      511     0.0.0.0:80           users:((\"nginx\",pid=905,fd=6))",
+     "lang": "Terminal",
+     "title": "ss -ltnp"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **les ports TCP en écoute** avec **le processus** propriétaire (sudo).",
+     "hints": [
+      "ss + les 4 options l t n p."
+     ],
+     "accept": [
+      "sudo ss -l -t -n -p",
+      "sudo ss -l -t -p -n",
+      "sudo ss -l -n -t -p",
+      "sudo ss -l -n -p -t",
+      "sudo ss -l -p -t -n",
+      "sudo ss -l -p -n -t",
+      "sudo ss -t -l -n -p",
+      "sudo ss -t -l -p -n",
+      "sudo ss -t -n -l -p",
+      "sudo ss -t -n -p -l",
+      "sudo ss -t -p -l -n",
+      "sudo ss -t -p -n -l",
+      "sudo ss -n -l -t -p",
+      "sudo ss -n -l -p -t",
+      "sudo ss -n -t -l -p",
+      "sudo ss -n -t -p -l",
+      "sudo ss -n -p -l -t",
+      "sudo ss -n -p -t -l",
+      "sudo ss -p -l -t -n",
+      "sudo ss -p -l -n -t",
+      "sudo ss -p -t -l -n",
+      "sudo ss -p -t -n -l",
+      "sudo ss -p -n -l -t",
+      "sudo ss -p -n -t -l",
+      "sudo ss -tlnp",
+      "sudo ss -lntp",
+      "sudo ss -ntlp",
+      "sudo ss -tnlp",
+      "sudo ss -nltp",
+      "sudo ss -lptn",
+      "sudo ss -ltpn",
+      "sudo ss -tlpn",
+      "ss -ltnp",
+      "ss -l -t -n -p",
+      "ss -l -t -p -n",
+      "ss -l -n -t -p",
+      "ss -l -n -p -t",
+      "ss -l -p -t -n",
+      "ss -l -p -n -t",
+      "ss -t -l -n -p",
+      "ss -t -l -p -n",
+      "ss -t -n -l -p",
+      "ss -t -n -p -l",
+      "ss -t -p -l -n",
+      "ss -t -p -n -l",
+      "ss -n -l -t -p",
+      "ss -n -l -p -t",
+      "ss -n -t -l -p",
+      "ss -n -t -p -l",
+      "ss -n -p -l -t",
+      "ss -n -p -t -l",
+      "ss -p -l -t -n",
+      "ss -p -l -n -t",
+      "ss -p -t -l -n",
+      "ss -p -t -n -l",
+      "ss -p -n -l -t",
+      "ss -p -n -t -l",
+      "ss -tlnp",
+      "ss -lntp",
+      "ss -ntlp",
+      "ss -tnlp",
+      "ss -nltp",
+      "ss -lptn",
+      "ss -ltpn",
+      "ss -tlpn"
+     ],
+     "solution": "sudo ss -ltnp",
+     "explain": "Sans `sudo`, tu ne vois pas le nom des processus des autres utilisateurs.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **le processus qui utilise le port 8080** avec `lsof` (sudo).",
+     "hints": [
+      "lsof -i :<port>"
+     ],
+     "accept": [
+      "sudo lsof -i:8080",
+      "sudo lsof -i tcp:8080",
+      "sudo lsof -iTCP:8080",
+      "sudo lsof -i TCP:8080",
+      "lsof -i :8080",
+      "lsof -i:8080",
+      "lsof -i tcp:8080",
+      "lsof -iTCP:8080",
+      "lsof -i TCP:8080"
+     ],
+     "solution": "sudo lsof -i :8080",
+     "explain": "Indique la commande, le PID et l'utilisateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le PID du processus qui utilise le **port TCP 80** avec `fuser` (sudo).",
+     "hints": [
+      "fuser <port>/tcp"
+     ],
+     "accept": [
+      "sudo fuser -n tcp 80",
+      "fuser 80/tcp",
+      "fuser -n tcp 80"
+     ],
+     "solution": "sudo fuser 80/tcp",
+     "explain": "Ajoute `-k` pour tuer ce processus (à manier avec prudence).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "« Address already in use » au démarrage d'un serveur sur le port 8080. Que fais-tu en premier ?",
+     "options": [
+      "Redémarrer la machine",
+      "Identifier le processus qui occupe déjà le port (ss -ltnp ou lsof -i :8080)",
+      "Changer d'ordinateur"
+     ],
+     "answer": 1,
+     "explain": "Un **autre processus** (ou une ancienne instance) écoute déjà : trouve-le avant d'agir."
+    },
+    {
+     "type": "say",
+     "text": "🏁 `systemctl status|start|stop|restart|reload|enable|disable|is-active`, **`enable --now`**, `journalctl -u … -f -n`, ports : **`ss -ltnp`**, `lsof -i :port`, `fuser`."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : l'enquête du serveur lent",
+   "emoji": "🏆",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final !** Le serveur de l'entreprise est **lent**, tout le monde se plaint. Tu mènes l'enquête avec **tout** ce que tu as appris. 14 questions."
+    },
+    {
+     "type": "exercise",
+     "q": "**1/14** — Le serveur est lent : quelle commande (très courte) affiche **depuis quand il tourne et sa charge** (load average) ?",
+     "hints": [
+      "Un mot, anglais."
+     ],
+     "accept": [
+      "w"
+     ],
+     "solution": "uptime",
+     "explain": "Tu lis 3 valeurs : 1, 5 et 15 minutes. À comparer au **nombre de cœurs**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "**2/14** — Load average `9.1, 8.7, 8.2` sur un serveur de **4 cœurs**. Diagnostic ?",
+     "options": [
+      "Saturation durable (environ le double de la capacité)",
+      "Tout va bien",
+      "Pic ponctuel"
+     ],
+     "answer": 0,
+     "explain": "9 pour 4 cœurs : **file d'attente permanente**. Cherche le coupable."
+    },
+    {
+     "type": "exercise",
+     "q": "**3/14** — Affiche **tous les processus triés par CPU décroissant**.",
+     "hints": [
+      "ps aux + --sort=-%cpu."
+     ],
+     "accept": [
+      "ps -aux --sort=-%cpu",
+      "ps aux --sort -%cpu"
+     ],
+     "solution": "ps aux --sort=-%cpu",
+     "explain": "Le coupable est en haut de la liste.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**4/14** — Extrait : `awa 4521 98.5 1.2 … R+ ./export_donnees`. Quel est le **PID** du processus gourmand ?",
+     "hints": [
+      "Deuxième colonne."
+     ],
+     "accept": [],
+     "solution": "4521",
+     "explain": "**4521**, lancé par `awa`, qui consomme 98,5 % de CPU.",
+     "placeholder": "Écris ta réponse ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**5/14** — Affiche **la ligne de commande complète** et l'état du processus 4521 avec `ps -p`.",
+     "hints": [
+      "ps -p + PID + -f"
+     ],
+     "accept": [
+      "ps -fp 4521",
+      "ps -f -p 4521",
+      "ps -p 4521",
+      "ps u -p 4521"
+     ],
+     "solution": "ps -p 4521 -f",
+     "explain": "Tu vois le PPID et la commande exacte.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**6/14** — `awa` a lancé ce calcul sans précaution. **Baisse sa priorité** à nice 10 (sans le tuer).",
+     "hints": [
+      "renice -n 10 -p <PID>"
+     ],
+     "accept": [
+      "sudo renice -n 10 -p 4521",
+      "renice 10 -p 4521",
+      "renice 10 4521",
+      "renice +10 -p 4521",
+      "sudo renice 10 -p 4521",
+      "renice -n 10 4521",
+      "sudo renice -n 10 4521",
+      "renice -n 10 -p 4521"
+     ],
+     "solution": "renice -n 10 -p 4521",
+     "explain": "Les autres processus retrouvent leur CPU, le calcul continue plus lentement.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**7/14** — Il faut **suspendre** ce processus le temps de l'enquête (sans le tuer).",
+     "hints": [
+      "kill -STOP <PID>"
+     ],
+     "accept": [
+      "kill -19 4521",
+      "kill -SIGSTOP 4521",
+      "sudo kill -STOP 4521",
+      "sudo kill -19 4521",
+      "kill -STOP 4521"
+     ],
+     "solution": "kill -STOP 4521",
+     "explain": "Il passe à l'état `T` : plus de CPU consommé, mais ses données restent en mémoire.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**8/14** — L'enquête est finie : **relance-le** (reprise du processus suspendu).",
+     "hints": [
+      "kill -CONT <PID>"
+     ],
+     "accept": [
+      "kill -18 4521",
+      "kill -SIGCONT 4521",
+      "sudo kill -CONT 4521",
+      "sudo kill -18 4521",
+      "kill -CONT 4521"
+     ],
+     "solution": "kill -CONT 4521",
+     "explain": "Il repart exactement où il s'était arrêté.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**9/14** — Un autre processus (PID 4600) est complètement bloqué. Demande-lui d'abord **poliment** de terminer.",
+     "hints": [
+      "Signal par défaut."
+     ],
+     "accept": [
+      "kill -15 4600",
+      "kill -TERM 4600",
+      "sudo kill 4600",
+      "sudo kill -15 4600",
+      "sudo kill -TERM 4600",
+      "kill 4600"
+     ],
+     "solution": "kill 4600",
+     "explain": "SIGTERM d'abord : on laisse une chance de se fermer proprement.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**10/14** — Il n'a pas réagi après plusieurs secondes. **Tue-le** pour de bon.",
+     "hints": [
+      "Le signal irrattrapable."
+     ],
+     "accept": [
+      "kill -KILL 4600",
+      "sudo kill -9 4600",
+      "sudo kill -KILL 4600",
+      "kill -SIGKILL 4600",
+      "kill -9 4600"
+     ],
+     "solution": "kill -9 4600",
+     "explain": "SIGKILL en dernier recours.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**11/14** — Une sauvegarde nocturne lourde (`./backup.sh`) ralentit le serveur. Relance-la avec une priorité CPU de **19** **et** disque **idle**.",
+     "hints": [
+      "nice + ionice."
+     ],
+     "accept": [
+      "nice -n 19 ionice -c 3 ./backup.sh",
+      "nice -19 ionice -c3 ./backup.sh",
+      "ionice -c3 nice -n 19 ./backup.sh",
+      "ionice -c 3 nice -n 19 ./backup.sh"
+     ],
+     "solution": "nice -n 19 ionice -c3 ./backup.sh",
+     "explain": "CPU et disque sont ménagés pour les utilisateurs.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**12/14** — Tu dois lancer `./backup.sh` en arrière-plan **sans qu'elle meure** à la fermeture de ta session SSH.",
+     "hints": [
+      "nohup … &"
+     ],
+     "accept": [
+      "nohup ./backup.sh > /dev/null 2>&1 &",
+      "nohup ./backup.sh >/dev/null 2>&1 &",
+      "nohup ./backup.sh&"
+     ],
+     "solution": "nohup ./backup.sh &",
+     "explain": "La sortie ira dans `nohup.out`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**13/14** — Le service web `nginx` ne démarre pas : « Address already in use ». **Trouve qui occupe** les ports TCP en écoute (sudo).",
+     "hints": [
+      "ss + options ltnp."
+     ],
+     "accept": [
+      "sudo ss -l -t -n -p",
+      "sudo ss -l -t -p -n",
+      "sudo ss -l -n -t -p",
+      "sudo ss -l -n -p -t",
+      "sudo ss -l -p -t -n",
+      "sudo ss -l -p -n -t",
+      "sudo ss -t -l -n -p",
+      "sudo ss -t -l -p -n",
+      "sudo ss -t -n -l -p",
+      "sudo ss -t -n -p -l",
+      "sudo ss -t -p -l -n",
+      "sudo ss -t -p -n -l",
+      "sudo ss -n -l -t -p",
+      "sudo ss -n -l -p -t",
+      "sudo ss -n -t -l -p",
+      "sudo ss -n -t -p -l",
+      "sudo ss -n -p -l -t",
+      "sudo ss -n -p -t -l",
+      "sudo ss -p -l -t -n",
+      "sudo ss -p -l -n -t",
+      "sudo ss -p -t -l -n",
+      "sudo ss -p -t -n -l",
+      "sudo ss -p -n -l -t",
+      "sudo ss -p -n -t -l",
+      "sudo ss -tlnp",
+      "sudo ss -lntp",
+      "sudo ss -ntlp",
+      "sudo ss -tnlp",
+      "ss -ltnp",
+      "ss -l -t -n -p",
+      "ss -l -t -p -n",
+      "ss -l -n -t -p",
+      "ss -l -n -p -t",
+      "ss -l -p -t -n",
+      "ss -l -p -n -t",
+      "ss -t -l -n -p",
+      "ss -t -l -p -n",
+      "ss -t -n -l -p",
+      "ss -t -n -p -l",
+      "ss -t -p -l -n",
+      "ss -t -p -n -l",
+      "ss -n -l -t -p",
+      "ss -n -l -p -t",
+      "ss -n -t -l -p",
+      "ss -n -t -p -l",
+      "ss -n -p -l -t",
+      "ss -n -p -t -l",
+      "ss -p -l -t -n",
+      "ss -p -l -n -t",
+      "ss -p -t -l -n",
+      "ss -p -t -n -l",
+      "ss -p -n -l -t",
+      "ss -p -n -t -l",
+      "ss -tlnp",
+      "ss -lntp",
+      "ss -ntlp",
+      "ss -tnlp"
+     ],
+     "solution": "sudo ss -ltnp",
+     "explain": "Tu verras quel processus écoute déjà sur le port 80.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**14/14 (boss)** — Après correction, **recharge** la configuration de `nginx` **sans coupure** (sudo).",
+     "hints": [
+      "systemctl reload + service."
+     ],
+     "accept": [
+      "systemctl reload nginx"
+     ],
+     "solution": "sudo systemctl reload nginx",
+     "explain": "Pas de coupure des clients connectés.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais **observer** (`ps`, `top`, `free`), **signaler** (`kill`, `pkill`), **prioriser** (`nice`, `renice`, `ionice`), **jongler** avec les jobs et **piloter** les services. Voilà un vrai travail d'administrateur système. 🚀"
+    }
+   ]
+  }
+ ]
+}
