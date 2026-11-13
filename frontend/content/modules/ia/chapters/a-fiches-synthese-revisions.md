@@ -57,3 +57,22 @@ $$0 \le h(n) \le h^*(n)$$
 - **Sélection** : Choix proportionnel au fitness (roulette : $p_i = \frac{f_i}{\sum f_k}$).
 - **Croisement (Crossover)** : Échange de segments chromosomiques entre 2 parents.
 - **Mutation** : Inversion aléatoire d'un bit ou permutation pour conserver la diversité.
+
+---
+
+### A.5 Fiche 5 : Logique classique
+
+- **Connecteurs** : `~` non, `^` et, `v` ou, `=>` implication, `<=>` équivalence. `A => B ≡ ~A v B` ; fausse seulement si A vrai et B faux.
+- **Contraposition** : `P => Q ≡ ~Q => ~P` (l'inverse `~P => ~Q` n'est pas équivalent).
+- **Chaînage avant** : faits → règles → nouveaux faits. **Chaînage arrière** : but → sous-buts → faits.
+- **Règles** : modus ponens `A=>B, A ⊢ B` ; modus tollens `A=>B, ~B ⊢ ~A` ; résolution `A v B, ~B v C ⊢ A v C`.
+- **Résolution** : forme clausale + négation du but, puis résolutions jusqu'à la clause vide.
+- **Prédicats** : `∀` avec `=>`, `∃` avec `^` ; `¬∀ ≡ ∃¬` ; `¬∃ ≡ ∀¬` ; `∃x∀y ≠ ∀y∃x`. Skolémisation : fonction de Skolem si le ∃ est dans un ∀, constante sinon.
+
+### A.6 Fiche 6 : Machine Learning
+
+- **Objectifs** : classification (SVM, arbres, KNN), prédiction (régression), association (Apriori), segmentation (K-means).
+- **Prédictif** = classification + prédiction ; **descriptif** = segmentation + association.
+- **Supervisé** : exemples étiquetés, `f : X → Y`. **Non supervisé** : sans étiquette, clusters.
+- **Sur-apprentissage** : apprend le bruit. **Sous-apprentissage** : trop simple.
+- **Rappel** = TP/(TP+FN) ; **précision** = TP/(TP+FP) ; **F** = 2TP/(2TP+FP+FN) ; **spécificité** = TN/(TN+FP) ; **accuracy** = (TP+TN)/total.

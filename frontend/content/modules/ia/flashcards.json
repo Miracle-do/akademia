@@ -250,5 +250,167 @@
     "front": "Quel langage de programmation logique est préconisé dans l'atelier de programmation de systèmes intelligents de M. Dagba ?",
     "back": "PROLOG, et plus particulièrement l'environnement SWI-PROLOG.",
     "tag": "Outils & Méthodes"
+  },
+  {
+    "id": "fc-43",
+    "front": "Qu'est-ce qu'une base de connaissances ?",
+    "back": "Toutes les connaissances sur le monde et sa structure : une base de faits + une base de règles. L'inférence utilise faits et règles pour trouver de nouveaux faits.",
+    "tag": "Logique"
+  },
+  {
+    "id": "fc-44",
+    "front": "Table de vérité de A => B ?",
+    "back": "Fausse uniquement si A est vrai et B faux. Équivaut à ~A v B.",
+    "tag": "Logique"
+  },
+  {
+    "id": "fc-45",
+    "front": "Quelle est la loi de contraposition ?",
+    "back": "P => Q ⇔ ~Q => ~P. (Attention : P => Q n'est pas équivalent à ~P => ~Q, qui est l'inverse.)",
+    "tag": "Logique"
+  },
+  {
+    "id": "fc-46",
+    "front": "Lois de Morgan ?",
+    "back": "~(P v Q) ⇔ ~P ^ ~Q et ~(P ^ Q) ⇔ ~P v ~Q.",
+    "tag": "Logique"
+  },
+  {
+    "id": "fc-47",
+    "front": "Chaînage avant : principe ?",
+    "back": "Partir des faits, appliquer toutes les règles applicables, ajouter chaque conclusion à la base de faits, jusqu'à obtenir le but ou ne plus pouvoir avancer.",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-48",
+    "front": "Chaînage arrière : principe ?",
+    "back": "Partir du but, chercher les règles dont il est la conclusion, ses prémisses deviennent des sous-buts, jusqu'à retomber sur des faits connus.",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-49",
+    "front": "Énoncer le modus ponens et le modus tollens.",
+    "back": "Modus ponens : A => B, A ⊢ B. Modus tollens : A => B, ~B ⊢ ~A.",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-50",
+    "front": "Qu'est-ce que la résolution ?",
+    "back": "A v B, ~B v C ⊢ A v C : on annule une proposition contre sa négation entre deux clauses.",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-51",
+    "front": "Procédure de résolution en 3 étapes ?",
+    "back": "1) Mettre les assertions en forme clausale. 2) Ajouter la négation du but. 3) Résoudre des paires de clauses jusqu'à la clause vide (contradiction = but démontré).",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-52",
+    "front": "Qu'est-ce qu'une forme clausale ?",
+    "back": "Une série de propositions ou négations reliées par des « ou », par exemple A v ~B v C v ~D.",
+    "tag": "Inférence"
+  },
+  {
+    "id": "fc-53",
+    "front": "Pourquoi la logique des prédicats ?",
+    "back": "La logique des propositions est trop pauvre pour exprimer des connaissances générales : il faut des objets, des prédicats, des variables et des quantificateurs.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-54",
+    "front": "Quel connecteur avec ∀ et avec ∃ ?",
+    "back": "∀x (P => Q) avec l'implication ; ∃x (P ^ Q) avec la conjonction.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-55",
+    "front": "Que dit ∃x ∀y différemment de ∀y ∃x ?",
+    "back": "∃x ∀y Aime(x,y) : quelqu'un aime tout le monde. ∀y ∃x Aime(x,y) : tout le monde est aimé par au moins une personne. L'ordre compte.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-56",
+    "front": "Lois de Morgan généralisées ?",
+    "back": "¬∀x P ⇔ ∃x ¬P ; ¬∃x P ⇔ ∀x ¬P ; ∀x P ⇔ ¬∃x ¬P ; ∃x P ⇔ ¬∀x ¬P.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-57",
+    "front": "Ordres du calcul des prédicats ?",
+    "back": "Ordre 0 : pas de quantification. Ordre 1 : sur les individus. Ordre 2 : sur les individus et les prédicats. Les algorithmes d'inférence existent pour les ordres 0 et 1.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-58",
+    "front": "Skolémisation : principe ?",
+    "back": "Éliminer les ∃ : ∃ dans un ∀ → fonction de Skolem des variables universelles (∀x ∃y p(x,y) → p(x,f(x))) ; ∃ hors de tout ∀ → constante.",
+    "tag": "Prédicats"
+  },
+  {
+    "id": "fc-59",
+    "front": "Qu'est-ce que le Machine Learning ?",
+    "back": "Une branche de l'IA : un système apprend à partir de données (exemples) pour produire un modèle, sans qu'on programme explicitement les règles.",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-60",
+    "front": "Les deux piliers du ML ?",
+    "back": "Les données (exemples) et l'algorithme d'apprentissage. Aussi importants l'un que l'autre. Les faire tourner ensemble = entraînement.",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-61",
+    "front": "Les 4 objectifs du ML avec un algorithme chacun ?",
+    "back": "Classification (SVM, arbres, KNN) ; prédiction (régression linéaire, perceptron) ; association (Apriori, FP-Growth) ; segmentation (K-means).",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-62",
+    "front": "Modèle prédictif vs descriptif ?",
+    "back": "Prédictif : classification, prédiction (résultats connus). Descriptif : segmentation, association (décrit les données, souvent en amont du prédictif).",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-63",
+    "front": "Apprentissage supervisé vs non supervisé ?",
+    "back": "Supervisé : exemples avec étiquettes, on cherche f : X → Y. Non supervisé : sans étiquette, on regroupe en clusters.",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-64",
+    "front": "Types de problème selon l'espace des étiquettes Y ?",
+    "back": "Y = ℝ : régression. Y = {0,1} : classification binaire. Y = {1..C}, C > 2 : classification multi-classe.",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-65",
+    "front": "Généralisation, sur-apprentissage, sous-apprentissage ?",
+    "back": "Généralisation : bonnes prédictions sur des données nouvelles. Sur-apprentissage : le modèle apprend aussi le bruit. Sous-apprentissage : modèle trop simple, mauvais même à l'entraînement.",
+    "tag": "Machine Learning"
+  },
+  {
+    "id": "fc-66",
+    "front": "TP, FP, TN, FN ?",
+    "back": "TP : positif bien classé. FP : négatif prédit positif (type I, fausse alarme). TN : négatif bien classé. FN : positif prédit négatif (type II).",
+    "tag": "Évaluation"
+  },
+  {
+    "id": "fc-67",
+    "front": "Formules : rappel, précision, spécificité ?",
+    "back": "Rappel = TP/(TP+FN) ; précision = TP/(TP+FP) ; spécificité = TN/(TN+FP).",
+    "tag": "Évaluation"
+  },
+  {
+    "id": "fc-68",
+    "front": "Formule de la F-mesure ?",
+    "back": "F = 2·précision·rappel / (précision + rappel) = 2TP / (2TP + FP + FN), moyenne harmonique.",
+    "tag": "Évaluation"
+  },
+  {
+    "id": "fc-69",
+    "front": "Accuracy vs precision ?",
+    "back": "Accuracy = (TP+TN)/total, proportion d'exemples correctement étiquetés. Precision = TP/(TP+FP). Les deux se traduisent « précision » en français.",
+    "tag": "Évaluation"
   }
 ]

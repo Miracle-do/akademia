@@ -488,5 +488,523 @@
     ],
     "answer": 1,
     "explain": "Le principe d'A* repose sur l'expansion prioritaire du chemin le plus prometteur globalement, ce qui impose d'extraire toujours l'état ayant le plus petit f(n) = g(n) + h(n)."
+  },
+  {
+    "id": "q36",
+    "chapter": "5-1-logique-propositions",
+    "difficulty": 1,
+    "q": "Laquelle de ces phrases est une proposition logique ?",
+    "options": [
+      "Viens ici !",
+      "Le cube d'un nombre est positif",
+      "On doit conduire à droite",
+      "La terre est ronde"
+    ],
+    "answer": 3,
+    "explain": "Une proposition est vraie ou fausse de façon univoque. « On doit conduire à droite » et « le cube d'un nombre est positif » sont tantôt vraies, tantôt fausses selon le contexte ; une injonction n'a pas de valeur de vérité."
+  },
+  {
+    "id": "q37",
+    "chapter": "5-1-logique-propositions",
+    "difficulty": 1,
+    "q": "Dans quel unique cas l'implication A => B est-elle fausse ?",
+    "options": [
+      "A faux et B faux",
+      "A vrai et B faux",
+      "A vrai et B vrai",
+      "A faux et B vrai"
+    ],
+    "answer": 1,
+    "explain": "A => B est fausse seulement quand la prémisse est vraie et la conclusion fausse. Elle équivaut à ~A v B."
+  },
+  {
+    "id": "q38",
+    "chapter": "5-1-logique-propositions",
+    "difficulty": 2,
+    "q": "Quelle formule est équivalente à P => Q ?",
+    "options": [
+      "~Q => ~P",
+      "~P => ~Q",
+      "~P ^ Q",
+      "Q => P"
+    ],
+    "answer": 0,
+    "explain": "La contraposée ~Q => ~P est équivalente. ~P => ~Q est l'inverse et Q => P la réciproque : elles ne sont pas équivalentes à P => Q."
+  },
+  {
+    "id": "q39",
+    "chapter": "5-1-logique-propositions",
+    "difficulty": 2,
+    "q": "D'après la loi de Morgan, ~(P v Q) est équivalent à :",
+    "options": [
+      "~P => Q",
+      "P ^ Q",
+      "~P v ~Q",
+      "~P ^ ~Q"
+    ],
+    "answer": 3,
+    "explain": "La négation d'un « ou » est le « et » des négations : ~(P v Q) ⇔ ~P ^ ~Q."
+  },
+  {
+    "id": "q40",
+    "chapter": "5-2-inference-chainage",
+    "difficulty": 1,
+    "q": "Quel est le point de départ du chaînage arrière ?",
+    "options": [
+      "La règle la plus longue",
+      "La base de faits",
+      "Le but à démontrer",
+      "Une clause vide"
+    ],
+    "answer": 2,
+    "explain": "Le chaînage arrière part du but, cherche les règles qui l'ont pour conclusion et transforme leurs prémisses en sous-buts."
+  },
+  {
+    "id": "q41",
+    "chapter": "5-2-inference-chainage",
+    "difficulty": 1,
+    "q": "Dans le chaînage avant, que fait-on d'une règle appliquée ?",
+    "options": [
+      "On supprime tous les faits",
+      "On l'applique à l'infini",
+      "On l'ajoute à la base de faits",
+      "On la désactive (retirée de BR) et on ajoute sa conclusion à BF"
+    ],
+    "answer": 3,
+    "explain": "L'algorithme fait BR = BR − {R} puis BF = BF ∪ {conclusion de R}, jusqu'à obtenir le but ou ne plus avoir de règle applicable."
+  },
+  {
+    "id": "q42",
+    "chapter": "5-2-inference-chainage",
+    "difficulty": 2,
+    "q": "Avec les règles R1 : A => E, R2 : B => D, R3 : H => A, R5 : E ^ K => B et les faits H, K, quel est le sous-but suivant D en chaînage arrière ?",
+    "options": [
+      "E (par R1)",
+      "H (par R3)",
+      "A (par R3)",
+      "B (par R2)"
+    ],
+    "answer": 3,
+    "explain": "D est conclusion de R2 uniquement : le premier sous-but est B. Puis B (R5) donne E, E (R1) donne A, A (R3) est établi par H."
+  },
+  {
+    "id": "q43",
+    "chapter": "5-2-inference-chainage",
+    "difficulty": 3,
+    "q": "Faits : D, G, I. Règles : R1 A^B=>C, R2 D=>A, R4 G=>H, R5 I=>F, R6 H^F^J=>B, R7 H^K=>J, R8 G^F=>K. Dans quel ordre de faits obtient-on C en chaînage avant ?",
+    "options": [
+      "H, A, B, K, F, J, C",
+      "A, H, F, K, J, B, C",
+      "C directement",
+      "B, J, K, F, H, A, C"
+    ],
+    "answer": 1,
+    "explain": "R2 donne A ; R4 donne H ; R5 donne F ; R8 donne K ; R7 donne J ; R6 donne B ; R1 donne C."
+  },
+  {
+    "id": "q44",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 1,
+    "q": "Que conclut le modus ponens à partir de A => B et A ?",
+    "options": [
+      "B",
+      "~B",
+      "~A",
+      "A v B"
+    ],
+    "answer": 0,
+    "explain": "Modus ponens : A => B, A ⊢ B."
+  },
+  {
+    "id": "q45",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 1,
+    "q": "Que conclut le modus tollens à partir de A => B et ~B ?",
+    "options": [
+      "A",
+      "rien",
+      "B",
+      "~A"
+    ],
+    "answer": 3,
+    "explain": "Modus tollens : A => B, ~B ⊢ ~A."
+  },
+  {
+    "id": "q46",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 2,
+    "q": "Quelle est la résolvante des clauses A v B et ~B v C ?",
+    "options": [
+      "la clause vide",
+      "A v C",
+      "B v C",
+      "A ^ C"
+    ],
+    "answer": 1,
+    "explain": "On annule B contre ~B : il reste A v C."
+  },
+  {
+    "id": "q47",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 2,
+    "q": "Dans la procédure de résolution, que doit-on ajouter à l'ensemble des clauses ?",
+    "options": [
+      "Rien",
+      "La négation de l'assertion à démontrer",
+      "Toutes les tautologies",
+      "L'assertion à démontrer"
+    ],
+    "answer": 1,
+    "explain": "C'est une preuve par réfutation : on ajoute la négation du but et on cherche la clause vide (contradiction)."
+  },
+  {
+    "id": "q48",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 2,
+    "q": "L'inférence « α→β ⊢ ¬α→¬β » est :",
+    "options": [
+      "correcte (résolution)",
+      "correcte (modus ponens)",
+      "correcte (contraposition)",
+      "incorrecte : c'est l'inverse"
+    ],
+    "answer": 3,
+    "explain": "Si α est faux et β vrai, α→β est vraie mais ¬α→¬β est fausse. La contraposée correcte est ¬β→¬α."
+  },
+  {
+    "id": "q49",
+    "chapter": "5-3-regles-inference-resolution",
+    "difficulty": 3,
+    "q": "Pourquoi la résolvante de (A v B) et (~A v ~B) n'est-elle pas la clause vide ?",
+    "options": [
+      "Parce que A v B est fausse",
+      "Parce que ces clauses sont identiques",
+      "Parce qu'on annule une seule paire à la fois, ce qui laisse B v ~B",
+      "Parce que la résolution est interdite"
+    ],
+    "answer": 2,
+    "explain": "On n'annule qu'un littéral à la fois : avec A on obtient B v ~B, une tautologie, et non une contradiction."
+  },
+  {
+    "id": "q50",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 1,
+    "q": "Comment écrit-on « Tous les chats sont des mammifères » ?",
+    "options": [
+      "∀x Chat(x) => Mammifère(x)",
+      "∃x Chat(x) => Mammifère(x)",
+      "∀x Chat(x) ^ Mammifère(x)",
+      "∃x Chat(x) ^ Mammifère(x)"
+    ],
+    "answer": 0,
+    "explain": "Le quantificateur universel s'associe à l'implication."
+  },
+  {
+    "id": "q51",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 1,
+    "q": "Comment écrit-on « Kokou a une sœur étudiante » ?",
+    "options": [
+      "∀x Soeur(x,Kokou) => étudiante(x)",
+      "∃x Soeur(x,Kokou) ^ étudiante(x)",
+      "∃x Soeur(x,Kokou) => étudiante(x)",
+      "∀x Soeur(x,Kokou) ^ étudiante(x)"
+    ],
+    "answer": 1,
+    "explain": "L'existentiel s'associe à la conjonction."
+  },
+  {
+    "id": "q52",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 2,
+    "q": "Que signifie ∃x ∀y Aime(x,y) ?",
+    "options": [
+      "Tout le monde est aimé par au moins une personne",
+      "Personne n'aime personne",
+      "Il existe quelqu'un qui aime tout le monde",
+      "Chacun aime quelqu'un"
+    ],
+    "answer": 2,
+    "explain": "∃x ∀y : un même x aime tous les y. L'ordre inverse ∀y ∃x dit que chacun est aimé par au moins quelqu'un."
+  },
+  {
+    "id": "q53",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 2,
+    "q": "Par Morgan généralisé, ¬∀x P(x) est équivalent à :",
+    "options": [
+      "∃x P(x)",
+      "∀x ¬P(x)",
+      "∃x ¬P(x)",
+      "¬∃x P(x)"
+    ],
+    "answer": 2,
+    "explain": "Nier « pour tout » revient à dire « il existe un contre-exemple » : ¬∀x P ⇔ ∃x ¬P."
+  },
+  {
+    "id": "q54",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 2,
+    "q": "Que devient « ∃y ∀x personne(x) => parle(x,y) » après skolémisation ?",
+    "options": [
+      "rien, on ne peut pas",
+      "parle(x, f(x))",
+      "parle(a, a)",
+      "parle(x, a) avec a une constante"
+    ],
+    "answer": 3,
+    "explain": "L'existentiel est hors de tout ∀ : la fonction de Skolem est une constante. Tous parlent la même langue a."
+  },
+  {
+    "id": "q55",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 2,
+    "q": "Que devient « ∀x ∃y p(x,y) » après skolémisation ?",
+    "options": [
+      "p(f(x), f(x))",
+      "p(x, f(x))",
+      "∃y p(a,y)",
+      "p(x, a)"
+    ],
+    "answer": 1,
+    "explain": "L'existentiel est dans le domaine d'un ∀ : la fonction de Skolem dépend de x."
+  },
+  {
+    "id": "q56",
+    "chapter": "5-4-logique-predicats",
+    "difficulty": 1,
+    "q": "Pour quels ordres du calcul des prédicats existe-t-il des algorithmes d'inférence ?",
+    "options": [
+      "Ordre 0 et 1 seulement",
+      "Tous les ordres",
+      "Ordre 2 seulement",
+      "Aucun"
+    ],
+    "answer": 0,
+    "explain": "Le 2e ordre (quantification sur les prédicats) n'est presque jamais utilisé faute d'algorithmes d'inférence."
+  },
+  {
+    "id": "q57",
+    "chapter": "6-1-ml-notions-objectifs",
+    "difficulty": 1,
+    "q": "Le Machine Learning est utilisé quand :",
+    "options": [
+      "il n'y a aucune donnée",
+      "les données sont abondantes mais les connaissances peu accessibles",
+      "on veut écrire à la main toutes les règles",
+      "le problème est déjà résolu algorithmiquement et bon marché"
+    ],
+    "answer": 1,
+    "explain": "Le cours le résume ainsi : données relativement abondantes, connaissances peu accessibles ou peu développées."
+  },
+  {
+    "id": "q58",
+    "chapter": "6-1-ml-notions-objectifs",
+    "difficulty": 1,
+    "q": "Quel terme désigne le fait de faire tourner un algorithme d'apprentissage sur un jeu de données ?",
+    "options": [
+      "La skolémisation",
+      "L'entraînement",
+      "La segmentation",
+      "L'inférence"
+    ],
+    "answer": 1,
+    "explain": "L'entraînement produit un modèle à partir des données et de l'algorithme."
+  },
+  {
+    "id": "q59",
+    "chapter": "6-1-ml-notions-objectifs",
+    "difficulty": 1,
+    "q": "Quelle tâche attribue une classe à un objet d'après ses caractéristiques ?",
+    "options": [
+      "Classification",
+      "Association",
+      "Régression",
+      "Segmentation"
+    ],
+    "answer": 0,
+    "explain": "La classification attribue une classe, par exemple accorder ou refuser un prêt."
+  },
+  {
+    "id": "q60",
+    "chapter": "6-1-ml-notions-objectifs",
+    "difficulty": 2,
+    "q": "Parmi ces algorithmes, lequel sert à l'association ?",
+    "options": [
+      "Régression linéaire",
+      "K-means",
+      "Apriori",
+      "KNN"
+    ],
+    "answer": 2,
+    "explain": "Apriori et FP-Growth déterminent les attributs corrélés (analyse du panier de la ménagère). K-means sert à la segmentation."
+  },
+  {
+    "id": "q61",
+    "chapter": "6-1-ml-notions-objectifs",
+    "difficulty": 2,
+    "q": "Quelles tâches relèvent du modèle descriptif ?",
+    "options": [
+      "Prédiction et association",
+      "Segmentation et association",
+      "Classification et segmentation",
+      "Classification et prédiction"
+    ],
+    "answer": 1,
+    "explain": "Modèle prédictif : classification, prédiction. Modèle descriptif : segmentation, association."
+  },
+  {
+    "id": "q62",
+    "chapter": "6-2-ml-types-apprentissage-generalisation",
+    "difficulty": 1,
+    "q": "Qu'est-ce qui distingue l'apprentissage supervisé ?",
+    "options": [
+      "Les exemples sont fournis avec leur étiquette",
+      "Il n'y a pas de données",
+      "Il n'utilise que des règles",
+      "Il regroupe les exemples en clusters sans étiquette"
+    ],
+    "answer": 0,
+    "explain": "En supervisé, chaque exemple d'apprentissage contient entrée et sortie (l'étiquette)."
+  },
+  {
+    "id": "q63",
+    "chapter": "6-2-ml-types-apprentissage-generalisation",
+    "difficulty": 1,
+    "q": "Quand Y = {0, 1}, on parle de :",
+    "options": [
+      "régression",
+      "classification binaire",
+      "classification multi-classe",
+      "segmentation"
+    ],
+    "answer": 1,
+    "explain": "Y = ℝ : régression ; Y = {0,1} : classification binaire ; Y = {1..C}, C > 2 : multi-classe."
+  },
+  {
+    "id": "q64",
+    "chapter": "6-2-ml-types-apprentissage-generalisation",
+    "difficulty": 2,
+    "q": "Un modèle excellent sur ses données d'entraînement mais mauvais sur de nouvelles données souffre de :",
+    "options": [
+      "bonne généralisation",
+      "sur-apprentissage (overfitting)",
+      "segmentation",
+      "sous-apprentissage"
+    ],
+    "answer": 1,
+    "explain": "Il a modélisé le bruit des exemples d'entraînement au lieu de la nature des objets : c'est du sur-apprentissage."
+  },
+  {
+    "id": "q65",
+    "chapter": "6-2-ml-types-apprentissage-generalisation",
+    "difficulty": 2,
+    "q": "Un modèle trop simple, mauvais même sur les données d'entraînement, est en :",
+    "options": [
+      "sous-apprentissage (underfitting)",
+      "sur-apprentissage",
+      "généralisation",
+      "classification"
+    ],
+    "answer": 0,
+    "explain": "Le sous-apprentissage correspond à un modèle trop simple pour de bonnes performances, même sur l'entraînement."
+  },
+  {
+    "id": "q66",
+    "chapter": "6-2-ml-types-apprentissage-generalisation",
+    "difficulty": 2,
+    "q": "Quel est le but de l'apprentissage non supervisé ?",
+    "options": [
+      "Démontrer un théorème",
+      "Regrouper des exemples similaires en clusters",
+      "Réduire le coût des chemins",
+      "Prédire une étiquette connue"
+    ],
+    "answer": 1,
+    "explain": "Sans étiquette, on regroupe les exemples en paquets d'exemples similaires."
+  },
+  {
+    "id": "q67",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 1,
+    "q": "Un faux positif est :",
+    "options": [
+      "un exemple positif classé négatif",
+      "un exemple positif classé positif",
+      "un exemple négatif classé positif",
+      "un exemple négatif classé négatif"
+    ],
+    "answer": 2,
+    "explain": "FP : négatif étiqueté positif par le modèle (fausse alarme, erreur de type I)."
+  },
+  {
+    "id": "q68",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 1,
+    "q": "La formule du rappel est :",
+    "options": [
+      "(TP + TN) / total",
+      "TP / (TP + FN)",
+      "TP / (TP + FP)",
+      "TN / (TN + FP)"
+    ],
+    "answer": 1,
+    "explain": "Rappel = taux de vrais positifs = TP / (TP + FN). TP/(TP+FP) est la précision et TN/(TN+FP) la spécificité."
+  },
+  {
+    "id": "q69",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 2,
+    "q": "TP = 40, FP = 10, FN = 20, TN = 30. Quelle est la précision ?",
+    "options": [
+      "0,80",
+      "0,70",
+      "0,67",
+      "0,75"
+    ],
+    "answer": 0,
+    "explain": "Précision = TP / (TP + FP) = 40 / 50 = 0,80. Le rappel vaut 0,67, la spécificité 0,75 et l'accuracy 0,70."
+  },
+  {
+    "id": "q70",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 3,
+    "q": "Avec TP = 40, FP = 10, FN = 20, TN = 30, quelle est la F-mesure ?",
+    "options": [
+      "0,80",
+      "0,667",
+      "0,727",
+      "0,70"
+    ],
+    "answer": 2,
+    "explain": "F = 2TP / (2TP + FP + FN) = 80 / 110 ≈ 0,727, moyenne harmonique de 0,80 et 0,667."
+  },
+  {
+    "id": "q71",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 2,
+    "q": "Pourquoi ne peut-on pas juger un classifieur sur le seul rappel ?",
+    "options": [
+      "Prédire que tout est positif donne un rappel parfait",
+      "Il est toujours égal à la précision",
+      "Il est trop difficile à calculer",
+      "Il dépend de la couleur des données"
+    ],
+    "answer": 0,
+    "explain": "En prédisant tout positif, FN = 0 et le rappel vaut 1, mais la précision est mauvaise : d'où la précision et la F-mesure."
+  },
+  {
+    "id": "q72",
+    "chapter": "6-3-ml-evaluation-matrice-confusion",
+    "difficulty": 2,
+    "q": "La F-mesure est :",
+    "options": [
+      "la moyenne arithmétique de la précision et du rappel",
+      "le produit de TP et TN",
+      "la moyenne harmonique de la précision et du rappel",
+      "le taux d'erreur"
+    ],
+    "answer": 2,
+    "explain": "F = 2·P·R / (P + R), moyenne harmonique."
   }
 ]

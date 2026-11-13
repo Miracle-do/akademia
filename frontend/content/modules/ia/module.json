@@ -1,12 +1,12 @@
 {
   "id": "ia",
   "title": "Intelligence Artificielle",
-  "subtitle": "Espaces d'états, Recherche, Jeux & Algorithmes Génétiques · ENEAM & Batna · Licence 3",
-  "description": "Fondements de l'IA symbolique et heuristique : formalisation en espaces d'états, recherche aveugle (DFS, BFS, UCS), recherche informée (Hill Climbing, A*), jeux à deux joueurs (Min-Max, Alpha-Bêta) et algorithmes génétiques.",
+  "subtitle": "Espaces d'états, Recherche, Jeux, Algorithmes Génétiques, Logique & Machine Learning · ENEAM & Batna · Licence 3",
+  "description": "Fondements de l'IA : espaces d'états, recherche aveugle (DFS, BFS, UCS) et informée (Hill Climbing, A*), jeux (Min-Max, Alpha-Bêta), algorithmes génétiques, représentation des connaissances par la logique (propositions, prédicats, chaînage, résolution) et introduction au Machine Learning.",
   "emoji": "🧠",
   "color": "#7C3AED",
   "level": "Licence 3",
-  "estimatedHours": 12,
+  "estimatedHours": 14,
   "parts": [
     {
       "id": "p1",
@@ -40,6 +40,25 @@
       "chapters": [
         "4-1-jeux-minmax-alpha-beta",
         "4-2-algorithmes-genetiques"
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Chapitre 5 · Représentation des connaissances : logique classique",
+      "chapters": [
+        "5-1-logique-propositions",
+        "5-2-inference-chainage",
+        "5-3-regles-inference-resolution",
+        "5-4-logique-predicats"
+      ]
+    },
+    {
+      "id": "p6",
+      "title": "Chapitre 6 · Introduction au Machine Learning",
+      "chapters": [
+        "6-1-ml-notions-objectifs",
+        "6-2-ml-types-apprentissage-generalisation",
+        "6-3-ml-evaluation-matrice-confusion"
       ]
     },
     {
@@ -131,6 +150,62 @@
       "summary": "Chromosomes, fitness, sélection, croisement, mutation : maximisation de f(x) = x² + 1 et problème du voyageur de commerce (TSP).",
       "minutes": 12,
       "file": "4-2-algorithmes-genetiques.md"
+    },
+    {
+      "id": "5-1-logique-propositions",
+      "number": "5.1",
+      "title": "Propositions, connecteurs et lois logiques",
+      "summary": "Propositions, connecteurs, table de vérité, lois de Morgan, implication et contraposition, base de connaissances.",
+      "minutes": 9,
+      "file": "5-1-logique-propositions.md"
+    },
+    {
+      "id": "5-2-inference-chainage",
+      "number": "5.2",
+      "title": "Inférence : chaînage avant et arrière",
+      "summary": "Base de faits et de règles, algorithme de chaînage avant, chaînage arrière par sous-buts, exercices corrigés.",
+      "minutes": 12,
+      "file": "5-2-inference-chainage.md"
+    },
+    {
+      "id": "5-3-regles-inference-resolution",
+      "number": "5.3",
+      "title": "Règles d'inférence et procédure de résolution",
+      "summary": "Modus ponens, modus tollens, absurde, résolution, forme clausale, preuve par réfutation, exercices corrigés.",
+      "minutes": 13,
+      "file": "5-3-regles-inference-resolution.md"
+    },
+    {
+      "id": "5-4-logique-predicats",
+      "number": "5.4",
+      "title": "Logique des prédicats et skolémisation",
+      "summary": "Prédicats, quantificateurs ∀ et ∃, Morgan généralisé, ordre du calcul, skolémisation, exercices de modélisation.",
+      "minutes": 15,
+      "file": "5-4-logique-predicats.md"
+    },
+    {
+      "id": "6-1-ml-notions-objectifs",
+      "number": "6.1",
+      "title": "Machine Learning : notions et objectifs",
+      "summary": "Définition, quand l'utiliser, données et algorithme, classification, prédiction, association, segmentation, modèles prédictifs et descriptifs.",
+      "minutes": 10,
+      "file": "6-1-ml-notions-objectifs.md"
+    },
+    {
+      "id": "6-2-ml-types-apprentissage-generalisation",
+      "number": "6.2",
+      "title": "Apprentissage supervisé, non supervisé et généralisation",
+      "summary": "Formalisation f : X → Y, régression et classification, clustering, généralisation, sur- et sous-apprentissage.",
+      "minutes": 9,
+      "file": "6-2-ml-types-apprentissage-generalisation.md"
+    },
+    {
+      "id": "6-3-ml-evaluation-matrice-confusion",
+      "number": "6.3",
+      "title": "Évaluer un classifieur : matrice de confusion",
+      "summary": "TP, FP, TN, FN, rappel, précision, F-mesure, spécificité, accuracy et exemple chiffré.",
+      "minutes": 10,
+      "file": "6-3-ml-evaluation-matrice-confusion.md"
     },
     {
       "id": "a-fiches-synthese-revisions",
