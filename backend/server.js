@@ -8,6 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '../frontend/.env') });
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const { rateLimit } = require('express-rate-limit');
 const contentService = require('./services/contentService');
 const progressService = require('./services/progressService');
 const progressionService = require('./services/progressionService');
@@ -17,8 +19,32 @@ const adminService = require('./services/adminService');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// Render place l'application derrière un proxy : sans cela toutes les requêtes auraient la même IP (limites de débit inutiles).
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
+// CORS : liste blanche via CORS_ORIGINS (domaines séparés par des virgules). Sans variable, l'API reste ouverte (jeton Bearer, pas de cookies).
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean);
+if (!allowedOrigins.length && process.env.NODE_ENV === 'production') {
+  console.warn('[securite] CORS_ORIGINS non défini : toutes les origines sont acceptées.');
+}
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin.replace(/\/$/, ''))) return callback(null, true);
+      return callback(null, false);
+    },
+  }),
+);
 app.use(express.json({ limit: '2mb' }));
+
+// Limites de débit (par IP). Réponse 429 en JSON avec l'en-tête Retry-After.
+const limiter = (windowMs, limit, message, extra = {}) =>
+  rateLimit({ windowMs, limit, standardHeaders: 'draft-7', legacyHeaders: false, message: { error: message }, ...extra });
+app.use('/api', limiter(60 * 1000, 300, 'Trop de requêtes, réessayez dans une minute.', { skip: (req) => req.path === '/health' }));
+const authLimiter = limiter(15 * 60 * 1000, 20, 'Trop de tentatives, réessayez dans quelques minutes.');
+const writeLimiter = limiter(60 * 1000, 60, 'Vous publiez trop vite, patientez un instant.');
 app.use((req, _res, next) => {
   progressService.runWithRequestContext(req.headers, next);
 });
@@ -46,7 +72,32 @@ app.get('/api/theme', (req, res) => {
 });
 
 // ==================== ADMINISTRATION & MONITORING FRONTEND ====================
-app.get('/api/admin/stats', async (_req, res, next) => {
+// Accès réservé : mot de passe ADMIN_PASSWORD (Basic dans le navigateur, ou « Authorization: Bearer <mot de passe> »).
+// Sans variable définie, l'administration est désactivée (refus par défaut).
+const sha = (v) => crypto.createHash('sha256').update(String(v)).digest();
+function requireAdmin(req, res, next) {
+  res.set('Cache-Control', 'no-store');
+  const secret = process.env.ADMIN_PASSWORD;
+  if (!secret) return res.status(503).json({ error: 'Administration désactivée : définissez ADMIN_PASSWORD sur le serveur.' });
+  const header = req.headers.authorization || '';
+  let provided = '';
+  const basic = header.match(/^Basic\s+(.+)$/i);
+  const bearer = header.match(/^Bearer\s+(.+)$/i);
+  if (basic) {
+    const decoded = Buffer.from(basic[1], 'base64').toString('utf8');
+    provided = decoded.slice(decoded.indexOf(':') + 1);
+  } else if (bearer) {
+    provided = bearer[1];
+  }
+  if (provided && crypto.timingSafeEqual(sha(provided), sha(secret))) return next();
+  return res
+    .set('WWW-Authenticate', 'Basic realm="Akademia administration", charset="UTF-8"')
+    .status(401)
+    .json({ error: 'Accès administrateur requis' });
+}
+const adminLimiter = limiter(15 * 60 * 1000, 30, 'Trop de tentatives, réessayez plus tard.', { skipSuccessfulRequests: true });
+
+app.get('/api/admin/stats', adminLimiter, requireAdmin, async (_req, res, next) => {
   try {
     const stats = await adminService.getAdminStats();
     res.json(stats);
@@ -55,7 +106,7 @@ app.get('/api/admin/stats', async (_req, res, next) => {
   }
 });
 
-app.get('/admin', async (_req, res, next) => {
+app.get('/admin', adminLimiter, requireAdmin, async (_req, res, next) => {
   try {
     const stats = await adminService.getAdminStats();
     const html = adminService.renderAdminHtml(stats);
@@ -66,7 +117,7 @@ app.get('/admin', async (_req, res, next) => {
 });
 
 // ==================== AUTHENTIFICATION EMAIL / MOT DE PASSE ====================
-app.post('/api/auth/signup', async (req, res, next) => {
+app.post('/api/auth/signup', authLimiter, async (req, res, next) => {
   try {
     const result = await progressService.signUpUser({
       email: req.body?.email,
@@ -81,7 +132,7 @@ app.post('/api/auth/signup', async (req, res, next) => {
   }
 });
 
-app.post('/api/auth/signin', async (req, res, next) => {
+app.post('/api/auth/signin', authLimiter, async (req, res, next) => {
   try {
     const result = await progressService.signInUser({
       email: req.body?.email,
@@ -114,7 +165,7 @@ app.post('/api/auth/signout', async (req, res, next) => {
   }
 });
 
-app.post('/api/auth/reset-password', async (req, res, next) => {
+app.post('/api/auth/reset-password', authLimiter, async (req, res, next) => {
   try {
     await progressService.resetUserPassword({
       email: req.body?.email,
@@ -280,7 +331,7 @@ app.delete('/api/push/subscriptions', requireUser, async (req, res, next) => {
   }
 });
 
-app.post('/api/messages', requireUser, async (req, res, next) => {
+app.post('/api/messages', requireUser, writeLimiter, async (req, res, next) => {
   const recipientId = req.body?.recipientId;
   const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
   if (
@@ -372,7 +423,7 @@ app.get('/api/feed', requireUser, async (req, res, next) => {
   }
 });
 
-app.post('/api/feed/:postId/like', requireUser, async (req, res, next) => {
+app.post('/api/feed/:postId/like', requireUser, writeLimiter, async (req, res, next) => {
   try {
     res.json(await progressService.togglePostLike(req.auth.user.id, req.params.postId));
   } catch (error) {
@@ -381,7 +432,7 @@ app.post('/api/feed/:postId/like', requireUser, async (req, res, next) => {
   }
 });
 
-app.post('/api/feed/:postId/comments', requireUser, async (req, res, next) => {
+app.post('/api/feed/:postId/comments', requireUser, writeLimiter, async (req, res, next) => {
   try {
     res
       .status(201)
@@ -573,6 +624,8 @@ app.delete('/api/progress', requireUser, handleResetProgress);
 app.post('/api/progress/reset', requireUser, handleResetProgress);
 
 app.use((err, _req, res, _next) => {
+  if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'Corps de requête JSON invalide' });
+  if (err.type === 'entity.too.large') return res.status(413).json({ error: 'Requête trop volumineuse' });
   console.error(err.message || err);
   res
     .status(err.status || 500)

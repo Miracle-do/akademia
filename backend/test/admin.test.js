@@ -1,7 +1,10 @@
+process.env.ADMIN_PASSWORD = 'secret-de-test';
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const adminService = require('../services/adminService');
 const app = require('../server');
+
+const AUTH = { Authorization: `Basic ${Buffer.from('admin:secret-de-test').toString('base64')}` };
 
 test('adminService.getAdminStats computes exhaustive statistics across modules and users without mocks or emojis', async () => {
   const stats = await adminService.getAdminStats();
@@ -84,7 +87,7 @@ test('HTTP GET /api/admin/stats returns 200 and JSON stats', async () => {
   const port = server.address().port;
 
   try {
-    const res = await fetch(`http://127.0.0.1:${port}/api/admin/stats`);
+    const res = await fetch(`http://127.0.0.1:${port}/api/admin/stats`, { headers: AUTH });
     assert.equal(res.status, 200);
     const data = await res.json();
     assert.ok(data.summary.totalModules >= 6);
@@ -99,7 +102,7 @@ test('HTTP GET /admin returns 200 and HTML page with violet theme and papicons',
   const port = server.address().port;
 
   try {
-    const res = await fetch(`http://127.0.0.1:${port}/admin`);
+    const res = await fetch(`http://127.0.0.1:${port}/admin`, { headers: AUTH });
     assert.equal(res.status, 200);
     const contentType = res.headers.get('content-type');
     assert.ok(contentType.includes('text/html'));
@@ -107,6 +110,71 @@ test('HTTP GET /admin returns 200 and HTML page with violet theme and papicons',
     assert.ok(text.includes('<!doctype html>'));
     assert.ok(text.includes('data-theme="violet"'));
     assert.ok(text.includes('papicon'));
+  } finally {
+    server.close();
+  }
+});
+
+test('administration : refusée sans identifiants ou avec un mauvais mot de passe, acceptée avec Basic ou Bearer', async () => {
+  const server = app.listen(0);
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    for (const path of ['/admin', '/api/admin/stats']) {
+      const none = await fetch(base + path);
+      assert.equal(none.status, 401, `${path} doit exiger une authentification`);
+      assert.ok((none.headers.get('www-authenticate') || '').startsWith('Basic'));
+      const bad = await fetch(base + path, { headers: { Authorization: `Basic ${Buffer.from('admin:mauvais').toString('base64')}` } });
+      assert.equal(bad.status, 401);
+      const body = await none.text();
+      assert.ok(!body.includes('@'), 'aucune donnée utilisateur ne doit fuiter');
+    }
+    const bearer = await fetch(`${base}/api/admin/stats`, { headers: { Authorization: 'Bearer secret-de-test' } });
+    assert.equal(bearer.status, 200);
+  } finally {
+    server.close();
+  }
+});
+
+test('administration : désactivée (503) quand ADMIN_PASSWORD est absent', async () => {
+  const saved = process.env.ADMIN_PASSWORD;
+  delete process.env.ADMIN_PASSWORD;
+  const server = app.listen(0);
+  try {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/admin`, { headers: AUTH });
+    assert.equal(res.status, 503);
+  } finally {
+    process.env.ADMIN_PASSWORD = saved;
+    server.close();
+  }
+});
+
+test('renderAdminHtml échappe les pseudos/emails malveillants (pas de XSS)', async () => {
+  const stats = await adminService.getAdminStats();
+  const evil = '<img src=x onerror=alert(1)></script><script>alert(2)</script>';
+  stats.allUsers = [{ ...stats.allUsers[0], username: evil, email: `a"${evil}@x.fr` }];
+  stats.leaderboard = [{ rank: 1, username: evil, id: 'x', filiere: 'ARI', level: 1, xp: 1, streak: 0, chaptersRead: 0 }];
+  const html = adminService.renderAdminHtml(stats);
+  assert.ok(!html.includes('<img src=x'), 'le pseudo doit être échappé dans le tableau');
+  assert.ok(!html.includes('<script>alert(2)'), 'le JSON embarqué ne doit pas pouvoir fermer le bloc script');
+  assert.ok(html.includes('&lt;img src=x'));
+});
+
+test('limite de débit : trop de tentatives de connexion renvoient 429 ; JSON invalide renvoie 400', async () => {
+  const server = app.listen(0);
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const bad = await fetch(`${base}/api/auth/refresh`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{pas du json' });
+    assert.equal(bad.status, 400);
+    let last = 0;
+    for (let i = 0; i < 25; i += 1) {
+      const r = await fetch(`${base}/api/auth/signin`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'x@y.z', password: 'x' }) });
+      last = r.status;
+      if (last === 429) break;
+    }
+    assert.equal(last, 429);
+    const h = await fetch(`${base}/api/health`);
+    assert.ok(h.headers.get('x-content-type-options'), 'en-têtes de sécurité attendus');
+    assert.equal(h.headers.get('x-powered-by'), null);
   } finally {
     server.close();
   }

@@ -597,8 +597,20 @@ async function getAdminStats() {
   };
 }
 
-function renderAdminHtml(stats) {
-  const statsJson = JSON.stringify(stats);
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+const escapeDeep = (v) => {
+  if (typeof v === 'string') return escapeHtml(v);
+  if (Array.isArray(v)) return v.map(escapeDeep);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, escapeDeep(x)]));
+  return v;
+};
+
+function renderAdminHtml(rawStats) {
+  // Pseudos et emails sont saisis par les utilisateurs : on les échappe avant de les insérer dans le HTML,
+  // et on neutralise « < » dans le JSON embarqué pour qu'un « </script> » ne puisse pas sortir du bloc <script>.
+  const stats = { ...rawStats, allUsers: escapeDeep(rawStats.allUsers), leaderboard: escapeDeep(rawStats.leaderboard) };
+  const statsJson = JSON.stringify(rawStats).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '');
 
   return `<!doctype html>
 <html lang="fr" data-theme="violet">
@@ -1867,5 +1879,6 @@ function renderAdminHtml(stats) {
 module.exports = {
   getAdminStats,
   renderAdminHtml,
+  escapeHtml,
   renderPapicon,
 };

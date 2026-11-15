@@ -32,6 +32,10 @@ Les comptes, la progression, le classement et les notifications passent par Expr
 4. Déploie le frontend sur Vercel ou Netlify avec la commande racine `npm run build` et le dossier de sortie `frontend/dist`.
 5. Configure `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` et `VITE_API_BASE_URL=https://adresse-de-ton-api/api` pour le frontend.
 6. Autorise le domaine frontend dans les URL de redirection Supabase. L’API accepte les appels CORS; ses routes de progression exigent toujours un jeton utilisateur valide.
+7. **Sécurité du backend (Render)** :
+   - `ADMIN_PASSWORD` : mot de passe de la page `/admin` et de `/api/admin/stats` (navigateur : identifiant quelconque + ce mot de passe ; API : `Authorization: Bearer <mot de passe>`). **Sans cette variable, l’administration est désactivée (503).** Choisis un mot de passe long et aléatoire.
+   - `CORS_ORIGINS` : domaines du frontend autorisés, séparés par des virgules (ex. `https://akademia.vercel.app,http://localhost:5173`). Sans cette variable, toutes les origines sont acceptées.
+   - Limites de débit par IP : 300 requêtes/min sur l’API, 20 tentatives/15 min sur connexion, inscription et réinitialisation, 60 écritures/min (messages, likes, commentaires), 30 tentatives/15 min sur l’administration.
 
 ### Notifications Web Push
 1. Génère une paire VAPID depuis la racine avec `npm --prefix backend exec -- web-push generate-vapid-keys`.
