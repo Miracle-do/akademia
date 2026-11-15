@@ -2,7 +2,10 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import Loader from '@/components/Loader';
 
 export interface LoadingState {
+  /** Au moins une requête en cours (bloquante ou non). */
   isLoading: boolean;
+  /** Au moins une requête qui doit bloquer l'écran (connexion, inscription…). */
+  blocking: boolean;
   activeCount: number;
   message: string | null;
 }
@@ -17,12 +20,14 @@ type Listener = (state: LoadingState) => void;
 
 class GlobalLoadingManager {
   private activeCount = 0;
+  private blockingCount = 0;
   private messageStack: string[] = [];
   private listeners = new Set<Listener>();
 
   public getState(): LoadingState {
     return {
       isLoading: this.activeCount > 0,
+      blocking: this.blockingCount > 0,
       activeCount: this.activeCount,
       message: this.messageStack.length > 0 ? this.messageStack[this.messageStack.length - 1] : null,
     };
@@ -47,8 +52,9 @@ class GlobalLoadingManager {
     });
   }
 
-  public start(message?: string): () => void {
+  public start(message?: string, blocking = false): () => void {
     this.activeCount++;
+    if (blocking) this.blockingCount++;
     if (message) {
       this.messageStack.push(message);
     }
@@ -58,6 +64,7 @@ class GlobalLoadingManager {
     return () => {
       if (stopped) return;
       stopped = true;
+      if (blocking && this.blockingCount > 0) this.blockingCount--;
       if (message) {
         const idx = this.messageStack.lastIndexOf(message);
         if (idx !== -1) {
@@ -73,13 +80,14 @@ class GlobalLoadingManager {
       this.activeCount--;
       if (this.activeCount === 0) {
         this.messageStack = [];
+        this.blockingCount = 0;
       }
       this.notify();
     }
   }
 
-  public async track<T>(promiseOrFn: Promise<T> | (() => Promise<T>), message?: string): Promise<T> {
-    const done = this.start(message);
+  public async track<T>(promiseOrFn: Promise<T> | (() => Promise<T>), message?: string, blocking = false): Promise<T> {
+    const done = this.start(message, blocking);
     try {
       const promise = typeof promiseOrFn === 'function' ? promiseOrFn() : promiseOrFn;
       return await promise;
@@ -119,6 +127,21 @@ export function getApiLoadingMessage(url: string, method: string = 'GET'): strin
 }
 
 /**
+ * Seules les actions de compte (connexion, inscription, mot de passe) bloquent l'écran :
+ * l'utilisateur ne peut rien faire d'utile tant qu'elles ne sont pas terminées.
+ * Tout le reste (lecture de contenu, synchronisation de progression, messagerie, classement…)
+ * se fait en arrière-plan, sans jamais masquer la page.
+ */
+export function isBlockingRequest(url: string, method: string = 'GET'): boolean {
+  const u = url.toLowerCase();
+  if (method.toUpperCase() === 'GET') return false;
+  return (
+    u.includes('/auth/signin') || u.includes('/auth/signup') || u.includes('/auth/reset-password') || u.includes('/auth/update-password') ||
+    /supabase\.co\/auth\/v1\/(token|signup|recover)/.test(u)
+  );
+}
+
+/**
  * Initialise l'interception automatique de `window.fetch` pour les requêtes API et Supabase.
  * Empêche les doubles clics et affiche immédiatement le spinner global.
  */
@@ -154,7 +177,7 @@ export function initGlobalFetchInterceptor() {
     const method = init?.method || (input instanceof Request ? input.method : 'GET');
     const message = getApiLoadingMessage(url, method);
 
-    return globalLoadingManager.track(originalFetch(input, init), message);
+    return globalLoadingManager.track(originalFetch(input, init), message, isBlockingRequest(url, method));
   };
 }
 
@@ -171,7 +194,7 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const startLoading = useCallback((message?: string) => {
-    return globalLoadingManager.start(message);
+    return globalLoadingManager.start(message, true);
   }, []);
 
   const stopLoading = useCallback(() => {
@@ -179,7 +202,7 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const withLoading = useCallback(async <T,>(promiseOrFn: Promise<T> | (() => Promise<T>), message?: string) => {
-    return globalLoadingManager.track(promiseOrFn, message);
+    return globalLoadingManager.track(promiseOrFn, message, true);
   }, []);
 
   const value = useMemo<LoadingContextValue>(
@@ -195,6 +218,7 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <LoadingContext.Provider value={value}>
       {children}
+      <GlobalProgressBar active={state.isLoading && !state.blocking} />
       <GlobalLoaderOverlay state={state} />
     </LoadingContext.Provider>
   );
@@ -212,8 +236,28 @@ export function useLoading(): LoadingContextValue {
  * Overlay plein écran interactif qui bloque les interactions utilisateur (clics multiples)
  * et affiche le Dot Spinner adapté au thème actif de l'application.
  */
+/** Délai avant d'afficher le voile (évite le clignotement sur les requêtes rapides) et durée maximale d'affichage. */
+const OVERLAY_DELAY_MS = 400;
+const OVERLAY_MAX_MS = 12000;
+
 export const GlobalLoaderOverlay: React.FC<{ state: LoadingState }> = ({ state }) => {
-  if (!state.isLoading) return null;
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!state.blocking) {
+      setVisible(false);
+      return;
+    }
+    const show = window.setTimeout(() => setVisible(true), OVERLAY_DELAY_MS);
+    // Garde-fou : une requête qui traîne ne doit jamais enfermer l'utilisateur derrière le voile.
+    const hide = window.setTimeout(() => setVisible(false), OVERLAY_MAX_MS);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hide);
+    };
+  }, [state.blocking]);
+
+  if (!state.blocking || !visible) return null;
 
   return (
     <div
@@ -248,6 +292,28 @@ export const GlobalLoaderOverlay: React.FC<{ state: LoadingState }> = ({ state }
           </p>
         </div>
       </div>
+    </div>
+  );
+};
+
+/**
+ * Fine barre de progression en haut de l'écran pour les requêtes d'arrière-plan lentes (> 1 s).
+ * Elle n'intercepte aucun clic : la page reste utilisable.
+ */
+export const GlobalProgressBar: React.FC<{ active: boolean }> = ({ active }) => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (!active) {
+      setShow(false);
+      return;
+    }
+    const t = window.setTimeout(() => setShow(true), 1000);
+    return () => window.clearTimeout(t);
+  }, [active]);
+  if (!show) return null;
+  return (
+    <div className="fixed left-0 top-0 z-[99998] h-0.5 w-full overflow-hidden pointer-events-none" role="progressbar" aria-label="Chargement en arrière-plan">
+      <div className="h-full w-1/3 animate-pulse rounded-full" style={{ backgroundColor: 'rgb(var(--brand))' }} />
     </div>
   );
 };
