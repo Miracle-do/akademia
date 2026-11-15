@@ -11,7 +11,7 @@ import {
   Tasks,
 } from '@getpapillon/papicons';
 import { Bar } from '@/components/ui';
-import { getModule, localFormations, loadFormations } from '@/lib/content';
+import { getModule, loadFormations } from '@/lib/content';
 import FormationShowcase from '@/components/FormationShowcase';
 import { useEffect, useState } from 'react';
 import type { Formation } from '@/lib/types';
@@ -26,7 +26,7 @@ export default function ModulePage() {
   const { moduleId } = useParams();
   const m = getModule(moduleId);
   const { state } = useStore();
-  const [formations, setFormations] = useState<Formation[]>(() => (moduleId ? localFormations(moduleId) : []));
+  const [formations, setFormations] = useState<Formation[]>([]);
   useEffect(() => {
     if (!moduleId) return;
     let alive = true;

@@ -12,13 +12,28 @@ const chapterLoaders = import.meta.glob('/content/modules/*/chapters/*.md', { qu
 const quizLoaders = import.meta.glob('/content/modules/*/quiz.json', { import: 'default' }) as Record<string, () => Promise<Question[]>>;
 const cardLoaders = import.meta.glob('/content/modules/*/flashcards.json', { import: 'default' }) as Record<string, () => Promise<Flashcard[]>>;
 const examIndexLoaders = import.meta.glob('/content/modules/*/exams-index.json', { import: 'default' }) as Record<string, () => Promise<ExamIndexItem[]>>;
-const formationLoaders = import.meta.glob('/content/modules/*/formations/*.json', { eager: true, import: 'default' }) as Record<string, Formation>;
+const formationLoaders = import.meta.glob('/content/modules/*/formations/*.json', { import: 'default' }) as Record<string, () => Promise<Formation>>;
 const examLoaders = import.meta.glob('/content/modules/*/exams/*.json', { import: 'default' }) as Record<string, () => Promise<Exam>>;
 
+const OFFLINE_KEY = 'akademia-offline-build';
+const idle = () => new Promise<void>((r) => ('requestIdleCallback' in window ? (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => r()) : setTimeout(r, 120)));
+
+/**
+ * Télécharge discrètement chapitres et QCM pour le mode hors ligne : par petits lots, quand le navigateur est inactif,
+ * une seule fois par version déployée, et jamais en mode économie de données ou sur connexion très lente.
+ */
 export async function prepareOfflineContent(): Promise<void> {
   if (!navigator.onLine) return;
+  const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return;
+  try { if (localStorage.getItem(OFFLINE_KEY) === __BUILD_ID__) return; } catch { /* stockage indisponible : on continue */ }
   const loaders = [...Object.values(chapterLoaders), ...Object.values(quizLoaders)];
-  await Promise.allSettled(loaders.map((load) => load()));
+  for (let i = 0; i < loaders.length; i += 4) {
+    if (!navigator.onLine) return;
+    await Promise.allSettled(loaders.slice(i, i + 4).map((load) => load()));
+    await idle();
+  }
+  try { localStorage.setItem(OFFLINE_KEY, __BUILD_ID__); } catch { /* ignoré */ }
 }
 
 async function apiGet<T>(path: string): Promise<T> {
@@ -106,6 +121,17 @@ export const loadExam = (moduleId: string, n: number) =>
     }
   });
 
+/** Formations d'un module lues depuis les fichiers embarqués (chargées à la demande, hors du bundle principal). */
+async function readLocalFormations(moduleId: string): Promise<Formation[]> {
+  const prefix = `/content/modules/${moduleId}/formations/`;
+  const list = await Promise.all(
+    Object.entries(formationLoaders)
+      .filter(([p]) => p.startsWith(prefix))
+      .map(([, load]) => load()),
+  );
+  return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+}
+
 /** Formations d'un module (API puis repli local). */
 export const loadFormations = (moduleId: string) =>
   memo(`formations:${moduleId}`, async () => {
@@ -113,43 +139,16 @@ export const loadFormations = (moduleId: string) =>
     try {
       list = await apiGet<Formation[]>(`/modules/${encodeURIComponent(moduleId)}/formations`);
     } catch {
-      list = Object.entries(formationLoaders)
-        .filter(([p]) => p.startsWith(`/content/modules/${moduleId}/formations/`))
-        .map(([, f]) => f)
-        .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      list = await readLocalFormations(moduleId);
     }
     return list.map((f) => ({ ...f, moduleId }));
   });
-
-/** Lecture synchrone locale (affichage immédiat des badges de la page module). */
-export const localFormations = (moduleId: string): Formation[] =>
-  Object.entries(formationLoaders)
-    .filter(([p]) => p.startsWith(`/content/modules/${moduleId}/formations/`))
-    .map(([, f]) => ({ ...f, moduleId }))
-    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
 export interface FormationWithModule extends Formation {
   moduleTitle: string;
   moduleEmoji: string;
   moduleColor: string;
 }
-
-/** Lecture synchrone de toutes les formations disponibles tous modules confondus. */
-export const localAllFormations = (): FormationWithModule[] =>
-  Object.entries(formationLoaders)
-    .map(([p, f]) => {
-      const match = p.match(/\/content\/modules\/([^/]+)\/formations\//);
-      const modId = match ? match[1] : (f.moduleId || '');
-      const mod = getModule(modId);
-      return {
-        ...f,
-        moduleId: modId,
-        moduleTitle: mod?.title ?? modId,
-        moduleEmoji: mod?.emoji ?? '📚',
-        moduleColor: mod?.color ?? '#6366f1',
-      };
-    })
-    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
 /** Chargement asynchrone de toutes les formations tous modules confondus. */
 export const loadAllFormations = async (): Promise<FormationWithModule[]> => {
@@ -165,7 +164,7 @@ export const loadAllFormations = async (): Promise<FormationWithModule[]> => {
           moduleColor: m.color,
         }));
       } catch {
-        return localFormations(m.id).map((f) => ({
+        return (await readLocalFormations(m.id)).map((f) => ({
           ...f,
           moduleTitle: m.title,
           moduleEmoji: m.emoji,

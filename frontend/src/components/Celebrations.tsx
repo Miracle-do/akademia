@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import { badgeById, tierFor } from '@/lib/gamification';
 import { useStore } from '@/state/Store';
 import { Mascot } from './Mascot';
@@ -9,11 +8,14 @@ export function fireConfetti(big = false) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
   const colors = ['#1D6FFF', '#FF574A', '#18B8E8', '#7C3AED', '#FFD026', '#22C55E'];
-  confetti({ particleCount: big ? 140 : 65, spread: big ? 100 : 70, origin: { y: 0.62 }, colors });
-  if (big) {
-    setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0, y: 0.7 }, colors }), 200);
-    setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1, y: 0.7 }, colors }), 200);
-  }
+  // La bibliothèque de confettis n'est téléchargée qu'au premier déclenchement.
+  void import('canvas-confetti').then(({ default: confetti }) => {
+    confetti({ particleCount: big ? 140 : 65, spread: big ? 100 : 70, origin: { y: 0.62 }, colors });
+    if (big) {
+      setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0, y: 0.7 }, colors }), 200);
+      setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1, y: 0.7 }, colors }), 200);
+    }
+  });
 }
 
 /**

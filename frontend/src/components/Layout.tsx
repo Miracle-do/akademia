@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   Check,
@@ -20,7 +20,7 @@ import { cn, fmtNum } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
 import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
-import { Bar } from './ui';
+import { Bar, Spinner } from './ui';
 import Celebrations, { fireConfetti } from './Celebrations';
 import { Mascot } from './Mascot';
 import { ConfettiBackdrop, FlameBadgeIcon } from './Decor';
@@ -318,7 +318,9 @@ export default function Layout() {
             Synchronisation : {syncError}
           </p>
         )}
-        <Outlet />
+        <Suspense fallback={<Spinner />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {/* Bottom Navigation Bar Mobile-First (5 Onglets : Accueil, Formations, Actu, Classement, Profil) */}

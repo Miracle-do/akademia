@@ -1,15 +1,24 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationHat, Play, Check } from '@getpapillon/papicons';
-import { PageTitle } from '@/components/ui';
-import { localAllFormations, modules, type FormationWithModule } from '@/lib/content';
+import { PageTitle, Spinner } from '@/components/ui';
+import { loadAllFormations, modules, type FormationWithModule } from '@/lib/content';
 import { useStore } from '@/state/Store';
 import { AnimatedEmoji, renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 import { FormationShareAction } from '@/components/FormationShareModal';
 
 export default function FormationsListPage() {
   const { state } = useStore();
-  const [formations] = useState<FormationWithModule[]>(() => localAllFormations());
+  const [formations, setFormations] = useState<FormationWithModule[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    loadAllFormations()
+      .then((x) => alive && setFormations(x))
+      .catch(() => undefined)
+      .finally(() => alive && setLoaded(true));
+    return () => { alive = false; };
+  }, []);
   const [selectedModule, setSelectedModule] = useState<string>('all');
 
   // Modules distincts
@@ -23,6 +32,8 @@ export default function FormationsListPage() {
     if (selectedModule === 'all') return formations;
     return formations.filter((f) => f.moduleId === selectedModule);
   }, [formations, selectedModule]);
+
+  if (!loaded) return <Spinner />;
 
   return (
     <div className="space-y-6">

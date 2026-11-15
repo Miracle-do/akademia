@@ -1,28 +1,31 @@
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Spinner } from '@/components/ui';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
-import AuthPage from '@/pages/AuthPage';
-import BadgesPage from '@/pages/BadgesPage';
-import BlitzPage from '@/pages/BlitzPage';
-import ChapterPage from '@/pages/ChapterPage';
-import Dashboard from '@/pages/Dashboard';
-import ExamPage from '@/pages/ExamPage';
-import ExamsPage from '@/pages/ExamsPage';
-import FeedPage from '@/pages/FeedPage';
-import FormationLessonPage from '@/pages/FormationLessonPage';
-import FormationPage from '@/pages/FormationPage';
-import FormationsListPage from '@/pages/FormationsListPage';
-import FlashcardsPage from '@/pages/FlashcardsPage';
-import LeaderboardPage from '@/pages/LeaderboardPage';
-import MessagesPage from '@/pages/MessagesPage';
-import ProfilePage from '@/pages/ProfilePage';
-import ConversationPage from '@/pages/ConversationPage';
-import ModulePage from '@/pages/ModulePage';
-import ModulesPage from '@/pages/ModulesPage';
-import QuizPage from '@/pages/QuizPage';
-import ResultsPage from '@/pages/ResultsPage';
+
+// Chaque page est chargée à la demande : le premier écran ne télécharge plus tout le code de l'application.
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
+const BadgesPage = lazy(() => import('@/pages/BadgesPage'));
+const BlitzPage = lazy(() => import('@/pages/BlitzPage'));
+const ChapterPage = lazy(() => import('@/pages/ChapterPage'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const ExamPage = lazy(() => import('@/pages/ExamPage'));
+const ExamsPage = lazy(() => import('@/pages/ExamsPage'));
+const FeedPage = lazy(() => import('@/pages/FeedPage'));
+const FormationLessonPage = lazy(() => import('@/pages/FormationLessonPage'));
+const FormationPage = lazy(() => import('@/pages/FormationPage'));
+const FormationsListPage = lazy(() => import('@/pages/FormationsListPage'));
+const FlashcardsPage = lazy(() => import('@/pages/FlashcardsPage'));
+const LeaderboardPage = lazy(() => import('@/pages/LeaderboardPage'));
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const ConversationPage = lazy(() => import('@/pages/ConversationPage'));
+const ModulePage = lazy(() => import('@/pages/ModulePage'));
+const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
+const QuizPage = lazy(() => import('@/pages/QuizPage'));
+const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
 
 function Gate() {
   const { user, ready } = useAuth();
@@ -36,7 +39,7 @@ function Gate() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/connexion" element={<AuthPage />} />
+      <Route path="/connexion" element={<Suspense fallback={<Spinner />}><AuthPage /></Suspense>} />
       <Route element={<Gate />}>
         <Route index element={<Dashboard />} />
         <Route path="formations" element={<FormationsListPage />} />

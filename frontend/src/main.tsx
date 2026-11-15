@@ -21,7 +21,8 @@ if ('serviceWorker' in navigator) {
         await new Promise<void>((resolve) => navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true }));
       }
       const { prepareOfflineContent } = await import('./lib/content');
-      void prepareOfflineContent();
+      // On laisse d'abord la page respirer : le téléchargement hors ligne démarre quelques secondes après l'affichage.
+      window.setTimeout(() => void prepareOfflineContent(), 6000);
     }).catch(() => undefined);
   });
 }
