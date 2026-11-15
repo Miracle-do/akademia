@@ -226,7 +226,7 @@
       "∃x beninois(x) => gentil(x)"
      ],
      "answer": 0,
-     "explain": "∃ + ^ : un objet qui est béninois **et** gentil. La 3e est un piège (leçon suivante)."
+     "explain": "∃ + ^ : un objet qui est béninois **et** gentil. La variante avec ∃ et => est un piège (leçon suivante)."
     },
     {
      "type": "exercise",

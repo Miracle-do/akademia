@@ -1,0 +1,1533 @@
+{
+ "id": "propositions-resolution",
+ "order": 2,
+ "title": "Logique des propositions et résolution",
+ "tagline": "Connecteurs, lois, chaînage avant et arrière, résolution : démontre par l'absurde.",
+ "emoji": "🧮",
+ "color": "#7C3AED",
+ "level": "Débutant → Intermédiaire",
+ "minutes": 119,
+ "pitch": [
+  "Salut ! Je te présente **« Logique des propositions et résolution »** 🧮.",
+  "C'est le socle des systèmes experts : une **base de faits**, une **base de règles**, et un moteur qui **déduit** de nouveaux faits. Au programme : les **connecteurs** et tables de vérité, les **lois logiques** (Morgan, contraposition), le **chaînage avant et arrière**, puis la **procédure de résolution** qui démontre par l'absurde.",
+  "Chaque règle est suivie d'une formule à écrire ou d'un calcul à faire : on refait les exercices du cours pas à pas.",
+  "On termine par un défi sur les implications imbriquées."
+ ],
+ "benefits": [
+  "Traduire du français en formules et évaluer une formule avec sa table de vérité",
+  "Réécrire avec les lois logiques (Morgan, implication, contraposition) sans confondre contraposée et inverse",
+  "Dérouler un chaînage avant et un chaînage arrière sur une base de règles",
+  "Mettre en forme clausale et démontrer un but par résolution jusqu'à la clause vide"
+ ],
+ "lessons": [
+  {
+   "id": "propositions",
+   "title": "Propositions et connecteurs",
+   "emoji": "🔤",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Cette formation, c'est la **logique des propositions** et la **résolution** : le moteur de démonstration derrière les systèmes experts. On commence par les briques de base."
+    },
+    {
+     "type": "say",
+     "text": "**Définition.** Avec l'ensemble `L = {vrai, faux}`, une phrase est une **proposition** si on peut la qualifier par **un seul** élément de L."
+    },
+    {
+     "type": "choice",
+     "q": "Laquelle de ces phrases est une proposition ?",
+     "options": [
+      "Viens ici !",
+      "Le nombre 3 est plus grand que le nombre 1",
+      "Le cube d'un nombre est positif"
+     ],
+     "answer": 1,
+     "explain": "Une injonction n'est ni vraie ni fausse. « Le cube d'un nombre est positif » dépend du nombre choisi. « 3 > 1 » est **vraie** : c'est une proposition."
+    },
+    {
+     "type": "choice",
+     "q": "« Il ne pleut jamais au Bénin » est-elle une proposition ?",
+     "options": [
+      "Oui, et elle est fausse",
+      "Non, car elle est fausse",
+      "Non, elle dépend du jour"
+     ],
+     "answer": 0,
+     "explain": "Une proposition peut être fausse : ce qui compte, c'est qu'elle ait **une** valeur de vérité bien définie."
+    },
+    {
+     "type": "choice",
+     "q": "« On doit conduire à droite » est-elle une proposition ?",
+     "options": [
+      "Non : tantôt vraie, tantôt fausse selon le pays",
+      "Oui, vraie",
+      "Oui, fausse"
+     ],
+     "answer": 0,
+     "explain": "La valeur change avec le contexte (Bénin, Royaume-Uni…) : ce n'est pas une proposition au sens strict."
+    },
+    {
+     "type": "say",
+     "text": "Chaque proposition reçoit une **lettre** : `P` « il pleut », `S` « le soleil brille », `V` « le vent souffle ». On les relie par des **connecteurs** :"
+    },
+    {
+     "type": "code",
+     "sql": "~A       non (négation)         autre notation : ¬A\nA ^ B    et (conjonction)       ∧\nA v B    ou (disjonction)       ∨\nA => B   implication            ⇒\nA <=> B  équivalence            ⇔",
+     "lang": "Logique",
+     "title": "Les connecteurs"
+    },
+    {
+     "type": "say",
+     "text": "Pour répondre, tu peux écrire les symboles (¬ ∧ ∨ ⇒) ou au clavier (`~ ^ v =>`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Avec P « il pleut » et S « le soleil brille » : écris « **S'il pleut alors le soleil ne brille pas** ».",
+     "hints": [
+      "Une implication dont la conclusion est une négation"
+     ],
+     "accept": [
+      "P=>~S",
+      "P ⇒ ¬S",
+      "P ⇒ ~S",
+      "P⇒¬S",
+      "P⇒~S"
+     ],
+     "solution": "P=>¬S",
+     "explain": "P ⇒ ¬S.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec en plus V « le vent souffle » : écris « **S'il pleut et que le soleil ne brille pas alors le vent souffle** ».",
+     "hints": [
+      "(… et …) ⇒ …"
+     ],
+     "accept": [
+      "(P ^ ~S)=>V",
+      "(P ^ ¬S) ⇒ V",
+      "(P ^ ~S) ⇒ V",
+      "(P ^ ¬S)⇒V",
+      "(P ^ ~S)⇒V",
+      "(P^¬S)=>V",
+      "(P^~S)=>V",
+      "(P^¬S) ⇒ V",
+      "(P^~S) ⇒ V",
+      "(P^¬S)⇒V",
+      "(P^~S)⇒V",
+      "(P ∧ ¬S)=>V",
+      "(P ∧ ~S)=>V",
+      "(P ∧ ¬S) ⇒ V",
+      "(P ∧ ~S) ⇒ V",
+      "(P ∧ ¬S)⇒V",
+      "(P ∧ ~S)⇒V",
+      "(P∧¬S)=>V",
+      "(P∧~S)=>V",
+      "(P∧¬S) ⇒ V",
+      "(P∧~S) ⇒ V",
+      "(P∧¬S)⇒V",
+      "(P∧~S)⇒V",
+      "(P and ¬S)=>V",
+      "(P and ~S)=>V",
+      "(P and ¬S) ⇒ V",
+      "(P and ~S) ⇒ V",
+      "(P and ¬S)⇒V",
+      "(P and ~S)⇒V",
+      "P ^ ¬S=>V",
+      "P ^ ~S=>V",
+      "P ^ ¬S ⇒ V",
+      "P ^ ~S ⇒ V",
+      "P ^ ¬S⇒V",
+      "P ^ ~S⇒V",
+      "P^¬S=>V",
+      "P^~S=>V",
+      "P^¬S ⇒ V",
+      "P^~S ⇒ V",
+      "P^¬S⇒V",
+      "P^~S⇒V",
+      "P ∧ ¬S=>V",
+      "P ∧ ~S=>V",
+      "P ∧ ¬S ⇒ V",
+      "P ∧ ~S ⇒ V",
+      "P ∧ ¬S⇒V",
+      "P ∧ ~S⇒V",
+      "P∧¬S=>V",
+      "P∧~S=>V",
+      "P∧¬S ⇒ V",
+      "P∧~S ⇒ V",
+      "P∧¬S⇒V",
+      "P∧~S⇒V",
+      "P and ¬S=>V",
+      "P and ~S=>V",
+      "P and ¬S ⇒ V",
+      "P and ~S ⇒ V",
+      "P and ¬S⇒V",
+      "P and ~S⇒V"
+     ],
+     "solution": "(P ^ ¬S)=>V",
+     "explain": "(P ∧ ¬S) ⇒ V : la condition est une **conjonction**, la conclusion V.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quel connecteur traduit « **ou** » ?",
+     "options": [
+      "=>",
+      "^",
+      "v"
+     ],
+     "answer": 2,
+     "explain": "`v` (∨) est la disjonction. `^` est le « et »."
+    }
+   ]
+  },
+  {
+   "id": "verite",
+   "title": "Tables de vérité",
+   "emoji": "📊",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une **table de vérité** liste la valeur d'une formule pour **toutes** les combinaisons de valeurs de ses propositions."
+    },
+    {
+     "type": "code",
+     "sql": " A | B | ~A | A^B | AvB | A=>B | A<=>B\n F | F |  V |  F  |  F  |   V   |   V\n F | V |  V |  F  |  V  |   V   |   F\n V | F |  F |  F  |  V  |   F   |   F\n V | V |  F |  V  |  V  |   V   |   V",
+     "lang": "Logique",
+     "title": "Tables de base (V vrai, F faux)"
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel unique cas `A => B` est-elle **fausse** ?",
+     "options": [
+      "A vrai, B faux",
+      "A faux, B vrai",
+      "A faux, B faux"
+     ],
+     "answer": 0,
+     "explain": "Une promesse n'est rompue que si la condition est remplie (A vrai) et que la conséquence ne l'est pas (B faux)."
+    },
+    {
+     "type": "choice",
+     "q": "Si A est **faux**, que vaut `A => B` ?",
+     "options": [
+      "Vrai, quel que soit B",
+      "Ça dépend de B",
+      "Faux"
+     ],
+     "answer": 0,
+     "explain": "« Du faux on déduit n'importe quoi » : l'implication est **vraie** dès que sa prémisse est fausse. C'est pour cela que `A => B ≡ ~A v B`."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de lignes a la table de vérité d'une formule contenant **3** propositions différentes ?",
+     "hints": [
+      "Chaque proposition double le nombre de lignes : 2 × 2 × 2"
+     ],
+     "accept": [
+      "2^3",
+      "2³",
+      "2*2*2"
+     ],
+     "solution": "8",
+     "explain": "Avec n propositions : 2ⁿ lignes. Ici 2³ = 8.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "A = V et B = F. Que vaut `A ^ ~B` ?",
+     "hints": [
+      "Réponds V (vrai) ou F (faux)"
+     ],
+     "accept": [
+      "vrai",
+      "true",
+      "t"
+     ],
+     "solution": "V",
+     "explain": "~B = V, donc A ^ ~B = V ^ V = **V**.",
+     "placeholder": "V ou F"
+    },
+    {
+     "type": "exercise",
+     "q": "A = V et B = F. Que vaut `~(A v B)` ?",
+     "hints": [
+      "Réponds V (vrai) ou F (faux)"
+     ],
+     "accept": [
+      "faux",
+      "false",
+      "f"
+     ],
+     "solution": "F",
+     "explain": "A v B = V, donc sa négation est **F**.",
+     "placeholder": "V ou F"
+    },
+    {
+     "type": "exercise",
+     "q": "A = F et B = F. Que vaut `A <=> B` ?",
+     "hints": [
+      "Réponds V (vrai) ou F (faux)"
+     ],
+     "accept": [
+      "vrai",
+      "true",
+      "t"
+     ],
+     "solution": "V",
+     "explain": "Les deux membres ont la **même** valeur : l'équivalence est vraie.",
+     "placeholder": "V ou F"
+    },
+    {
+     "type": "exercise",
+     "q": "A = V et B = F. Que vaut `A => B` ?",
+     "hints": [
+      "Réponds V (vrai) ou F (faux)"
+     ],
+     "accept": [
+      "faux",
+      "false",
+      "f"
+     ],
+     "solution": "F",
+     "explain": "C'est l'unique cas où l'implication est fausse.",
+     "placeholder": "V ou F"
+    },
+    {
+     "type": "say",
+     "text": "Une **tautologie** est une formule vraie pour **toutes** les valeurs possibles (toutes les lignes valent V). Ex : `P v ~P`. Les **lois logiques** de la leçon suivante sont toutes des tautologies."
+    },
+    {
+     "type": "choice",
+     "q": "Laquelle de ces formules est une tautologie ?",
+     "options": [
+      "P ^ ~P",
+      "P => ~P",
+      "P v ~P"
+     ],
+     "answer": 2,
+     "explain": "`P v ~P` : si P est vrai la formule est vraie, si P est faux ~P l'est. `P ^ ~P` est au contraire toujours **fausse** (contradiction)."
+    },
+    {
+     "type": "exercise",
+     "q": "A = V, B = V, C = F. Que vaut `(A ^ B) => C` ?",
+     "hints": [
+      "Réponds V (vrai) ou F (faux)"
+     ],
+     "accept": [
+      "faux",
+      "false",
+      "f"
+     ],
+     "solution": "F",
+     "explain": "A ^ B = V et C = F : implication V ⇒ F = **F**.",
+     "placeholder": "V ou F"
+    }
+   ]
+  },
+  {
+   "id": "lois",
+   "title": "Les lois logiques",
+   "emoji": "⚖️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deux formules sont **équivalentes** (`≡`) si elles ont la même table de vérité. Ces équivalences permettent de **réécrire** une formule pour la simplifier ou la mettre en forme clausale."
+    },
+    {
+     "type": "code",
+     "sql": "P ^ Q ≡ Q ^ P ; P v Q ≡ Q v P                       commutativité\nP ^ (Q ^ R) ≡ (P ^ Q) ^ R                              associativité (idem pour v)\nP ^ (Q v R) ≡ (P ^ Q) v (P ^ R)                        distributivité de ^ sur v\nP v (Q ^ R) ≡ (P v Q) ^ (P v R)                        distributivité de v sur ^\n~(P v Q) ≡ ~P ^ ~Q ; ~(P ^ Q) ≡ ~P v ~Q               lois de Morgan\nP => Q ≡ ~P v Q                                         implication\nP => Q ≡ ~Q => ~P                                       contraposition\n~~P ≡ P                                                 double négation\n(P <=> Q) ≡ (P => Q) ^ (Q => P)                         équivalence",
+     "lang": "Logique",
+     "title": "Les lois"
+    },
+    {
+     "type": "exercise",
+     "q": "Applique Morgan : réécris `~(A v B)` sans négation devant la parenthèse.",
+     "hints": [
+      "La négation d'un « ou » est le « et » des négations"
+     ],
+     "accept": [
+      "~A ^ ~B",
+      "¬A^¬B",
+      "~A^~B",
+      "¬A ∧ ¬B",
+      "~A ∧ ~B",
+      "¬A∧¬B",
+      "~A∧~B",
+      "¬A and ¬B",
+      "~A and ~B",
+      "(¬A) ^ (¬B)",
+      "(~A) ^ (~B)",
+      "(¬A)^(¬B)",
+      "(~A)^(~B)",
+      "(¬A) ∧ (¬B)",
+      "(~A) ∧ (~B)",
+      "(¬A)∧(¬B)",
+      "(~A)∧(~B)",
+      "(¬A) and (¬B)",
+      "(~A) and (~B)"
+     ],
+     "solution": "¬A ^ ¬B",
+     "explain": "~(A v B) ≡ ~A ^ ~B.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Applique Morgan : réécris `~(P ^ Q)`.",
+     "hints": [
+      "La négation d'un « et » est le « ou » des négations"
+     ],
+     "accept": [
+      "¬P ∨ ¬Q",
+      "¬P∨¬Q",
+      "¬P or ¬Q",
+      "~P v ~Q",
+      "~P ∨ ~Q",
+      "~P∨~Q",
+      "~P or ~Q"
+     ],
+     "solution": "¬P v ¬Q",
+     "explain": "~(P ^ Q) ≡ ~P v ~Q.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Réécris `A => B` en n'utilisant que `~` et `v`.",
+     "hints": [
+      "A => B ≡ ~A v …"
+     ],
+     "accept": [
+      "¬A ∨ B",
+      "¬A∨B",
+      "¬A or B",
+      "~A v B",
+      "~A ∨ B",
+      "~A∨B",
+      "~A or B",
+      "B v ¬A",
+      "B ∨ ¬A",
+      "B∨¬A",
+      "B or ¬A",
+      "B v ~A",
+      "B ∨ ~A",
+      "B∨~A",
+      "B or ~A"
+     ],
+     "solution": "¬A v B",
+     "explain": "A ⇒ B ≡ ¬A ∨ B. **Cette réécriture est la clé de toute la résolution.**",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **contraposée** de `A => B`.",
+     "hints": [
+      "On inverse et on nie les deux"
+     ],
+     "accept": [
+      "~B=>~A",
+      "¬B ⇒ ¬A",
+      "~B ⇒ ~A",
+      "¬B⇒¬A",
+      "~B⇒~A"
+     ],
+     "solution": "¬B=>¬A",
+     "explain": "A ⇒ B ≡ ¬B ⇒ ¬A.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "`~A => ~B` est-elle équivalente à `A => B` ?",
+     "options": [
+      "Oui, par Morgan",
+      "Non : c'est l'**inverse**, qui n'est pas équivalent",
+      "Oui, c'est la contraposition"
+     ],
+     "answer": 1,
+     "explain": "Contre-exemple : A faux et B vrai. Alors A ⇒ B est vraie, mais ¬A ⇒ ¬B (V ⇒ F) est **fausse**. ⚠️ Le polycopié écrit cette formule comme « contraposition » : c'est une **coquille**."
+    },
+    {
+     "type": "choice",
+     "q": "Contraposée de « S'il pleut, la route est mouillée » ?",
+     "options": [
+      "Si la route n'est pas mouillée, il ne pleut pas",
+      "S'il ne pleut pas, la route n'est pas mouillée",
+      "Si la route est mouillée, il pleut"
+     ],
+     "answer": 0,
+     "explain": "La contraposée est équivalente. « S'il ne pleut pas, la route n'est pas mouillée » est l'**inverse**, « si la route est mouillée, il pleut » la **réciproque** : aucune des deux n'est équivalente (la route peut être mouillée par un arrosage)."
+    },
+    {
+     "type": "exercise",
+     "q": "Distributivité : complète `P ^ (Q v R) ≡ (P ^ Q) v ( … )`. Écris la partie manquante entre parenthèses.",
+     "hints": [
+      "On distribue P sur R aussi"
+     ],
+     "accept": [
+      "(P^R)",
+      "(P ∧ R)",
+      "(P∧R)",
+      "(P and R)"
+     ],
+     "solution": "(P ^ R)",
+     "explain": "P ∧ (Q ∨ R) ≡ (P ∧ Q) ∨ (P ∧ R).",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris `P <=> Q` avec seulement des implications et un « et ».",
+     "hints": [
+      "Dans les deux sens"
+     ],
+     "accept": [
+      "(P ⇒ Q) ^ (Q ⇒ P)",
+      "(P⇒Q) ^ (Q⇒P)",
+      "(P=>Q)^(Q=>P)",
+      "(P ⇒ Q)^(Q ⇒ P)",
+      "(P⇒Q)^(Q⇒P)",
+      "(P=>Q) ∧ (Q=>P)",
+      "(P ⇒ Q) ∧ (Q ⇒ P)",
+      "(P⇒Q) ∧ (Q⇒P)",
+      "(P=>Q)∧(Q=>P)",
+      "(P ⇒ Q)∧(Q ⇒ P)",
+      "(P⇒Q)∧(Q⇒P)",
+      "(P=>Q) and (Q=>P)",
+      "(P ⇒ Q) and (Q ⇒ P)",
+      "(P⇒Q) and (Q⇒P)",
+      "(Q=>P) ^ (P=>Q)",
+      "(Q ⇒ P) ^ (P ⇒ Q)",
+      "(Q⇒P) ^ (P⇒Q)",
+      "(Q=>P)^(P=>Q)",
+      "(Q ⇒ P)^(P ⇒ Q)",
+      "(Q⇒P)^(P⇒Q)",
+      "(Q=>P) ∧ (P=>Q)",
+      "(Q ⇒ P) ∧ (P ⇒ Q)",
+      "(Q⇒P) ∧ (P⇒Q)",
+      "(Q=>P)∧(P=>Q)",
+      "(Q ⇒ P)∧(P ⇒ Q)",
+      "(Q⇒P)∧(P⇒Q)",
+      "(Q=>P) and (P=>Q)",
+      "(Q ⇒ P) and (P ⇒ Q)",
+      "(Q⇒P) and (P⇒Q)"
+     ],
+     "solution": "(P=>Q) ^ (Q=>P)",
+     "explain": "(P ⇔ Q) ≡ (P ⇒ Q) ∧ (Q ⇒ P).",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **négation** de `P => Q` sans implication (indice : `P => Q ≡ ~P v Q`, puis Morgan).",
+     "hints": [
+      "~(~P v Q) = ~~P ^ ~Q"
+     ],
+     "accept": [
+      "P ^ ~Q",
+      "P^¬Q",
+      "P^~Q",
+      "P ∧ ¬Q",
+      "P ∧ ~Q",
+      "P∧¬Q",
+      "P∧~Q",
+      "P and ¬Q",
+      "P and ~Q"
+     ],
+     "solution": "P ^ ¬Q",
+     "explain": "¬(P ⇒ Q) ≡ P ∧ ¬Q : une promesse est rompue quand P est vrai **et** Q faux.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Que vaut `~~P` ?",
+     "options": [
+      "P",
+      "~P",
+      "Faux"
+     ],
+     "answer": 0,
+     "explain": "Double négation : ~~P ≡ P."
+    }
+   ]
+  },
+  {
+   "id": "avant",
+   "title": "Chaînage avant",
+   "emoji": "➡️",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Base de connaissances** = **base de faits** (ce qui est vrai) + **base de règles** (comment en déduire d'autres faits). **Inférer**, c'est utiliser faits et règles pour trouver de **nouveaux faits**."
+    },
+    {
+     "type": "say",
+     "text": "**Chaînage avant** : on part des **faits**, on applique **toutes** les règles possibles et on ajoute chaque conclusion aux faits, jusqu'à obtenir le but ou ne plus pouvoir avancer."
+    },
+    {
+     "type": "code",
+     "sql": "Algorithme chainage-avant (BF, BR, F)\nTANTQUE (F ∉ BF) ET (il existe une règle applicable)\n    choisir une règle applicable R\n    BR ← BR − {R}               (désactivation)\n    BF ← BF ∪ {conclusion de R}\nSI F ∈ BF ALORS F est établi SINON F n'est pas établi",
+     "lang": "Pseudo-code",
+     "title": "L'algorithme"
+    },
+    {
+     "type": "code",
+     "sql": "R1 : vin ^ inférieur à 2 l       => petite-quantité\nR2 : cognac ^ inférieur à 1 l    => petite-quantité\nR3 : inférieur à 60 000 FCFA     => petite-quantité\nR4 : petite-quantité ^ adulte    => hors-taxe\nFaits : vin, inférieur à 2 l, inférieur à 60 000 FCFA, adulte      But : hors-taxe",
+     "lang": "Logique",
+     "title": "Marchandise hors taxe ?"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle règle s'applique en premier avec les faits `vin` et `inférieur à 2 l` ?",
+     "options": [
+      "R2",
+      "R4",
+      "R1"
+     ],
+     "answer": 2,
+     "explain": "R1 a ses deux prémisses (vin, inférieur à 2 l) dans les faits. R4 n'est pas encore applicable : il lui manque « petite-quantité »."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel fait nouveau R1 ajoute-t-elle ?",
+     "hints": [
+      "La conclusion de R1"
+     ],
+     "accept": [
+      "petite quantité",
+      "petite_quantité",
+      "petite-quantite"
+     ],
+     "solution": "petite-quantité",
+     "explain": "R1 conclut `petite-quantité`. Ce fait déclenche ensuite R4 avec `adulte` pour obtenir `hors-taxe`.",
+     "placeholder": "Un fait"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi dit-on que `petite-quantité` est « trouvé deux fois » ?",
+     "options": [
+      "R1 et R3 le concluent toutes les deux",
+      "C'est une erreur",
+      "Parce qu'il y a deux faits"
+     ],
+     "answer": 0,
+     "explain": "L'efficacité dépend de la capacité à **éviter les inférences inutiles** : après R1, appliquer R3 n'apporte rien de nouveau."
+    },
+    {
+     "type": "say",
+     "text": "**Exercice du cours.** Règles : `R1 : A^B => C`, `R2 : D => A`, `R3 : E => F`, `R4 : G => H`, `R5 : I => F`, `R6 : H^F^J => B`, `R7 : H^K => J`, `R8 : G^F => K`. Faits : **D, G, I**. But : **C**."
+    },
+    {
+     "type": "exercise",
+     "q": "Premier fait obtenu avec les faits D, G, I en appliquant R2 ?",
+     "hints": [
+      "R2 : D => A"
+     ],
+     "accept": [
+      "a"
+     ],
+     "solution": "A",
+     "explain": "D est un fait, R2 conclut `A`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Après A, quel fait donne R4 ?",
+     "hints": [
+      "R4 : G => H, G est un fait"
+     ],
+     "accept": [],
+     "solution": "H",
+     "explain": "`H`. (On aurait aussi pu commencer par R4 ou R5 : l'ordre est libre tant que les règles sont applicables.)",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec G et **F** (obtenu par R5 : I => F), quel fait donne R8 ?",
+     "hints": [
+      "R8 : G ^ F => K"
+     ],
+     "accept": [],
+     "solution": "K",
+     "explain": "`K`. Pour R8 il fallait F : on l'avait grâce à R5.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec H et K, quel fait donne R7 ?",
+     "hints": [
+      "R7 : H ^ K => J"
+     ],
+     "accept": [],
+     "solution": "J",
+     "explain": "`J`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec H, F et J, quel fait donne R6 ?",
+     "hints": [
+      "R6 : H ^ F ^ J => B"
+     ],
+     "accept": [],
+     "solution": "B",
+     "explain": "`B`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Enfin avec A et B, quel fait donne R1 ?",
+     "hints": [
+      "R1 : A ^ B => C"
+     ],
+     "accept": [],
+     "solution": "C",
+     "explain": "`C` : **but atteint** ✔. Enchaînement : R2 A · R4 H · R5 F · R8 K · R7 J · R6 B · R1 C.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "choice",
+     "q": "Quand le chaînage avant **s'arrête**-t-il ?",
+     "options": [
+      "Jamais",
+      "Quand toutes les règles ont été supprimées au hasard",
+      "Quand le but est dans BF ou qu'aucune règle n'est applicable"
+     ],
+     "answer": 2,
+     "explain": "Deux conditions d'arrêt : but établi (succès) ou plus de règle applicable (échec : le but n'est pas établi)."
+    }
+   ]
+  },
+  {
+   "id": "arriere",
+   "title": "Chaînage arrière",
+   "emoji": "⬅️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Chaînage arrière** : on part du **but**. On cherche les règles qui l'ont dans leur **conclusion** (partie droite) ; leurs prémisses deviennent des **sous-buts**, et ainsi de suite jusqu'à retomber sur des **faits**. Plus proche du raisonnement humain."
+    },
+    {
+     "type": "code",
+     "sql": "Faits : H, K\nR1 : A => E      R2 : B => D      R3 : H => A\nR4 : E ^ G => C  R5 : E ^ K => B  R6 : D ^ E ^ K => C\nR7 : G ^ K ^ F => A\nBut : D",
+     "lang": "Logique",
+     "title": "Exemple du cours"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle règle a **D** dans sa conclusion ? (écris son numéro, ex. `R2`)",
+     "hints": [
+      "Cherche D à droite d'un =>"
+     ],
+     "accept": [],
+     "solution": "R2",
+     "explain": "R2 : B => D. Le sous-but devient **B**.",
+     "placeholder": "Ex. R3"
+    },
+    {
+     "type": "exercise",
+     "q": "Premier sous-but obtenu ?",
+     "hints": [
+      "Prémisse de R2"
+     ],
+     "accept": [],
+     "solution": "B",
+     "explain": "`B`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "B est conclusion de R5 : `E ^ K => B`. K est un fait. Quel est le nouveau sous-but ?",
+     "hints": [
+      "Il reste la prémisse non connue"
+     ],
+     "accept": [],
+     "solution": "E",
+     "explain": "`E` (K est déjà dans les faits : rien à prouver).",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "E est conclusion de R1 : `A => E`. Nouveau sous-but ?",
+     "hints": [
+      "Prémisse de R1"
+     ],
+     "accept": [],
+     "solution": "A",
+     "explain": "`A`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "choice",
+     "q": "A est la conclusion de R3 (`H => A`) **et** de R7 (`G ^ K ^ F => A`). Laquelle conclut ?",
+     "options": [
+      "R7, car K est un fait",
+      "Aucune",
+      "R3, car H est un fait"
+     ],
+     "answer": 2,
+     "explain": "R3 : sa seule prémisse `H` est un fait. R7 demanderait G et F, inconnus. **D est prouvé**. Chemin : H →R3→ A →R1→ E →R5→ B →R2→ D."
+    },
+    {
+     "type": "say",
+     "text": "Même base que la leçon précédente (faits **D, G, I**), but **C**, en arrière."
+    },
+    {
+     "type": "exercise",
+     "q": "C est conclusion de R1 (`A ^ B => C`). Écris les **deux** sous-buts, séparés par une virgule.",
+     "hints": [
+      "Les prémisses de R1"
+     ],
+     "accept": [
+      "a,b",
+      "a et b",
+      "a ^ b",
+      "b, a",
+      "b,a"
+     ],
+     "solution": "A, B",
+     "explain": "Sous-buts `A` et `B`.",
+     "placeholder": "Ex. X, Y"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle règle prouve A, et à partir de quel fait ?",
+     "hints": [
+      "Cherche A dans les conclusions"
+     ],
+     "accept": [
+      "r2, d",
+      "r2 d",
+      "r2 depuis d",
+      "r2 avec d",
+      "r2 (d)"
+     ],
+     "solution": "R2 à partir de D",
+     "explain": "R2 : D => A, et **D est un fait** ✔.",
+     "placeholder": "Ex. R5 à partir de X"
+    },
+    {
+     "type": "exercise",
+     "q": "B est conclusion de R6 (`H ^ F ^ J => B`). Écris ses trois sous-buts séparés par des virgules.",
+     "hints": [
+      "Les prémisses de R6"
+     ],
+     "accept": [
+      "h,f,j",
+      "h f j"
+     ],
+     "solution": "H, F, J",
+     "explain": "H, F et J. H ← R4 (G fait) ; F ← R5 (I fait) ; J ← R7 (H et K) avec K ← R8 (G et F). Tout retombe sur des faits : **C est prouvé** ✔.",
+     "placeholder": "Ex. X, Y, Z"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'avantage du chaînage arrière sur le chaînage avant ?",
+     "options": [
+      "Il est toujours plus court",
+      "Il déduit tous les faits possibles",
+      "Il n'explore que les règles utiles au but"
+     ],
+     "answer": 2,
+     "explain": "Arrière : on ne travaille que sur ce qui sert **la question posée**. Avant : on peut produire beaucoup de faits inutiles, mais on obtient *tout* ce qui est déductible."
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux **toutes** les conséquences d'une situation. Quelle stratégie ?",
+     "options": [
+      "Chaînage arrière",
+      "Aucune",
+      "Chaînage avant"
+     ],
+     "answer": 2,
+     "explain": "Pour tout déduire à partir des faits : chaînage **avant**. Pour répondre à une question précise : chaînage **arrière**."
+    }
+   ]
+  },
+  {
+   "id": "regles",
+   "title": "Règles d'inférence",
+   "emoji": "🧰",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Quatre règles **universellement vraies** (le symbole `⊢` se lit « permet de déduire »). Elles servent à valider une proposition ou à générer des conclusions."
+    },
+    {
+     "type": "code",
+     "sql": "Modus ponens           A => B, A       ⊢  B\nModus tollens          A => B, ~B      ⊢  ~A\nRéduction à l'absurde  A => B, A => ~B ⊢  ~A\nRésolution             A v B, ~B v C   ⊢  A v C",
+     "lang": "Logique",
+     "title": "Les 4 règles"
+    },
+    {
+     "type": "exercise",
+     "q": "Modus ponens : de `A => B` et `A`, quelle est la conclusion ?",
+     "hints": [
+      "On détache la conclusion"
+     ],
+     "accept": [],
+     "solution": "B",
+     "explain": "B.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Modus tollens : de `A => B` et `~B`, quelle est la conclusion ?",
+     "hints": [
+      "On remonte la flèche en niant"
+     ],
+     "accept": [
+      "~A"
+     ],
+     "solution": "¬A",
+     "explain": "¬A : si la conséquence est fausse, la cause l'est aussi.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Absurde : de `A => B` et `A => ~B`, quelle est la conclusion ?",
+     "hints": [
+      "A mène à une contradiction"
+     ],
+     "accept": [
+      "~A"
+     ],
+     "solution": "¬A",
+     "explain": "¬A : si A était vrai, B et ~B le seraient.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résolution : de `A v B` et `~B v C`, quelle est la conclusion ?",
+     "hints": [
+      "On annule B contre ~B"
+     ],
+     "accept": [
+      "A ∨ C",
+      "A∨C",
+      "A or C",
+      "C v A",
+      "C ∨ A",
+      "C∨A",
+      "C or A"
+     ],
+     "solution": "A v C",
+     "explain": "A v C.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "**Exemple.** R : « Si l'informatique est un domaine qui se développe, on ne manque pas de candidats » (`I => ~M`). F : « Il y a manque de candidats » (`M`)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle formule conclut le **modus tollens** ici ? (Écris-la avec I.)",
+     "hints": [
+      "De I => ~M et ~~M"
+     ],
+     "accept": [
+      "~I"
+     ],
+     "solution": "¬I",
+     "explain": "~I : l'informatique n'est pas un domaine qui se développe (valide logiquement ; reste à juger si la prémisse est réaliste).",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "**Exercice 3 du cours : inférences correctes ?** Réponds à ces cas un par un."
+    },
+    {
+     "type": "choice",
+     "q": "Laquelle de ces inférences est **incorrecte** ?",
+     "options": [
+      "α→β ⊢ ¬β→¬α",
+      "α→β ⊢ ¬α→¬β",
+      "α→β, β→γ ⊢ α→γ"
+     ],
+     "answer": 1,
+     "explain": "`α→β ⊢ ¬α→¬β` est l'**inverse** : réfutée par α faux, β vrai. Les deux autres sont le syllogisme hypothétique et la contraposition."
+    },
+    {
+     "type": "choice",
+     "q": "`α∨β, α∨¬β ⊢ α` : correcte ?",
+     "options": [
+      "Non, il faudrait aussi ¬α",
+      "Oui, modus tollens",
+      "Oui : résolution sur β, on obtient α ∨ α = α"
+     ],
+     "answer": 2,
+     "explain": "On annule β et ¬β : il reste `α ∨ α ≡ α`."
+    },
+    {
+     "type": "choice",
+     "q": "`α→(β→γ) ⊢ β→(α→γ)` : correcte ?",
+     "options": [
+      "Oui : les deux valent ¬α ∨ ¬β ∨ γ",
+      "Oui, par contraposition",
+      "Non"
+     ],
+     "answer": 0,
+     "explain": "α⇒(β⇒γ) ≡ ¬α∨¬β∨γ ≡ ¬β∨¬α∨γ ≡ β⇒(α⇒γ). On peut échanger l'ordre des hypothèses."
+    },
+    {
+     "type": "choice",
+     "q": "`α→β, β→γ, α ⊢ γ` : correcte ?",
+     "options": [
+      "Oui : modus ponens deux fois",
+      "Oui, absurde",
+      "Non"
+     ],
+     "answer": 0,
+     "explain": "α et α⇒β donnent β ; β et β⇒γ donnent γ."
+    }
+   ]
+  },
+  {
+   "id": "resolution",
+   "title": "La procédure de résolution",
+   "emoji": "🧮",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "La **résolution** est une preuve **par l'absurde** mécanique. On ne manipule que des **clauses** : des propositions (ou négations) reliées par des **ou**, comme `A v ~B v C`."
+    },
+    {
+     "type": "code",
+     "sql": "1) Mettre toutes les assertions sous FORME CLAUSALE\n2) Ajouter la NÉGATION de l'assertion à démontrer\n3) Répéter jusqu'à contradiction :\n   a) choisir deux clauses\n   b) appliquer la résolution (annuler p contre ~p)\n   c) résolvante non vide → l'ajouter ; résolvante vide → CONTRADICTION : c'est démontré",
+     "lang": "Logique",
+     "title": "La procédure"
+    },
+    {
+     "type": "say",
+     "text": "**Étape 1 : forme clausale.** On utilise `A => B ≡ ~A v B` et Morgan."
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `(P ^ Q) => R` sous forme clausale.",
+     "hints": [
+      "~(P ^ Q) v R, puis Morgan"
+     ],
+     "accept": [
+      "¬P ∨ ¬Q ∨ R",
+      "¬P∨¬Q∨R",
+      "¬P or ¬Q or R",
+      "~P v ~Q v R",
+      "~P ∨ ~Q ∨ R",
+      "~P∨~Q∨R",
+      "~P or ~Q or R",
+      "¬P v R v ¬Q",
+      "¬P ∨ R ∨ ¬Q",
+      "¬P∨R∨¬Q",
+      "¬P or R or ¬Q",
+      "~P v R v ~Q",
+      "~P ∨ R ∨ ~Q",
+      "~P∨R∨~Q",
+      "~P or R or ~Q",
+      "¬Q v ¬P v R",
+      "¬Q ∨ ¬P ∨ R",
+      "¬Q∨¬P∨R",
+      "¬Q or ¬P or R",
+      "~Q v ~P v R",
+      "~Q ∨ ~P ∨ R",
+      "~Q∨~P∨R",
+      "~Q or ~P or R",
+      "¬Q v R v ¬P",
+      "¬Q ∨ R ∨ ¬P",
+      "¬Q∨R∨¬P",
+      "¬Q or R or ¬P",
+      "~Q v R v ~P",
+      "~Q ∨ R ∨ ~P",
+      "~Q∨R∨~P",
+      "~Q or R or ~P",
+      "R v ¬P v ¬Q",
+      "R ∨ ¬P ∨ ¬Q",
+      "R∨¬P∨¬Q",
+      "R or ¬P or ¬Q",
+      "R v ~P v ~Q",
+      "R ∨ ~P ∨ ~Q",
+      "R∨~P∨~Q",
+      "R or ~P or ~Q",
+      "R v ¬Q v ¬P",
+      "R ∨ ¬Q ∨ ¬P",
+      "R∨¬Q∨¬P",
+      "R or ¬Q or ¬P",
+      "R v ~Q v ~P",
+      "R ∨ ~Q ∨ ~P",
+      "R∨~Q∨~P",
+      "R or ~Q or ~P"
+     ],
+     "solution": "¬P v ¬Q v R",
+     "explain": "¬(P∧Q) ∨ R ≡ ¬P ∨ ¬Q ∨ R.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `S => Q` sous forme clausale.",
+     "hints": [
+      "A => B ≡ ~A v B"
+     ],
+     "accept": [
+      "¬S ∨ Q",
+      "¬S∨Q",
+      "¬S or Q",
+      "~S v Q",
+      "~S ∨ Q",
+      "~S∨Q",
+      "~S or Q",
+      "Q v ¬S",
+      "Q ∨ ¬S",
+      "Q∨¬S",
+      "Q or ¬S",
+      "Q v ~S",
+      "Q ∨ ~S",
+      "Q∨~S",
+      "Q or ~S"
+     ],
+     "solution": "¬S v Q",
+     "explain": "¬S ∨ Q.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "**Exemple du cours.** Assertions : `P` ; `(P ^ Q) => R` ; `S => Q` ; `~T v Q` ; `T`. **Montrer que R est vrai.**\nClauses : (1) `P` (2) `~P v ~Q v R` (3) `~S v Q` (4) `~T v Q` (5) `T`."
+    },
+    {
+     "type": "exercise",
+     "q": "**Étape 2.** Quelle clause ajoute-t-on pour démontrer R ?",
+     "hints": [
+      "La négation du but"
+     ],
+     "accept": [
+      "~R"
+     ],
+     "solution": "¬R",
+     "explain": "(6) `~R`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (6) `~R` avec (2) `~P v ~Q v R`. Quelle résolvante ?",
+     "hints": [
+      "On annule R contre ~R"
+     ],
+     "accept": [
+      "¬P ∨ ¬Q",
+      "¬P∨¬Q",
+      "¬P or ¬Q",
+      "~P v ~Q",
+      "~P ∨ ~Q",
+      "~P∨~Q",
+      "~P or ~Q",
+      "¬Q v ¬P",
+      "¬Q ∨ ¬P",
+      "¬Q∨¬P",
+      "¬Q or ¬P",
+      "~Q v ~P",
+      "~Q ∨ ~P",
+      "~Q∨~P",
+      "~Q or ~P"
+     ],
+     "solution": "¬P v ¬Q",
+     "explain": "(7) `~P v ~Q`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (7) avec (1) `P`. Quelle résolvante ?",
+     "hints": [
+      "On annule P contre ~P"
+     ],
+     "accept": [
+      "~Q"
+     ],
+     "solution": "¬Q",
+     "explain": "(8) `~Q`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (4) `~T v Q` avec (5) `T`. Quelle résolvante ?",
+     "hints": [
+      "On annule T contre ~T"
+     ],
+     "accept": [],
+     "solution": "Q",
+     "explain": "(9) `Q`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (8) `~Q` avec (9) `Q`. Quelle résolvante ?",
+     "hints": [
+      "La résolvante est vide quand on annule tout"
+     ],
+     "accept": [
+      "vide",
+      "la clause vide",
+      "⊥",
+      "[]",
+      "{}",
+      "contradiction",
+      "nil"
+     ],
+     "solution": "clause vide",
+     "explain": "Les deux clauses s'annulent complètement : **clause vide ⊥ = contradiction**. L'hypothèse `~R` est absurde, donc **R est démontré** ✔. (La clause 3 n'a pas servi : normal.)",
+     "placeholder": "Écris la résolvante"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi aboutir à la **clause vide** prouve-t-il le but ?",
+     "options": [
+      "Parce qu'on a prouvé que la base + la négation du but est contradictoire : le but est donc vrai",
+      "Parce qu'on n'a plus de clauses",
+      "Parce que la clause vide est vraie"
+     ],
+     "answer": 0,
+     "explain": "Preuve **par réfutation** : si `base ∧ ¬but` est impossible, alors `but` découle de la base."
+    },
+    {
+     "type": "choice",
+     "q": "Résolution de `A v B` avec `~A v ~B` : quelle est la résolvante ?",
+     "options": [
+      "B v ~B (une tautologie, inutile)",
+      "A v ~A",
+      "La clause vide"
+     ],
+     "answer": 0,
+     "explain": "On n'annule qu'**une** paire à la fois : avec A on obtient `B v ~B`, une tautologie. **Jamais deux paires d'un coup !** (sinon on « prouve » n'importe quoi)."
+    },
+    {
+     "type": "say",
+     "text": "**Application : « l'informatique ne se développe pas ».** Clauses : (1) `~I v ~M` (la règle) (2) `M` (le fait). But : `~I`, donc on ajoute sa négation (3) `I`."
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (3) `I` avec (1) `~I v ~M`. Quelle résolvante ?",
+     "hints": [
+      "On annule I contre ~I"
+     ],
+     "accept": [
+      "~M"
+     ],
+     "solution": "¬M",
+     "explain": "(4) `~M`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous (4) `~M` avec (2) `M`.",
+     "hints": [
+      "La résolvante est vide quand on annule tout"
+     ],
+     "accept": [
+      "vide",
+      "la clause vide",
+      "⊥",
+      "[]",
+      "{}",
+      "contradiction",
+      "nil"
+     ],
+     "solution": "clause vide",
+     "explain": "⊥ : `~I` est démontré (l'informatique n'est pas un domaine qui se développe, **si** la règle est admise).",
+     "placeholder": "Écris la résolvante"
+    },
+    {
+     "type": "say",
+     "text": "**Exercice 5 du cours (Barbara).** Anne (A), Barbara (B), Charles (C), David (D), Elizabeth (E), Fiona (F). `A v B` ; `A => (C v D)` ; `C => (E ^ F)` ; `(F ^ ~D) => ~E` ; `~D`. **Prouver B.**"
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `A => (C v D)` en clause.",
+     "hints": [
+      "~A v (C v D)"
+     ],
+     "accept": [
+      "¬A ∨ C ∨ D",
+      "¬A∨C∨D",
+      "¬A or C or D",
+      "~A v C v D",
+      "~A ∨ C ∨ D",
+      "~A∨C∨D",
+      "~A or C or D",
+      "¬A v D v C",
+      "¬A ∨ D ∨ C",
+      "¬A∨D∨C",
+      "¬A or D or C",
+      "~A v D v C",
+      "~A ∨ D ∨ C",
+      "~A∨D∨C",
+      "~A or D or C",
+      "C v ¬A v D",
+      "C ∨ ¬A ∨ D",
+      "C∨¬A∨D",
+      "C or ¬A or D",
+      "C v ~A v D",
+      "C ∨ ~A ∨ D",
+      "C∨~A∨D",
+      "C or ~A or D",
+      "C v D v ¬A",
+      "C ∨ D ∨ ¬A",
+      "C∨D∨¬A",
+      "C or D or ¬A",
+      "C v D v ~A",
+      "C ∨ D ∨ ~A",
+      "C∨D∨~A",
+      "C or D or ~A",
+      "D v ¬A v C",
+      "D ∨ ¬A ∨ C",
+      "D∨¬A∨C",
+      "D or ¬A or C",
+      "D v ~A v C",
+      "D ∨ ~A ∨ C",
+      "D∨~A∨C",
+      "D or ~A or C",
+      "D v C v ¬A",
+      "D ∨ C ∨ ¬A",
+      "D∨C∨¬A",
+      "D or C or ¬A",
+      "D v C v ~A",
+      "D ∨ C ∨ ~A",
+      "D∨C∨~A",
+      "D or C or ~A"
+     ],
+     "solution": "¬A v C v D",
+     "explain": "¬A ∨ C ∨ D.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `(F ^ ~D) => ~E` en clause.",
+     "hints": [
+      "~(F ^ ~D) v ~E → ~F v ~~D v ~E"
+     ],
+     "accept": [
+      "¬F ∨ D ∨ ¬E",
+      "¬F∨D∨¬E",
+      "¬F or D or ¬E",
+      "~F v D v ~E",
+      "~F ∨ D ∨ ~E",
+      "~F∨D∨~E",
+      "~F or D or ~E",
+      "¬F v ¬E v D",
+      "¬F ∨ ¬E ∨ D",
+      "¬F∨¬E∨D",
+      "¬F or ¬E or D",
+      "~F v ~E v D",
+      "~F ∨ ~E ∨ D",
+      "~F∨~E∨D",
+      "~F or ~E or D",
+      "D v ¬F v ¬E",
+      "D ∨ ¬F ∨ ¬E",
+      "D∨¬F∨¬E",
+      "D or ¬F or ¬E",
+      "D v ~F v ~E",
+      "D ∨ ~F ∨ ~E",
+      "D∨~F∨~E",
+      "D or ~F or ~E",
+      "D v ¬E v ¬F",
+      "D ∨ ¬E ∨ ¬F",
+      "D∨¬E∨¬F",
+      "D or ¬E or ¬F",
+      "D v ~E v ~F",
+      "D ∨ ~E ∨ ~F",
+      "D∨~E∨~F",
+      "D or ~E or ~F",
+      "¬E v ¬F v D",
+      "¬E ∨ ¬F ∨ D",
+      "¬E∨¬F∨D",
+      "¬E or ¬F or D",
+      "~E v ~F v D",
+      "~E ∨ ~F ∨ D",
+      "~E∨~F∨D",
+      "~E or ~F or D",
+      "¬E v D v ¬F",
+      "¬E ∨ D ∨ ¬F",
+      "¬E∨D∨¬F",
+      "¬E or D or ¬F",
+      "~E v D v ~F",
+      "~E ∨ D ∨ ~F",
+      "~E∨D∨~F",
+      "~E or D or ~F"
+     ],
+     "solution": "¬F v D v ¬E",
+     "explain": "¬F ∨ D ∨ ¬E (la double négation ¬¬D devient D).",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle clause ajoute-t-on pour prouver `B` ?",
+     "hints": [
+      "La négation du but"
+     ],
+     "accept": [
+      "~B"
+     ],
+     "solution": "¬B",
+     "explain": "`~B`.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Que donne la résolution de `~B` avec `A v B` ?",
+     "options": [
+      "A",
+      "~A",
+      "La clause vide"
+     ],
+     "answer": 0,
+     "explain": "On annule B contre ~B : il reste **A**. Avec `~A v C v D` on obtient `C v D`, puis avec `~D` : `C`, puis E et F… jusqu'à la clause vide : **Barbara ira**."
+    },
+    {
+     "type": "choice",
+     "q": "Dans la preuve de Barbara, `~F v D v ~E` est résolue avec F, puis E, puis `~D`. Comment la contradiction apparaît-elle ?",
+     "options": [
+      "On obtient E",
+      "Elle n'apparaît pas",
+      "`~F v D v ~E` + F → `D v ~E` ; + E → `D` ; + `~D` → clause vide"
+     ],
+     "answer": 2,
+     "explain": "Chaque résolution enlève un littéral : F, puis E, puis D. Les deux dernières clauses `D` et `~D` donnent ⊥."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : chaînage et résolution",
+   "emoji": "🏆",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dernier défi : le piège du cours ! **Exercice 1** : règles `R1 : (~A => B) => P`, `R2 : (P ^ Q) => F`, `R3 : (C => A) => Q`, `R4 : F => (D => K)`, `R5 : K => (M ^ L)`. Faits : **A, D**. Prouver **M** par chaînage avant."
+    },
+    {
+     "type": "exercise",
+     "q": "Réécris `~A => B` avec seulement `v` (et `~`).",
+     "hints": [
+      "~~A v B"
+     ],
+     "accept": [
+      "A ∨ B",
+      "A∨B",
+      "A or B",
+      "B v A",
+      "B ∨ A",
+      "B∨A",
+      "B or A"
+     ],
+     "solution": "A v B",
+     "explain": "`~A => B ≡ ~~A v B ≡ A v B`. Comme A est un fait, cette formule est **vraie** : la prémisse de R1 est satisfaite.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel fait obtient-on par R1 ?",
+     "hints": [
+      "La conclusion de R1"
+     ],
+     "accept": [],
+     "solution": "P",
+     "explain": "`P`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi la prémisse de R3, `C => A`, est-elle vraie sans rien savoir sur C ?",
+     "options": [
+      "Parce que R3 est une loi",
+      "Parce que A est vrai (une conclusion vraie rend l'implication vraie)",
+      "Parce que C est faux"
+     ],
+     "answer": 1,
+     "explain": "`C => A ≡ ~C v A`, vrai dès que A l'est. On obtient **Q**."
+    },
+    {
+     "type": "exercise",
+     "q": "Avec P et Q, quel fait donne R2 ?",
+     "hints": [
+      "R2 : (P ^ Q) => F"
+     ],
+     "accept": [],
+     "solution": "F",
+     "explain": "`F`.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "R4 : `F => (D => K)`. Avec F puis D (fait), quel fait obtient-on ?",
+     "hints": [
+      "Deux modus ponens successifs"
+     ],
+     "accept": [],
+     "solution": "K",
+     "explain": "K.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "R5 : `K => (M ^ L)`. Quel fait cherché obtient-on ?",
+     "hints": [
+      "M ^ L donne M et L"
+     ],
+     "accept": [],
+     "solution": "M",
+     "explain": "**M** ✔ : But atteint. Enchaînement R1 P · R3 Q · R2 F · R4 K · R5 M.",
+     "placeholder": "Une lettre"
+    },
+    {
+     "type": "exercise",
+     "q": "Résous `~A v B` avec `A`. Quelle résolvante ?",
+     "hints": [
+      "On annule A contre ~A"
+     ],
+     "accept": [],
+     "solution": "B",
+     "explain": "B : c'est exactement le modus ponens.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle formule est une tautologie ?",
+     "options": [
+      "P => ~P",
+      "P ^ ~P",
+      "P => P"
+     ],
+     "answer": 2,
+     "explain": "P ⇒ P ≡ ¬P ∨ P, toujours vraie."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **contraposée** de `~A => B`.",
+     "hints": [
+      "~B => ~~A"
+     ],
+     "accept": [
+      "~B=>A",
+      "¬B ⇒ A",
+      "~B ⇒ A",
+      "¬B⇒A",
+      "~B⇒A",
+      "¬B=>¬¬A",
+      "~B=>~~A",
+      "¬B ⇒ ¬¬A",
+      "~B ⇒ ~~A",
+      "¬B⇒¬¬A",
+      "~B⇒~~A"
+     ],
+     "solution": "¬B=>A",
+     "explain": "¬B ⇒ ¬¬A, soit ¬B ⇒ A.",
+     "placeholder": "Écris la formule : ~ ou ¬, ^ ou ∧, v ou ∨, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "🎉 **Bravo !** Tu sais écrire une formule, la réécrire, enchaîner avant et arrière, appliquer modus ponens/tollens et dérouler une résolution jusqu'à la clause vide. Prochaine étape : la **logique des prédicats** (la formation précédente) pour donner des variables à tout ça."
+    }
+   ]
+  }
+ ]
+}
