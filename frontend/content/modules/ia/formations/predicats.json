@@ -1,0 +1,1437 @@
+{
+ "id": "predicats",
+ "order": 1,
+ "title": "Prédicats et quantificateurs",
+ "tagline": "∀, ∃, Morgan, skolémisation, résolution : traduis le français en logique et prouve.",
+ "emoji": "🔣",
+ "color": "#7C3AED",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 119,
+ "pitch": [
+  "Salut ! Je te présente **« Prédicats et quantificateurs »** 🔣.",
+  "La logique des propositions ne sait pas dire « **tous** les chats sont des mammifères ». Pour représenter des connaissances générales, il faut les **prédicats** et les **quantificateurs ∀ et ∃**.",
+  "On part des prédicats, puis on apprend à **traduire** des phrases sans tomber dans les pièges classiques (∀ avec ⇒, ∃ avec ∧), à **nier** une phrase avec Morgan, à **skolémiser**, et à **prouver** par résolution les exercices du cours : Jack et le chat, West le criminel…",
+  "Chaque règle est suivie d'une formule à écrire toi-même, et on finit par un défi."
+ ],
+ "benefits": [
+  "Traduire une phrase française en prédicats avec ∀ et ∃ sans erreur de connecteur",
+  "Distinguer ∃x∀y de ∀y∃x et appliquer les lois de Morgan généralisées",
+  "Skolémiser une formule (fonction ou constante de Skolem)",
+  "Mettre en forme clausale et démontrer un but par résolution"
+ ],
+ "lessons": [
+  {
+   "id": "pourquoi",
+   "title": "Des propositions aux prédicats",
+   "emoji": "🧩",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! On attaque la **logique des prédicats**. Pourquoi ? Parce que la logique des propositions est **trop pauvre**."
+    },
+    {
+     "type": "say",
+     "text": "Pour dire « tous les chats sont des mammifères » en propositions, il faudrait une proposition **par chat** : `Felix_est_mammifere`, `Tom_est_mammifere`… On ne peut pas exprimer une connaissance **générale**."
+    },
+    {
+     "type": "say",
+     "text": "Il nous faut des **objets**, des **propriétés** et des **relations**. Un **prédicat** exprime l'un ou l'autre. Forme habituelle : `nom_prédicat(objet1, objet2, …)`."
+    },
+    {
+     "type": "code",
+     "sql": "est_grand(Jules)        -- propriété d'un objet\nmange(Jules, pomme)     -- relation entre deux objets\npere(Jean, Henry)       -- relation : Henry est le père de Jean ?  à toi de convenir de l'ordre !",
+     "lang": "Logique",
+     "title": "Quelques prédicats"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Jules est grand** » avec le prédicat `est_grand`.",
+     "hints": [
+      "nom_prédicat(objet)"
+     ],
+     "accept": [],
+     "solution": "est_grand(Jules)",
+     "explain": "Une propriété = un prédicat à **un** argument.",
+     "placeholder": "Écris le prédicat…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Jules mange une pomme** » avec le prédicat `mange`, l'objet `Jules` en premier puis `pomme`.",
+     "hints": [
+      "mange(…, …)"
+     ],
+     "accept": [],
+     "solution": "mange(Jules, pomme)",
+     "explain": "Une relation = un prédicat à **deux** arguments (l'ordre compte : `mange(pomme, Jules)` dirait l'inverse !).",
+     "placeholder": "Écris le prédicat…"
+    },
+    {
+     "type": "choice",
+     "q": "Combien d'arguments a le prédicat `aime(x, y)` ?",
+     "options": [
+      "1",
+      "Autant qu'on veut, c'est variable",
+      "2"
+     ],
+     "answer": 2,
+     "explain": "On compte les objets mis en relation : ici **deux** (celui qui aime et celui qui est aimé). C'est l'**arité** du prédicat."
+    },
+    {
+     "type": "choice",
+     "q": "`est_grand(Jules)` est-elle une proposition (vraie ou fausse) ?",
+     "options": [
+      "Seulement si Jules est un nombre",
+      "Oui : Jules est un objet précis, la phrase est vraie ou fausse",
+      "Non, jamais"
+     ],
+     "answer": 1,
+     "explain": "Une fois les arguments **fixés**, un prédicat devient une proposition. Avec une variable libre (`est_grand(X)`), la valeur de vérité dépend de X."
+    },
+    {
+     "type": "say",
+     "text": "**Notations mathématiques.** Dans certains domaines on garde les notations habituelles : on écrit `3 < 56` plutôt que `inferieur(3, 56)`, et `1/2 = 3/6` plutôt que `egal(1/2, 3/6)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « 3 est inférieur à 56 » avec le prédicat nommé `inferieur`.",
+     "hints": [
+      "inferieur(arg1, arg2)"
+     ],
+     "accept": [
+      "inférieur(3, 56)"
+     ],
+     "solution": "inferieur(3, 56)",
+     "explain": "C'est exactement `3 < 56` en notation de prédicat.",
+     "placeholder": "Écris le prédicat…"
+    },
+    {
+     "type": "say",
+     "text": "**Les variables.** Elles servent à deux choses : (1) un énoncé **universel** : `beninois(X) => africain(X)` où X est *n'importe quel* béninois ; (2) l'**existence** d'un objet pas encore identifié : dans `pere(\"Joe\", X)`, X est la personne qui est le père de Joe."
+    },
+    {
+     "type": "choice",
+     "q": "Dans l'équation `3X − 8 = 22`, la variable X exprime plutôt…",
+     "options": [
+      "Un prédicat",
+      "L'existence d'un nombre encore inconnu qui vérifie l'équation",
+      "Un usage universel : X vaut tout nombre"
+     ],
+     "answer": 1,
+     "explain": "X est un nombre **qui existe** et qu'on cherche (ici 10). Pour distinguer les deux usages, la logique des prédicats utilise les **quantificateurs** : c'est la leçon suivante."
+    }
+   ]
+  },
+  {
+   "id": "quantificateurs",
+   "title": "Les quantificateurs ∀ et ∃",
+   "emoji": "🔢",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deux symboles à retenir : **∀** « pour tout » (quantificateur universel) et **∃** « il existe » (quantificateur existentiel)."
+    },
+    {
+     "type": "say",
+     "text": "`∀x P(x)` est vrai si **P est vrai pour tous** les objets x de l'univers.\n`∃x P(x)` est vrai si P est vrai pour **au moins un** objet."
+    },
+    {
+     "type": "say",
+     "text": "**Pour écrire tes réponses** : tu peux taper les symboles (∀ ∃ ¬ ∧ ⇒) ou leurs équivalents clavier : `forall x`, `exists x`, `~`, `^` (ou `and`), `=>`. La casse n'a pas d'importance."
+    },
+    {
+     "type": "code",
+     "sql": "∀x chat(x) => mammifere(x)             -- « Tous les chats sont des mammifères »\n∃x soeur(x, Kokou) ^ etudiante(x)       -- « Kokou a une sœur qui est étudiante »",
+     "lang": "Logique",
+     "title": "Les deux exemples du cours"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Tous les chats sont des mammifères** » avec les prédicats `chat(x)` et `mammifere(x)`.",
+     "hints": [
+      "∀x … => …",
+      "Si x est un chat, alors x est un mammifère"
+     ],
+     "accept": [
+      "∀x chat(x) ⇒ mammifere(x)",
+      "∀x chat(x)⇒mammifere(x)",
+      "∀ x chat(x)=>mammifere(x)",
+      "∀ x chat(x) ⇒ mammifere(x)",
+      "∀ x chat(x)⇒mammifere(x)",
+      "forall x chat(x)=>mammifere(x)",
+      "forall x chat(x) ⇒ mammifere(x)",
+      "forall x chat(x)⇒mammifere(x)",
+      "∀x (chat(x)=>mammifere(x))",
+      "∀x (chat(x) ⇒ mammifere(x))",
+      "∀x (chat(x)⇒mammifere(x))",
+      "∀ x (chat(x)=>mammifere(x))",
+      "∀ x (chat(x) ⇒ mammifere(x))",
+      "∀ x (chat(x)⇒mammifere(x))",
+      "forall x (chat(x)=>mammifere(x))",
+      "forall x (chat(x) ⇒ mammifere(x))",
+      "forall x (chat(x)⇒mammifere(x))"
+     ],
+     "solution": "∀x chat(x)=>mammifere(x)",
+     "explain": "Le « pour tout » va avec une **implication** : *si* x est un chat *alors* c'est un mammifère.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Kokou a une sœur qui est étudiante** » avec `soeur(x, Kokou)` (x est sœur de Kokou) et `etudiante(x)`.",
+     "hints": [
+      "Il existe un x tel que… ET …"
+     ],
+     "accept": [
+      "∃ x soeur(x, Kokou) ^ etudiante(x)",
+      "exists x soeur(x, Kokou) ^ etudiante(x)",
+      "∃x soeur(x, Kokou)^etudiante(x)",
+      "∃ x soeur(x, Kokou)^etudiante(x)",
+      "exists x soeur(x, Kokou)^etudiante(x)",
+      "∃x soeur(x, Kokou) ∧ etudiante(x)",
+      "∃ x soeur(x, Kokou) ∧ etudiante(x)",
+      "exists x soeur(x, Kokou) ∧ etudiante(x)",
+      "∃x soeur(x, Kokou)∧etudiante(x)",
+      "∃ x soeur(x, Kokou)∧etudiante(x)",
+      "exists x soeur(x, Kokou)∧etudiante(x)",
+      "∃x soeur(x, Kokou) and etudiante(x)",
+      "∃ x soeur(x, Kokou) and etudiante(x)",
+      "exists x soeur(x, Kokou) and etudiante(x)",
+      "∃x (soeur(x, Kokou) ^ etudiante(x))",
+      "∃ x (soeur(x, Kokou) ^ etudiante(x))",
+      "exists x (soeur(x, Kokou) ^ etudiante(x))",
+      "∃x (soeur(x, Kokou)^etudiante(x))",
+      "∃ x (soeur(x, Kokou)^etudiante(x))",
+      "exists x (soeur(x, Kokou)^etudiante(x))",
+      "∃x (soeur(x, Kokou) ∧ etudiante(x))",
+      "∃ x (soeur(x, Kokou) ∧ etudiante(x))",
+      "exists x (soeur(x, Kokou) ∧ etudiante(x))",
+      "∃x (soeur(x, Kokou)∧etudiante(x))",
+      "∃ x (soeur(x, Kokou)∧etudiante(x))",
+      "exists x (soeur(x, Kokou)∧etudiante(x))",
+      "∃x (soeur(x, Kokou) and etudiante(x))",
+      "∃ x (soeur(x, Kokou) and etudiante(x))",
+      "exists x (soeur(x, Kokou) and etudiante(x))"
+     ],
+     "solution": "∃x soeur(x, Kokou) ^ etudiante(x)",
+     "explain": "Le « il existe » va avec une **conjonction** : il existe un x qui est sœur de Kokou **et** étudiante.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle formule dit « **Il existe un Béninois gentil** » ?",
+     "options": [
+      "∃x beninois(x) ^ gentil(x)",
+      "∀x beninois(x) => gentil(x)",
+      "∃x beninois(x) => gentil(x)"
+     ],
+     "answer": 0,
+     "explain": "∃ + ^ : un objet qui est béninois **et** gentil. La 3e est un piège (leçon suivante)."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Tous les étudiants sont sérieux** » avec `etudiant(x)` et `serieux(x)`.",
+     "hints": [
+      "∀ et une implication"
+     ],
+     "accept": [
+      "∀x etudiant(x) ⇒ serieux(x)",
+      "∀x etudiant(x)⇒serieux(x)",
+      "∀ x etudiant(x)=>serieux(x)",
+      "∀ x etudiant(x) ⇒ serieux(x)",
+      "∀ x etudiant(x)⇒serieux(x)",
+      "forall x etudiant(x)=>serieux(x)",
+      "forall x etudiant(x) ⇒ serieux(x)",
+      "forall x etudiant(x)⇒serieux(x)",
+      "∀x (etudiant(x)=>serieux(x))",
+      "∀x (etudiant(x) ⇒ serieux(x))",
+      "∀x (etudiant(x)⇒serieux(x))",
+      "∀ x (etudiant(x)=>serieux(x))",
+      "∀ x (etudiant(x) ⇒ serieux(x))",
+      "∀ x (etudiant(x)⇒serieux(x))",
+      "forall x (etudiant(x)=>serieux(x))",
+      "forall x (etudiant(x) ⇒ serieux(x))",
+      "forall x (etudiant(x)⇒serieux(x))"
+     ],
+     "solution": "∀x etudiant(x)=>serieux(x)",
+     "explain": "Même schéma que les chats : ∀x (étudiant ⇒ sérieux).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Il existe un étudiant qui a réussi** » avec `etudiant(x)` et `reussi(x)`.",
+     "hints": [
+      "∃ et une conjonction"
+     ],
+     "accept": [
+      "∃ x etudiant(x) ^ reussi(x)",
+      "exists x etudiant(x) ^ reussi(x)",
+      "∃x etudiant(x)^reussi(x)",
+      "∃ x etudiant(x)^reussi(x)",
+      "exists x etudiant(x)^reussi(x)",
+      "∃x etudiant(x) ∧ reussi(x)",
+      "∃ x etudiant(x) ∧ reussi(x)",
+      "exists x etudiant(x) ∧ reussi(x)",
+      "∃x etudiant(x)∧reussi(x)",
+      "∃ x etudiant(x)∧reussi(x)",
+      "exists x etudiant(x)∧reussi(x)",
+      "∃x etudiant(x) and reussi(x)",
+      "∃ x etudiant(x) and reussi(x)",
+      "exists x etudiant(x) and reussi(x)",
+      "∃x (etudiant(x) ^ reussi(x))",
+      "∃ x (etudiant(x) ^ reussi(x))",
+      "exists x (etudiant(x) ^ reussi(x))",
+      "∃x (etudiant(x)^reussi(x))",
+      "∃ x (etudiant(x)^reussi(x))",
+      "exists x (etudiant(x)^reussi(x))",
+      "∃x (etudiant(x) ∧ reussi(x))",
+      "∃ x (etudiant(x) ∧ reussi(x))",
+      "exists x (etudiant(x) ∧ reussi(x))",
+      "∃x (etudiant(x)∧reussi(x))",
+      "∃ x (etudiant(x)∧reussi(x))",
+      "exists x (etudiant(x)∧reussi(x))",
+      "∃x (etudiant(x) and reussi(x))",
+      "∃ x (etudiant(x) and reussi(x))",
+      "exists x (etudiant(x) and reussi(x))"
+     ],
+     "solution": "∃x etudiant(x) ^ reussi(x)",
+     "explain": "∃x (étudiant ∧ réussi).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "**Convention :** que signifie `homme(x) => mortel(x)` sans quantificateur ?",
+     "options": [
+      "Rien, la formule est invalide",
+      "∀x (homme(x) => mortel(x))",
+      "∃x (homme(x) => mortel(x))"
+     ],
+     "answer": 1,
+     "explain": "**Toute variable libre est quantifiée universellement.** « Tout homme est mortel » s'écrit donc simplement `homme(x) => mortel(x)`."
+    },
+    {
+     "type": "choice",
+     "q": "Combien de cas faut-il vérifier pour **prouver** `∃x P(x)` ?",
+     "options": [
+      "Aucun",
+      "Tous les objets",
+      "Un seul objet qui vérifie P suffit"
+     ],
+     "answer": 2,
+     "explain": "∃ : un témoin suffit. ∀ : un seul **contre-exemple** suffit pour le **réfuter**, mais il faut tout vérifier pour le prouver."
+    }
+   ]
+  },
+  {
+   "id": "piege",
+   "title": "Le piège ∀/⇒ et ∃/^",
+   "emoji": "⚠️",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Voici l'erreur n°1 des étudiants : **mélanger** les connecteurs et les quantificateurs. La règle d'or :"
+    },
+    {
+     "type": "code",
+     "sql": "∀x ( P(x) => Q(x) )     -- ∀ va avec l'IMPLICATION\n∃x ( P(x) ^  Q(x) )     -- ∃ va avec la CONJONCTION",
+     "lang": "Logique",
+     "title": "Règle d'or"
+    },
+    {
+     "type": "choice",
+     "q": "`∀x (chat(x) ^ mammifere(x))` dit que…",
+     "options": [
+      "TOUT objet de l'univers est un chat ET un mammifère (table, nuage…)",
+      "Il existe un chat mammifère",
+      "Tous les chats sont des mammifères"
+     ],
+     "answer": 0,
+     "explain": "Avec ∀ et ^, la formule s'applique à **chaque** objet de l'univers, y compris ceux qui ne sont pas des chats : absurde."
+    },
+    {
+     "type": "choice",
+     "q": "`∃x (chat(x) => mammifere(x))` est vraie dès que…",
+     "options": [
+      "Il existe au moins un chat",
+      "Il existe au moins un objet qui n'est **pas** un chat",
+      "Tous les chats sont mammifères"
+     ],
+     "answer": 1,
+     "explain": "Une implication à prémisse fausse est vraie : n'importe quelle **table** qui n'est pas un chat rend la formule vraie. Elle ne dit donc presque rien."
+    },
+    {
+     "type": "say",
+     "text": "Les deux formes correctes se lisent : `∀x (P ⇒ Q)` « chaque objet qui a P a aussi Q » ; `∃x (P ∧ Q)` « il existe un objet qui a à la fois P et Q »."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Chaque objet x qui possède la propriété P possède également la propriété Q** ».",
+     "hints": [
+      "∀ avec une implication"
+     ],
+     "accept": [
+      "∀x (P(x) ⇒ Q(x))",
+      "∀x (P(x)⇒Q(x))",
+      "∀ x (P(x)=>Q(x))",
+      "∀ x (P(x) ⇒ Q(x))",
+      "∀ x (P(x)⇒Q(x))",
+      "forall x (P(x)=>Q(x))",
+      "forall x (P(x) ⇒ Q(x))",
+      "forall x (P(x)⇒Q(x))",
+      "∀x P(x)=>Q(x)",
+      "∀x P(x) ⇒ Q(x)",
+      "∀x P(x)⇒Q(x)",
+      "∀ x P(x)=>Q(x)",
+      "∀ x P(x) ⇒ Q(x)",
+      "∀ x P(x)⇒Q(x)",
+      "forall x P(x)=>Q(x)",
+      "forall x P(x) ⇒ Q(x)",
+      "forall x P(x)⇒Q(x)"
+     ],
+     "solution": "∀x (P(x)=>Q(x))",
+     "explain": "∀x (P(x) ⇒ Q(x)).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Il existe un objet possédant la propriété P et la propriété Q** ».",
+     "hints": [
+      "∃ avec une conjonction"
+     ],
+     "accept": [
+      "∃ x (P(x) ^ Q(x))",
+      "exists x (P(x) ^ Q(x))",
+      "∃x (P(x)^Q(x))",
+      "∃ x (P(x)^Q(x))",
+      "exists x (P(x)^Q(x))",
+      "∃x (P(x) ∧ Q(x))",
+      "∃ x (P(x) ∧ Q(x))",
+      "exists x (P(x) ∧ Q(x))",
+      "∃x (P(x)∧Q(x))",
+      "∃ x (P(x)∧Q(x))",
+      "exists x (P(x)∧Q(x))",
+      "∃x (P(x) and Q(x))",
+      "∃ x (P(x) and Q(x))",
+      "exists x (P(x) and Q(x))",
+      "∃x P(x) ^ Q(x)",
+      "∃ x P(x) ^ Q(x)",
+      "exists x P(x) ^ Q(x)",
+      "∃x P(x)^Q(x)",
+      "∃ x P(x)^Q(x)",
+      "exists x P(x)^Q(x)",
+      "∃x P(x) ∧ Q(x)",
+      "∃ x P(x) ∧ Q(x)",
+      "exists x P(x) ∧ Q(x)",
+      "∃x P(x)∧Q(x)",
+      "∃ x P(x)∧Q(x)",
+      "exists x P(x)∧Q(x)",
+      "∃x P(x) and Q(x)",
+      "∃ x P(x) and Q(x)",
+      "exists x P(x) and Q(x)"
+     ],
+     "solution": "∃x (P(x) ^ Q(x))",
+     "explain": "∃x (P(x) ∧ Q(x)).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Certains étudiants sont absents** » avec `etudiant(x)` et `absent(x)`.",
+     "hints": [
+      "« Certains » = il existe"
+     ],
+     "accept": [
+      "∃ x (etudiant(x) ^ absent(x))",
+      "exists x (etudiant(x) ^ absent(x))",
+      "∃x (etudiant(x)^absent(x))",
+      "∃ x (etudiant(x)^absent(x))",
+      "exists x (etudiant(x)^absent(x))",
+      "∃x (etudiant(x) ∧ absent(x))",
+      "∃ x (etudiant(x) ∧ absent(x))",
+      "exists x (etudiant(x) ∧ absent(x))",
+      "∃x (etudiant(x)∧absent(x))",
+      "∃ x (etudiant(x)∧absent(x))",
+      "exists x (etudiant(x)∧absent(x))",
+      "∃x (etudiant(x) and absent(x))",
+      "∃ x (etudiant(x) and absent(x))",
+      "exists x (etudiant(x) and absent(x))",
+      "∃x etudiant(x) ^ absent(x)",
+      "∃ x etudiant(x) ^ absent(x)",
+      "exists x etudiant(x) ^ absent(x)",
+      "∃x etudiant(x)^absent(x)",
+      "∃ x etudiant(x)^absent(x)",
+      "exists x etudiant(x)^absent(x)",
+      "∃x etudiant(x) ∧ absent(x)",
+      "∃ x etudiant(x) ∧ absent(x)",
+      "exists x etudiant(x) ∧ absent(x)",
+      "∃x etudiant(x)∧absent(x)",
+      "∃ x etudiant(x)∧absent(x)",
+      "exists x etudiant(x)∧absent(x)",
+      "∃x etudiant(x) and absent(x)",
+      "∃ x etudiant(x) and absent(x)",
+      "exists x etudiant(x) and absent(x)"
+     ],
+     "solution": "∃x (etudiant(x) ^ absent(x))",
+     "explain": "∃x (étudiant(x) ∧ absent(x)).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Aucun chat n'est un chien** » avec `chat(x)` et `chien(x)` (en commençant par ∀).",
+     "hints": [
+      "Pour tout x : si c'est un chat, alors ce n'est pas un chien"
+     ],
+     "accept": [
+      "∀x (chat(x)=>~chien(x))",
+      "∀x (chat(x) ⇒ ¬chien(x))",
+      "∀x (chat(x) ⇒ ~chien(x))",
+      "∀x (chat(x)⇒¬chien(x))",
+      "∀x (chat(x)⇒~chien(x))",
+      "∀ x (chat(x)=>¬chien(x))",
+      "∀ x (chat(x)=>~chien(x))",
+      "∀ x (chat(x) ⇒ ¬chien(x))",
+      "∀ x (chat(x) ⇒ ~chien(x))",
+      "∀ x (chat(x)⇒¬chien(x))",
+      "∀ x (chat(x)⇒~chien(x))",
+      "forall x (chat(x)=>¬chien(x))",
+      "forall x (chat(x)=>~chien(x))",
+      "forall x (chat(x) ⇒ ¬chien(x))",
+      "forall x (chat(x) ⇒ ~chien(x))",
+      "forall x (chat(x)⇒¬chien(x))",
+      "forall x (chat(x)⇒~chien(x))",
+      "∀x chat(x)=>¬chien(x)",
+      "∀x chat(x)=>~chien(x)",
+      "∀x chat(x) ⇒ ¬chien(x)",
+      "∀x chat(x) ⇒ ~chien(x)",
+      "∀x chat(x)⇒¬chien(x)",
+      "∀x chat(x)⇒~chien(x)",
+      "∀ x chat(x)=>¬chien(x)",
+      "∀ x chat(x)=>~chien(x)",
+      "∀ x chat(x) ⇒ ¬chien(x)",
+      "∀ x chat(x) ⇒ ~chien(x)",
+      "∀ x chat(x)⇒¬chien(x)",
+      "∀ x chat(x)⇒~chien(x)",
+      "forall x chat(x)=>¬chien(x)",
+      "forall x chat(x)=>~chien(x)",
+      "forall x chat(x) ⇒ ¬chien(x)",
+      "forall x chat(x) ⇒ ~chien(x)",
+      "forall x chat(x)⇒¬chien(x)",
+      "forall x chat(x)⇒~chien(x)"
+     ],
+     "solution": "∀x (chat(x)=>¬chien(x))",
+     "explain": "∀x (chat(x) ⇒ ¬chien(x)). Équivaut à ¬∃x (chat(x) ∧ chien(x)) : « il n'existe aucun chat qui soit un chien ».",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Parmi ces phrases, laquelle se traduit par `∃x (P(x) ^ Q(x))` ?",
+     "options": [
+      "Aucun P n'est un Q",
+      "Tous les P sont des Q",
+      "Il y a au moins un P qui est aussi un Q"
+     ],
+     "answer": 2,
+     "explain": "Reconnais les mots-clés : « tous / chaque / tout » → ∀ ⇒ ; « certains / il existe / au moins un » → ∃ ∧ ; « aucun » → ∀ ⇒ ¬."
+    },
+    {
+     "type": "choice",
+     "q": "Comment traduire « **Un chat est un mammifère** » (au sens général) ?",
+     "options": [
+      "chat(x) => mammifere(x)  (variable libre, donc ∀)",
+      "∃x chat(x) ^ mammifere(x)",
+      "chat(x) ^ mammifere(x)"
+     ],
+     "answer": 0,
+     "explain": "« Un chat est un mammifère » est une vérité **générale** : c'est la forme universelle ∀x (chat ⇒ mammifère), qu'on peut écrire sans le ∀ grâce à la convention."
+    }
+   ]
+  },
+  {
+   "id": "ordre-morgan",
+   "title": "Ordre des quantificateurs et lois de Morgan",
+   "emoji": "🔄",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Deux quantificateurs identiques commutent** : `∀x ∀y ≡ ∀y ∀x` et `∃x ∃y ≡ ∃y ∃x`."
+    },
+    {
+     "type": "say",
+     "text": "**Mais ∃ et ∀ ne commutent pas !**"
+    },
+    {
+     "type": "code",
+     "sql": "∃x ∀y Aime(x,y)   -- il existe quelqu'un qui aime tout le monde\n∀y ∃x Aime(x,y)   -- tout le monde est aimé par au moins une personne",
+     "lang": "Logique",
+     "title": "Le grand classique"
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie `∃x ∀y Aime(x,y)` ?",
+     "options": [
+      "Il y a UNE personne qui aime TOUT le monde",
+      "Chacun aime quelqu'un",
+      "Tout le monde est aimé par quelqu'un"
+     ],
+     "answer": 0,
+     "explain": "Le ∃ est en premier : on **choisit d'abord** un x, puis il aime chaque y."
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie `∀y ∃x Aime(x,y)` ?",
+     "options": [
+      "Tout le monde est aimé par au moins une personne (pas forcément la même)",
+      "Personne n'aime personne",
+      "Il y a une personne qui aime tout le monde"
+     ],
+     "answer": 0,
+     "explain": "Pour **chaque** y on peut trouver un x **différent**. Le x dépend de y."
+    },
+    {
+     "type": "choice",
+     "q": "Si `∃x ∀y Aime(x,y)` est vraie, que peut-on dire de `∀y ∃x Aime(x,y)` ?",
+     "options": [
+      "Elle est fausse",
+      "On ne peut rien dire",
+      "Elle est aussi vraie : la personne qui aime tout le monde aime en particulier chaque y"
+     ],
+     "answer": 2,
+     "explain": "Oui, ∃∀ ⇒ ∀∃. Mais la **réciproque est fausse** : chacun peut être aimé par quelqu'un de différent sans que personne n'aime tout le monde."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Tout le monde aime quelqu'un** » avec `aime(x, y)`.",
+     "hints": [
+      "Pour tout x, il existe y tel que x aime y"
+     ],
+     "accept": [
+      "∀x ∃ y aime(x, y)",
+      "∀x exists y aime(x, y)",
+      "∀ x ∃y aime(x, y)",
+      "∀ x ∃ y aime(x, y)",
+      "∀ x exists y aime(x, y)",
+      "forall x ∃y aime(x, y)",
+      "forall x ∃ y aime(x, y)",
+      "forall x exists y aime(x, y)",
+      "∀x (∃y aime(x, y))",
+      "∀x (∃ y aime(x, y))",
+      "∀x (exists y aime(x, y))",
+      "∀ x (∃y aime(x, y))",
+      "∀ x (∃ y aime(x, y))",
+      "∀ x (exists y aime(x, y))",
+      "forall x (∃y aime(x, y))",
+      "forall x (∃ y aime(x, y))",
+      "forall x (exists y aime(x, y))"
+     ],
+     "solution": "∀x ∃y aime(x, y)",
+     "explain": "∀x ∃y aime(x, y) : l'ordre ∀ puis ∃ rend le y **dépendant** de x.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Il existe quelqu'un que tout le monde aime** » avec `aime(x, y)` (x aime y).",
+     "hints": [
+      "Il existe y, tel que pour tout x, x aime y"
+     ],
+     "accept": [
+      "∃ y ∀x aime(x, y)",
+      "exists y ∀x aime(x, y)",
+      "∃y ∀ x aime(x, y)",
+      "∃ y ∀ x aime(x, y)",
+      "exists y ∀ x aime(x, y)",
+      "∃y forall x aime(x, y)",
+      "∃ y forall x aime(x, y)",
+      "exists y forall x aime(x, y)",
+      "∃y (∀x aime(x, y))",
+      "∃ y (∀x aime(x, y))",
+      "exists y (∀x aime(x, y))",
+      "∃y (∀ x aime(x, y))",
+      "∃ y (∀ x aime(x, y))",
+      "exists y (∀ x aime(x, y))",
+      "∃y (forall x aime(x, y))",
+      "∃ y (forall x aime(x, y))",
+      "exists y (forall x aime(x, y))"
+     ],
+     "solution": "∃y ∀x aime(x, y)",
+     "explain": "∃y ∀x aime(x, y) : on choisit d'abord le y, aimé de **tous**.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "**Un quantificateur s'exprime avec l'autre** (lois de Morgan généralisées) :\n- `¬∀x P(x) ≡ ∃x ¬P(x)`\n- `¬∃x P(x) ≡ ∀x ¬P(x)`\n- `∀x P(x) ≡ ¬∃x ¬P(x)`\n- `∃x P(x) ≡ ¬∀x ¬P(x)`\n\nAstuce : pour **faire passer une négation à travers un quantificateur**, on le **change** (∀↔∃) et la négation va sur ce qui suit."
+    },
+    {
+     "type": "choice",
+     "q": "`¬∀x P(x)` est équivalent à…",
+     "options": [
+      "∃x ¬P(x)",
+      "∀x ¬P(x)",
+      "¬∃x P(x)"
+     ],
+     "answer": 0,
+     "explain": "« Ce n'est pas vrai que **tous** ont P » = « **au moins un** n'a pas P »."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'équivalent de `¬∃x P(x)` en faisant passer la négation derrière le quantificateur.",
+     "hints": [
+      "Le ∃ devient ∀, la négation passe devant P(x)"
+     ],
+     "accept": [
+      "∀x ~P(x)",
+      "∀ x ¬P(x)",
+      "∀ x ~P(x)",
+      "forall x ¬P(x)",
+      "forall x ~P(x)",
+      "∀x (¬P(x))",
+      "∀x (~P(x))",
+      "∀ x (¬P(x))",
+      "∀ x (~P(x))",
+      "forall x (¬P(x))",
+      "forall x (~P(x))"
+     ],
+     "solution": "∀x ¬P(x)",
+     "explain": "¬∃x P(x) ≡ ∀x ¬P(x) : « il n'existe aucun x avec P » = « aucun x n'a P ».",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Exprime `∀x Aime(x, Fruit)` en utilisant seulement ∃ et ¬.",
+     "hints": [
+      "∀ ≡ ¬∃¬"
+     ],
+     "accept": [
+      "~∃x ~Aime(x, Fruit)",
+      "¬∃ x ¬Aime(x, Fruit)",
+      "~∃ x ~Aime(x, Fruit)",
+      "¬exists x ¬Aime(x, Fruit)",
+      "~exists x ~Aime(x, Fruit)",
+      "¬(∃x ¬Aime(x, Fruit))",
+      "~(∃x ~Aime(x, Fruit))",
+      "¬(∃ x ¬Aime(x, Fruit))",
+      "~(∃ x ~Aime(x, Fruit))",
+      "¬(exists x ¬Aime(x, Fruit))",
+      "~(exists x ~Aime(x, Fruit))"
+     ],
+     "solution": "¬∃x ¬Aime(x, Fruit)",
+     "explain": "∀x Aime(x,Fruit) ≡ ¬∃x ¬Aime(x,Fruit) : « il n'y a personne qui n'aime pas les fruits ».",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Exprime `∃x Aime(x, Viande)` en utilisant seulement ∀ et ¬.",
+     "hints": [
+      "∃ ≡ ¬∀¬"
+     ],
+     "accept": [
+      "~∀x ~Aime(x, Viande)",
+      "¬∀ x ¬Aime(x, Viande)",
+      "~∀ x ~Aime(x, Viande)",
+      "¬forall x ¬Aime(x, Viande)",
+      "~forall x ~Aime(x, Viande)",
+      "¬(∀x ¬Aime(x, Viande))",
+      "~(∀x ~Aime(x, Viande))",
+      "¬(∀ x ¬Aime(x, Viande))",
+      "~(∀ x ~Aime(x, Viande))",
+      "¬(forall x ¬Aime(x, Viande))",
+      "~(forall x ~Aime(x, Viande))"
+     ],
+     "solution": "¬∀x ¬Aime(x, Viande)",
+     "explain": "∃x Aime(x,Viande) ≡ ¬∀x ¬Aime(x,Viande) : « ce n'est pas vrai que personne n'aime la viande ».",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **négation** de « Tous les étudiants ont réussi » ?",
+     "options": [
+      "Aucun étudiant n'a réussi",
+      "Tous les étudiants ont échoué",
+      "Il existe un étudiant qui n'a pas réussi"
+     ],
+     "answer": 2,
+     "explain": "¬∀x (étudiant ⇒ réussi) ≡ ∃x (étudiant ∧ ¬réussi). La négation de « tous » n'est **pas** « aucun » !"
+    },
+    {
+     "type": "say",
+     "text": "**Autres équivalences utiles** : `∀x [P(x) ∧ Q(x)] ≡ ∀x P(x) ∧ ∀y Q(y)` ; `∃x [P(x) ∨ Q(x)] ≡ ∃x P(x) ∨ ∃y Q(y)` ; renommer une variable muette ne change rien : `∀x P(x) ≡ ∀y P(y)`."
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on écrire `∀x [P(x) ∨ Q(x)] ≡ ∀x P(x) ∨ ∀y Q(y)` ?",
+     "options": [
+      "Oui mais seulement si P = Q",
+      "Oui, ∀ se distribue sur ∨",
+      "Non : ∀ ne se distribue que sur ∧ (et ∃ sur ∨)"
+     ],
+     "answer": 2,
+     "explain": "Contre-exemple : sur les entiers, « tout entier est pair **ou** impair » est vrai, mais « tout entier est pair » **ou** « tout entier est impair » est faux."
+    }
+   ]
+  },
+  {
+   "id": "egalite",
+   "title": "L'égalité et « au moins deux »",
+   "emoji": "🟰",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "L'**égalité** `=` est vraie si les deux membres désignent le **même objet**. Elle se combine avec des fonctions comme `pere(Jean)` (qui désigne un objet, pas une vérité)."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Le père de Jean est Henry** » avec la fonction `pere(Jean)` et l'égalité.",
+     "hints": [
+      "fonction = objet"
+     ],
+     "accept": [
+      "Henry = pere(Jean)"
+     ],
+     "solution": "pere(Jean) = Henry",
+     "explain": "`Pere(Jean) = Henry` : à gauche une fonction qui renvoie un objet, à droite un objet.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "Pour dire « **au moins deux frères** », il ne suffit pas de poser deux variables : elles pourraient désigner la **même personne** !"
+    },
+    {
+     "type": "code",
+     "sql": "∃x,y Frère(x,Richard) ^ Frère(y,Richard) ^ ¬(x = y)",
+     "lang": "Logique",
+     "title": "Richard a au moins deux frères"
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert `¬(x = y)` dans cette formule ?",
+     "options": [
+      "À dire que x et y sont égaux",
+      "À dire que x et y sont deux frères **différents**",
+      "À nier que Richard a des frères"
+     ],
+     "answer": 1,
+     "explain": "Sans lui, x = y = le même frère rendrait la formule vraie avec **un seul** frère."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Richard a au moins deux frères** » avec `frere(x, Richard)`.",
+     "hints": [
+      "Deux variables, deux frères, et x ≠ y"
+     ],
+     "accept": [
+      "∃x ∃y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "∃ x ∃ y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+      "∃ x ∃ y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "exists x exists y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+      "exists x exists y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "∃x ∃y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "∃x ∃y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "∃ x ∃ y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "∃ x ∃ y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "exists x exists y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "exists x exists y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "∃x ∃y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "∃x ∃y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "∃ x ∃ y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "∃ x ∃ y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "exists x exists y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "exists x exists y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "∃x ∃y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "∃x ∃y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "∃ x ∃ y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "∃ x ∃ y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "exists x exists y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "exists x exists y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "∃x ∃y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "∃x ∃y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "∃ x ∃ y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "∃ x ∃ y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "exists x exists y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "exists x exists y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "∃x ,y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+      "∃x ,y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "∃ x ,y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+      "∃ x ,y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "exists x ,y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+      "exists x ,y frere(x, Richard) ^ frere(y, Richard) ^ ~(x = y)",
+      "∃x ,y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "∃x ,y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "∃ x ,y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "∃ x ,y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "exists x ,y frere(x, Richard)^frere(y, Richard)^¬(x = y)",
+      "exists x ,y frere(x, Richard)^frere(y, Richard)^~(x = y)",
+      "∃x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "∃x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "∃ x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "∃ x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "exists x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ¬(x = y)",
+      "exists x ,y frere(x, Richard) ∧ frere(y, Richard) ∧ ~(x = y)",
+      "∃x ,y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "∃x ,y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "∃ x ,y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "∃ x ,y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "exists x ,y frere(x, Richard)∧frere(y, Richard)∧¬(x = y)",
+      "exists x ,y frere(x, Richard)∧frere(y, Richard)∧~(x = y)",
+      "∃x ,y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "∃x ,y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "∃ x ,y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "∃ x ,y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "exists x ,y frere(x, Richard) and frere(y, Richard) and ¬(x = y)",
+      "exists x ,y frere(x, Richard) and frere(y, Richard) and ~(x = y)",
+      "∃x ∃y frere(x, Richard) ^ frere(y, Richard) ^ x != y",
+      "∃ x ∃ y frere(x, Richard) ^ frere(y, Richard) ^ x != y",
+      "exists x exists y frere(x, Richard) ^ frere(y, Richard) ^ x != y",
+      "∃x ∃y frere(x, Richard)^frere(y, Richard)^x != y",
+      "∃ x ∃ y frere(x, Richard)^frere(y, Richard)^x != y",
+      "exists x exists y frere(x, Richard)^frere(y, Richard)^x != y",
+      "∃x ∃y frere(x, Richard) ∧ frere(y, Richard) ∧ x != y",
+      "∃ x ∃ y frere(x, Richard) ∧ frere(y, Richard) ∧ x != y",
+      "exists x exists y frere(x, Richard) ∧ frere(y, Richard) ∧ x != y",
+      "∃x ∃y frere(x, Richard)∧frere(y, Richard)∧x != y",
+      "∃ x ∃ y frere(x, Richard)∧frere(y, Richard)∧x != y",
+      "exists x exists y frere(x, Richard)∧frere(y, Richard)∧x != y",
+      "∃x ∃y frere(x, Richard) and frere(y, Richard) and x != y",
+      "∃ x ∃ y frere(x, Richard) and frere(y, Richard) and x != y",
+      "exists x exists y frere(x, Richard) and frere(y, Richard) and x != y"
+     ],
+     "solution": "∃x ∃y frere(x, Richard) ^ frere(y, Richard) ^ ¬(x = y)",
+     "explain": "∃x ∃y frere(x,Richard) ∧ frere(y,Richard) ∧ ¬(x = y).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle formule dit « Richard a **au plus un** frère » ?",
+     "options": [
+      "∃x,y frere(x,R) ^ frere(y,R) ^ ¬(x=y)",
+      "∀x ∀y (frere(x,R) ^ frere(y,R)) => x = y",
+      "∀x frere(x,R)"
+     ],
+     "answer": 1,
+     "explain": "Au plus un : deux frères quelconques sont forcément égaux. C'est la **négation** de « au moins deux ». Bien vu si tu as pensé à Morgan !"
+    }
+   ]
+  },
+  {
+   "id": "skolem",
+   "title": "La skolémisation : éliminer les ∃",
+   "emoji": "✂️",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Pour démontrer automatiquement, il est plus simple de n'avoir que des **∀**. Le logicien **Skolem** a montré qu'on peut **supprimer tout ∃** en introduisant une **fonction** (ou une **constante**) de Skolem."
+    },
+    {
+     "type": "say",
+     "text": "**Cas 1 : le ∃ est dans le domaine d'un ∀** : `∀x ∃y p(x, y)`. Pour chaque x, un y existe : on introduit une fonction `f(x)` qui le donne. Résultat : `∀x p(x, f(x))`."
+    },
+    {
+     "type": "say",
+     "text": "**Cas 2 : le ∃ est hors de tout ∀** : `∃y p(y)`. Il n'y a pas de x dont il dépendrait : la fonction de Skolem est une **constante** `a`. Résultat : `p(a)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Skolémise `∃y chien(y)` avec la constante `d0`.",
+     "hints": [
+      "Un ∃ hors de tout ∀ donne une constante"
+     ],
+     "accept": [],
+     "solution": "chien(d0)",
+     "explain": "On donne un nom au chien dont on sait qu'il existe : `chien(d0)`.",
+     "placeholder": "Écris la formule obtenue…"
+    },
+    {
+     "type": "exercise",
+     "q": "Skolémise `∀x ∃y aime(x, y)` avec la fonction `f` (garde le ∀ ou enlève-le, les deux sont acceptés).",
+     "hints": [
+      "y devient f(x)"
+     ],
+     "accept": [
+      "∀ x aime(x, f(x))",
+      "forall x aime(x, f(x))",
+      "aime(x, f(x))"
+     ],
+     "solution": "∀x aime(x, f(x))",
+     "explain": "Le ∃ est dans un ∀ : y dépend de x, d'où `f(x)`.",
+     "placeholder": "Écris la formule obtenue…"
+    },
+    {
+     "type": "exercise",
+     "q": "Skolémise `∃y ∀x aime(x, y)` avec la constante `a` (∀ gardé ou non).",
+     "hints": [
+      "Le ∃ est à l'extérieur"
+     ],
+     "accept": [
+      "∀ x aime(x, a)",
+      "forall x aime(x, a)",
+      "aime(x, a)"
+     ],
+     "solution": "∀x aime(x, a)",
+     "explain": "Le ∃ est hors de tout ∀ : **constante** `a`. C'est quelqu'un d'aimé de tous.",
+     "placeholder": "Écris la formule obtenue…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `∀x ∃y aime(x,y)` donne-t-il une **fonction** et `∃y ∀x aime(x,y)` une **constante** ?",
+     "options": [
+      "Parce que ∃ est toujours une fonction",
+      "Au hasard",
+      "Dans le premier, y peut changer avec x ; dans le second, y est choisi avant x et ne dépend de rien"
+     ],
+     "answer": 2,
+     "explain": "La règle du cours : toutes les variables universelles qui **englobent** le ∃ deviennent les arguments de la fonction de Skolem."
+    },
+    {
+     "type": "exercise",
+     "q": "Skolémise `∀x ∀z ∃y p(x, y, z)` avec la fonction `f` (garde le ∀ ou non).",
+     "hints": [
+      "f prend **tous** les ∀ qui englobent le ∃"
+     ],
+     "accept": [
+      "∀ x ∀ z p(x, f(x, z), z)",
+      "forall x forall z p(x, f(x, z), z)",
+      "p(x, f(x, z), z)",
+      "∀x ∀z p(x, f(z, x), z)",
+      "∀ x ∀ z p(x, f(z, x), z)",
+      "forall x forall z p(x, f(z, x), z)",
+      "p(x, f(z, x), z)"
+     ],
+     "solution": "∀x ∀z p(x, f(x, z), z)",
+     "explain": "La fonction de Skolem a pour arguments **toutes** les variables universelles englobantes : x **et** z.",
+     "placeholder": "Écris la formule obtenue…"
+    },
+    {
+     "type": "say",
+     "text": "**Exemple du cours.** « Chaque personne parle **sa** langue » : `∀x ∃y personne(x) ⇒ (langue(y) ∧ parle(x,y))` devient `personne(x) ⇒ (langue(f_langue(x)) ∧ parle(x, f_langue(x)))`.\n« **Toutes** les personnes parlent **une** langue » : `∃y ∀x …` devient `personne(x) ⇒ (langue(a) ∧ parle(x, a))`."
+    },
+    {
+     "type": "choice",
+     "q": "Que dit `personne(x) => (langue(a) ^ parle(x, a))` ?",
+     "options": [
+      "Tout le monde parle **la même** langue a",
+      "Chacun parle sa propre langue",
+      "Personne ne parle"
+     ],
+     "answer": 0,
+     "explain": "La constante `a` est une seule langue pour tous. Avec `f_langue(x)`, la langue dépendrait de la personne."
+    },
+    {
+     "type": "choice",
+     "q": "Une formule contient **deux** ∃. Utilise-t-on la même fonction de Skolem pour les deux ?",
+     "options": [
+      "Oui, pour simplifier",
+      "Seulement si les variables ont le même nom",
+      "Non : une fonction de Skolem **différente** par quantificateur existentiel"
+     ],
+     "answer": 2,
+     "explain": "Deux existences peuvent désigner deux objets différents : même fonction = on les forcerait à être liés."
+    },
+    {
+     "type": "say",
+     "text": "**Ensuite**, il ne reste que des variables universelles sans interdépendance : on peut **omettre les ∀** (variable libre = universelle). On obtient une forme compacte, prête pour la **résolution**."
+    },
+    {
+     "type": "choice",
+     "q": "Que devient `∀x ∃y p(x,y)` si on le skolémise **de façon incorrecte** par `p(x, a)` ?",
+     "options": [
+      "C'est la même chose que ∃y ∀x",
+      "C'est équivalent",
+      "On affirme qu'un MÊME y convient à tous les x : formule plus forte, donc fausse en général"
+     ],
+     "answer": 2,
+     "explain": "Remplacer par une constante transforme « pour chaque x un y » en « un même y pour tous » (c'est `∃y ∀x`). Mauvais sens du quantificateur !"
+    }
+   ]
+  },
+  {
+   "id": "modeliser",
+   "title": "Modéliser et prouver (chiens, chats et criminels)",
+   "emoji": "🧠",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Passons à la pratique : **représenter un texte en prédicats**, puis **prouver** une conclusion par résolution. Premier cas : « *Jack possède un chien. Tout propriétaire de chien est un ami des animaux. Aucun ami des animaux ne tue un animal. Jack ou John a tué le chat.* » Question : **John a-t-il tué le chat ?**"
+    },
+    {
+     "type": "code",
+     "sql": "∃y chien(y) ^ possede(Jack, y)                          -- après skolémisation : chien(d0), possede(Jack, d0)\n∀x,y chien(y) ^ possede(x,y) => ami_animaux(x)\n∀x,y ami_animaux(x) ^ animal(y) => ~tue(x,y)\ntue(Jack, chat) v tue(John, chat)\nanimal(chat)                                                -- savoir implicite : un chat est un animal",
+     "lang": "Logique",
+     "title": "La base de connaissances"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi ajoute-t-on `animal(chat)` ?",
+     "options": [
+      "Ce n'est pas nécessaire",
+      "C'est une connaissance **implicite** que le texte ne dit pas mais dont la preuve a besoin",
+      "Pour allonger la preuve"
+     ],
+     "answer": 1,
+     "explain": "Une base ne contient que ce qu'on y écrit : le « bon sens » (un chat est un animal) doit être **modélisé**."
+    },
+    {
+     "type": "say",
+     "text": "**Forme clausale.** On élimine `=>` avec `A ⇒ B ≡ ¬A ∨ B`, puis on omet les ∀."
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `∀x,y chien(y) ^ possede(x,y) => ami_animaux(x)` sous **forme clausale** (des littéraux reliés par des « ou », `v`).",
+     "hints": [
+      "¬(A ∧ B) ∨ C = ¬A ∨ ¬B ∨ C",
+      "Trois littéraux : deux négatifs, un positif"
+     ],
+     "accept": [
+      "~chien(y) ∨ ~possede(x, y) ∨ ami_animaux(x)",
+      "~chien(y)∨~possede(x, y)∨ami_animaux(x)",
+      "~chien(y) or ~possede(x, y) or ami_animaux(x)",
+      "~chien(y) v ami_animaux(x) v ~possede(x, y)",
+      "~chien(y) ∨ ami_animaux(x) ∨ ~possede(x, y)",
+      "~chien(y)∨ami_animaux(x)∨~possede(x, y)",
+      "~chien(y) or ami_animaux(x) or ~possede(x, y)",
+      "~possede(x, y) v ~chien(y) v ami_animaux(x)",
+      "~possede(x, y) ∨ ~chien(y) ∨ ami_animaux(x)",
+      "~possede(x, y)∨~chien(y)∨ami_animaux(x)",
+      "~possede(x, y) or ~chien(y) or ami_animaux(x)",
+      "~possede(x, y) v ami_animaux(x) v ~chien(y)",
+      "~possede(x, y) ∨ ami_animaux(x) ∨ ~chien(y)",
+      "~possede(x, y)∨ami_animaux(x)∨~chien(y)",
+      "~possede(x, y) or ami_animaux(x) or ~chien(y)",
+      "ami_animaux(x) v ~chien(y) v ~possede(x, y)",
+      "ami_animaux(x) ∨ ~chien(y) ∨ ~possede(x, y)",
+      "ami_animaux(x)∨~chien(y)∨~possede(x, y)",
+      "ami_animaux(x) or ~chien(y) or ~possede(x, y)",
+      "ami_animaux(x) v ~possede(x, y) v ~chien(y)",
+      "ami_animaux(x) ∨ ~possede(x, y) ∨ ~chien(y)",
+      "ami_animaux(x)∨~possede(x, y)∨~chien(y)",
+      "ami_animaux(x) or ~possede(x, y) or ~chien(y)",
+      "¬chien(y) v ¬possede(x, y) v ami_animaux(x)",
+      "¬chien(y) ∨ ¬possede(x, y) ∨ ami_animaux(x)",
+      "¬chien(y)∨¬possede(x, y)∨ami_animaux(x)",
+      "¬chien(y) or ¬possede(x, y) or ami_animaux(x)",
+      "¬chien(y) v ami_animaux(x) v ¬possede(x, y)",
+      "¬chien(y) ∨ ami_animaux(x) ∨ ¬possede(x, y)",
+      "¬chien(y)∨ami_animaux(x)∨¬possede(x, y)",
+      "¬chien(y) or ami_animaux(x) or ¬possede(x, y)",
+      "¬possede(x, y) v ¬chien(y) v ami_animaux(x)",
+      "¬possede(x, y) ∨ ¬chien(y) ∨ ami_animaux(x)",
+      "¬possede(x, y)∨¬chien(y)∨ami_animaux(x)",
+      "¬possede(x, y) or ¬chien(y) or ami_animaux(x)",
+      "¬possede(x, y) v ami_animaux(x) v ¬chien(y)",
+      "¬possede(x, y) ∨ ami_animaux(x) ∨ ¬chien(y)",
+      "¬possede(x, y)∨ami_animaux(x)∨¬chien(y)",
+      "¬possede(x, y) or ami_animaux(x) or ¬chien(y)",
+      "ami_animaux(x) v ¬chien(y) v ¬possede(x, y)",
+      "ami_animaux(x) ∨ ¬chien(y) ∨ ¬possede(x, y)",
+      "ami_animaux(x)∨¬chien(y)∨¬possede(x, y)",
+      "ami_animaux(x) or ¬chien(y) or ¬possede(x, y)",
+      "ami_animaux(x) v ¬possede(x, y) v ¬chien(y)",
+      "ami_animaux(x) ∨ ¬possede(x, y) ∨ ¬chien(y)",
+      "ami_animaux(x)∨¬possede(x, y)∨¬chien(y)",
+      "ami_animaux(x) or ¬possede(x, y) or ¬chien(y)",
+      "~chien(y) v ~possede(x,y) v ami_animaux(x)",
+      "~chien(y) ∨ ~possede(x,y) ∨ ami_animaux(x)",
+      "~chien(y)∨~possede(x,y)∨ami_animaux(x)",
+      "~chien(y) or ~possede(x,y) or ami_animaux(x)",
+      "~chien(y) v ami_animaux(x) v ~possede(x,y)",
+      "~chien(y) ∨ ami_animaux(x) ∨ ~possede(x,y)",
+      "~chien(y)∨ami_animaux(x)∨~possede(x,y)",
+      "~chien(y) or ami_animaux(x) or ~possede(x,y)",
+      "~possede(x,y) v ~chien(y) v ami_animaux(x)",
+      "~possede(x,y) ∨ ~chien(y) ∨ ami_animaux(x)",
+      "~possede(x,y)∨~chien(y)∨ami_animaux(x)",
+      "~possede(x,y) or ~chien(y) or ami_animaux(x)",
+      "~possede(x,y) v ami_animaux(x) v ~chien(y)",
+      "~possede(x,y) ∨ ami_animaux(x) ∨ ~chien(y)",
+      "~possede(x,y)∨ami_animaux(x)∨~chien(y)",
+      "~possede(x,y) or ami_animaux(x) or ~chien(y)",
+      "ami_animaux(x) v ~chien(y) v ~possede(x,y)",
+      "ami_animaux(x) ∨ ~chien(y) ∨ ~possede(x,y)",
+      "ami_animaux(x)∨~chien(y)∨~possede(x,y)",
+      "ami_animaux(x) or ~chien(y) or ~possede(x,y)",
+      "ami_animaux(x) v ~possede(x,y) v ~chien(y)",
+      "ami_animaux(x) ∨ ~possede(x,y) ∨ ~chien(y)",
+      "ami_animaux(x)∨~possede(x,y)∨~chien(y)",
+      "ami_animaux(x) or ~possede(x,y) or ~chien(y)"
+     ],
+     "solution": "~chien(y) v ~possede(x, y) v ami_animaux(x)",
+     "explain": "`A ∧ B ⇒ C ≡ ¬(A ∧ B) ∨ C ≡ ¬A ∨ ¬B ∨ C` (Morgan).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "On **nie le but** : on ajoute `~tue(John, chat)` (« John n'a pas tué le chat ») et on cherche la **clause vide**."
+    },
+    {
+     "type": "choice",
+     "q": "On résout `tue(Jack,chat) v tue(John,chat)` avec `~tue(John,chat)`. On obtient…",
+     "options": [
+      "la clause vide",
+      "tue(John, chat)",
+      "tue(Jack, chat)"
+     ],
+     "answer": 2,
+     "explain": "On annule `tue(John,chat)` contre sa négation : il reste `tue(Jack, chat)`."
+    },
+    {
+     "type": "choice",
+     "q": "Avec `ami_animaux(x) ^ animal(y) => ~tue(x,y)`, `animal(chat)` et `tue(Jack, chat)`, on déduit…",
+     "options": [
+      "~ami_animaux(Jack)",
+      "ami_animaux(Jack)",
+      "tue(John, chat)"
+     ],
+     "answer": 0,
+     "explain": "Clause `~ami_animaux(x) v ~animal(y) v ~tue(x,y)` avec x = Jack, y = chat et les deux faits : il reste `~ami_animaux(Jack)`."
+    },
+    {
+     "type": "choice",
+     "q": "Or Jack possède le chien `d0`, donc `ami_animaux(Jack)`. Que se passe-t-il ?",
+     "options": [
+      "Rien",
+      "On a prouvé que Jack est innocent sans contradiction",
+      "Contradiction : clause vide, donc John a bien tué le chat"
+     ],
+     "answer": 2,
+     "explain": "`ami_animaux(Jack)` et `~ami_animaux(Jack)` donnent la **clause vide** : l'hypothèse « John n'a pas tué le chat » est absurde. **Oui, John a tué le chat.**"
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on répondre **sans** résolution, avec les règles d'inférence de base ?",
+     "options": [
+      "Oui : modus ponens (Jack ami des animaux, donc il ne tue pas le chat), puis syllogisme disjonctif `A v B, ~A ⊢ B`",
+      "Non, impossible",
+      "Oui, avec le modus tollens seulement"
+     ],
+     "answer": 0,
+     "explain": "Le syllogisme disjonctif est un cas particulier de **résolution**. Les deux approches sont équivalentes."
+    },
+    {
+     "type": "say",
+     "text": "**Deuxième cas : « West est un criminel ».** *La loi dit que c'est un crime pour un Américain de vendre des armes aux nations ennemies. Nono, ennemi de l'Amérique, possède des missiles qui lui ont été vendus par le colonel West, un Américain.*"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle formule traduit la **loi** ?",
+     "options": [
+      "∀x criminel(x) => americain(x)",
+      "∃x,y,z americain(x) ^ arme(y) ^ vend(x,y,z) ^ hostile(z) => criminel(x)",
+      "∀x,y,z americain(x) ^ arme(y) ^ vend(x,y,z) ^ hostile(z) => criminel(x)"
+     ],
+     "answer": 2,
+     "explain": "Une **loi générale** : ∀ avec implication (la prémisse contient tout ce qui constitue le crime)."
+    },
+    {
+     "type": "choice",
+     "q": "Quelles connaissances **implicites** faut-il ajouter pour que la preuve passe ?",
+     "options": [
+      "missile(x) => arme(x) et ennemi(x, Amérique) => hostile(x)",
+      "americain(Nono)",
+      "Aucune"
+     ],
+     "answer": 0,
+     "explain": "Un missile est une arme, un ennemi est hostile : ce sont les **ponts** entre le vocabulaire du texte et celui de la loi."
+    },
+    {
+     "type": "choice",
+     "q": "En chaînage avant (modus ponens), quel est le **dernier** fait obtenu ?",
+     "options": [
+      "hostile(Nono)",
+      "criminel(West)",
+      "arme(M1)"
+     ],
+     "answer": 1,
+     "explain": "Ordre : `arme(M1)`, `vend(West,M1,Nono)`, `hostile(Nono)`, puis la loi avec x=West, y=M1, z=Nono donne `criminel(West)`."
+    },
+    {
+     "type": "say",
+     "text": "**Troisième cas : « H est son propre grand-père ».** Aucun texte ne dit ce qu'est un beau-père. Il faut **expliciter** les règles par alliance : `epoux(x,y) ^ mere(y,z) => parent(x,z)`, puis `parent(x,y) ^ parent(y,z) => grand_pere(x,z)`. On trouve `parent(H, P)` et `parent(P, H)`, donc `grand_pere(H, H)` (par alliance)."
+    },
+    {
+     "type": "choice",
+     "q": "Que retenir de cet exercice ?",
+     "options": [
+      "Un énoncé n'est démontrable qu'après avoir **modélisé le bon sens implicite** (ici les relations par alliance)",
+      "La logique permet de tout démontrer sans rien ajouter",
+      "Les prédicats sont inutiles"
+     ],
+     "answer": 0,
+     "explain": "Garbage in, garbage out : la qualité de la preuve dépend de la **modélisation**."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : modéliser, nier, skolémiser, prouver",
+   "emoji": "🏆",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dernier défi : tout ce que tu as vu, dans le désordre. Pas de pitié 😄"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Tout homme est mortel** » avec `homme(x)` et `mortel(x)`.",
+     "hints": [
+      "∀ + implication (ou variable libre)"
+     ],
+     "accept": [
+      "∀x homme(x) ⇒ mortel(x)",
+      "∀x homme(x)⇒mortel(x)",
+      "∀ x homme(x)=>mortel(x)",
+      "∀ x homme(x) ⇒ mortel(x)",
+      "∀ x homme(x)⇒mortel(x)",
+      "forall x homme(x)=>mortel(x)",
+      "forall x homme(x) ⇒ mortel(x)",
+      "forall x homme(x)⇒mortel(x)",
+      "∀x (homme(x)=>mortel(x))",
+      "∀x (homme(x) ⇒ mortel(x))",
+      "∀x (homme(x)⇒mortel(x))",
+      "∀ x (homme(x)=>mortel(x))",
+      "∀ x (homme(x) ⇒ mortel(x))",
+      "∀ x (homme(x)⇒mortel(x))",
+      "forall x (homme(x)=>mortel(x))",
+      "forall x (homme(x) ⇒ mortel(x))",
+      "forall x (homme(x)⇒mortel(x))",
+      "homme(x)=>mortel(x)",
+      "homme(x) ⇒ mortel(x)",
+      "homme(x)⇒mortel(x)"
+     ],
+     "solution": "∀x homme(x)=>mortel(x)",
+     "explain": "∀x (homme(x) ⇒ mortel(x)).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "exercise",
+     "q": "Mets `homme(x) => mortel(x)` sous forme clausale.",
+     "hints": [
+      "A ⇒ B ≡ ¬A ∨ B"
+     ],
+     "accept": [
+      "¬homme(x) ∨ mortel(x)",
+      "¬homme(x)∨mortel(x)",
+      "¬homme(x) or mortel(x)",
+      "~homme(x) v mortel(x)",
+      "~homme(x) ∨ mortel(x)",
+      "~homme(x)∨mortel(x)",
+      "~homme(x) or mortel(x)",
+      "mortel(x) v ¬homme(x)",
+      "mortel(x) ∨ ¬homme(x)",
+      "mortel(x)∨¬homme(x)",
+      "mortel(x) or ¬homme(x)",
+      "mortel(x) v ~homme(x)",
+      "mortel(x) ∨ ~homme(x)",
+      "mortel(x)∨~homme(x)",
+      "mortel(x) or ~homme(x)"
+     ],
+     "solution": "¬homme(x) v mortel(x)",
+     "explain": "`¬homme(x) ∨ mortel(x)`.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "On sait aussi `homme(Socrate)` et on veut prouver `mortel(Socrate)`. On ajoute la négation du but : `~mortel(Socrate)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle clause obtient-on en résolvant `~homme(x) v mortel(x)` avec `~mortel(Socrate)` (x = Socrate) ?",
+     "hints": [
+      "On annule mortel(Socrate) contre sa négation"
+     ],
+     "accept": [
+      "~homme(Socrate)"
+     ],
+     "solution": "¬homme(Socrate)",
+     "explain": "Il reste `¬homme(Socrate)`. Avec le fait `homme(Socrate)`, la résolution donne la **clause vide** : Socrate est mortel ✔.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la négation de « Il existe un étudiant qui a triché » ?",
+     "options": [
+      "Aucun étudiant n'a triché (∀x étudiant(x) ⇒ ¬triché(x))",
+      "Tous les étudiants ont triché",
+      "Il existe un étudiant qui n'a pas triché"
+     ],
+     "answer": 0,
+     "explain": "¬∃x (étudiant ∧ triché) ≡ ∀x (étudiant ⇒ ¬triché)."
+    },
+    {
+     "type": "exercise",
+     "q": "Skolémise `∀x ∃y mere(y, x)` (tout x a une mère y) avec la fonction `m`.",
+     "hints": [
+      "y dépend de x"
+     ],
+     "accept": [
+      "∀ x mere(m(x), x)",
+      "forall x mere(m(x), x)",
+      "mere(m(x), x)"
+     ],
+     "solution": "∀x mere(m(x), x)",
+     "explain": "`mere(m(x), x)` : m(x) désigne la mère de x.",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "choice",
+     "q": "Qu'est-ce qui est **vrai** ?",
+     "options": [
+      "∀x ∃y ⇒ ∃x ∀y",
+      "∃x ∀y ⇒ ∀y ∃x, mais pas la réciproque",
+      "∀x ∃y ≡ ∃y ∀x"
+     ],
+     "answer": 1,
+     "explain": "Le « un seul pour tous » implique « pour chacun un », jamais l'inverse."
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le bon couple connecteur / quantificateur ?",
+     "options": [
+      "∀ avec ^ et ∃ avec =>",
+      "Peu importe",
+      "∀ avec => et ∃ avec ^"
+     ],
+     "answer": 2,
+     "explain": "La règle d'or : **∀ ⇒** et **∃ ∧**."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris « **Tous les Béninois sont gentils** » (`beninois(x)`, `gentil(x)`) puis tu auras fini l'exercice 4 du cours 🎉",
+     "hints": [
+      "∀ + implication"
+     ],
+     "accept": [
+      "∀x beninois(x) ⇒ gentil(x)",
+      "∀x beninois(x)⇒gentil(x)",
+      "∀ x beninois(x)=>gentil(x)",
+      "∀ x beninois(x) ⇒ gentil(x)",
+      "∀ x beninois(x)⇒gentil(x)",
+      "forall x beninois(x)=>gentil(x)",
+      "forall x beninois(x) ⇒ gentil(x)",
+      "forall x beninois(x)⇒gentil(x)",
+      "∀x (beninois(x)=>gentil(x))",
+      "∀x (beninois(x) ⇒ gentil(x))",
+      "∀x (beninois(x)⇒gentil(x))",
+      "∀ x (beninois(x)=>gentil(x))",
+      "∀ x (beninois(x) ⇒ gentil(x))",
+      "∀ x (beninois(x)⇒gentil(x))",
+      "forall x (beninois(x)=>gentil(x))",
+      "forall x (beninois(x) ⇒ gentil(x))",
+      "forall x (beninois(x)⇒gentil(x))",
+      "beninois(x)=>gentil(x)",
+      "beninois(x) ⇒ gentil(x)",
+      "beninois(x)⇒gentil(x)"
+     ],
+     "solution": "∀x beninois(x)=>gentil(x)",
+     "explain": "∀x (beninois(x) ⇒ gentil(x)).",
+     "placeholder": "Écris la formule : ∀ ou forall, ∃ ou exists, ¬ ou ~, ^ ou ∧, => ou ⇒"
+    },
+    {
+     "type": "say",
+     "text": "🎉 **Bravo !** Tu sais maintenant traduire du français en prédicats, manier ∀/∃ sans les pièges classiques, appliquer Morgan, skolémiser et lancer une résolution. Pour la suite : refais les exercices 6, 7 et 8 du cours **sans regarder** la correction."
+    }
+   ]
+  }
+ ]
+}
