@@ -9,3 +9,4 @@ dist
 .vercel
 .netlify
 backend/data/
+frontend/public/search-index.json

@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Check,
   Crown,
@@ -23,6 +23,7 @@ import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
 import { Bar, Spinner } from './ui';
 import Celebrations, { fireConfetti } from './Celebrations';
 import { Mascot } from './Mascot';
+import { SearchIcon } from './SearchIcon';
 import { ConfettiBackdrop, FlameBadgeIcon } from './Decor';
 import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
@@ -44,6 +45,7 @@ const DESKTOP_NAV = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
   { to: '/formations', label: 'Formations', icon: GraduationHat },
   { to: '/modules', label: 'Modules de cours', icon: Folder },
+  { to: '/recherche', label: 'Rechercher', icon: SearchIcon },
   { to: '/actu', label: 'Actualités & Battles', icon: Newspaper },
   { to: '/classement', label: 'Classement', icon: Crown },
   { to: '/messages', label: 'Messages', icon: TextBubble },
@@ -169,10 +171,26 @@ export default function Layout() {
   const { state, online, pendingSync, syncError } = useStore();
   const { filiere, customPseudo } = useTheme();
   const loc = useLocation();
+  const navigate = useNavigate();
   const unread = useUnreadMessages();
   const inReader = loc.pathname.includes('/lire/');
 
   const [battle, setBattle] = useState<WeeklyBattleInfo | null>(null);
+
+  // Raccourcis : « / » ou Ctrl/⌘ + K ouvrent la recherche (sauf pendant la saisie dans un champ).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+      const combo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k';
+      if (combo || (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey)) {
+        e.preventDefault();
+        navigate('/recherche');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navigate]);
 
   useEffect(() => {
     let alive = true;
@@ -285,6 +303,14 @@ export default function Layout() {
           </div>
           <div className="flex items-center gap-2">
             <XpChip />
+            <Link
+              to="/recherche"
+              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"
+              aria-label="Rechercher dans les cours"
+              title="Rechercher dans les cours  ( / )"
+            >
+              <SearchIcon size={18} />
+            </Link>
             <Link
               to="/messages"
               className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"

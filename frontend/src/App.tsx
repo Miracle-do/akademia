@@ -23,6 +23,7 @@ const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const ConversationPage = lazy(() => import('@/pages/ConversationPage'));
 const ModulePage = lazy(() => import('@/pages/ModulePage'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
 const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="formations" element={<FormationsListPage />} />
         <Route path="actu" element={<FeedPage />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="recherche" element={<SearchPage />} />
         <Route path="modules" element={<ModulesPage />} />
         <Route path="m/:moduleId" element={<ModulePage />} />
         <Route path="m/:moduleId/lire/:chapterId" element={<ChapterPage />} />

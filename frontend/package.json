@@ -9,7 +9,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "validate": "node scripts/validate-content.mjs",
-    "new-module": "node scripts/new-module.mjs"
+    "new-module": "node scripts/new-module.mjs",
+    "predev": "node scripts/build-search-index.mjs",
+    "prebuild": "node scripts/build-search-index.mjs"
   },
   "dependencies": {
     "@fontsource-variable/baloo-2": "^5.3.0",
