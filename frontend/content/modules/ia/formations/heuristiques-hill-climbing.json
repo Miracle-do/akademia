@@ -1,0 +1,946 @@
+{
+ "id": "heuristiques-hill-climbing",
+ "order": 3,
+ "title": "Heuristiques et Hill Climbing",
+ "tagline": "Taquin, h₁ et h₂, admissibilité, ascension de colline, pièges et recherche gloutonne.",
+ "emoji": "⛰️",
+ "color": "#7C3AED",
+ "level": "Intermédiaire",
+ "minutes": 107,
+ "pitch": [
+  "Salut ! Je te présente **« Heuristiques et Hill Climbing »** ⛰️.",
+  "Une recherche aveugle explore sans savoir où elle va. Une **heuristique** lui donne une boussole : une estimation de la distance au but. On construit deux heuristiques sur le **Taquin** (plaquettes mal placées, distances de Manhattan), on vérifie leur **admissibilité**, puis on lance **Hill Climbing** et on le regarde tomber dans ses pièges (optimum local, plateau, crête).",
+  "On termine avec la **recherche gloutonne** et on la compare à Hill Climbing sur un petit graphe.",
+  "Tous les calculs sont à faire toi-même, avec de vraies grilles."
+ ],
+ "benefits": [
+  "Définir une heuristique de coût ou de mérite et savoir laquelle minimiser ou maximiser",
+  "Calculer h₁ (plaquettes mal placées) et h₂ (Manhattan) sur n'importe quel état du Taquin",
+  "Juger l'admissibilité et la dominance d'une heuristique",
+  "Dérouler Hill Climbing, reconnaître l'optimum local, le plateau et la crête, et le comparer à la recherche gloutonne"
+ ],
+ "lessons": [
+  {
+   "id": "heuristique",
+   "title": "C'est quoi une heuristique ?",
+   "emoji": "🧭",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Dans cette formation on apprend à **guider** une recherche, puis à voir ce qui se passe quand on la laisse **grimper toute seule** (Hill Climbing). On commence par l'idée de base."
+    },
+    {
+     "type": "say",
+     "text": "« Heuristique » vient du grec *heuriskein* : **découvrir, trouver**. La recherche aveugle (DFS, BFS) avance sans savoir à quelle distance elle est du but. La **recherche heuristique** utilise une information **propre au problème** pour essayer d'abord les chemins les plus prometteurs."
+    },
+    {
+     "type": "choice",
+     "q": "Qu'est-ce qui distingue une recherche heuristique d'une recherche aveugle ?",
+     "options": [
+      "Elle garantit toujours la solution optimale",
+      "Elle utilise une information spécifique au problème pour classer les états",
+      "Elle explore toujours tous les états"
+     ],
+     "answer": 1,
+     "explain": "L'heuristique est une **estimation** : elle oriente la recherche mais ne donne aucune garantie d'optimalité par elle-même."
+    },
+    {
+     "type": "say",
+     "text": "**Définition formelle.** Une fonction heuristique est une application `h : E → ℝ` : à chaque état `n` de l'espace d'états `E`, elle associe un nombre réel qui estime son **attractivité**."
+    },
+    {
+     "type": "say",
+     "text": "Deux sortes d'estimations :\n- **estimation de coût** : `h(n)` estime le coût **restant** jusqu'au but → on cherche à **minimiser** ;\n- **estimation de mérite** : `h(n)` estime la qualité ou le gain de l'état → on cherche à **maximiser**."
+    },
+    {
+     "type": "choice",
+     "q": "`h(n)` = distance à vol d'oiseau entre la ville `n` et la ville but. De quel type est cette heuristique ?",
+     "options": [
+      "Ce n'est pas une heuristique",
+      "Estimation de mérite (à maximiser)",
+      "Estimation de coût (à minimiser)"
+     ],
+     "answer": 2,
+     "explain": "Plus la ville est proche du but, mieux c'est : c'est un **coût restant estimé**, donc on prend la plus petite valeur."
+    },
+    {
+     "type": "choice",
+     "q": "`h(n)` = nombre de reines non menacées dans une position du problème des 8 reines. Type ?",
+     "options": [
+      "Estimation de coût (à minimiser)",
+      "Heuristique inadmissible",
+      "Estimation de mérite (à maximiser)"
+     ],
+     "answer": 2,
+     "explain": "Plus il y a de reines en sécurité, mieux c'est : c'est un **mérite**, on le **maximise**."
+    },
+    {
+     "type": "choice",
+     "q": "Pour une estimation de **coût**, quel état un algorithme choisit-il en premier ?",
+     "options": [
+      "Celui qui a la plus petite valeur de h",
+      "Celui qui a la plus grande valeur de h",
+      "Le premier généré"
+     ],
+     "answer": 0,
+     "explain": "Coût estimé le plus faible = état qui semble le plus proche du but."
+    },
+    {
+     "type": "exercise",
+     "q": "Pour un état **but**, que vaut toujours une heuristique de coût `h` ?",
+     "hints": [
+      "Il ne reste rien à parcourir"
+     ],
+     "accept": [],
+     "solution": "0",
+     "explain": "`h(but) = 0` : aucun coût restant. (Cette condition fait partie de la définition de l'admissibilité, qu'on verra plus loin.)",
+     "placeholder": "Un nombre"
+    }
+   ]
+  },
+  {
+   "id": "h1",
+   "title": "Heuristique h₁ : plaquettes mal placées",
+   "emoji": "🧩",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On travaille sur le **Taquin** (8-Puzzle) : une grille 3×3, huit plaquettes numérotées et une case vide. On veut passer d'un état initial à l'état but."
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+      +---+---+---+\n| 5 |   | 8 |      | 1 | 2 | 3 |\n+---+---+---+      +---+---+---+\n| 4 | 2 | 1 |      | 4 | 5 | 6 |\n+---+---+---+      +---+---+---+\n| 7 | 3 | 6 |      | 7 | 8 |   |\n+---+---+---+      +---+---+---+\n      État initial                 État but",
+     "lang": "Taquin",
+     "title": "L'exemple du cours"
+    },
+    {
+     "type": "say",
+     "text": "**h₁ = nombre de plaquettes (hors case vide) qui ne sont pas à leur position finale.** La case vide ne compte jamais."
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₁ pour l'**état initial** ci-dessus (compare avec l'état but).",
+     "hints": [
+      "Passe les plaquettes une par une : 1, 2, 3…",
+      "Seules 4 et 7 sont bien placées"
+     ],
+     "accept": [],
+     "solution": "6",
+     "explain": "Mal placées : 5, 8, 2, 1, 3 et 6 → **h₁ = 6** (seules 4 et 7 sont déjà à leur place).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "Maintenant, **un seul mouvement** : la case vide descend et échange sa place avec la plaquette **2**."
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 5 | 2 | 8 |\n+---+---+---+\n| 4 |   | 1 |\n+---+---+---+\n| 7 | 3 | 6 |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "Nouvel état"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut h₁ pour ce nouvel état ?",
+     "hints": [
+      "Le 2 est maintenant en haut au milieu : est-ce sa place finale ?"
+     ],
+     "accept": [],
+     "solution": "5",
+     "explain": "Le **2** est arrivé à sa place finale (haut, au milieu) : il y a donc **5** plaquettes mal placées au lieu de 6. Le mouvement a fait **baisser** h₁ : c'est un bon signe pour une heuristique de coût.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Et si au lieu de cela la case vide va à **gauche** (elle échange avec le 5) ? Que vaut h₁ ?",
+     "hints": [
+      "Le 5 est-il à sa place finale ?"
+     ],
+     "accept": [],
+     "solution": "6",
+     "explain": "Le 5 est maintenant en haut au milieu, alors que sa place finale est au centre : toujours mal placé. h₁ reste à **6**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 1 | 2 | 3 |\n+---+---+---+\n| 4 | 5 | 6 |\n+---+---+---+\n| 7 |   | 8 |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "Un état presque terminé"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₁ pour cet état (indice : regarde la dernière ligne).",
+     "hints": [
+      "Combien de plaquettes ne sont pas à leur place ?"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "Seule la plaquette **8** est mal placée (elle devrait être au milieu en bas) → **h₁ = 1**. La case vide, elle, ne compte pas.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₁ pour l'état but lui-même.",
+     "hints": [
+      "Toutes les plaquettes sont à leur place"
+     ],
+     "accept": [],
+     "solution": "0",
+     "explain": "h₁(but) = **0**, comme il se doit.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi h₁ est-elle une heuristique \"grossière\" ?",
+     "options": [
+      "Elle est toujours fausse",
+      "Elle compte la case vide",
+      "Elle ne tient pas compte de la distance à parcourir : une plaquette à 1 case et une à 4 cases comptent pareil"
+     ],
+     "answer": 2,
+     "explain": "h₁ ne dit pas **à quelle distance** chaque plaquette se trouve de sa place. L'heuristique suivante en tient compte."
+    }
+   ]
+  },
+  {
+   "id": "h2",
+   "title": "Heuristique h₂ : distances de Manhattan",
+   "emoji": "📐",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**h₂ = somme des distances de Manhattan** de chaque plaquette à sa place finale. Pour une plaquette en `(ligne, colonne) = (x, y)` dont la cible est `(x*, y*)` :\n`dist = |x − x*| + |y − y*|`\nC'est le nombre minimal de **cases à parcourir** (horizontalement + verticalement), sans diagonale."
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+      +---+---+---+\n| 5 |   | 8 |      | 1 | 2 | 3 |\n+---+---+---+      +---+---+---+\n| 4 | 2 | 1 |      | 4 | 5 | 6 |\n+---+---+---+      +---+---+---+\n| 7 | 3 | 6 |      | 7 | 8 |   |\n+---+---+---+      +---+---+---+\n      État initial                 État but",
+     "lang": "Taquin",
+     "title": "On reprend l'état initial"
+    },
+    {
+     "type": "exercise",
+     "q": "Plaquette **1** : elle est en deuxième ligne, troisième colonne ; sa cible est en haut à gauche. Quelle distance de Manhattan ?",
+     "hints": [
+      "Lignes : de la 2e à la 1re ; colonnes : de la 3e à la 1re"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "|2−1| + |3−1| = 1 + 2 = **3**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Plaquette **5** : en haut à gauche ; sa cible est au centre. Distance ?",
+     "hints": [
+      "Une ligne plus bas, une colonne à droite"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "|1−2| + |1−2| = 1 + 1 = **2**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Plaquette **8** : en haut à droite ; sa cible est en bas, au milieu. Distance ?",
+     "hints": [
+      "Deux lignes plus bas, une colonne à gauche"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "|1−3| + |3−2| = 2 + 1 = **3**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "code",
+     "sql": "Plaquette :  1  2  3  4  5  6  7  8\nDistance  :  3  1  3  0  2  1  0  3",
+     "lang": "Taquin",
+     "title": "Toutes les distances de l'état initial"
+    },
+    {
+     "type": "exercise",
+     "q": "Additionne : que vaut h₂ pour l'état initial ?",
+     "hints": [
+      "3 + 1 + 3 + 0 + 2 + 1 + 0 + 3"
+     ],
+     "accept": [],
+     "solution": "13",
+     "explain": "**h₂ = 13**, alors que h₁ = 6 : h₂ est une estimation bien plus fine.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 1 | 2 | 3 |\n+---+---+---+\n| 4 | 5 | 6 |\n+---+---+---+\n| 7 |   | 8 |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "Un état presque terminé"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₂ pour cet état (ligne du bas : 7, case vide, 8).",
+     "hints": [
+      "Une seule plaquette est mal placée : à combien de cases de sa cible ?"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "Seule la plaquette **8** est mal placée : elle est une case trop à droite → distance 1, donc **h₂ = 1** (= h₁ ici).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₂ pour l'état obtenu en déplaçant la case vide **vers le bas** depuis l'état initial (le 2 monte).",
+     "hints": [
+      "Seul le 2 a bougé : sa distance passe de 1 à 0",
+      "h₂(initial) = 13"
+     ],
+     "accept": [],
+     "solution": "12",
+     "explain": "Le 2 est arrivé à sa place : sa distance passe de 1 à 0 et les autres ne bougent pas : 13 − 1 = **12**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₂ pour l'état du bas, en partant de l'état initial et en déplaçant la case vide à **gauche** (le 5 se décale à droite).",
+     "hints": [
+      "Le 5 se rapproche-t-il de sa cible (centre) ?"
+     ],
+     "accept": [],
+     "solution": "12",
+     "explain": "Le 5 passe de (1,1) à (1,2) : sa distance au centre baisse de 2 à 1. Total : 13 − 1 = **12**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pour toute plaquette mal placée, sa distance de Manhattan est au moins…",
+     "options": [
+      "1",
+      "2",
+      "0"
+     ],
+     "answer": 0,
+     "explain": "Une plaquette mal placée doit au moins faire 1 pas. Donc la somme des distances est toujours **≥ h₁** : `h₂(n) ≥ h₁(n)`."
+    },
+    {
+     "type": "choice",
+     "q": "Les deux mouvements précédents (case vide à gauche ou en bas) donnent la même valeur h₂ = 12. Que peut-on dire ?",
+     "options": [
+      "Le 1er est strictement meilleur",
+      "Le 2e est strictement meilleur",
+      "L'heuristique ne permet pas de les départager"
+     ],
+     "answer": 2,
+     "explain": "Égalité : on a une **égalité de valeurs** (un « petit plateau »). Un algorithme devra alors appliquer un critère arbitraire (ordre des opérateurs). C'est une des faiblesses du Hill Climbing qu'on voit plus loin."
+    }
+   ]
+  },
+  {
+   "id": "admissibilite",
+   "title": "Admissibilité et dominance",
+   "emoji": "✅",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Soit `h*(n)` le **coût réel minimal** pour atteindre un but depuis `n`. Une heuristique est **admissible** si, pour tout état `n` :\n`0 ≤ h(n) ≤ h*(n)`\nAutrement dit : elle est **optimiste** et **ne surestime jamais** le coût réel. (Et `h(but) = 0`.)"
+    },
+    {
+     "type": "choice",
+     "q": "`h(n) > h*(n)` pour un état `n`. Que dit-on de h ?",
+     "options": [
+      "Elle surestime : elle n'est pas admissible",
+      "Elle est admissible",
+      "Elle est dominante"
+     ],
+     "answer": 0,
+     "explain": "Surestimer le coût restant viole la condition d'admissibilité. On perd alors, par exemple, la garantie d'optimalité de A*."
+    },
+    {
+     "type": "say",
+     "text": "**Un cas réel.** Pour l'état initial du cours, un calcul exhaustif donne `h*(initial) = 21` mouvements. Or h₁ = 6 et h₂ = 13."
+    },
+    {
+     "type": "choice",
+     "q": "h₁ et h₂ respectent-elles `h ≤ h*` sur cet état ?",
+     "options": [
+      "Seulement h₁",
+      "Aucune des deux",
+      "Oui : 6 ≤ 21 et 13 ≤ 21"
+     ],
+     "answer": 2,
+     "explain": "Les deux sous-estiment, ce qui est conforme. h₂ est **plus proche** du coût réel : plus informative."
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi ces deux heuristiques sont admissibles.**\n- h₁ : une plaquette mal placée demande **au moins 1** mouvement → coût réel ≥ h₁.\n- h₂ : une plaquette a besoin d'**au moins** sa distance de Manhattan en mouvements (au mieux, personne ne la gêne). En réalité, les pièces se bloquent entre elles → coût réel ≥ h₂."
+    },
+    {
+     "type": "choice",
+     "q": "Une plaquette est à 3 cases de sa place. Combien de mouvements faut-il **au minimum** pour cette seule plaquette ?",
+     "options": [
+      "Au plus 3",
+      "1",
+      "3"
+     ],
+     "answer": 2,
+     "explain": "Chaque mouvement avance la plaquette d'**une** case. Pas de diagonale : au minimum 3."
+    },
+    {
+     "type": "say",
+     "text": "**Dominance.** Si `h₂(n) ≥ h₁(n)` pour tout état n, alors **h₂ domine h₁**. Comme h₂ est plus proche de h* tout en restant admissible, un algorithme comme A* guidé par h₂ développe **moins ou autant de nœuds** qu'avec h₁."
+    },
+    {
+     "type": "exercise",
+     "q": "Entre h₁ (valeur 6) et h₂ (valeur 13) sur l'état initial, laquelle domine l'autre ? (écris h1 ou h2)",
+     "hints": [
+      "La plus grande valeur, tout en restant ≤ h*"
+     ],
+     "accept": [
+      "h₂",
+      "h 2",
+      "h2 domine h1",
+      "h2 domine h₁"
+     ],
+     "solution": "h2",
+     "explain": "**h₂** domine h₁ : 13 ≥ 6 (et c'est vrai sur tous les états).",
+     "placeholder": "h1 ou h2"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur l'état « presque terminé » (une seule plaquette à déplacer d'une case), h* = 1. Quelle est la plus grande valeur qu'une heuristique **admissible** puisse prendre sur cet état ?",
+     "hints": [
+      "h ≤ h*"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "Une heuristique admissible ne peut pas dépasser h* = 1 (et vaut 1 pour h₁ comme pour h₂).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "`h(n) = 0` pour tous les états : admissible ?",
+     "options": [
+      "Non, elle surestime",
+      "Oui, mais totalement inutile pour guider la recherche",
+      "Non, car h(but) doit être > 0"
+     ],
+     "answer": 1,
+     "explain": "0 ≤ h* partout, donc admissible. Mais elle ne distingue plus rien : on retombe sur une recherche aveugle (Dijkstra / coût uniforme)."
+    },
+    {
+     "type": "choice",
+     "q": "On définit `h'(n) = h₂(n) + 5` pour tout état sauf le but. Sur l'état « presque terminé » (h* = 1), h' vaut 6. Admissible ?",
+     "options": [
+      "Non : 6 > 1, elle surestime",
+      "Oui, car h₂ l'est",
+      "Oui, car h' > h₂"
+     ],
+     "answer": 0,
+     "explain": "Un seul contre-exemple suffit : h'(n) > h*(n) donc h' n'est **pas** admissible."
+    },
+    {
+     "type": "choice",
+     "q": "Heuristique parfaite : `h(n) = h*(n)` pour tout n. Est-elle admissible ?",
+     "options": [
+      "Seulement pour le Taquin",
+      "Oui : elle ne surestime pas",
+      "Non, car elle est trop précise"
+     ],
+     "answer": 1,
+     "explain": "h = h* vérifie 0 ≤ h ≤ h*. C'est le cas idéal, mais h* est justement ce que l'on cherche à calculer…"
+    },
+    {
+     "type": "exercise",
+     "q": "Si h₂(n) = 13 est admissible, le coût réel minimal h*(n) est au moins égal à… ?",
+     "hints": [
+      "h₂ ≤ h*"
+     ],
+     "accept": [],
+     "solution": "13",
+     "explain": "h* ≥ 13 (ici h* = 21).",
+     "placeholder": "Un nombre"
+    }
+   ]
+  },
+  {
+   "id": "hill",
+   "title": "Hill Climbing : monter la colline",
+   "emoji": "⛰️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Hill Climbing** (ascension de colline) est une **recherche locale** : on regarde ses voisins immédiats et on **avance vers le meilleur**, comme un marcheur qui monte dans le brouillard en choisissant le pas le plus favorable."
+    },
+    {
+     "type": "code",
+     "sql": "1. État courant = état de départ\n2. Générer les enfants de l'état courant\n3. Évaluer les enfants avec h et choisir le MEILLEUR enfant\n4. Si le meilleur enfant est MEILLEUR que l'état courant :\n       il devient l'état courant ; retour à l'étape 2\n5. Sinon : ARRÊT",
+     "lang": "Pseudo-code",
+     "title": "L'algorithme en 5 étapes"
+    },
+    {
+     "type": "choice",
+     "q": "Combien de chemins Hill Climbing explore-t-il ?",
+     "options": [
+      "Tous, en parallèle",
+      "Deux : le meilleur et le second",
+      "Un seul : les autres enfants sont définitivement écartés"
+     ],
+     "answer": 2,
+     "explain": "Une fois l'enfant choisi, **aucune alternative n'est mémorisée** : pas de retour en arrière."
+    },
+    {
+     "type": "say",
+     "text": "**À toi de jouer sur le Taquin**, avec h₂ (à **minimiser**). État de départ : h₂ = 3."
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 1 | 2 | 3 |\n+---+---+---+\n|   | 5 | 6 |\n+---+---+---+\n| 4 | 7 | 8 |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "État de départ"
+    },
+    {
+     "type": "say",
+     "text": "La case vide (à gauche, au milieu) a **trois** déplacements possibles : vers le **haut** (échange avec le 1), vers le **bas** (avec le 4), vers la **droite** (avec le 5)."
+    },
+    {
+     "type": "exercise",
+     "q": "Déplacement **vers le bas** (le 4 monte dans la 2e ligne) : que vaut h₂ de l'enfant ?",
+     "hints": [
+      "Le 4 retrouve sa place finale (milieu gauche)"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "Le 4 est revenu à sa place : sa distance passe de 1 à 0. Il reste le 7 et le 8 : 1 + 1 = **2**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Déplacement **vers le haut** (le 1 descend) : que vaut h₂ de l'enfant ?",
+     "hints": [
+      "Le 1 s'éloigne de sa cible"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "Le 1 passe de sa place (distance 0) à une case de sa place : +1 → h₂ = 3 + 1 = **4**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **meilleure valeur** de h₂ parmi les trois enfants ?",
+     "hints": [
+      "Compare 4, 2 et 4"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "Le meilleur enfant a h₂ = **2** (déplacement vers le bas). Comme 2 < 3, Hill Climbing y va.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "Le marcheur continue : état à h₂ = 2, puis h₂ = 1, puis h₂ = 0. À chaque étape, un enfant fait mieux que l'état courant."
+    },
+    {
+     "type": "exercise",
+     "q": "Sur cette descente, à quelle valeur h₂ l'algorithme s'arrête-t-il ?",
+     "hints": [
+      "Quand plus aucun enfant ne fait mieux… ou que le but est atteint"
+     ],
+     "accept": [],
+     "solution": "0",
+     "explain": "**0** : c'est l'état but, plus aucun enfant ne peut faire mieux. Hill Climbing a réussi.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Mais ce n'est pas toujours aussi simple !**"
+    }
+   ]
+  },
+  {
+   "id": "pieges",
+   "title": "Les pièges : optimum local, plateau, crête",
+   "emoji": "🕳️",
+   "minutes": 17,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Autre état de départ : h₂ = 6."
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 1 | 3 | 5 |\n+---+---+---+\n| 4 |   | 6 |\n+---+---+---+\n| 7 | 2 | 8 |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "État de départ B"
+    },
+    {
+     "type": "say",
+     "text": "Les enfants ont pour h₂ : haut = 7, bas = 5, gauche = 7, droite = 7. Hill Climbing choisit le **bas** (5), puis un enfant à 4, et arrive sur :"
+    },
+    {
+     "type": "code",
+     "sql": "+---+---+---+\n| 1 | 3 | 5 |\n+---+---+---+\n| 4 | 2 | 6 |\n+---+---+---+\n| 7 | 8 |   |\n+---+---+---+",
+     "lang": "Taquin",
+     "title": "État où l'algorithme s'arrête"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut h₂ de cet état final ?",
+     "hints": [
+      "Seules 3 (dist. 1), 5 et 2 sont mal placées : calcule leurs distances"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "h₂ = **4** : le 3 est à 1 case de sa place, le 5 à 2 cases, le 2 à 1 case ; toutes les autres plaquettes sont bien placées (1 + 2 + 1).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Les deux enfants de cet état ont tous les deux h₂ = 5. Peuvent-ils améliorer la situation (h₂ < 4) ? (Réponds oui ou non)",
+     "hints": [
+      "Compare 5 et 4"
+     ],
+     "accept": [
+      "non."
+     ],
+     "solution": "non",
+     "explain": "Non : 5 > 4. **Aucun enfant n'est meilleur** → Hill Climbing s'arrête.",
+     "placeholder": "oui ou non"
+    },
+    {
+     "type": "choice",
+     "q": "L'état final est-il le but du Taquin ?",
+     "options": [
+      "Non : c'est un optimum local",
+      "Oui, car l'algorithme s'est arrêté",
+      "Oui, car h₂ = 4 est minimal"
+     ],
+     "answer": 0,
+     "explain": "Le but a h₂ = 0. Ici h₂ = 4 : l'algorithme est **coincé** alors qu'il faut encore exactement 6 mouvements pour résoudre (la solution passe par une étape où h₂ remonte)."
+    },
+    {
+     "type": "say",
+     "text": "**Les trois pièges topologiques :**\n- **Optimum local** : un pic plus bas que le meilleur, entouré de voisins tous moins bons → arrêt prématuré ;\n- **Plateau** : zone plate où tous les voisins ont la même valeur → aucun repère pour choisir ;\n- **Crête** : succession de pics étroits → la recherche oscille sans avancer le long de la crête."
+    },
+    {
+     "type": "say",
+     "text": "**Un paysage en une dimension.** On **maximise** un mérite. Les positions 0 à 8 ont pour valeurs : `[2, 4, 6, 5, 3, 7, 9, 12, 8]`. À chaque pas, on regarde les positions voisines (−1 et +1) et on va sur la meilleure **si elle est strictement meilleure**."
+    },
+    {
+     "type": "code",
+     "sql": "position : 0  1  2  3  4  5  6  7  8\nvaleur   : 2  4  6  5  3  7  9  12 8",
+     "lang": "Paysage",
+     "title": "Le paysage"
+    },
+    {
+     "type": "exercise",
+     "q": "On part de la **position 0**. Sur quelle position l'algorithme s'arrête-t-il ?",
+     "hints": [
+      "Position 0 → 1 (valeur 4 > 2) → 2 (valeur 6 > 4) → …"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "Position 0 → 1 → 2, puis les voisins (positions 1 et 3) valent 4 et 5, tous < 6 : arrêt en **position 2** (valeur 6).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur de l'**optimum global** de ce paysage ?",
+     "hints": [
+      "Le plus haut sommet"
+     ],
+     "accept": [],
+     "solution": "12",
+     "explain": "**12** (position 7). Depuis la position 0, Hill Climbing se contente de 6 : c'est un optimum local.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "On part de la **position 4** (valeur 3). Voisins : 5 (pos. 3) et 7 (pos. 5). Sur quelle position l'algorithme s'arrête-t-il ?",
+     "hints": [
+      "Il monte vers le meilleur voisin : 7, puis 9, puis 12…"
+     ],
+     "accept": [],
+     "solution": "7",
+     "explain": "Position 4 → 5 (valeur 7) → 6 (valeur 9) → 7 (valeur 12) ; les voisins de la position 7 valent 9 et 8 : arrêt en **position 7**, l'optimum global. Le **point de départ** décide du résultat !",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Valeurs `[3, 3, 3, 3, 5]`, départ en position 0. Que fait Hill Climbing ?",
+     "options": [
+      "Il atteint la valeur 5",
+      "Il s'arrête tout de suite : le voisin n'est pas strictement meilleur (plateau)",
+      "Il revient en arrière"
+     ],
+     "answer": 1,
+     "explain": "Le voisin vaut 3, comme l'état courant : pas **meilleur** → arrêt. C'est le piège du **plateau**, alors que 5 est tout près."
+    },
+    {
+     "type": "choice",
+     "q": "Hill Climbing est-il **complet** (trouve-t-il toujours une solution s'il en existe une) ?",
+     "options": [
+      "Oui",
+      "Non",
+      "Oui, mais seulement sur un plateau"
+     ],
+     "answer": 1,
+     "explain": "Non complet et non optimal : un optimum local peut le bloquer avant le but."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi Hill Climbing ne peut-il pas « faire demi-tour » ?",
+     "options": [
+      "Il ne garde en mémoire que l'état courant : aucun mécanisme de retour arrière",
+      "Il est interdit de revenir sur ses pas par définition de h",
+      "Il n'évalue pas les enfants"
+     ],
+     "answer": 0,
+     "explain": "Pas de mémoire des alternatives, donc pas de backtracking."
+    },
+    {
+     "type": "say",
+     "text": "*Pour aller plus loin (hors cours)* : on peut relancer l'algorithme depuis **plusieurs états de départ choisis au hasard** et garder le meilleur résultat : c'est la technique des redémarrages aléatoires."
+    }
+   ]
+  },
+  {
+   "id": "glouton",
+   "title": "Recherche gloutonne (Best-First)",
+   "emoji": "🐷",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "La **recherche gloutonne** utilise une **file de priorité Q** et développe toujours le nœud qui a la plus petite valeur de `h(n)` : `f(n) = h(n)`. Contrairement à Hill Climbing, elle **garde en mémoire** les nœuds non développés : elle peut donc abandonner une branche devenue mauvaise."
+    },
+    {
+     "type": "code",
+     "sql": "      S (h=5)\n    /1      \\4\n  A (h=2)    B (h=3)\n    |1          |4\n  C (h=4)    D (h=1)\n    |1          |4\n   G (h=0) ----- G (h=0)",
+     "lang": "Graphe",
+     "title": "Un petit graphe (coût sur les arcs)"
+    },
+    {
+     "type": "say",
+     "text": "Arcs et coûts : `S–A = 1`, `S–B = 4`, `A–C = 1`, `C–G = 1`, `B–D = 4`, `D–G = 4`. Heuristique : S = 5, A = 2, B = 3, C = 4, D = 1, G = 0. But : **G**."
+    },
+    {
+     "type": "say",
+     "text": "**D'abord Hill Climbing** depuis S : les enfants sont A (2) et B (3). Le meilleur est A (2 < 5) : on y va. L'unique enfant de A est C (4)."
+    },
+    {
+     "type": "choice",
+     "q": "Hill Climbing continue-t-il vers C ?",
+     "options": [
+      "Non : h(C) = 4 n'est pas meilleur que h(A) = 2, arrêt sur A",
+      "Oui, C est un enfant",
+      "Oui, car C mène à G"
+     ],
+     "answer": 0,
+     "explain": "4 > 2 : le seul enfant est **moins bon**, Hill Climbing s'arrête sur A, qui **n'est pas le but** : échec (optimum local)."
+    },
+    {
+     "type": "say",
+     "text": "**Maintenant le glouton.** On met S dans Q ; on extrait toujours l'élément de plus petit h."
+    },
+    {
+     "type": "exercise",
+     "q": "Extraction 1 : S. On insère ses enfants A (2) et B (3). Quel nœud est extrait ensuite ? (une lettre)",
+     "hints": [
+      "Plus petit h"
+     ],
+     "accept": [
+      "a"
+     ],
+     "solution": "A",
+     "explain": "A (h = 2) < B (h = 3).",
+     "placeholder": "Un nœud"
+    },
+    {
+     "type": "exercise",
+     "q": "On développe A : son enfant C (4) entre dans Q = {B (3), C (4)}. Quel nœud est extrait ensuite ?",
+     "hints": [
+      "Plus petit h dans Q"
+     ],
+     "accept": [
+      "b"
+     ],
+     "solution": "B",
+     "explain": "B (3) passe devant C (4) : le glouton **abandonne** la branche A–C pour une autre — ce que Hill Climbing ne sait pas faire.",
+     "placeholder": "Un nœud"
+    },
+    {
+     "type": "exercise",
+     "q": "On développe B : D (1) entre dans Q = {C (4), D (1)}. Quel nœud est extrait ensuite ?",
+     "hints": [
+      "Plus petit h"
+     ],
+     "accept": [
+      "d"
+     ],
+     "solution": "D",
+     "explain": "D (1).",
+     "placeholder": "Un nœud"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'ordre complet des nœuds extraits de Q jusqu'au but (séparés par des virgules).",
+     "hints": [
+      "S, A, B, D, …"
+     ],
+     "accept": [
+      "S A B D G",
+      "S-A-B-D-G",
+      "SABDG",
+      "s→a→b→d→g",
+      "S,A,B,D,G"
+     ],
+     "solution": "S, A, B, D, G",
+     "explain": "Ordre : **S, A, B, D, G**. Après D, G (h = 0) entre dans Q et est extrait avant C.",
+     "placeholder": "Ex. S, A, …"
+    },
+    {
+     "type": "exercise",
+     "q": "Le chemin trouvé est S–B–D–G. Quel est son coût ?",
+     "hints": [
+      "4 + 4 + 4"
+     ],
+     "accept": [],
+     "solution": "12",
+     "explain": "4 + 4 + 4 = **12**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Le chemin S–A–C–G existe aussi. Quel est son coût ?",
+     "hints": [
+      "1 + 1 + 1"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "1 + 1 + 1 = **3** : bien moins cher ! Le glouton, qui **ignore le coût déjà payé** et ne regarde que h, a raté l'optimum : il n'est **pas optimal**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Que retenir de la comparaison Hill Climbing / glouton ?",
+     "options": [
+      "Le glouton garde les alternatives dans Q, mais reste non optimal ; Hill Climbing n'en garde aucune",
+      "Hill Climbing garde les alternatives dans Q",
+      "Les deux sont optimaux"
+     ],
+     "answer": 0,
+     "explain": "Ils partagent la même idée (suivre h), mais le glouton **peut revenir** sur un autre nœud prometteur. Aucun des deux n'utilise le coût `g(n)` : c'est l'apport de A* (`f = g + h`)."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final",
+   "emoji": "🏆",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dernier défi : mélange de tout ce que tu as vu. C'est parti !"
+    },
+    {
+     "type": "exercise",
+     "q": "Définition : une heuristique **admissible** ne doit jamais… (réponds par un mot : surestimer ou sous-estimer)",
+     "hints": [
+      "Elle est optimiste"
+     ],
+     "accept": [
+      "sur-estimer",
+      "surestimer le coût",
+      "surestime"
+     ],
+     "solution": "surestimer",
+     "explain": "Elle ne doit jamais **surestimer** le coût réel restant.",
+     "placeholder": "Un mot"
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule h₁ pour l'état suivant : `1 2 3 / 4 5 6 / 8 7 _` (lecture ligne par ligne, `_` = case vide).",
+     "hints": [
+      "Quelles plaquettes ne sont pas à leur place ?"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "8 et 7 sont inversés : **h₁ = 2**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Et h₂ pour ce même état ?",
+     "hints": [
+      "8 est en (3,1), sa cible (3,2) ; 7 est en (3,2), sa cible (3,1)"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "1 + 1 = **2**. (Cet état est d'ailleurs *insoluble* : on ne peut pas échanger seulement deux plaquettes — la parité l'interdit.)",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle heuristique est la plus informée sur le Taquin ?",
+     "options": [
+      "h₂ (Manhattan) : elle domine h₁",
+      "h₁ (plaquettes mal placées)",
+      "Elles sont strictement équivalentes"
+     ],
+     "answer": 0,
+     "explain": "h₂(n) ≥ h₁(n) pour tout n, tout en restant admissible."
+    },
+    {
+     "type": "choice",
+     "q": "Hill Climbing s'arrête quand…",
+     "options": [
+      "Il a visité tous les états",
+      "Aucun enfant n'est meilleur que l'état courant",
+      "Il atteint la profondeur maximale"
+     ],
+     "answer": 1,
+     "explain": "Étape 5 de l'algorithme : arrêt si aucun enfant n'est strictement meilleur."
+    },
+    {
+     "type": "choice",
+     "q": "Quel piège décrit « zone plate : tous les voisins ont la même valeur » ?",
+     "options": [
+      "L'optimum global",
+      "Le plateau",
+      "La crête"
+     ],
+     "answer": 1,
+     "explain": "Plateau : aucune direction n'est meilleure."
+    },
+    {
+     "type": "choice",
+     "q": "Quel mécanisme manque à Hill Climbing et que possède la recherche gloutonne ?",
+     "options": [
+      "La mémoire des alternatives (file Q)",
+      "L'heuristique",
+      "Le calcul du coût g(n)"
+     ],
+     "answer": 0,
+     "explain": "Glouton : f(n) = h(n) avec une file de priorité qui garde les nœuds non développés."
+    },
+    {
+     "type": "choice",
+     "q": "La recherche gloutonne trouve-t-elle toujours le chemin de coût minimal ?",
+     "options": [
+      "Non : elle ignore le coût déjà payé",
+      "Oui, si h est admissible",
+      "Oui, toujours"
+     ],
+     "answer": 0,
+     "explain": "On l'a vu : coût 12 trouvé alors que 3 existait."
+    },
+    {
+     "type": "say",
+     "text": "🎉 **Bravo !** Tu sais maintenant construire et comparer des heuristiques, juger leur admissibilité, dérouler Hill Climbing et reconnaître ses pièges, et distinguer glouton et Hill Climbing. Prochaine étape naturelle : **A\\*** (f = g + h), qui corrige ces défauts."
+    }
+   ]
+  }
+ ]
+}
