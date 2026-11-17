@@ -1,0 +1,2060 @@
+{
+ "id": "decoder-trames",
+ "order": 7,
+ "title": "Décoder une trame comme un pro",
+ "tagline": "Ethernet, VLAN, ARP, IPv4, ICMP, UDP, TCP, IPv6 : lis chaque octet d'une capture et retrouve toutes les informations.",
+ "emoji": "🔬",
+ "color": "#8B5CF6",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 164,
+ "pitch": [
+  "Salut ! Je te propose **« Décoder une trame comme un pro »** 🔬.",
+  "Tout le monde sait que « le paquet passe par le routeur ». Peu de gens savent **ouvrir une capture** et dire, octet par octet, d'où vient le paquet, où il va, ce qu'il transporte et si quelque chose cloche.",
+  "On part de **vraies trames en hexadécimal** (avec checksums calculés pour de vrai) et on décode toutes les couches : **Ethernet et VLAN**, **ARP**, **IPv4** (champs, checksum, fragmentation), **ICMP**, **UDP**, **TCP** (drapeaux, séquences, options) et **IPv6**.",
+  "À la fin, tu appliques une **méthode en 7 étapes** sur une trame complète : tu es capable d'en sortir toutes les informations, comme un analyste réseau."
+ ],
+ "benefits": [
+  "Lire un dump hexadécimal et retrouver chaque champ par son offset",
+  "Décoder Ethernet, 802.1Q, ARP, IPv4, ICMP, UDP, TCP et IPv6",
+  "Calculer un checksum IP et reconstituer des fragments",
+  "Interpréter drapeaux, numéros de séquence et options TCP",
+  "Appliquer une méthode de décodage de bout en bout"
+ ],
+ "lessons": [
+  {
+   "id": "lecture",
+   "title": "Lire une capture : octets, offsets, encapsulation",
+   "emoji": "🔬",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! L'objectif de cette formation : **ouvrir n'importe quelle trame et en sortir chaque information, octet par octet**, comme un analyste réseau. On ne devine plus : on lit."
+    },
+    {
+     "type": "say",
+     "text": "Une trame, c'est des **poupées russes** : une **trame Ethernet** (couche 2) contient un **paquet IP** (couche 3), qui contient un **segment TCP ou UDP** (couche 4), qui contient enfin les **données** de l'application (HTTP, DNS…). Chaque couche ajoute son **en-tête** devant celui de la couche supérieure : c'est l'**encapsulation**."
+    },
+    {
+     "type": "code",
+     "sql": "[ Ethernet 14 octets ][ IPv4 20 octets (minimum) ][ TCP 20 octets (minimum) ][ données ]\n\nOn lit toujours de l'extérieur vers l'intérieur :\n  1. Ethernet  → le champ EtherType dit ce qu'il y a après (0x0800 = IPv4)\n  2. IPv4      → le champ Protocole dit ce qu'il y a après (6 = TCP, 17 = UDP, 1 = ICMP)\n  3. TCP/UDP   → les ports disent quelle application est concernée",
+     "lang": "Schéma",
+     "title": "La règle d'or du décodage"
+    },
+    {
+     "type": "say",
+     "text": "**Les octets en hexadécimal.** Un octet = **8 bits** = **2 chiffres hexadécimaux** (de `00` à `ff`). Chaque chiffre hexa vaut 4 bits (un *quartet*) : `0`–`9` puis `a`=10, `b`=11, `c`=12, `d`=13, `e`=14, `f`=15."
+    },
+    {
+     "type": "say",
+     "text": "Pour convertir : `0xC0` = 12×16 + 0 = **192**. `0xA8` = 10×16 + 8 = **168**. Voilà pourquoi `c0 a8 01 0a` est l'adresse **192.168.1.10**."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis l'octet `0xC0` en décimal.",
+     "hints": [
+      "12 × 16 + 0"
+     ],
+     "accept": [],
+     "solution": "192",
+     "explain": "C vaut 12 : 12×16 = **192**. C'est le premier octet des adresses 192.168.x.x.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis l'octet `0xA8` en décimal.",
+     "hints": [
+      "A vaut 10 : 10 × 16 + 8"
+     ],
+     "accept": [],
+     "solution": "168",
+     "explain": "10×16 + 8 = **168**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis l'octet `0x0A` en décimal.",
+     "hints": [
+      "A vaut 10, et le premier chiffre est 0"
+     ],
+     "accept": [],
+     "solution": "10",
+     "explain": "0×16 + 10 = **10**. Donc `c0 a8 01 0a` = 192.168.1.10.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis le **décimal 64** (une valeur de TTL classique) en hexadécimal sur un octet.",
+     "hints": [
+      "64 = 4 × 16 + 0"
+     ],
+     "accept": [
+      "40"
+     ],
+     "solution": "0x40",
+     "explain": "64 = 4×16 + 0 → **0x40**.",
+     "placeholder": "Ex. 0x1f"
+    },
+    {
+     "type": "say",
+     "text": "Voici une **vraie trame** : un PC (`192.168.1.10`) ouvre une connexion web vers un serveur (`203.0.113.80`). C'est un paquet **TCP SYN**. Elle sert de fil rouge pour toute la formation."
+    },
+    {
+     "type": "code",
+     "sql": "0000  00 1a 2b 3c 4d 5e 08 00 27 a1 b2 c3 08 00 45 00\n0010  00 3c 1c 46 40 00 40 06 20 73 c0 a8 01 0a cb 00\n0020  71 50 c9 3a 00 50 3b 9a ca 00 00 00 00 00 a0 02\n0030  fa f0 cc 81 00 00 02 04 05 b4 04 02 08 0a 00 a1\n0040  b2 c3 00 00 00 00 01 03 03 07",
+     "lang": "Hexadécimal",
+     "title": "Trame capturée (74 octets) – décalage (offset) en hexa à gauche",
+     "note": "Chaque ligne montre 16 octets. L'offset de gauche est le numéro (en hexa) du premier octet de la ligne. L'octet 0 est le tout premier."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets fait cette trame ? (Regarde l'offset de la dernière ligne et compte ses octets.)",
+     "hints": [
+      "Dernière ligne : offset 0x40 = 64, plus 10 octets",
+      "64 + 10"
+     ],
+     "accept": [],
+     "solution": "74",
+     "explain": "Offset 0x40 = 64, plus les **10** octets de la dernière ligne = **74 octets**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "À quel offset **décimal** commence l'en-tête **IP** ? (Ethernet occupe les premiers octets.)",
+     "hints": [
+      "Combien d'octets fait un en-tête Ethernet ? 6 + 6 + 2"
+     ],
+     "accept": [],
+     "solution": "14",
+     "explain": "MAC destination (6) + MAC source (6) + EtherType (2) = **14**. L'en-tête IP commence à l'octet 14, c'est le `45` de la ligne `0000`.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "À quel offset **décimal** commence l'en-tête **TCP** ? (Ethernet 14 + IP avec IHL = 5.)",
+     "hints": [
+      "IP fait 5 × 4 octets"
+     ],
+     "accept": [],
+     "solution": "34",
+     "explain": "14 (Ethernet) + 20 (IP) = **34**. C'est `c9 3a` à l'offset `0x22` (34 = 0x22).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il pour les champs **préambule** et **FCS** d'Ethernet dans une capture Wireshark ?",
+     "options": [
+      "Ils sont en général absents : la carte réseau les traite avant de remettre la trame au système",
+      "Ils sont toujours présents au début et à la fin",
+      "Ils sont remplacés par l'adresse IP"
+     ],
+     "answer": 0,
+     "explain": "Le préambule (7 octets) et le SFD (1 octet) servent à synchroniser la réception ; le FCS (4 octets) est vérifié par la carte, qui jette les trames corrompues. Dans une capture normale, on voit la trame **de la MAC destination jusqu'à la fin des données**."
+    },
+    {
+     "type": "say",
+     "text": "**Réflexe tcpdump.** Deux options valent de l'or :"
+    },
+    {
+     "type": "code",
+     "sql": "sudo tcpdump -i eth0 -nn -e -c 1 -XX tcp port 80\n#  -nn : pas de résolution de noms ni de ports (on voit les nombres)\n#  -e  : affiche les adresses MAC (en-tête Ethernet)\n#  -XX : affiche l'hexa ET l'ASCII, en-tête Ethernet compris\n#  -v / -vv : détaille l'en-tête IP (ttl, id, flags, longueur...)",
+     "lang": "bash",
+     "title": "Capturer et lire"
+    },
+    {
+     "type": "code",
+     "sql": "IP (tos 0x0, ttl 64, id 7238, offset 0, flags [DF], proto TCP (6), length 60)\n    192.168.1.10.51514 > 203.0.113.80.80: Flags [S], seq 1000000000, win 64240, length 0",
+     "lang": "tcpdump",
+     "title": "Ce que tcpdump -v affiche pour notre trame",
+     "note": "Tout ce qu'on va apprendre à lire en hexa se retrouve dans cette ligne. Entraîne-toi à faire le lien."
+    },
+    {
+     "type": "exercise",
+     "q": "D'après la ligne tcpdump ci-dessus, quelle est la valeur du champ **Longueur totale** de l'en-tête IP ?",
+     "hints": [
+      "Cherche « length »"
+     ],
+     "accept": [],
+     "solution": "60",
+     "explain": "`length 60` : c'est la **longueur totale** du paquet IP (en-tête IP + en-tête TCP + données), soit 20 + 40 + 0.",
+     "placeholder": "Un nombre"
+    }
+   ]
+  },
+  {
+   "id": "ethernet",
+   "title": "L'en-tête Ethernet et les étiquettes VLAN",
+   "emoji": "🧱",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On commence par l'**en-tête Ethernet II** : toujours **14 octets**. Trois champs seulement."
+    },
+    {
+     "type": "code",
+     "sql": "octets 0-5    MAC destination   (6 octets)\noctets 6-11   MAC source        (6 octets)\noctets 12-13  EtherType         (2 octets)  → type du contenu",
+     "lang": "Offsets",
+     "title": "Les 3 champs Ethernet"
+    },
+    {
+     "type": "code",
+     "sql": "00 1a 2b 3c 4d 5e 08 00 27 a1 b2 c3 08 00",
+     "lang": "Hexadécimal",
+     "title": "Les 14 premiers octets de notre trame"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **MAC destination** ? (Les 6 premiers octets.)",
+     "hints": [
+      "Octets 0 à 5",
+      "00 1a 2b 3c 4d 5e"
+     ],
+     "accept": [
+      "00-1a-2b-3c-4d-5e",
+      "001a2b3c4d5e",
+      "001a.2b3c.4d5e"
+     ],
+     "solution": "00:1a:2b:3c:4d:5e",
+     "explain": "Octets 0-5 : **00:1a:2b:3c:4d:5e**. Comme le serveur est hors du réseau local, c'est la MAC de la **passerelle** (le routeur), pas celle du serveur !",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **MAC source** ? (Octets 6 à 11.)",
+     "hints": [
+      "Après les 6 premiers octets"
+     ],
+     "accept": [
+      "08-00-27-a1-b2-c3",
+      "080027a1b2c3",
+      "0800.27a1.b2c3"
+     ],
+     "solution": "08:00:27:a1:b2:c3",
+     "explain": "Octets 6-11 : **08:00:27:a1:b2:c3**, la carte réseau du PC.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'**EtherType** (octets 12-13) ?",
+     "hints": [
+      "Ce sont les deux octets juste avant le `45`"
+     ],
+     "accept": [
+      "0800",
+      "0x800",
+      "800"
+     ],
+     "solution": "0x0800",
+     "explain": "`08 00` → **0x0800** : le contenu est un paquet **IPv4**.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "choice",
+     "q": "EtherType **0x0806** : que contient la trame ?",
+     "options": [
+      "Un message ARP",
+      "Un paquet IPv6",
+      "Un paquet IPv4"
+     ],
+     "answer": 0,
+     "explain": "Les trois à connaître : **0x0800** IPv4, **0x0806** ARP, **0x86DD** IPv6."
+    },
+    {
+     "type": "choice",
+     "q": "Une trame porte l'EtherType **0x86DD**. Que contient-elle ?",
+     "options": [
+      "Un paquet IPv6",
+      "Un message ARP",
+      "Une étiquette VLAN"
+     ],
+     "answer": 0,
+     "explain": "**0x86DD** = IPv6. (L'étiquette VLAN, elle, est signalée par **0x8100**.)"
+    },
+    {
+     "type": "say",
+     "text": "**Lire une adresse MAC.** Les **3 premiers octets** forment l'**OUI** (le constructeur). Notre source `08:00:27` est l'OUI de VirtualBox : on peut donc deviner que le PC est une machine virtuelle."
+    },
+    {
+     "type": "say",
+     "text": "Deux bits du **premier octet** ont un sens spécial :\n- **bit de poids faible (0x01)** : **I/G**. 0 = unicast (une seule machine), 1 = **multicast/broadcast** ;\n- **avant-dernier bit (0x02)** : **U/L**. 0 = adresse universelle (constructeur), 1 = **administrée localement** (virtuelle, modifiée)."
+    },
+    {
+     "type": "code",
+     "sql": "0x00 = 0000 0000   → unicast, universelle\n0x01 = 0000 0001   → multicast   (01:00:5e... = multicast IPv4)\n0x02 = 0000 0010   → unicast, administrée localement\n0xff = 1111 1111   → ff:ff:ff:ff:ff:ff : broadcast (bit I/G à 1)",
+     "lang": "Binaire",
+     "title": "Les deux bits du premier octet"
+    },
+    {
+     "type": "choice",
+     "q": "L'adresse `01:00:5e:00:00:fb` est…",
+     "options": [
+      "Une adresse multicast",
+      "Une adresse unicast universelle",
+      "Une adresse administrée localement"
+     ],
+     "answer": 0,
+     "explain": "Premier octet `0x01` = 0000 0001 : le bit de poids faible vaut 1 → **multicast** (ici l'adresse multicast IPv4 d'mDNS)."
+    },
+    {
+     "type": "choice",
+     "q": "L'adresse `52:54:00:12:34:56` (typique des machines QEMU/KVM) est…",
+     "options": [
+      "Unicast, administrée localement",
+      "Multicast, universelle",
+      "Broadcast"
+     ],
+     "answer": 0,
+     "explain": "`0x52` = 0101 **0010** : bit 0x01 à 0 → **unicast** ; bit 0x02 à 1 → **administrée localement**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'**OUI** (les 3 premiers octets) de la MAC source `08:00:27:a1:b2:c3` ?",
+     "hints": [
+      "Les 3 premiers octets"
+     ],
+     "accept": [
+      "08-00-27",
+      "080027"
+     ],
+     "solution": "08:00:27",
+     "explain": "L'OUI identifie le constructeur : **08:00:27**.",
+     "placeholder": "xx:xx:xx"
+    },
+    {
+     "type": "say",
+     "text": "**Taille d'une trame.** Charge utile (le *payload*) : **46 à 1500 octets**. 1500 est le **MTU** d'Ethernet. Si les données sont trop courtes, la carte ajoute du **bourrage (padding)** pour atteindre le minimum."
+    },
+    {
+     "type": "exercise",
+     "q": "Taille **maximale** d'une trame Ethernet sans VLAN, en comptant l'en-tête (14), la charge utile maximale (1500) et le FCS (4) ?",
+     "hints": [
+      "14 + 1500 + 4"
+     ],
+     "accept": [],
+     "solution": "1518",
+     "explain": "14 + 1500 + 4 = **1518 octets** (1522 avec une étiquette VLAN de 4 octets).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Taille **minimale** d'une trame Ethernet, FCS compris (en-tête 14 + charge 46 + FCS 4) ?",
+     "hints": [
+      "14 + 46 + 4"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "14 + 46 + 4 = **64 octets**. Les trames plus courtes (« runts ») sont invalides.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Ethernet II ou 802.3 ?** Le champ des octets 12-13 a deux sens selon sa valeur :\n- **≤ 1500 (0x05DC)** : c'est une **longueur** (trame 802.3) ;\n- **≥ 1536 (0x0600)** : c'est un **EtherType** (Ethernet II, le cas courant)."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis `0x05DC` en décimal (la limite entre « longueur » et « EtherType »).",
+     "hints": [
+      "5×256 + 13×16 + 12"
+     ],
+     "accept": [],
+     "solution": "1500",
+     "explain": "5×256 = 1280 ; 0xDC = 220 ; total **1500**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**L'étiquette VLAN (802.1Q).** Sur un lien *trunk*, 4 octets sont insérés **entre la MAC source et l'EtherType**. L'EtherType à la place habituelle devient **0x8100** (le TPID), et le vrai type est repoussé 4 octets plus loin."
+    },
+    {
+     "type": "code",
+     "sql": "00 1a 2b 3c 4d 5e  08 00 27 a1 b2 c3  81 00  a0 0a  08 00\n└── MAC dest ──┘     └── MAC source ──┘  TPID  TCI   EtherType réel",
+     "lang": "Hexadécimal",
+     "title": "Trame avec étiquette 802.1Q (18 octets d'en-tête)"
+    },
+    {
+     "type": "code",
+     "sql": "TCI = 16 bits :   PCP (3 bits) | DEI (1 bit) | VID (12 bits)\n\n0xa00a = 1010 0000 0000 1010\n         PCP=101  DEI=0  VID=0000 0000 1010",
+     "lang": "Binaire",
+     "title": "Décomposer le TCI"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **priorité PCP** (3 bits de poids fort du TCI `0xa00a`) ?",
+     "hints": [
+      "0xa = 1010 : les 3 premiers bits sont 101"
+     ],
+     "accept": [],
+     "solution": "5",
+     "explain": "101 en binaire = **5**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **VLAN ID** (12 bits de poids faible du TCI `0xa00a`) ?",
+     "hints": [
+      "Il reste 0x00a"
+     ],
+     "accept": [],
+     "solution": "10",
+     "explain": "Les 12 bits de poids faible sont `0x00a` = **10** : la trame appartient au **VLAN 10**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec cette étiquette, à quel offset commence l'en-tête IP ?",
+     "hints": [
+      "14 + 4"
+     ],
+     "accept": [],
+     "solution": "18",
+     "explain": "14 + 4 (étiquette 802.1Q) = **18**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Un en-tête Ethernet commence par `81 00` à l'offset 12. Que faut-il conclure ?",
+     "options": [
+      "La trame est étiquetée VLAN : le vrai EtherType est à l'offset 16",
+      "La trame contient du ARP",
+      "La trame est corrompue"
+     ],
+     "answer": 0,
+     "explain": "**0x8100** = TPID 802.1Q. Les 2 octets suivants sont le TCI, puis (offset 16) l'EtherType réel."
+    }
+   ]
+  },
+  {
+   "id": "arp",
+   "title": "ARP : décoder une requête et une réponse",
+   "emoji": "📞",
+   "minutes": 13,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Avant d'envoyer un paquet IP, un PC doit connaître la **MAC** du voisin : c'est le rôle d'**ARP**. Un message ARP est transporté **directement dans Ethernet** (EtherType **0x0806**), sans en-tête IP. Il fait **28 octets** pour IPv4/Ethernet."
+    },
+    {
+     "type": "code",
+     "sql": "octets 0-1    Type de matériel (HTYPE)        1 = Ethernet\noctets 2-3    Type de protocole (PTYPE)       0x0800 = IPv4\noctet  4      Longueur adresse matériel (HLEN) 6\noctet  5      Longueur adresse protocole (PLEN) 4\noctets 6-7    Opération (OPER)                1 = requête, 2 = réponse\noctets 8-13   MAC de l'émetteur (SHA)\noctets 14-17  IP de l'émetteur  (SPA)\noctets 18-23  MAC de la cible   (THA)\noctets 24-27  IP de la cible    (TPA)",
+     "lang": "Offsets",
+     "title": "Les champs ARP (28 octets)"
+    },
+    {
+     "type": "code",
+     "sql": "0000  ff ff ff ff ff ff 08 00 27 a1 b2 c3 08 06 00 01\n0010  08 00 06 04 00 01 08 00 27 a1 b2 c3 c0 a8 01 0a\n0020  00 00 00 00 00 00 c0 a8 01 14",
+     "lang": "Hexadécimal",
+     "title": "Une requête ARP capturée (trame de 42 octets utiles, ici sans le bourrage)",
+     "note": "Les 14 premiers octets sont l'en-tête Ethernet ; l'ARP commence à l'offset 14 (0x0e)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la MAC **destination** de l'en-tête Ethernet ? (Octets 0-5.)",
+     "hints": [
+      "Une requête ARP est envoyée à tout le monde"
+     ],
+     "accept": [
+      "ff-ff-ff-ff-ff-ff",
+      "ffffffffffff",
+      "ffff.ffff.ffff"
+     ],
+     "solution": "ff:ff:ff:ff:ff:ff",
+     "explain": "**ff:ff:ff:ff:ff:ff** : la requête est un **broadcast** de niveau 2 : « qui a cette IP ? ».",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'EtherType de la trame (octets 12-13) ?",
+     "hints": [
+      "ARP"
+     ],
+     "accept": [
+      "0806",
+      "0x806",
+      "806"
+     ],
+     "solution": "0x0806",
+     "explain": "**0x0806** = ARP.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut le champ **HLEN** (taille d'une adresse MAC, en octets) ?",
+     "hints": [
+      "Octet 4 de l'ARP, soit l'octet 18 de la trame"
+     ],
+     "accept": [],
+     "solution": "6",
+     "explain": "HLEN = **6** (une MAC fait 6 octets) ; PLEN = 4 (une IPv4 fait 4 octets).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur du champ **opération** (octets 6-7 de l'ARP : `00 01`) ? 1 ou 2 ?",
+     "hints": [
+      "1 = requête (Who has), 2 = réponse (is at)"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "**1** = requête ARP (*who-has*). La réponse porte **2** (*is-at*).",
+     "placeholder": "1 ou 2"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'**IP de l'émetteur** (SPA : `c0 a8 01 0a`) ?",
+     "hints": [
+      "c0=192, a8=168, 01=1, 0a=10"
+     ],
+     "accept": [],
+     "solution": "192.168.1.10",
+     "explain": "`c0 a8 01 0a` = **192.168.1.10**.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'**IP cherchée** (TPA : `c0 a8 01 14`) ?",
+     "hints": [
+      "c0=192, a8=168, 01=1, 14=20 (0x14 = 1×16 + 4)"
+     ],
+     "accept": [],
+     "solution": "192.168.1.20",
+     "explain": "`c0 a8 01 14` = **192.168.1.20** : « Qui a 192.168.1.20 ? ».",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi la **MAC cible (THA)** vaut-elle `00:00:00:00:00:00` dans la requête ?",
+     "options": [
+      "Parce qu'on cherche précisément cette MAC : elle est inconnue",
+      "Parce que le destinataire est hors du réseau",
+      "Parce que la requête est chiffrée"
+     ],
+     "answer": 0,
+     "explain": "On ne peut pas remplir ce qu'on cherche : le champ est mis à zéro. La réponse le renseignera."
+    },
+    {
+     "type": "say",
+     "text": "**La réponse** est envoyée en **unicast** vers celui qui a demandé."
+    },
+    {
+     "type": "code",
+     "sql": "0000  08 00 27 a1 b2 c3 aa bb cc dd ee 02 08 06 00 01\n0010  08 00 06 04 00 02 aa bb cc dd ee 02 c0 a8 01 14\n0020  08 00 27 a1 b2 c3 c0 a8 01 0a",
+     "lang": "Hexadécimal",
+     "title": "La réponse ARP de 192.168.1.20"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut la MAC **source** de cette trame ? (Octets 6-11.)",
+     "hints": [
+      "Octets 6 à 11 : aa bb cc dd ee 02"
+     ],
+     "accept": [
+      "aa-bb-cc-dd-ee-02",
+      "aabbccddee02",
+      "aabb.ccdd.ee02"
+     ],
+     "solution": "aa:bb:cc:dd:ee:02",
+     "explain": "**aa:bb:cc:dd:ee:02** : c'est la MAC de 192.168.1.20, la réponse à la question.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut ici le champ **opération** ?",
+     "hints": [
+      "Réponse = 2"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "`00 02` : **2** = réponse ARP (*is-at*).",
+     "placeholder": "1 ou 2"
+    },
+    {
+     "type": "choice",
+     "q": "Un message ARP où l'**IP émetteur est égale à l'IP cible** s'appelle…",
+     "options": [
+      "Un ARP gratuit (gratuitous ARP)",
+      "Un ARP proxy",
+      "Une attaque DoS obligatoire"
+     ],
+     "answer": 0,
+     "explain": "L'ARP gratuit annonce sa propre adresse : détection de doublons d'IP, mise à jour des caches après un basculement. (Utilisé aussi pour l'empoisonnement de cache : attention.)"
+    },
+    {
+     "type": "choice",
+     "q": "Combien d'octets ARP (sans Ethernet) pour IPv4 sur Ethernet ?",
+     "options": [
+      "28",
+      "14",
+      "46"
+     ],
+     "answer": 0,
+     "explain": "2+2+1+1+2 = 8 octets d'en-tête + 2×(6+4) = 20 d'adresses = **28**. Le reste de la trame (jusqu'à 60 octets) n'est que du **bourrage** à zéro."
+    }
+   ]
+  },
+  {
+   "id": "ipv4",
+   "title": "L'en-tête IPv4, champ par champ",
+   "emoji": "📦",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "L'**en-tête IPv4** fait **20 octets** (jusqu'à 60 avec des options). Il se lit **par lignes de 4 octets (32 bits)**. Voici l'en-tête de notre trame, extrait de l'offset 14 à 33 :"
+    },
+    {
+     "type": "code",
+     "sql": "45 00 00 3c 1c 46 40 00 40 06 20 73 c0 a8 01 0a cb 00 71 50",
+     "lang": "Hexadécimal",
+     "title": "Les 20 octets de l'en-tête IP"
+    },
+    {
+     "type": "code",
+     "sql": "octet 0        Version (4 bits) | IHL (4 bits)\noctet 1        DSCP (6 bits) | ECN (2 bits)\noctets 2-3     Longueur totale\noctets 4-5     Identification\noctets 6-7     Drapeaux (3 bits) | Décalage de fragment (13 bits)\noctet 8        TTL\noctet 9        Protocole\noctets 10-11   Somme de contrôle de l'en-tête\noctets 12-15   Adresse IP source\noctets 16-19   Adresse IP destination",
+     "lang": "Offsets",
+     "title": "Plan de l'en-tête (offset relatif au début de l'IP)"
+    },
+    {
+     "type": "say",
+     "text": "**Octet 0 = `45`** : le premier chiffre hexa (**4**) est la **version** ; le second (**5**) est l'**IHL** (*Internet Header Length*), exprimé en **mots de 32 bits**. Longueur de l'en-tête = **IHL × 4 octets**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **version** (premier chiffre de l'octet `45`) ?",
+     "hints": [
+      "Premier chiffre hexa"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "**4** → IPv4.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur de l'en-tête IP en octets** pour `45` ?",
+     "hints": [
+      "IHL = 5 mots de 4 octets"
+     ],
+     "accept": [],
+     "solution": "20",
+     "explain": "5 × 4 = **20 octets** (valeur minimale ; sans option).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Si le premier octet de l'en-tête vaut `4f`, quelle est la longueur de l'en-tête en octets ?",
+     "hints": [
+      "f = 15"
+     ],
+     "accept": [],
+     "solution": "60",
+     "explain": "IHL = 0xf = 15 → 15 × 4 = **60 octets** (le maximum : il y a 40 octets d'options).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi l'IHL n'est-il pas simplement exprimé en octets ?",
+     "options": [
+      "Il tient sur 4 bits (max 15) : en mots de 4 octets, il peut atteindre 60 octets",
+      "Pour économiser de la bande passante TCP",
+      "Par tradition historique uniquement, sans raison technique"
+     ],
+     "answer": 0,
+     "explain": "4 bits donnent 0 à 15. En multipliant par 4, on couvre **jusqu'à 60 octets**."
+    },
+    {
+     "type": "say",
+     "text": "**Longueur totale (octets 2-3)** : `00 3c` = 0x3c = 3×16 + 12 = **60**. C'est la taille du **paquet IP entier** (en-tête + données). Donc la charge utile (segment TCP/UDP) = 60 − 20 = **40 octets**."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis `0x003c` (la longueur totale) en décimal.",
+     "hints": [
+      "3 × 16 + 12"
+     ],
+     "accept": [],
+     "solution": "60",
+     "explain": "0x3c = 48 + 12 = **60**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets de **données** transporte ce paquet au-dessus de l'en-tête IP ? (Longueur totale − IHL×4.)",
+     "hints": [
+      "60 − 20"
+     ],
+     "accept": [],
+     "solution": "40",
+     "explain": "60 − 20 = **40 octets** : c'est le segment TCP (20 octets d'en-tête + 20 d'options, 0 octet de données).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Identification (octets 4-5)** : `1c 46` = 0x1c46 = **7238**. Elle identifie le datagramme, pour pouvoir **réassembler** les fragments qui en sont issus."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis l'identification `0x1c46` en décimal.",
+     "hints": [
+      "1×4096 + 12×256 + 4×16 + 6",
+      "4096 + 3072 + 64 + 6"
+     ],
+     "accept": [],
+     "solution": "7238",
+     "explain": "4096 + 3072 + 64 + 6 = **7238** (c'est le `id 7238` de la ligne tcpdump).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Drapeaux et décalage (octets 6-7)** : `40 00` = `0100 0000 0000 0000` en binaire. Les 3 premiers bits sont les drapeaux :"
+    },
+    {
+     "type": "code",
+     "sql": "bit 0 : réservé (toujours 0)\nbit 1 : DF  (Don't Fragment : interdit de fragmenter)\nbit 2 : MF  (More Fragments : d'autres fragments suivent)\npuis 13 bits : décalage du fragment, en blocs de 8 octets\n\n0x4000 = 010 0 0000 0000 0000  → DF=1, MF=0, décalage = 0",
+     "lang": "Binaire",
+     "title": "Découpage des 16 bits"
+    },
+    {
+     "type": "choice",
+     "q": "Les octets 6-7 valent `40 00`. Que peut-on dire ?",
+     "options": [
+      "DF est activé, ce n'est pas un fragment",
+      "MF est activé : d'autres fragments suivent",
+      "Le paquet est fragmenté"
+     ],
+     "answer": 0,
+     "explain": "0x4000 → bit DF à 1, MF à 0, décalage 0 : un paquet **entier**, qu'il est interdit de fragmenter."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la valeur des octets 6-7 d'un paquet **premier fragment** (MF=1, décalage 0) ?",
+     "options": [
+      "0x2000",
+      "0x4000",
+      "0x0000"
+     ],
+     "answer": 0,
+     "explain": "MF est le 3e bit : 001 0 0000 … = **0x2000**. 0x4000 = DF ; 0x0000 = ni DF ni fragment."
+    },
+    {
+     "type": "say",
+     "text": "**TTL (octet 8)** : `40` = **64**. À chaque routeur, le TTL baisse de 1 ; à 0, le paquet est jeté et le routeur renvoie un message ICMP « Time Exceeded ». Les valeurs de départ typiques : **64** (Linux, macOS), **128** (Windows), **255** (équipements Cisco)."
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis le TTL `0x40` en décimal.",
+     "hints": [
+      "4 × 16"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "**64** : valeur de départ de nombreux systèmes Linux.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Tu reçois un paquet avec un **TTL de 57**. Il vient probablement d'un système qui démarre à 64. Combien de routeurs a-t-il traversés ?",
+     "hints": [
+      "64 − 57"
+     ],
+     "accept": [],
+     "solution": "7",
+     "explain": "64 − 57 = **7 routeurs** (si le départ était bien 64 : c'est une estimation, pas une certitude).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Protocole (octet 9)** : le numéro du protocole transporté. `06` = **TCP**. À connaître par cœur :"
+    },
+    {
+     "type": "code",
+     "sql": "0x01 =  1 : ICMP\n0x06 =  6 : TCP\n0x11 = 17 : UDP\n0x29 = 41 : IPv6 encapsulé dans IPv4\n0x2f = 47 : GRE\n0x59 = 89 : OSPF\n0x32 = 50 : ESP (IPsec)",
+     "lang": "Table",
+     "title": "Numéros de protocole IP"
+    },
+    {
+     "type": "choice",
+     "q": "Le champ Protocole d'un paquet IP vaut 17 (0x11). Le contenu est…",
+     "options": [
+      "Un datagramme UDP",
+      "Un segment TCP",
+      "Un message ICMP"
+     ],
+     "answer": 0,
+     "explain": "**17 = UDP**, **6 = TCP**, **1 = ICMP**."
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet porte le protocole **89** : que contient-il ?",
+     "options": [
+      "Un message OSPF (routage)",
+      "Un segment TCP",
+      "Du trafic IPsec"
+     ],
+     "answer": 0,
+     "explain": "**89 = OSPF** : les routeurs OSPF parlent **directement sur IP**, sans TCP ni UDP."
+    },
+    {
+     "type": "say",
+     "text": "**Adresses source et destination (octets 12-19)** : on lit **octet par octet en décimal**. `c0 a8 01 0a` → 192.168.1.10 ; `cb 00 71 50` → 203.0.113.80."
+    },
+    {
+     "type": "exercise",
+     "q": "Décode l'**IP source** : `c0 a8 01 0a`.",
+     "hints": [
+      "c0 = 192, a8 = 168"
+     ],
+     "accept": [],
+     "solution": "192.168.1.10",
+     "explain": "192.168.1.10.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "exercise",
+     "q": "Décode l'**IP destination** : `cb 00 71 50`.",
+     "hints": [
+      "cb = 12×16 + 11 = 203",
+      "71 = 7×16 + 1 = 113",
+      "50 = 5×16 = 80"
+     ],
+     "accept": [],
+     "solution": "203.0.113.80",
+     "explain": "0xcb = **203**, 0x00 = **0**, 0x71 = **113**, 0x50 = **80** → 203.0.113.80.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris `10.0.0.5` en hexadécimal, octet par octet (4 octets séparés par des espaces).",
+     "hints": [
+      "10 = 0x0a, 0 = 0x00, 5 = 0x05"
+     ],
+     "accept": [
+      "0a000005"
+     ],
+     "solution": "0a 00 00 05",
+     "explain": "10 → `0a`, 0 → `00`, 0 → `00`, 5 → `05`.",
+     "placeholder": "xx xx xx xx"
+    }
+   ]
+  },
+  {
+   "id": "checksum-frag",
+   "title": "Somme de contrôle et fragmentation",
+   "emoji": "🧮",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deux sujets qui font la différence entre un débutant et un pro : la **somme de contrôle de l'en-tête IP** et la **fragmentation**."
+    },
+    {
+     "type": "say",
+     "text": "**La somme de contrôle** (octets 10-11) protège **uniquement l'en-tête IP**, pas les données. Algorithme : on additionne tous les mots de **16 bits** de l'en-tête (avec le champ checksum **à 0**), on **replie les retenues** (le report au-dessus de 16 bits est ajouté), puis on prend le **complément à 1** (on inverse tous les bits)."
+    },
+    {
+     "type": "code",
+     "sql": "Mots de 16 bits de l'en-tête, champ checksum mis à 0000 :\n4500  003c  1c46  4000  4006  0000  c0a8  010a  cb00  7150\n\nSomme brute  = 0x2df8a\nOn replie    = 0xdf8a + 0x2 = 0xdf8c\nComplément 1 = ~0xdf8c = 0x2073   ← c'est le checksum !",
+     "lang": "Hexadécimal",
+     "title": "Calcul pas à pas"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans ce calcul, quelle est la **retenue** au-dessus de 16 bits qu'on replie ? (Somme brute 0x2df8a.)",
+     "hints": [
+      "La somme brute a 17 bits ; le chiffre de gauche est la retenue"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "0x2df8a : la partie haute vaut **2**. On l'ajoute à la partie basse.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **somme repliée** (partie basse + retenue) ?",
+     "hints": [
+      "0xdf8a + 2"
+     ],
+     "accept": [
+      "df8c"
+     ],
+     "solution": "0xdf8c",
+     "explain": "0xdf8a + 2 = **0xdf8c**.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **checksum** (complément à 1 de la somme repliée) ? Il se trouve aux octets 10-11 de l'en-tête.",
+     "hints": [
+      "Inverse chaque bit : 0xffff − la valeur",
+      "0xffff − 0xdf8c"
+     ],
+     "accept": [
+      "2073"
+     ],
+     "solution": "0x2073",
+     "explain": "0xffff − 0xdf8c = **0x2073**. On le lit en effet dans l'en-tête : `20 73`.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "say",
+     "text": "**Pour vérifier** un en-tête reçu, on additionne **tous** les mots, **checksum compris**, on replie : on doit obtenir **0xffff**. Sinon l'en-tête est corrompu et le routeur le jette. Un routeur recalcule le checksum à chaque saut, car le **TTL change**."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le checksum IP est-il recalculé par chaque routeur ?",
+     "options": [
+      "Parce que le TTL (dans l'en-tête) diminue de 1 à chaque saut",
+      "Parce que l'adresse MAC change à chaque saut",
+      "Parce que les données sont chiffrées"
+     ],
+     "answer": 0,
+     "explain": "Tout champ de l'en-tête qui change impose de recalculer la somme. Le TTL change à chaque routeur."
+    },
+    {
+     "type": "choice",
+     "q": "Le checksum IPv4 protège…",
+     "options": [
+      "Seulement l'en-tête IP",
+      "L'en-tête et les données",
+      "Seulement les données"
+     ],
+     "answer": 0,
+     "explain": "Les données sont protégées par le checksum de **TCP/UDP** (couche 4) et par le FCS Ethernet (couche 2)."
+    },
+    {
+     "type": "say",
+     "text": "**La fragmentation.** Si un paquet est plus grand que le **MTU** du lien suivant (souvent 1500) et que **DF = 0**, le routeur le **découpe en fragments**. Chaque fragment est un paquet IP complet avec **son propre en-tête**. Trois champs servent :"
+    },
+    {
+     "type": "code",
+     "sql": "Identification : IDENTIQUE pour tous les fragments d'un même datagramme\nMF = 1 sur tous les fragments sauf le dernier\nDécalage : position des données du fragment, en BLOCS DE 8 OCTETS",
+     "lang": "Règles",
+     "title": "Les champs de la fragmentation"
+    },
+    {
+     "type": "say",
+     "text": "**Exemple.** Un datagramme de **4000 octets** (20 d'en-tête + **3980** de données) doit traverser un lien de **MTU 1500**. Chaque fragment peut porter 1500 − 20 = **1480 octets de données** (1480 = 185 × 8 : multiple de 8, c'est obligatoire)."
+    },
+    {
+     "type": "code",
+     "sql": "Fragment 1 : longueur totale 1500 | MF=1 | décalage 0   | données 1480 | champ 0x2000\nFragment 2 : longueur totale 1500 | MF=1 | décalage 185 | données 1480 | champ 0x20b9\nFragment 3 : longueur totale 1040 | MF=0 | décalage 370 | données 1020 | champ 0x0172",
+     "lang": "Fragments",
+     "title": "Résultat"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de fragments faut-il pour 3980 octets de données avec 1480 octets maximum par fragment ?",
+     "hints": [
+      "3980 / 1480 ≈ 2,7"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "2 fragments pleins (2960) + un 3e avec les **1020** octets restants = **3 fragments**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **décalage** (valeur du champ) du fragment 2 ?",
+     "hints": [
+      "Décalage = octets déjà envoyés / 8 = 1480 / 8"
+     ],
+     "accept": [],
+     "solution": "185",
+     "explain": "1480 / 8 = **185**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **décalage** du fragment 3 ? (Il commence après 2 × 1480 octets.)",
+     "hints": [
+      "2960 / 8"
+     ],
+     "accept": [],
+     "solution": "370",
+     "explain": "2960 / 8 = **370**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur totale** du fragment 3 ? (1020 octets de données + en-tête.)",
+     "hints": [
+      "1020 + 20"
+     ],
+     "accept": [],
+     "solution": "1040",
+     "explain": "1020 + 20 = **1040**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur des octets 6-7 du **fragment 2** (MF = 1, décalage 185) ? (MF vaut 0x2000, 185 = 0x00b9.)",
+     "hints": [
+      "0x2000 + 0x00b9"
+     ],
+     "accept": [
+      "20b9"
+     ],
+     "solution": "0x20b9",
+     "explain": "0x2000 | 0x00b9 = **0x20b9**.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il si un paquet trop gros a **DF = 1** ?",
+     "options": [
+      "Le routeur le jette et renvoie un ICMP « fragmentation nécessaire » (type 3, code 4)",
+      "Le routeur le fragmente quand même",
+      "Le routeur réduit le TTL"
+     ],
+     "answer": 0,
+     "explain": "C'est le mécanisme du **Path MTU Discovery** : l'ICMP indique le MTU à ne pas dépasser. Un pare-feu qui bloque cet ICMP provoque des connexions qui se figent."
+    },
+    {
+     "type": "choice",
+     "q": "Qui **réassemble** les fragments ?",
+     "options": [
+      "La machine de destination finale",
+      "Chaque routeur sur le chemin",
+      "Le premier switch"
+     ],
+     "answer": 0,
+     "explain": "Les routeurs fragmentent mais **ne réassemblent pas** : seul le destinataire le fait, grâce à l'identification et aux décalages."
+    }
+   ]
+  },
+  {
+   "id": "icmp-udp",
+   "title": "ICMP et UDP : deux petits en-têtes",
+   "emoji": "📡",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**ICMP** est le protocole de diagnostic d'IP (`ping`, `traceroute`). Il est encapsulé **directement dans IP** (champ Protocole = **1**). Son en-tête de base : **8 octets**."
+    },
+    {
+     "type": "code",
+     "sql": "octet 0       Type\noctet 1       Code\noctets 2-3    Somme de contrôle (couvre tout le message ICMP)\noctets 4-7    Dépend du type (pour un ping : Identifiant 2 octets + N° de séquence 2 octets)",
+     "lang": "Offsets",
+     "title": "En-tête ICMP"
+    },
+    {
+     "type": "code",
+     "sql": "08 00 21 04 12 34 00 01 61 62 63 64\n\n08 00 : Type 8, Code 0\n21 04 : checksum\n12 34 : identifiant\n00 01 : n° de séquence\n61 62 63 64 : données (« abcd »)",
+     "lang": "Hexadécimal",
+     "title": "Un message ICMP Echo Request"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **type** ICMP de cette requête ?",
+     "hints": [
+      "Octet 0"
+     ],
+     "accept": [],
+     "solution": "8",
+     "explain": "**8** = Echo Request (le ping aller). La réponse est de type **0** (Echo Reply).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'**identifiant** (octets 4-5) ?",
+     "hints": [
+      "Octets 4 et 5"
+     ],
+     "accept": [
+      "1234"
+     ],
+     "solution": "0x1234",
+     "explain": "`12 34` → **0x1234**. Le ping garde le même identifiant sur toute une série.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **numéro de séquence** (octets 6-7 : `00 01`) ?",
+     "hints": [
+      "Il augmente de 1 à chaque ping"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "**1** : premier ping. Le suivant aura le n° 2, etc. (c'est le `icmp_seq=` de la commande ping).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "Types ICMP à connaître :"
+    },
+    {
+     "type": "code",
+     "sql": "Type  0  Echo Reply            (réponse au ping)\nType  3  Destination Unreachable\n   Code 0 réseau injoignable | Code 1 hôte injoignable | Code 3 port injoignable | Code 4 fragmentation nécessaire (DF=1)\nType  5  Redirect\nType  8  Echo Request           (le ping)\nType 11  Time Exceeded           (code 0 = TTL expiré en transit : base de traceroute)",
+     "lang": "Table",
+     "title": "Types et codes ICMP"
+    },
+    {
+     "type": "choice",
+     "q": "Un routeur renvoie un ICMP **type 11, code 0**. Que s'est-il passé ?",
+     "options": [
+      "Le TTL du paquet est arrivé à 0 en transit",
+      "Le port de destination est fermé",
+      "L'hôte a répondu au ping"
+     ],
+     "answer": 0,
+     "explain": "Type 11 = Time Exceeded. **traceroute** envoie des paquets avec TTL 1, 2, 3… et lit ces messages pour découvrir chaque routeur."
+    },
+    {
+     "type": "choice",
+     "q": "Un hôte renvoie **type 3, code 3**. Que signifie-t-il ?",
+     "options": [
+      "Le port UDP visé est fermé (aucun programme n'écoute)",
+      "Le réseau est inconnu",
+      "Le paquet est trop gros"
+     ],
+     "answer": 0,
+     "explain": "Type 3 = injoignable ; code 3 = **port injoignable**. C'est la réponse typique à un paquet UDP sur un port fermé."
+    },
+    {
+     "type": "choice",
+     "q": "Quel type ICMP est utilisé pour la **réponse** d'un ping ?",
+     "options": [
+      "0",
+      "8",
+      "3"
+     ],
+     "answer": 0,
+     "explain": "Aller : 8. Retour : **0**."
+    },
+    {
+     "type": "say",
+     "text": "**UDP**. Le plus simple des en-têtes de transport : **8 octets**, 4 champs de 16 bits. UDP ne garantit rien : ni connexion, ni ordre, ni reprise sur perte."
+    },
+    {
+     "type": "code",
+     "sql": "octets 0-1  Port source\noctets 2-3  Port destination\noctets 4-5  Longueur (en-tête 8 + données)\noctets 6-7  Somme de contrôle",
+     "lang": "Offsets",
+     "title": "En-tête UDP"
+    },
+    {
+     "type": "code",
+     "sql": "0000  d2 b0 00 35 00 25 2e 27 ab cd 01 00 00 01 00 00\n0010  00 00 00 00 07 65 78 61 6d 70 6c 65 03 63 6f 6d\n0020  00 00 01 00 01",
+     "lang": "Hexadécimal",
+     "title": "Datagramme UDP de la trame DNS (à partir de l'offset 34 de la trame)",
+     "note": "Les 8 premiers octets sont l'en-tête UDP : d2 b0 | 00 35 | 00 25 | 2e 27. Le reste est la requête DNS."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **port source** (`d2 b0`) ?",
+     "hints": [
+      "0xd2b0 = 13×4096 + 2×256 + 11×16 + 0",
+      "53248 + 512 + 176"
+     ],
+     "accept": [],
+     "solution": "53936",
+     "explain": "0xd2b0 = 53248 + 512 + 176 = **53936**. Port **éphémère** (≥ 49152) choisi par le système pour cette requête.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **port destination** (`00 35`) ?",
+     "hints": [
+      "0x35 = 3×16 + 5"
+     ],
+     "accept": [],
+     "solution": "53",
+     "explain": "0x35 = **53** : le port de **DNS**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur UDP** (`00 25`) ?",
+     "hints": [
+      "2×16 + 5"
+     ],
+     "accept": [],
+     "solution": "37",
+     "explain": "0x25 = **37** octets : 8 d'en-tête + 29 de requête DNS.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets de **données** UDP ? (37 − 8)",
+     "hints": [
+      "37 − 8"
+     ],
+     "accept": [],
+     "solution": "29",
+     "explain": "37 − 8 = **29** octets : l'en-tête DNS (12) + le nom (13) + type et classe (4).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Le checksum UDP vaut `00 00` dans un paquet IPv4. Qu'est-ce que cela signifie ?",
+     "options": [
+      "L'émetteur n'a pas calculé de checksum (permis en IPv4)",
+      "Le paquet est corrompu",
+      "Le paquet est un fragment"
+     ],
+     "answer": 0,
+     "explain": "En IPv4, le checksum UDP est **optionnel** : 0 = non calculé. En **IPv6 il est obligatoire**."
+    },
+    {
+     "type": "choice",
+     "q": "Quel champ UDP/TCP permet à la machine de savoir **quelle application** doit recevoir les données ?",
+     "options": [
+      "Le port destination",
+      "La MAC destination",
+      "Le TTL"
+     ],
+     "answer": 0,
+     "explain": "La MAC désigne la carte, l'IP la machine, le **port** le programme."
+    }
+   ]
+  },
+  {
+   "id": "tcp",
+   "title": "L'en-tête TCP, drapeaux et options",
+   "emoji": "🤝",
+   "minutes": 24,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**TCP** est le protocole **fiable** : connexion, numéros de séquence, accusés de réception, contrôle de flux. Son en-tête est donc plus riche : **20 octets minimum**, jusqu'à 60. Voici celui de notre trame (offset 34 à 73), avec ses **20 octets d'options**."
+    },
+    {
+     "type": "code",
+     "sql": "c9 3a 00 50 3b 9a ca 00 00 00 00 00 a0 02 fa f0 cc 81 00 00\n02 04 05 b4 04 02 08 0a 00 a1 b2 c3 00 00 00 00 01 03 03 07",
+     "lang": "Hexadécimal",
+     "title": "Les 20 octets fixes, puis les 20 octets d'options"
+    },
+    {
+     "type": "code",
+     "sql": "octets 0-1    Port source\noctets 2-3    Port destination\noctets 4-7    Numéro de séquence\noctets 8-11   Numéro d'accusé de réception (ACK)\noctet 12      Décalage de données (4 bits) | réservé (3 bits) | NS (1 bit)\noctet 13      Drapeaux : CWR ECE URG ACK PSH RST SYN FIN\noctets 14-15  Fenêtre\noctets 16-17  Somme de contrôle\noctets 18-19  Pointeur urgent\noctets 20+    Options",
+     "lang": "Offsets",
+     "title": "Plan de l'en-tête TCP"
+    },
+    {
+     "type": "exercise",
+     "q": "Port source `c9 3a` ?",
+     "hints": [
+      "0xc93a = 12×4096 + 9×256 + 3×16 + 10",
+      "49152 + 2304 + 48 + 10"
+     ],
+     "accept": [],
+     "solution": "51514",
+     "explain": "49152 + 2304 + 48 + 10 = **51514** : un port éphémère du client.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Port destination `00 50` ?",
+     "hints": [
+      "0x50 = 5×16"
+     ],
+     "accept": [],
+     "solution": "80",
+     "explain": "**80** : HTTP.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Décalage de données (octet 12 : `a0`)** : le premier chiffre hexa (**a** = 10) est la **longueur de l'en-tête en mots de 32 bits**, comme l'IHL d'IP. Longueur = 10 × 4 = **40 octets**, donc **20 octets d'options**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la longueur de l'en-tête TCP en octets pour `a0` ?",
+     "hints": [
+      "0xa = 10"
+     ],
+     "accept": [],
+     "solution": "40",
+     "explain": "10 × 4 = **40**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets d'options contient-il ? (40 − 20)",
+     "hints": [
+      "40 − 20"
+     ],
+     "accept": [],
+     "solution": "20",
+     "explain": "**20** octets d'options.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Les drapeaux (octet 13)**. Chaque bit est un drapeau ; on les additionne :"
+    },
+    {
+     "type": "code",
+     "sql": "0x01 FIN  : j'ai fini d'envoyer\n0x02 SYN  : synchronisation (début de connexion)\n0x04 RST  : réinitialisation brutale\n0x08 PSH  : livrer tout de suite à l'application\n0x10 ACK  : le champ ACK est valide\n0x20 URG  : pointeur urgent valide\n0x40 ECE  : notification de congestion\n0x80 CWR  : fenêtre de congestion réduite",
+     "lang": "Table",
+     "title": "Les 8 drapeaux"
+    },
+    {
+     "type": "choice",
+     "q": "Notre octet 13 vaut `02`. Quel est le paquet ?",
+     "options": [
+      "Un SYN : demande d'ouverture de connexion",
+      "Un SYN+ACK",
+      "Un ACK seul"
+     ],
+     "answer": 0,
+     "explain": "0x02 = SYN seul : c'est le **premier paquet** de la poignée de main."
+    },
+    {
+     "type": "choice",
+     "q": "Octet de drapeaux `12` : de quel paquet s'agit-il ?",
+     "options": [
+      "SYN+ACK (réponse du serveur)",
+      "ACK seul",
+      "FIN+ACK"
+     ],
+     "answer": 0,
+     "explain": "0x12 = 0x10 (ACK) + 0x02 (SYN) : le serveur accepte la connexion."
+    },
+    {
+     "type": "choice",
+     "q": "Octet de drapeaux `18` ?",
+     "options": [
+      "PSH+ACK : des données arrivent",
+      "SYN+ACK",
+      "FIN+ACK"
+     ],
+     "answer": 0,
+     "explain": "0x18 = 0x10 (ACK) + 0x08 (PSH) : segment qui transporte des données."
+    },
+    {
+     "type": "choice",
+     "q": "Octet de drapeaux `11` ?",
+     "options": [
+      "FIN+ACK : fermeture de connexion",
+      "SYN+ACK",
+      "RST"
+     ],
+     "answer": 0,
+     "explain": "0x11 = 0x10 (ACK) + 0x01 (FIN)."
+    },
+    {
+     "type": "choice",
+     "q": "Octet de drapeaux `04` ?",
+     "options": [
+      "RST : la connexion est coupée net (ex. port fermé)",
+      "FIN",
+      "SYN"
+     ],
+     "answer": 0,
+     "explain": "0x04 = **RST**. C'est la réponse d'un serveur sur un port où personne n'écoute."
+    },
+    {
+     "type": "exercise",
+     "q": "Octet de drapeaux d'un paquet **RST+ACK** ? (RST = 0x04, ACK = 0x10.)",
+     "hints": [
+      "0x04 + 0x10"
+     ],
+     "accept": [
+      "14"
+     ],
+     "solution": "0x14",
+     "explain": "0x04 + 0x10 = **0x14**.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "exercise",
+     "q": "Octet de drapeaux d'un paquet **FIN+PSH+ACK** ? (0x01 + 0x08 + 0x10)",
+     "hints": [
+      "Additionne les trois valeurs"
+     ],
+     "accept": [
+      "19"
+     ],
+     "solution": "0x19",
+     "explain": "0x01 + 0x08 + 0x10 = **0x19**.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "say",
+     "text": "**Fenêtre (octets 14-15 : `fa f0`)** : la quantité de données que le récepteur accepte de recevoir sans accusé. `0xfaf0` = **64240** octets. (Elle peut être multipliée grâce à l'option « window scale », voir plus bas.)"
+    },
+    {
+     "type": "exercise",
+     "q": "Convertis la fenêtre `0xfaf0` en décimal.",
+     "hints": [
+      "0xfa = 250 ; 250 × 256 + 0xf0 (240)"
+     ],
+     "accept": [],
+     "solution": "64240",
+     "explain": "250 × 256 + 240 = **64240** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Numéro de séquence (octets 4-7)** : `3b 9a ca 00` = 0x3b9aca00 = **1 000 000 000** (valeur initiale choisie au hasard à l'ouverture). Le numéro d'ACK vaut 0 car le drapeau ACK n'est pas levé."
+    },
+    {
+     "type": "say",
+     "text": "**Les options (octets 20+)** forment une suite `Type | Longueur | Valeur`. Les plus courantes :"
+    },
+    {
+     "type": "code",
+     "sql": "02 04 05 b4         Type 2 (MSS), longueur 4, valeur 0x05b4 = 1460\n04 02               Type 4 (SACK permis), longueur 2\n08 0a vvvvvvvv rrrrrrrr   Type 8 (horodatage), longueur 10, 2 valeurs de 4 octets\n01                  Type 1 (NOP) : octet de bourrage pour aligner\n03 03 07            Type 3 (Window Scale), longueur 3, décalage 7",
+     "lang": "Hexadécimal",
+     "title": "Décoder nos 20 octets d'options",
+     "note": "02 04 05 b4 | 04 02 | 08 0a 00 a1 b2 c3 00 00 00 00 | 01 | 03 03 07  → 4 + 2 + 10 + 1 + 3 = 20 octets."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur du **MSS** (`05 b4`) ?",
+     "hints": [
+      "5×256 + 11×16 + 4"
+     ],
+     "accept": [],
+     "solution": "1460",
+     "explain": "0x05b4 = 1280 + 176 + 4 = **1460** : le plus gros segment accepté. 1460 = MTU 1500 − 20 (IP) − 20 (TCP).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le MSS vaut-il 1460 sur un lien Ethernet ?",
+     "options": [
+      "Parce que 1500 (MTU) − 20 (IP) − 20 (TCP) = 1460",
+      "Parce que 1460 est la taille de la fenêtre",
+      "Parce que TCP ajoute 40 octets de FCS"
+     ],
+     "answer": 0,
+     "explain": "Le MSS ne compte que les **données TCP** : on retire les deux en-têtes du MTU."
+    },
+    {
+     "type": "exercise",
+     "q": "Window Scale `03 03 07` : de quel facteur la fenêtre est-elle multipliée ? (2 puissance 7)",
+     "hints": [
+      "2⁷ = 128"
+     ],
+     "accept": [],
+     "solution": "128",
+     "explain": "Décalage de 7 bits : × 2⁷ = **× 128**. La fenêtre réelle serait 64240 × 128 ≈ 8,2 Mo.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Poignée de main en 3 temps**, avec les numéros de séquence. Prends `x = 1 000 000 000` (notre SYN) et un serveur qui choisit `y = 3 000 000 000` :"
+    },
+    {
+     "type": "code",
+     "sql": "1. Client → Serveur : SYN       seq = x            ack = 0\n2. Serveur → Client : SYN+ACK   seq = y            ack = x + 1 = 1 000 000 001\n3. Client → Serveur : ACK       seq = x + 1        ack = y + 1 = 3 000 000 001",
+     "lang": "Séquences",
+     "title": "Les 3 temps"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro d'**accusé (ack)** du SYN+ACK ?",
+     "hints": [
+      "x + 1"
+     ],
+     "accept": [],
+     "solution": "1000000001",
+     "explain": "Le SYN consomme **un** numéro : l'ACK annonce le **prochain** numéro attendu : x + 1 = **1 000 000 001**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro d'**accusé (ack)** du 3e paquet (ACK du client) ?",
+     "hints": [
+      "y + 1"
+     ],
+     "accept": [],
+     "solution": "3000000001",
+     "explain": "Le client accuse le SYN du serveur : y + 1 = **3 000 000 001**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Ensuite, les données.** Un segment de **120 octets** (une requête HTTP) part avec `seq = 1 000 000 001`. Le serveur acquittera avec `ack = seq + octets reçus`."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel `ack` renvoie le serveur après ces 120 octets (seq 1 000 000 001) ?",
+     "hints": [
+      "1 000 000 001 + 120"
+     ],
+     "accept": [],
+     "solution": "1000000121",
+     "explain": "1 000 000 001 + 120 = **1 000 000 121** : « j'ai tout reçu jusqu'à l'octet 1 000 000 120, envoie-moi la suite ».",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Calculer la taille des données d'un segment** (très utile pour vérifier les captures) :\n`données TCP = longueur totale IP − (IHL × 4) − (décalage TCP × 4)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Un paquet a **longueur totale IP = 172**, **IHL = 5** et **décalage TCP = 8**. Combien d'octets de données TCP ?",
+     "hints": [
+      "172 − 20 − 32"
+     ],
+     "accept": [],
+     "solution": "120",
+     "explain": "172 − 20 − 32 = **120 octets** de données.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Notre SYN : longueur totale 60, IHL 5, décalage TCP 10. Combien d'octets de données ?",
+     "hints": [
+      "60 − 20 − 40"
+     ],
+     "accept": [],
+     "solution": "0",
+     "explain": "60 − 20 − 40 = **0** : un SYN ne transporte pas de données.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Astuce Wireshark** : par défaut, il affiche des numéros de séquence **relatifs** (le SYN = 0). C'est pratique, mais sur le fil les valeurs sont **absolues** (comme ici 1 000 000 000). Tu sais maintenant lire les deux."
+    }
+   ]
+  },
+  {
+   "id": "ipv6",
+   "title": "L'en-tête IPv6 : 40 octets fixes",
+   "emoji": "🧬",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "IPv6 simplifie l'en-tête : **40 octets fixes, toujours**. Plus de checksum, plus de champ d'options, plus de fragmentation dans l'en-tête de base. EtherType Ethernet : **0x86DD**."
+    },
+    {
+     "type": "code",
+     "sql": "octets 0-3     Version (4 bits) | Classe de trafic (8 bits) | Étiquette de flux (20 bits)\noctets 4-5     Longueur de la charge utile (sans l'en-tête de 40 octets)\noctet  6       En-tête suivant (Next Header) : comme le champ Protocole d'IPv4\noctet  7       Limite de sauts (Hop Limit) : comme le TTL\noctets 8-23    Adresse source (16 octets)\noctets 24-39   Adresse destination (16 octets)",
+     "lang": "Offsets",
+     "title": "Plan de l'en-tête IPv6"
+    },
+    {
+     "type": "say",
+     "text": "Voici le début d'un en-tête IPv6 :"
+    },
+    {
+     "type": "code",
+     "sql": "6e 12 3a bc  00 20 06 40\n20 01 0d b8 00 00 00 00 00 00 00 00 00 00 00 01\n20 01 0d b8 00 00 00 00 00 00 00 00 00 00 00 02",
+     "lang": "Hexadécimal",
+     "title": "Un en-tête IPv6 (extrait)"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **version** ? (Le premier chiffre hexa de l'octet 0.)",
+     "hints": [
+      "`6e` → premier chiffre"
+     ],
+     "accept": [],
+     "solution": "6",
+     "explain": "**6**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Classe de trafic** (8 bits) : c'est le **quartet de poids faible** de l'octet 0 (`e`) suivi du **quartet de poids fort** de l'octet 1 (`1`) → `0xe1`. **Étiquette de flux** (20 bits) : le quartet `2` de l'octet 1, puis les octets `3a bc` → `0x23abc`."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **classe de trafic** ? (Le chiffre `e` de `6e` suivi du chiffre `1` de `12`.)",
+     "hints": [
+      "Quartet bas de l'octet 0 + quartet haut de l'octet 1"
+     ],
+     "accept": [
+      "e1"
+     ],
+     "solution": "0xe1",
+     "explain": "`e` + `1` = **0xe1**. (Les 6 premiers bits sont le DSCP : 0xe1 >> 2 = 56.)",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'**étiquette de flux** (20 bits) ? (Le chiffre `2` de `12`, puis `3a bc`.)",
+     "hints": [
+      "Le chiffre 2, puis 3a, puis bc"
+     ],
+     "accept": [
+      "23abc"
+     ],
+     "solution": "0x23abc",
+     "explain": "`2` + `3a` + `bc` = **0x23abc**.",
+     "placeholder": "0x....."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur de la charge utile** (`00 20`) ?",
+     "hints": [
+      "0x20 = 2×16"
+     ],
+     "accept": [],
+     "solution": "32",
+     "explain": "0x20 = **32** octets (sans l'en-tête de 40 octets).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur totale du paquet IPv6** (en-tête compris) ?",
+     "hints": [
+      "40 + 32"
+     ],
+     "accept": [],
+     "solution": "72",
+     "explain": "40 + 32 = **72 octets**. IPv6 : la longueur ne compte **pas** l'en-tête (contrairement à IPv4).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**En-tête suivant (octet 6)** : même rôle que le champ Protocole d'IPv4, avec les **mêmes numéros** : 6 = TCP, 17 = UDP. Et **58 (0x3a) = ICMPv6**, la base de NDP (le « ARP d'IPv6 »)."
+    },
+    {
+     "type": "choice",
+     "q": "L'octet « En-tête suivant » vaut `3a`. Quel est le contenu du paquet ?",
+     "options": [
+      "Un message ICMPv6",
+      "Un segment TCP",
+      "Un datagramme UDP"
+     ],
+     "answer": 0,
+     "explain": "0x3a = **58 = ICMPv6**. Il remplace ICMP, et sert aussi à NDP (découverte de voisins) et SLAAC."
+    },
+    {
+     "type": "choice",
+     "q": "Quel champ IPv6 correspond au **TTL** d'IPv4 ?",
+     "options": [
+      "Hop Limit (limite de sauts)",
+      "Next Header",
+      "Flow Label"
+     ],
+     "answer": 0,
+     "explain": "Même fonction (décrémenté à chaque routeur) : seul le nom change."
+    },
+    {
+     "type": "say",
+     "text": "**Les adresses (16 octets = 128 bits)** s'écrivent en **8 groupes de 4 chiffres hexa**, et se **compressent** : on supprime les zéros de tête de chaque groupe, et on remplace **une seule** suite de groupes nuls par `::`."
+    },
+    {
+     "type": "code",
+     "sql": "20 01 0d b8 00 00 00 00 00 00 00 00 00 00 00 01\n= 2001:0db8:0000:0000:0000:0000:0000:0001\n= 2001:db8::1",
+     "lang": "Hexadécimal",
+     "title": "Compresser une adresse"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris en notation compressée l'adresse de destination : `20 01 0d b8 00 00 00 00 00 00 00 00 00 00 00 02`.",
+     "hints": [
+      "Groupes de 2 octets : 2001 0db8 0000 … 0002"
+     ],
+     "accept": [],
+     "solution": "2001:db8::2",
+     "explain": "Les zéros de tête disparaissent (0db8 → db8) et les groupes nuls deviennent `::` → **2001:db8::2**.",
+     "placeholder": "Notation compressée"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris en notation compressée : `fe 80 00 00 00 00 00 00 0a 00 27 ff fe a1 b2 c3`.",
+     "hints": [
+      "Groupes : fe80 0000 0000 0000 0a00 27ff fea1 b2c3"
+     ],
+     "accept": [],
+     "solution": "fe80::a00:27ff:fea1:b2c3",
+     "explain": "fe80 · (3 groupes nuls → `::`) · a00 (0a00 sans zéro de tête) · 27ff · fea1 · b2c3 → **fe80::a00:27ff:fea1:b2c3**.",
+     "placeholder": "Notation compressée"
+    },
+    {
+     "type": "say",
+     "text": "**Bonus de pro : retrouver la MAC dans une adresse link-local.** Pour une adresse `fe80::` en **EUI-64**, l'identifiant (les 64 bits de droite) est construit à partir de la MAC :\n1. on coupe la MAC en deux : `08:00:27` | `a1:b2:c3` ;\n2. on insère **`ff:fe`** au milieu ;\n3. on **inverse le bit U/L** (le bit 0x02 du premier octet) : `08` → `0a`."
+    },
+    {
+     "type": "code",
+     "sql": "MAC       08:00:27:a1:b2:c3\n  → 08 00 27 ff fe a1 b2 c3\n  → bit U/L inversé : 0a 00 27 ff fe a1 b2 c3\n  → fe80::a00:27ff:fea1:b2c3",
+     "lang": "Hexadécimal",
+     "title": "MAC vers adresse link-local"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la MAC dont dérive l'adresse `fe80::a00:27ff:fea1:b2c3` ? (Fais le chemin inverse.)",
+     "hints": [
+      "Retire ff:fe et réinverse le bit U/L : 0a → 08"
+     ],
+     "accept": [],
+     "solution": "08:00:27:a1:b2:c3",
+     "explain": "On retire `ff:fe`, et on remet le bit U/L : `0a` → `08` → **08:00:27:a1:b2:c3**.",
+     "placeholder": "xx:xx:xx:xx:xx:xx"
+    },
+    {
+     "type": "choice",
+     "q": "Quelles différences avec IPv4 ?",
+     "options": [
+      "Pas de checksum d'en-tête, pas d'options dans l'en-tête de base, taille fixe de 40 octets",
+      "Un checksum plus long, des options plus nombreuses",
+      "Un en-tête variable de 20 à 60 octets"
+     ],
+     "answer": 0,
+     "explain": "Moins de champs, taille fixe : les routeurs traitent les paquets **plus vite**. Les fonctions optionnelles passent dans des **en-têtes d'extension**."
+    }
+   ]
+  },
+  {
+   "id": "methode",
+   "title": "La méthode : décoder une trame de bout en bout",
+   "emoji": "🧭",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tu sais lire chaque couche. Il reste la **méthode** : un ordre fixe, pour ne rien oublier. Voici la fiche de décodage d'un pro :"
+    },
+    {
+     "type": "code",
+     "sql": "1. Ethernet   : MAC dest, MAC source, EtherType (octets 12-13)  →  0x0800 ? 0x0806 ? 0x86DD ? 0x8100 ?\n2. (VLAN)      : si 0x8100 : TCI (priorité, VLAN ID) puis EtherType réel (+4 octets)\n3. IP          : version, IHL, longueur totale, TTL, PROTOCOLE (octet 9), IP source, IP destination\n4. Fragments ? : MF, décalage ≠ 0 → c'est un fragment, l'en-tête de transport n'est que dans le premier fragment\n5. Transport   : ports source / destination ; TCP : drapeaux, seq, ack, fenêtre, options ; UDP : longueur\n6. Données     : longueur = longueur totale IP − IHL×4 − en-tête de transport\n7. Cohérence   : TTL, tailles, adresses : tout concorde-t-il ?",
+     "lang": "Méthode",
+     "title": "Fiche de décodage"
+    },
+    {
+     "type": "say",
+     "text": "**Premier exercice complet** : une **requête DNS** envoyée par le PC à sa passerelle/serveur DNS local. Prends ton temps, applique la fiche."
+    },
+    {
+     "type": "code",
+     "sql": "0000  aa bb cc 00 00 01 08 00 27 a1 b2 c3 08 00 45 00\n0010  00 39 8a 2f 40 00 40 11 2d 29 c0 a8 01 0a c0 a8\n0020  01 01 d2 b0 00 35 00 25 2e 27 ab cd 01 00 00 01\n0030  00 00 00 00 00 00 07 65 78 61 6d 70 6c 65 03 63\n0040  6f 6d 00 00 01 00 01",
+     "lang": "Hexadécimal",
+     "title": "La trame à décoder (71 octets)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Étape 1.** MAC destination ?",
+     "hints": [
+      "Octets 0 à 5"
+     ],
+     "accept": [
+      "aa-bb-cc-00-00-01",
+      "aabbcc000001",
+      "aabb.cc00.0001"
+     ],
+     "solution": "aa:bb:cc:00:00:01",
+     "explain": "**aa:bb:cc:00:00:01**.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "MAC source ?",
+     "hints": [
+      "Octets 6 à 11"
+     ],
+     "accept": [
+      "08-00-27-a1-b2-c3",
+      "080027a1b2c3",
+      "0800.27a1.b2c3"
+     ],
+     "solution": "08:00:27:a1:b2:c3",
+     "explain": "**08:00:27:a1:b2:c3**.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "EtherType ?",
+     "hints": [
+      "Octets 12-13"
+     ],
+     "accept": [
+      "0800",
+      "0x800",
+      "800"
+     ],
+     "solution": "0x0800",
+     "explain": "**0x0800** : IPv4.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "exercise",
+     "q": "**Étape 3.** Longueur de l'en-tête IP en octets ? (Octet 14 = `45`.)",
+     "hints": [
+      "IHL = 5"
+     ],
+     "accept": [],
+     "solution": "20",
+     "explain": "5 × 4 = **20**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Longueur totale IP (octets 16-17 : `00 39`) ?",
+     "hints": [
+      "3×16 + 9"
+     ],
+     "accept": [],
+     "solution": "57",
+     "explain": "0x39 = 48 + 9 = **57**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "TTL (octet 22 de la trame : `40`) ?",
+     "hints": [
+      "0x40"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "**64**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Numéro de protocole (octet 23 de la trame : `11`) en décimal ?",
+     "hints": [
+      "0x11 = 1×16 + 1"
+     ],
+     "accept": [],
+     "solution": "17",
+     "explain": "**17** = UDP.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "IP source ?",
+     "hints": [
+      "c0 a8 01 0a"
+     ],
+     "accept": [],
+     "solution": "192.168.1.10",
+     "explain": "**192.168.1.10**.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "exercise",
+     "q": "IP destination ? (`c0 a8 01 01`)",
+     "hints": [
+      "c0 a8 01 01"
+     ],
+     "accept": [],
+     "solution": "192.168.1.1",
+     "explain": "**192.168.1.1**.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "say",
+     "text": "**Étape 5.** L'en-tête UDP commence à l'offset 34 : `d2 b0 | 00 35 | 00 25 | 2e 27`."
+    },
+    {
+     "type": "exercise",
+     "q": "Port destination en décimal ?",
+     "hints": [
+      "0x35"
+     ],
+     "accept": [],
+     "solution": "53",
+     "explain": "**53** : DNS.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Octets de données UDP (longueur UDP 0x25 = 37, moins 8) ?",
+     "hints": [
+      "37 − 8"
+     ],
+     "accept": [],
+     "solution": "29",
+     "explain": "**29** octets : la requête DNS.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Étape 6 : les données.** Un en-tête DNS fait 12 octets : `ab cd` (identifiant de la requête), `01 00` (drapeaux : requête standard, récursion demandée), `00 01` (1 question), puis 3 compteurs à 0. Ensuite, la question : le nom encodé `07 example 03 com 00` (chaque nom de domaine précédé de sa longueur), le type `00 01` (A, une adresse IPv4) et la classe `00 01` (IN)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'**identifiant DNS** (octets `ab cd`) ?",
+     "hints": [
+      "Les 2 premiers octets de la requête DNS, à l'offset 42"
+     ],
+     "accept": [
+      "abcd"
+     ],
+     "solution": "0xabcd",
+     "explain": "**0xabcd** : le serveur le recopiera dans sa réponse pour associer réponse et question.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel nom est interrogé ? (`07 65 78 61 6d 70 6c 65 03 63 6f 6d 00` : 65 = e, 78 = x, 61 = a, 6d = m, 70 = p, 6c = l ; 63 = c, 6f = o)",
+     "hints": [
+      "07 = 7 lettres : example ; 03 = 3 lettres : com"
+     ],
+     "accept": [],
+     "solution": "example.com",
+     "explain": "`07` annonce 7 lettres (**example**), `03` annonce 3 lettres (**com**), `00` termine le nom → **example.com**.",
+     "placeholder": "nom.domaine"
+    },
+    {
+     "type": "say",
+     "text": "**Étape 7 : cohérence.** Longueur Ethernet 71 = 14 + 57 ✓ ; 57 = 20 (IP) + 8 (UDP) + 29 (DNS) ✓. Les chiffres concordent : la trame est saine."
+    },
+    {
+     "type": "exercise",
+     "q": "Vérifie la cohérence : 20 + 8 + 29 donne combien ?",
+     "hints": [
+      "Additionne"
+     ],
+     "accept": [],
+     "solution": "57",
+     "explain": "**57**, égal à la longueur totale IP.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Cette trame est destinée à une machine du **même réseau** (192.168.1.1). Que constate-t-on pour la MAC destination ?",
+     "options": [
+      "C'est la MAC de la machine visée elle-même",
+      "C'est toujours la MAC de la passerelle",
+      "C'est ff:ff:ff:ff:ff:ff"
+     ],
+     "answer": 0,
+     "explain": "Même réseau → ARP donne la MAC du **destinataire**. Pour un serveur distant (comme dans notre SYN), la MAC destination aurait été celle de la **passerelle**."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : analyste réseau",
+   "emoji": "🏆",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final.** Relis la **trame SYN** de la leçon 1 : tu vas la décoder **entièrement**, de la MAC au dernier octet d'option. Aucun indice dans l'énoncé : applique la méthode."
+    },
+    {
+     "type": "code",
+     "sql": "0000  00 1a 2b 3c 4d 5e 08 00 27 a1 b2 c3 08 00 45 00\n0010  00 3c 1c 46 40 00 40 06 20 73 c0 a8 01 0a cb 00\n0020  71 50 c9 3a 00 50 3b 9a ca 00 00 00 00 00 a0 02\n0030  fa f0 cc 81 00 00 02 04 05 b4 04 02 08 0a 00 a1\n0040  b2 c3 00 00 00 00 01 03 03 07",
+     "lang": "Hexadécimal",
+     "title": "La trame SYN (74 octets)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 1/10** : MAC source ?",
+     "hints": [
+      "Octets 6-11"
+     ],
+     "accept": [
+      "08-00-27-a1-b2-c3",
+      "080027a1b2c3",
+      "0800.27a1.b2c3"
+     ],
+     "solution": "08:00:27:a1:b2:c3",
+     "explain": "**08:00:27:a1:b2:c3**.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/10** : EtherType ?",
+     "hints": [
+      "Octets 12-13"
+     ],
+     "accept": [
+      "0800",
+      "0x800",
+      "800"
+     ],
+     "solution": "0x0800",
+     "explain": "**0x0800** : IPv4.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/10** : IP destination ?",
+     "hints": [
+      "Octets 30-33 de la trame"
+     ],
+     "accept": [],
+     "solution": "203.0.113.80",
+     "explain": "`cb 00 71 50` = **203.0.113.80**.",
+     "placeholder": "x.x.x.x"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/10** : TTL en décimal ?",
+     "hints": [
+      "Octet 22 de la trame"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "0x40 = **64**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/10** : le drapeau DF est-il activé ? Réponds **oui** ou **non**. (Octets 6-7 de l'en-tête IP : `40 00`.)",
+     "hints": [
+      "0x4000 = 0100 0000 0000 0000"
+     ],
+     "accept": [
+      "Oui"
+     ],
+     "solution": "oui",
+     "explain": "Bit DF (deuxième bit) à 1 : **oui**. Le paquet ne doit pas être fragmenté.",
+     "placeholder": "oui ou non"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/10** : numéro de protocole IP (octet 23) en décimal ?",
+     "hints": [
+      "0x06"
+     ],
+     "accept": [],
+     "solution": "6",
+     "explain": "**6** = TCP.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/10** : port destination ?",
+     "hints": [
+      "`00 50`"
+     ],
+     "accept": [],
+     "solution": "80",
+     "explain": "**80** : HTTP.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/10** : numéro de séquence initial (`3b 9a ca 00`) en décimal ?",
+     "hints": [
+      "0x3b9aca00 est un nombre rond…"
+     ],
+     "accept": [],
+     "solution": "1000000000",
+     "explain": "0x3b9aca00 = **1 000 000 000**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 9/10** : le serveur répond SYN+ACK. Quel `ack` doit-il envoyer ?",
+     "hints": [
+      "Le SYN consomme un numéro"
+     ],
+     "accept": [],
+     "solution": "1000000001",
+     "explain": "seq + 1 = **1 000 000 001**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 10/10 (boss)** : ce paquet fait partie d'une **fragmentation** de 4000 octets avec MTU 1500 ; le deuxième fragment porte les octets 6-7 de l'en-tête IP : MF = 1, décalage 185. Écris la valeur de ces 2 octets en hexa (4 chiffres).",
+     "hints": [
+      "0x2000 pour MF, plus 185 = 0xb9"
+     ],
+     "accept": [
+      "20b9"
+     ],
+     "solution": "0x20b9",
+     "explain": "MF = 0x2000, décalage 185 = 0x00b9 → **0x20b9**.",
+     "placeholder": "0x...."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais maintenant ouvrir une trame et en lire **tous les champs** : Ethernet et VLAN, ARP, IPv4 (en-tête, checksum, fragmentation), ICMP, UDP, TCP (drapeaux, séquences, options), IPv6. Prochaine étape : ouvre **Wireshark**, capture un `ping` et un `curl`, et retrouve chaque octet de ce que tu viens d'apprendre. Un vrai pro s'entraîne sur des captures réelles."
+    }
+   ]
+  }
+ ]
+}
