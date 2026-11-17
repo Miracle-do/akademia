@@ -1,0 +1,2436 @@
+{
+ "id": "shell-avance",
+ "order": 9,
+ "title": "Shell avancé : for, sed, find, xargs…",
+ "tagline": "Boucles for, cut, sort, uniq, sed, find, xargs, locate : automatise et traite du texte comme un pro.",
+ "emoji": "🧰",
+ "color": "#0891B2",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 208,
+ "pitch": [
+  "Salut ! Je te propose **« Shell avancé »** 🧰.",
+  "Un bon administrateur ne tape pas la même commande 200 fois : il **boucle**, **filtre**, **transforme** et **chaîne**. Dans cette formation, on prend les outils de la ligne de commande qu'on utilise tous les jours et on les pousse **à fond**.",
+  "Au programme : la boucle **`for`** (renommer, copier, parcourir), **`cut`**, **`sort`**, **`uniq`** (compter et classer), **`sed`** (substituer, supprimer, insérer, éditer en place), **`find`** avancé (combiner, exclure, filtrer), **`xargs`** (le pont entre une liste et des arguments) et **`locate`**.",
+  "Toutes les commandes des exercices ont été **testées dans un vrai shell**. À la fin, tu enchaînes ces outils pour répondre à des questions complexes en une seule ligne."
+ ],
+ "benefits": [
+  "Écrire des boucles for sûres (fichiers avec espaces, renommage en masse)",
+  "Découper, trier et compter précisément avec cut, sort et uniq",
+  "Transformer du texte avec sed (s///, groupes, adresses, -i)",
+  "Combiner les critères de find, exclure des dossiers, filtrer par date/taille/droits",
+  "Passer des listes en arguments avec xargs, y compris avec des espaces (-print0 / -0)",
+  "Choisir entre locate, find et grep selon le besoin"
+ ],
+ "lessons": [
+  {
+   "id": "for-base",
+   "title": "La boucle for : répéter sans copier-coller",
+   "emoji": "🔁",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Dans cette formation on passe au **shell avancé** : les **boucles** (`for`) et les **outils de traitement de texte et de fichiers** (`cut`, `sort`, `uniq`, `sed`, `find`, `xargs`, `locate`) à un niveau de pro. Tu connais déjà les bases des tubes et de `find` : ici on va **creuser** et **combiner**."
+    },
+    {
+     "type": "say",
+     "text": "On commence par la boucle **`for`** : elle répète des commandes pour **chaque élément d'une liste**. Fini le copier-coller."
+    },
+    {
+     "type": "code",
+     "sql": "for VARIABLE in LISTE; do\n    commandes utilisant $VARIABLE\ndone\n\n# Sur une seule ligne (le ; avant do et avant done est obligatoire) :\nfor VARIABLE in LISTE; do commande; done",
+     "lang": "Terminal",
+     "title": "Syntaxe"
+    },
+    {
+     "type": "code",
+     "sql": "$ for c in rouge vert bleu; do echo $c; done\nrouge\nvert\nbleu",
+     "lang": "Terminal",
+     "title": "Un premier exemple"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris une boucle `for` (variable `c`) qui affiche **rouge**, **vert**, **bleu**, un mot par ligne.",
+     "hints": [
+      "for c in … ; do … ; done",
+      "N'oublie pas le `$` devant c dans la commande"
+     ],
+     "accept": [
+      "for c in rouge vert bleu; do echo \"$c\"; done",
+      "for c in rouge vert bleu; do echo ${c}; done"
+     ],
+     "solution": "for c in rouge vert bleu; do echo $c; done",
+     "explain": "`for c in rouge vert bleu; do echo $c; done` : la variable `c` prend chaque valeur tour à tour. On la **lit** avec `$c`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**La liste** peut être de plusieurs formes : des mots, une **suite** `{1..5}`, le résultat d'une commande `$(seq 1 5)`, ou un **motif de fichiers** `*.txt` (le shell le développe avant la boucle)."
+    },
+    {
+     "type": "code",
+     "sql": "for i in {1..5}; do echo $i; done        # suite de 1 à 5\nfor i in {1..10..3}; do echo $i; done     # de 1 à 10 par pas de 3 : 1 4 7 10\nfor i in $(seq 1 2 9); do echo $i; done    # seq début pas fin : 1 3 5 7 9\nfor f in *.txt; do echo $f; done          # tous les fichiers .txt du dossier",
+     "lang": "Terminal",
+     "title": "Les formes de liste"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les nombres de **1 à 5**, un par ligne, avec une boucle `for` (variable `i`).",
+     "hints": [
+      "La suite {1..5} ou la commande seq"
+     ],
+     "accept": [
+      "for i in {1..5}; do echo \"$i\"; done",
+      "for i in {1..5}; do echo ${i}; done",
+      "for i in $(seq 1 5); do echo $i; done",
+      "for i in $(seq 1 5); do echo \"$i\"; done",
+      "for i in $(seq 1 5); do echo ${i}; done"
+     ],
+     "solution": "for i in {1..5}; do echo $i; done",
+     "explain": "`for i in {1..5}; do echo $i; done`. (`$(seq 1 5)` fait la même chose.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les **impairs** de 1 à 9 (1 3 5 7 9), un par ligne.",
+     "hints": [
+      "seq début pas fin"
+     ],
+     "accept": [
+      "for i in $(seq 1 2 9); do echo \"$i\"; done",
+      "for i in $(seq 1 2 9); do echo ${i}; done",
+      "for i in {1..9..2}; do echo $i; done",
+      "for i in {1..9..2}; do echo \"$i\"; done",
+      "for i in {1..9..2}; do echo ${i}; done",
+      "for i in 1 3 5 7 9; do echo $i; done",
+      "for i in 1 3 5 7 9; do echo \"$i\"; done",
+      "for i in 1 3 5 7 9; do echo ${i}; done"
+     ],
+     "solution": "for i in $(seq 1 2 9); do echo $i; done",
+     "explain": "`seq 1 2 9` : de 1 à 9 **par pas de 2**. Avec les accolades : `{1..9..2}`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche `bonjour` **3 fois**.",
+     "hints": [
+      "La variable n'est même pas utilisée dans la commande"
+     ],
+     "accept": [
+      "for i in {1..3}; do echo bonjour; done",
+      "for i in $(seq 3); do echo bonjour; done"
+     ],
+     "solution": "for i in 1 2 3; do echo bonjour; done",
+     "explain": "On peut ignorer la variable : la boucle sert juste à **répéter**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Boucler sur des fichiers.** Le dossier contient `a.txt`, `b.txt` et `c.log`. Le motif `*.txt` est développé par le shell **avant** la boucle :"
+    },
+    {
+     "type": "code",
+     "sql": "$ for f in *.txt; do echo $f; done\na.txt\nb.txt",
+     "lang": "Terminal",
+     "title": "Les fichiers .txt"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **nom** de chaque fichier `.txt` du dossier, un par ligne, avec une boucle (variable `f`).",
+     "hints": [
+      "Le motif de fichiers est *.txt"
+     ],
+     "accept": [
+      "for f in *.txt; do echo \"$f\"; done",
+      "for f in *.txt; do echo ${f}; done"
+     ],
+     "solution": "for f in *.txt; do echo $f; done",
+     "explain": "`for f in *.txt; do echo $f; done` : `c.log` n'est pas affiché car il ne correspond pas au motif.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "a.txt\nun\ndeux\n\nb.txt\nun\ndeux\ntrois\n\nc.log\nx"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour **chaque** fichier `.txt`, son **nombre de lignes** (juste le nombre, sans le nom). Utilise `wc -l <`.",
+     "hints": [
+      "wc -l < fichier n'affiche pas le nom"
+     ],
+     "accept": [
+      "for f in *.txt; do wc -l < \"$f\"; done",
+      "for f in *.txt; do wc -l < ${f}; done"
+     ],
+     "solution": "for f in *.txt; do wc -l < $f; done",
+     "explain": "Avec `<`, `wc` lit son entrée standard et n'affiche que le nombre : `2` puis `3`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "a.txt\nun\ndeux\n\nb.txt\nun\ndeux\ntrois\n\nc.log\nx"
+    },
+    {
+     "type": "say",
+     "text": "**Les guillemets autour de `$f`.** Il est conseillé d'écrire `\"$f\"` : si un nom contient un **espace** (`mon fichier.txt`), sans guillemets le shell le coupe en **deux mots** et la commande se plante."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi écrire `\"$f\"` plutôt que `$f` dans `rm \"$f\"` ?",
+     "options": [
+      "Pour que les noms contenant des espaces restent un seul argument",
+      "Pour que la boucle aille plus vite",
+      "Pour afficher le fichier avant de le supprimer"
+     ],
+     "answer": 0,
+     "explain": "Sans guillemets, `rm mon fichier.txt` essaie de supprimer **deux** fichiers : `mon` et `fichier.txt`. Avec guillemets, c'est un seul argument."
+    },
+    {
+     "type": "say",
+     "text": "**La forme « à la C »** existe aussi, pratique pour compter :"
+    },
+    {
+     "type": "code",
+     "sql": "$ for ((i=1; i<=3; i++)); do echo $i; done\n1\n2\n3",
+     "lang": "Terminal",
+     "title": "Boucle for arithmétique (bash)"
+    },
+    {
+     "type": "choice",
+     "q": "Dans `for ((i=1; i<=3; i++))`, que fait `i++` ?",
+     "options": [
+      "Il ajoute 1 à i à chaque tour",
+      "Il double i",
+      "Il affiche i"
+     ],
+     "answer": 0,
+     "explain": "Trois parties : **initialisation** (`i=1`), **condition** de poursuite (`i<=3`), **incrément** (`i++`)."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **bonne syntaxe** d'une boucle sur une seule ligne ?",
+     "options": [
+      "for i in 1 2 3; do echo $i; done",
+      "for i in 1 2 3 do echo $i done",
+      "for i in 1 2 3 { echo $i }"
+     ],
+     "answer": 0,
+     "explain": "Sur une ligne, il faut un **point-virgule** avant `do` et avant `done`."
+    }
+   ]
+  },
+  {
+   "id": "for-pratique",
+   "title": "for en pratique : renommer, copier, parcourir",
+   "emoji": "🛠️",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Maintenant, des **cas réels** : renommer des dizaines de fichiers, faire des sauvegardes, traiter une liste d'utilisateurs. C'est là que `for` devient indispensable."
+    },
+    {
+     "type": "say",
+     "text": "**Renommer en changeant l'extension.** Le shell sait **couper la fin** d'une variable : `${f%.txt}` retire `.txt` à la fin de `$f`."
+    },
+    {
+     "type": "code",
+     "sql": "f=rapport1.txt\necho ${f%.txt}        # rapport1         (retire .txt à la fin)\necho ${f%.*}          # rapport1         (retire la dernière extension, quelle qu'elle soit)\necho ${f#rapport}     # 1.txt            (retire « rapport » au début)\necho ${f%.txt}.bak    # rapport1.bak",
+     "lang": "Terminal",
+     "title": "Couper une variable"
+    },
+    {
+     "type": "choice",
+     "q": "Que vaut `${f%.*}` si `f=archive.tar.gz` ?",
+     "options": [
+      "archive.tar",
+      "archive",
+      "tar.gz"
+     ],
+     "answer": 0,
+     "explain": "`%` retire la **plus courte** fin qui correspond à `.*` : seulement `.gz`. (Avec `%%` on retirerait la plus longue : `archive`.)"
+    },
+    {
+     "type": "exercise",
+     "q": "Renomme chaque fichier `.txt` du dossier en `.bak` (`rapport1.txt` devient `rapport1.bak`). Variable `f`.",
+     "hints": [
+      "mv ancien nouveau",
+      "${f%.txt}.bak pour le nouveau nom"
+     ],
+     "accept": [
+      "for f in *.txt; do mv \"$f\" \"${f%.txt}.bak\"; done",
+      "for f in *.txt; do mv ${f} \"${f%.txt}.bak\"; done",
+      "for f in *.txt; do mv $f ${f%.txt}.bak; done",
+      "for f in *.txt; do mv \"$f\" ${f%.txt}.bak; done",
+      "for f in *.txt; do mv ${f} ${f%.txt}.bak; done"
+     ],
+     "solution": "for f in *.txt; do mv $f \"${f%.txt}.bak\"; done",
+     "explain": "`mv \"$f\" \"${f%.txt}.bak\"` : le nouveau nom est le nom privé de `.txt` + `.bak`. `notes.md` n'est pas touché.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "rapport1.txt\nr1\n\nrapport2.txt\nr2\n\nnotes.md\nn"
+    },
+    {
+     "type": "exercise",
+     "q": "Fais une **copie de sauvegarde** de chaque fichier `.txt` en ajoutant `.bak` au nom (`rapport1.txt` → `rapport1.txt.bak`).",
+     "hints": [
+      "cp source destination",
+      "Le nouveau nom : le nom + .bak"
+     ],
+     "accept": [
+      "for f in *.txt; do cp \"$f\" \"$f.bak\"; done",
+      "for f in *.txt; do cp ${f} \"$f.bak\"; done",
+      "for f in *.txt; do cp $f \"${f}.bak\"; done",
+      "for f in *.txt; do cp \"$f\" \"${f}.bak\"; done",
+      "for f in *.txt; do cp ${f} \"${f}.bak\"; done"
+     ],
+     "solution": "for f in *.txt; do cp $f \"$f.bak\"; done",
+     "explain": "`cp \"$f\" \"$f.bak\"` : on ajoute simplement une extension. Les originaux restent.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "rapport1.txt\nr1\n\nrapport2.txt\nr2\n\nnotes.md\nn"
+    },
+    {
+     "type": "say",
+     "text": "**Parcourir le résultat d'une commande** avec `$(...)` : le shell remplace `$(commande)` par sa sortie, mot par mot. Parfait pour une liste d'utilisateurs :"
+    },
+    {
+     "type": "code",
+     "sql": "$ for u in $(cat users.txt); do echo \"Bonjour $u\"; done\nBonjour awa\nBonjour koffi\nBonjour senami",
+     "lang": "Terminal",
+     "title": "Boucle sur le contenu d'un fichier"
+    },
+    {
+     "type": "exercise",
+     "q": "Pour chaque nom de `users.txt`, affiche `Bonjour` suivi du nom.",
+     "hints": [
+      "for u in $(cat …)"
+     ],
+     "accept": [
+      "for u in $(cat users.txt); do echo Bonjour $u; done",
+      "for u in $(< users.txt); do echo \"Bonjour $u\"; done"
+     ],
+     "solution": "for u in $(cat users.txt); do echo \"Bonjour $u\"; done",
+     "explain": "`$(cat users.txt)` donne `awa koffi senami` : la boucle les prend un par un.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "users.txt\nawa\nkoffi\nsenami"
+    },
+    {
+     "type": "exercise",
+     "q": "Pour chaque élève de `eleves.txt`, affiche **uniquement le nom** (1er champ séparé par `:`), avec `for` et `cut`.",
+     "hints": [
+      "$(cut -d: -f1 eleves.txt)"
+     ],
+     "accept": [
+      "for n in $(cut -d: -f1 eleves.txt); do echo \"$n\"; done",
+      "for n in $(cut -d: -f1 eleves.txt); do echo ${n}; done"
+     ],
+     "solution": "for n in $(cut -d: -f1 eleves.txt); do echo $n; done",
+     "explain": "`cut -d: -f1` extrait les noms, la boucle les affiche. (Ici un simple `cut` suffirait : c'est surtout utile quand on **fait autre chose** avec chaque nom.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **Piège des espaces.** `for f in $(ls)` coupe les noms aux **espaces** : un fichier `mon fichier.txt` devient **deux** éléments. Pour parcourir des fichiers, utilise toujours un **motif** (`*`), pas `$(ls)`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle boucle est **sûre** pour des noms de fichiers pouvant contenir des espaces ?",
+     "options": [
+      "for f in *; do echo \"$f\"; done",
+      "for f in $(ls); do echo \"$f\"; done",
+      "for f in `ls`; do echo $f; done"
+     ],
+     "answer": 0,
+     "explain": "Le motif `*` est développé par le shell en **un élément par fichier**, espaces compris. `$(ls)` re-découpe le texte et casse les noms."
+    },
+    {
+     "type": "say",
+     "text": "**Contrôler la boucle** : `break` **sort** de la boucle ; `continue` **saute** au tour suivant."
+    },
+    {
+     "type": "code",
+     "sql": "for i in {1..10}; do\n    [ $i -eq 3 ] && continue      # saute 3\n    [ $i -gt 5 ] && break         # s'arrête après 5\n    echo $i\ndone\n# affiche : 1 2 4 5",
+     "lang": "Terminal",
+     "title": "break et continue"
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `continue` dans une boucle ?",
+     "options": [
+      "Il passe directement à l'élément suivant",
+      "Il arrête complètement la boucle",
+      "Il recommence la boucle depuis le début"
+     ],
+     "answer": 0,
+     "explain": "`continue` = « saute ce tour » ; `break` = « sors de la boucle »."
+    },
+    {
+     "type": "say",
+     "text": "**Pour lire un fichier ligne à ligne**, préfère `while read` : il garde les **espaces** à l'intérieur de chaque ligne (alors que `for` les découpe)."
+    },
+    {
+     "type": "code",
+     "sql": "$ while read ligne; do echo \"> $ligne\"; done < eleves.txt\n> Awa:Cotonou:22\n> Koffi:Porto-Novo:25\n> Senami:Cotonou:22\n> Yao:Parakou:30\n> Ibrahim:Cotonou:25",
+     "lang": "Terminal",
+     "title": "Lire un fichier ligne par ligne"
+    },
+    {
+     "type": "choice",
+     "q": "Pour traiter un fichier dont les lignes contiennent des espaces, la meilleure boucle est…",
+     "options": [
+      "while read ligne; do … done < fichier",
+      "for ligne in $(cat fichier); do … done",
+      "for ligne in fichier; do … done"
+     ],
+     "answer": 0,
+     "explain": "`for … in $(cat …)` découpe sur chaque espace ; `while read` lit **une ligne entière** à chaque tour."
+    }
+   ]
+  },
+  {
+   "id": "cut",
+   "title": "cut en profondeur : couper des colonnes",
+   "emoji": "✂️",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`cut` extrait des **colonnes** d'un texte. Tu connais `-d` et `-f`. Voyons **tout ce qu'il sait faire**, et surtout **ses limites**."
+    },
+    {
+     "type": "prereq",
+     "formation": "tubes",
+     "why": "Si les tubes et `cut` sont nouveaux pour toi, commence par « Redirections, tubes et filtres » : cette leçon va plus loin."
+    },
+    {
+     "type": "code",
+     "sql": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25\n\nnotes.csv\nnom;maths;info\nAwa;14;17\nKoffi;9;12\nSenami;16;11",
+     "lang": "Terminal",
+     "title": "Nos fichiers"
+    },
+    {
+     "type": "code",
+     "sql": "cut -d: -f1 eleves.txt          # champ 1\ncut -d: -f1,3 eleves.txt        # champs 1 ET 3\ncut -d: -f2-  eleves.txt        # du champ 2 jusqu'à la fin\ncut -d: -f-2  eleves.txt        # du début jusqu'au champ 2\ncut -d: -f1-2 eleves.txt        # champs 1 à 2",
+     "lang": "Terminal",
+     "title": "Choisir les champs"
+    },
+    {
+     "type": "code",
+     "sql": "$ cut -d: -f1,3 eleves.txt\nAwa:22\nKoffi:25\nSenami:22\nYao:30\nIbrahim:25\n$ cut -d: -f2- eleves.txt\nCotonou:22\nPorto-Novo:25\nCotonou:22\nParakou:30\nCotonou:25",
+     "lang": "Terminal",
+     "title": "Exemples"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le **nom et l'âge** (champs 1 et 3) de `eleves.txt`.",
+     "hints": [
+      "Deux champs séparés par une virgule"
+     ],
+     "accept": [
+      "cut -f1,3 -d: eleves.txt",
+      "cut -d : -f 1,3 eleves.txt"
+     ],
+     "solution": "cut -d: -f1,3 eleves.txt",
+     "explain": "`-f1,3` : champs 1 **et** 3, séparés (par défaut) par le même délimiteur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **tout sauf le premier champ** (du champ 2 à la fin).",
+     "hints": [
+      "Un tiret après le 2 = « jusqu'à la fin »"
+     ],
+     "accept": [],
+     "solution": "cut -d: -f2- eleves.txt",
+     "explain": "`-f2-` : du champ 2 **jusqu'à la fin de la ligne**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "say",
+     "text": "**Le séparateur** doit être un **seul caractère**. Pour un point-virgule, il faut le **protéger** des yeux du shell (qui le prend pour une fin de commande) :"
+    },
+    {
+     "type": "exercise",
+     "q": "`notes.csv` utilise le séparateur `;`. Affiche la colonne des notes de **maths** (champ 2).",
+     "hints": [
+      "Mets le ; entre guillemets : -d';'"
+     ],
+     "accept": [
+      "cut -d\";\" -f2 notes.csv",
+      "cut -d\\; -f2 notes.csv",
+      "cut -f2 -d';' notes.csv",
+      "cut -f2 -d\";\" notes.csv"
+     ],
+     "solution": "cut -d';' -f2 notes.csv",
+     "explain": "`cut -d';' -f2 notes.csv` : sans guillemets, le shell couperait la commande au `;`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "notes.csv\nnom;maths;info\nAwa;14;17\nKoffi;9;12\nSenami;16;11"
+    },
+    {
+     "type": "say",
+     "text": "**Couper par caractères** avec `-c` (position), pratique pour des fichiers à colonnes fixes :"
+    },
+    {
+     "type": "code",
+     "sql": "$ cut -c1-3 eleves.txt\nAwa\nKof\nSen\nYao\nIbr\n$ cut -c1,5 eleves.txt\nAC\nKi\nSm\nYP\nIh",
+     "lang": "Terminal",
+     "title": "cut -c"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les **3 premiers caractères** de chaque ligne de `eleves.txt`.",
+     "hints": [
+      "-c suivi d'une plage début-fin"
+     ],
+     "accept": [
+      "cut -c -3 eleves.txt"
+     ],
+     "solution": "cut -c1-3 eleves.txt",
+     "explain": "`-c1-3` : caractères 1 à 3.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "say",
+     "text": "**Trois options très utiles** (version GNU, celle de Linux) :"
+    },
+    {
+     "type": "code",
+     "sql": "$ cut -d: --complement -f2 eleves.txt\nAwa:22\nKoffi:25\nSenami:22\nYao:30\nIbrahim:25\n$ cut -d: -f1,3 --output-delimiter=' ' eleves.txt\nAwa 22\nKoffi 25\nSenami 22\nYao 30\nIbrahim 25\n$ printf 'a:b\\nsans separateur\\n' | cut -d: -f2\nb\nsans separateur\n$ printf 'a:b\\nsans separateur\\n' | cut -s -d: -f2\nb",
+     "lang": "Terminal",
+     "title": "--complement, --output-delimiter, -s"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche toutes les colonnes de `eleves.txt` **sauf la 2ᵉ** (la ville), avec `--complement`.",
+     "hints": [
+      "--complement inverse la sélection"
+     ],
+     "accept": [
+      "cut --complement -d: -f2 eleves.txt",
+      "cut -d: -f2 --complement eleves.txt"
+     ],
+     "solution": "cut -d: --complement -f2 eleves.txt",
+     "explain": "`--complement` retient **tout sauf** les champs demandés.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nom et l'âge **séparés par un espace** (au lieu de `:`), avec `--output-delimiter`.",
+     "hints": [
+      "--output-delimiter=' '"
+     ],
+     "accept": [
+      "cut -d: -f1,3 --output-delimiter=\" \" eleves.txt"
+     ],
+     "solution": "cut -d: -f1,3 --output-delimiter=' ' eleves.txt",
+     "explain": "`--output-delimiter` change le séparateur de **sortie**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "choice",
+     "q": "Sur une ligne **sans** le délimiteur, que fait `cut -d: -f2` par défaut ?",
+     "options": [
+      "Il l'affiche telle quelle, en entier",
+      "Il l'ignore",
+      "Il affiche une ligne vide"
+     ],
+     "answer": 0,
+     "explain": "Par défaut, une ligne sans délimiteur est **affichée entière**. Avec `-s` (*only-delimited*), elle est **supprimée**."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ **La grande limite de `cut` : les espaces multiples.** `cut` traite **chaque** espace comme un séparateur : `awa    22` (4 espaces) a 5 champs, dont 3 vides ! Solution classique : **réduire** les espaces d'abord avec `tr -s ' '`."
+    },
+    {
+     "type": "code",
+     "sql": "$ cut -d' ' -f2 espaces.txt\n$ tr -s ' ' < espaces.txt | cut -d' ' -f2\n22\n25\n30",
+     "lang": "Terminal",
+     "title": "Avant / après tr -s"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `espaces.txt`, les colonnes sont séparées par **plusieurs espaces**. Affiche la 2ᵉ colonne (l'âge) en réduisant d'abord les espaces avec `tr -s`.",
+     "hints": [
+      "tr -s ' ' compresse les espaces répétés en un seul"
+     ],
+     "accept": [
+      "tr -s ' ' < espaces.txt | cut -d\" \" -f2",
+      "tr -s \" \" < espaces.txt | cut -d' ' -f2",
+      "tr -s \" \" < espaces.txt | cut -d\" \" -f2",
+      "cat espaces.txt | tr -s ' ' | cut -d' ' -f2",
+      "cat espaces.txt | tr -s ' ' | cut -d\" \" -f2",
+      "cat espaces.txt | tr -s \" \" | cut -d' ' -f2",
+      "cat espaces.txt | tr -s \" \" | cut -d\" \" -f2"
+     ],
+     "solution": "tr -s ' ' < espaces.txt | cut -d' ' -f2",
+     "explain": "`tr -s ' '` remplace chaque suite d'espaces par **un seul** espace, ce qui rend `cut` fiable.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "espaces.txt\nawa    22\nkoffi  25\nyao    30"
+    },
+    {
+     "type": "choice",
+     "q": "Pour des colonnes séparées par un nombre **variable** d'espaces, quel outil est le plus adapté ?",
+     "options": [
+      "awk '{print $2}' (il gère les espaces multiples nativement)",
+      "cut -d' ' -f2",
+      "sort -k2"
+     ],
+     "answer": 0,
+     "explain": "`awk` découpe sur **n'importe quelle suite** d'espaces. `cut` ne le sait pas : d'où le `tr -s` ci-dessus."
+    }
+   ]
+  },
+  {
+   "id": "sort",
+   "title": "sort en profondeur : trier juste",
+   "emoji": "📶",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`sort` trie les **lignes**. Facile ? Pas toujours : un mauvais tri est **la** source d'erreurs dans les scripts. Voyons les options qui comptent."
+    },
+    {
+     "type": "code",
+     "sql": "$ sort nombres.txt\n1\n10\n2\n33\n$ sort -n nombres.txt\n1\n2\n10\n33",
+     "lang": "Terminal",
+     "title": "Alphabétique vs numérique"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `sort` place-t-il `10` **avant** `2` sans option ?",
+     "options": [
+      "Il compare caractère par caractère : « 1 » vient avant « 2 »",
+      "C'est un bug",
+      "Il trie par taille"
+     ],
+     "answer": 0,
+     "explain": "Par défaut, c'est un **tri lexicographique** (comme un dictionnaire). Pour comparer des **nombres**, utilise `-n`."
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `nombres.txt` dans l'**ordre numérique** croissant.",
+     "hints": [
+      "-n = numérique"
+     ],
+     "accept": [],
+     "solution": "sort -n nombres.txt",
+     "explain": "`sort -n` : 1, 2, 10, 33.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nombres.txt\n10\n2\n33\n1"
+    },
+    {
+     "type": "say",
+     "text": "**Trier par colonne.** `-k` désigne la **clé** (champ). `-t` fixe le séparateur (sinon : espaces). **Piège** : `-k2` trie de la colonne 2 **jusqu'à la fin de la ligne** ; `-k2,2` s'arrête **à** la colonne 2."
+    },
+    {
+     "type": "code",
+     "sql": "ventes.txt\nmangue 12\nbanane 5\nmangue 7\nananas 20\nbanane 8",
+     "lang": "Terminal",
+     "title": "Nos données"
+    },
+    {
+     "type": "code",
+     "sql": "$ sort -k2 -n ventes.txt\nbanane 5\nmangue 7\nbanane 8\nmangue 12\nananas 20\n$ sort -k2 -nr ventes.txt\nananas 20\nmangue 12\nbanane 8\nmangue 7\nbanane 5",
+     "lang": "Terminal",
+     "title": "Tri par la 2e colonne"
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `ventes.txt` par **quantité** (2ᵉ colonne) **croissante**.",
+     "hints": [
+      "-k2 pour la colonne, -n pour numérique"
+     ],
+     "accept": [
+      "sort -n -k2 ventes.txt",
+      "sort -nk2 ventes.txt",
+      "sort -k2n ventes.txt",
+      "sort -k2,2n ventes.txt",
+      "sort -k 2 -n ventes.txt",
+      "sort -k2,2 -n ventes.txt"
+     ],
+     "solution": "sort -k2 -n ventes.txt",
+     "explain": "`sort -k2 -n` : on trie sur la colonne 2, comme un nombre.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "ventes.txt\nmangue 12\nbanane 5\nmangue 7\nananas 20\nbanane 8"
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `ventes.txt` par quantité **décroissante** (la plus grosse vente en premier).",
+     "hints": [
+      "-r inverse l'ordre"
+     ],
+     "accept": [
+      "sort -k2 -rn ventes.txt",
+      "sort -k2 -n -r ventes.txt",
+      "sort -nr -k2 ventes.txt",
+      "sort -rn -k2 ventes.txt",
+      "sort -k2,2nr ventes.txt",
+      "sort -k2,2 -nr ventes.txt",
+      "sort -r -n -k2 ventes.txt",
+      "sort -k2nr ventes.txt"
+     ],
+     "solution": "sort -k2 -nr ventes.txt",
+     "explain": "`-nr` : numérique **et** inversé (`-rn` aussi).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "ventes.txt\nmangue 12\nbanane 5\nmangue 7\nananas 20\nbanane 8"
+    },
+    {
+     "type": "say",
+     "text": "**Plusieurs clés** : on peut en enchaîner. Ici, par **ville** (champ 2) puis, à ville égale, par **âge** croissant (champ 3 numérique) :"
+    },
+    {
+     "type": "code",
+     "sql": "$ sort -t: -k2,2 -k3,3n eleves.txt\nAwa:Cotonou:22\nSenami:Cotonou:22\nIbrahim:Cotonou:25\nYao:Parakou:30\nKoffi:Porto-Novo:25",
+     "lang": "Terminal",
+     "title": "Deux clés"
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `eleves.txt` (séparateur `:`) par **ville** (champ 2), puis par **âge** croissant (champ 3).",
+     "hints": [
+      "-t: -k2,2 -k3,3n"
+     ],
+     "accept": [
+      "sort -t : -k 2,2 -k 3,3n eleves.txt",
+      "sort -t : -k2,2 -k3,3n eleves.txt"
+     ],
+     "solution": "sort -t: -k2,2 -k3,3n eleves.txt",
+     "explain": "`-k2,2` : seulement la ville ; `-k3,3n` : l'âge, numérique. On met `,2` pour que la clé s'arrête à la colonne.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la différence entre `-k2` et `-k2,2` ?",
+     "options": [
+      "-k2 va de la colonne 2 jusqu'à la fin de la ligne ; -k2,2 s'arrête à la colonne 2",
+      "Aucune",
+      "-k2 trie en numérique"
+     ],
+     "answer": 0,
+     "explain": "Sans `,2`, la clé s'étend jusqu'à la **fin** de la ligne : une 2ᵉ clé ne servirait à rien. Toujours préciser la fin avec `,N`."
+    },
+    {
+     "type": "say",
+     "text": "**Autres tris pratiques :**"
+    },
+    {
+     "type": "code",
+     "sql": "$ sort -h tailles.txt\n500\n1K\n10K\n2M\n3G\n$ sort -V versions.txt\nv1.2\nv1.9\nv1.10\n$ sort -u mots.txt\nchat\nchien\noiseau\n$ sort -r mots.txt\noiseau\nchien\nchien\nchat\nchat\nchat",
+     "lang": "Terminal",
+     "title": "-h, -V, -u, -r"
+    },
+    {
+     "type": "exercise",
+     "q": "`tailles.txt` contient des tailles lisibles (1K, 2M, 3G…). Trie-les **de la plus petite à la plus grande**.",
+     "hints": [
+      "-h = human-readable"
+     ],
+     "accept": [],
+     "solution": "sort -h tailles.txt",
+     "explain": "`sort -h` comprend les suffixes **K, M, G**. (`ls -lh | sort -k5 -h` en profite.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "tailles.txt\n1K\n2M\n500\n3G\n10K"
+    },
+    {
+     "type": "exercise",
+     "q": "`versions.txt` contient des numéros de version (v1.2, v1.10…). Trie-les **dans l'ordre des versions** (v1.2 avant v1.10).",
+     "hints": [
+      "-V = version"
+     ],
+     "accept": [],
+     "solution": "sort -V versions.txt",
+     "explain": "`sort -V` trie les **numéros de version** correctement (1.2 < 1.9 < 1.10).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "versions.txt\nv1.10\nv1.2\nv1.9"
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `mots.txt` **en supprimant les doublons**.",
+     "hints": [
+      "-u = unique"
+     ],
+     "accept": [],
+     "solution": "sort -u mots.txt",
+     "explain": "`sort -u` ≈ `sort | uniq`. À ne pas confondre : `-u` avec une clé (`-k`) supprime aussi les lignes qui ont la même **clé**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat"
+    },
+    {
+     "type": "exercise",
+     "q": "Trie `mots.txt` **et écris le résultat dans `mots.txt` lui-même**, avec `-o`.",
+     "hints": [
+      "-o fichier de sortie"
+     ],
+     "accept": [],
+     "solution": "sort -o mots.txt mots.txt",
+     "explain": "`sort -o` est **sûr** : `sort f > f` viderait le fichier avant la lecture !",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `sort fichier > fichier` est-il **dangereux** ?",
+     "options": [
+      "Le shell vide le fichier avant que sort ne le lise : on perd tout",
+      "Il trie deux fois",
+      "Il crée un doublon"
+     ],
+     "answer": 0,
+     "explain": "La redirection `>` **tronque** le fichier immédiatement. Utilise `sort -o fichier fichier` ou un fichier temporaire."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle option vérifie qu'un fichier est **déjà trié** (sans rien afficher si oui) ?",
+     "options": [
+      "sort -c",
+      "sort -v",
+      "sort -p"
+     ],
+     "answer": 0,
+     "explain": "`sort -c` renvoie un message d'erreur et un code ≠ 0 à la première ligne mal placée : utile dans un script."
+    },
+    {
+     "type": "say",
+     "text": "**Casse et caractères spéciaux.** Selon la **langue** (variable `LC_ALL`), l'ordre peut changer : majuscules avant minuscules en `C`, ordre « dictionnaire » en `fr_FR.UTF-8`. Pour un tri **reproductible** dans un script : `LC_ALL=C sort fichier`."
+    },
+    {
+     "type": "choice",
+     "q": "Pour un tri **identique sur toutes les machines** dans un script, on écrit…",
+     "options": [
+      "LC_ALL=C sort fichier",
+      "sort --stable fichier",
+      "sort -g fichier"
+     ],
+     "answer": 0,
+     "explain": "`LC_ALL=C` impose l'ordre brut des octets, indépendant de la langue du système."
+    }
+   ]
+  },
+  {
+   "id": "uniq",
+   "title": "uniq : compter et repérer les doublons",
+   "emoji": "🧮",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`uniq` supprime les lignes **identiques consécutives**. Le mot clé : **consécutives**. Donc on **trie d'abord** (`sort | uniq`). Voyons toutes ses options."
+    },
+    {
+     "type": "code",
+     "sql": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat\n\n$ uniq mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat\n$ sort mots.txt | uniq\nchat\nchien\noiseau",
+     "lang": "Terminal",
+     "title": "Sans tri, ça ne marche pas"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `uniq mots.txt` (sans tri) garde-t-il plusieurs « chat » ?",
+     "options": [
+      "uniq ne compare que les lignes voisines : il faut trier avant",
+      "uniq est cassé",
+      "Il garde toujours trois lignes"
+     ],
+     "answer": 0,
+     "explain": "`uniq` regarde seulement **la ligne précédente**. Deux « chat » séparés par « chien » ne sont pas consécutifs."
+    },
+    {
+     "type": "say",
+     "text": "**Les 4 options à connaître :**"
+    },
+    {
+     "type": "code",
+     "sql": "$ sort mots.txt | uniq -c\n      3 chat\n      2 chien\n      1 oiseau\n$ sort mots.txt | uniq -d\nchat\nchien\n$ sort mots.txt | uniq -u\noiseau\n$ printf 'Chat\\nchat\\nCHAT\\n' | uniq -ic\n      3 Chat",
+     "lang": "Terminal",
+     "title": "-c, -d, -u, -i"
+    },
+    {
+     "type": "code",
+     "sql": "-c   précède chaque ligne de son NOMBRE d'occurrences\n-d   n'affiche que les lignes DUPLIQUÉES (une fois chacune)\n-u   n'affiche que les lignes UNIQUES (apparaissant une seule fois)\n-i   ignore la casse (Chat = chat)",
+     "lang": "Terminal",
+     "title": "Récapitulatif"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche, pour chaque mot de `mots.txt`, **combien de fois** il apparaît.",
+     "hints": [
+      "trier puis uniq -c"
+     ],
+     "accept": [],
+     "solution": "sort mots.txt | uniq -c",
+     "explain": "`sort | uniq -c` : le **comptage de fréquence**, le motif n°1 de l'administrateur.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les mots qui apparaissent **plusieurs fois** dans `mots.txt` (une seule fois chacun).",
+     "hints": [
+      "-d = duplicates"
+     ],
+     "accept": [],
+     "solution": "sort mots.txt | uniq -d",
+     "explain": "`uniq -d` : **chat** et **chien** (les doublons), pas **oiseau**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les mots qui n'apparaissent **qu'une seule fois**.",
+     "hints": [
+      "-u = unique"
+     ],
+     "accept": [],
+     "solution": "sort mots.txt | uniq -u",
+     "explain": "`uniq -u` : seulement **oiseau**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nchat\nchien\nchat\noiseau\nchien\nchat"
+    },
+    {
+     "type": "say",
+     "text": "**Le classique : un classement.** On compte, puis on **retrie sur le nombre** (`sort -nr`), puis on garde le haut du classement (`head`)."
+    },
+    {
+     "type": "code",
+     "sql": "acces.log\n10.0.0.5 GET /index\n10.0.0.7 GET /login\n10.0.0.5 POST /login\n10.0.0.9 GET /index\n10.0.0.5 GET /about\n10.0.0.7 GET /index",
+     "lang": "Terminal",
+     "title": "Un journal d'accès"
+    },
+    {
+     "type": "code",
+     "sql": "$ cut -d' ' -f1 acces.log | sort | uniq -c | sort -nr\n      3 10.0.0.5\n      2 10.0.0.7\n      1 10.0.0.9",
+     "lang": "Terminal",
+     "title": "Requêtes par adresse IP"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `acces.log` (champs séparés par des espaces), classe les **adresses IP** (champ 1) de la plus active à la moins active, avec le nombre de requêtes.",
+     "hints": [
+      "cut, sort, uniq -c, puis sort -nr"
+     ],
+     "accept": [
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -nr",
+      "cut -d' ' -f1 acces.log | sort | uniq -c | sort -rn",
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -rn",
+      "cut -d' ' -f1 acces.log | sort | uniq -c | sort -n -r",
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -n -r"
+     ],
+     "solution": "cut -d' ' -f1 acces.log | sort | uniq -c | sort -nr",
+     "explain": "Le motif complet : **extraire → trier → compter → retrier sur le compte**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "acces.log\n10.0.0.5 GET /index\n10.0.0.7 GET /login\n10.0.0.5 POST /login\n10.0.0.9 GET /index\n10.0.0.5 GET /about\n10.0.0.7 GET /index"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **seulement la ligne** de l'URL (champ 3) la **plus demandée**, avec son compteur.",
+     "hints": [
+      "Ajoute head -n 1 à la fin"
+     ],
+     "accept": [
+      "cut -d\" \" -f3 acces.log | sort | uniq -c | sort -nr | head -n 1",
+      "cut -d' ' -f3 acces.log | sort | uniq -c | sort -nr | head -1",
+      "cut -d\" \" -f3 acces.log | sort | uniq -c | sort -nr | head -1",
+      "cut -d' ' -f3 acces.log | sort | uniq -c | sort -rn | head -n 1",
+      "cut -d\" \" -f3 acces.log | sort | uniq -c | sort -rn | head -n 1",
+      "cut -d' ' -f3 acces.log | sort | uniq -c | sort -rn | head -1",
+      "cut -d\" \" -f3 acces.log | sort | uniq -c | sort -rn | head -1"
+     ],
+     "solution": "cut -d' ' -f3 acces.log | sort | uniq -c | sort -nr | head -n 1",
+     "explain": "`head -n 1` garde la première ligne du classement : **/index** avec 3 requêtes.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "acces.log\n10.0.0.5 GET /index\n10.0.0.7 GET /login\n10.0.0.5 POST /login\n10.0.0.9 GET /index\n10.0.0.5 GET /about\n10.0.0.7 GET /index"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `phrase.txt`, affiche la ligne du **mot le plus fréquent** avec son compteur. (Indice : `tr ' ' '\\n'` met un mot par ligne.)",
+     "hints": [
+      "tr remplace chaque espace par un retour à la ligne"
+     ],
+     "accept": [
+      "tr ' ' \"\\n\" < phrase.txt | sort | uniq -c | sort -nr | head -n 1",
+      "tr \" \" '\\n' < phrase.txt | sort | uniq -c | sort -nr | head -n 1",
+      "tr \" \" \"\\n\" < phrase.txt | sort | uniq -c | sort -nr | head -n 1",
+      "tr ' ' '\\n' < phrase.txt | sort | uniq -c | sort -nr | head -1",
+      "tr ' ' \"\\n\" < phrase.txt | sort | uniq -c | sort -nr | head -1",
+      "tr \" \" '\\n' < phrase.txt | sort | uniq -c | sort -nr | head -1",
+      "tr \" \" \"\\n\" < phrase.txt | sort | uniq -c | sort -nr | head -1",
+      "cat phrase.txt | tr ' ' '\\n' | sort | uniq -c | sort -nr | head -n 1",
+      "cat phrase.txt | tr ' ' \"\\n\" | sort | uniq -c | sort -nr | head -n 1",
+      "cat phrase.txt | tr \" \" '\\n' | sort | uniq -c | sort -nr | head -n 1",
+      "cat phrase.txt | tr \" \" \"\\n\" | sort | uniq -c | sort -nr | head -n 1",
+      "cat phrase.txt | tr ' ' '\\n' | sort | uniq -c | sort -nr | head -1",
+      "cat phrase.txt | tr ' ' \"\\n\" | sort | uniq -c | sort -nr | head -1",
+      "cat phrase.txt | tr \" \" '\\n' | sort | uniq -c | sort -nr | head -1",
+      "cat phrase.txt | tr \" \" \"\\n\" | sort | uniq -c | sort -nr | head -1"
+     ],
+     "solution": "tr ' ' '\\n' < phrase.txt | sort | uniq -c | sort -nr | head -n 1",
+     "explain": "On transforme le texte en **un mot par ligne**, puis le motif habituel. Résultat : `3 le`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "phrase.txt\nle chat et le chien et le chat"
+    },
+    {
+     "type": "say",
+     "text": "**Autres options.** `-f N` **saute** les N premiers champs avant de comparer ; `-s N` saute N caractères. Utile pour ignorer un horodatage au début des lignes d'un journal :"
+    },
+    {
+     "type": "code",
+     "sql": "$ printf '10:01 erreur disque\\n10:02 erreur disque\\n10:03 ok\\n' | uniq -f1 -c\n      2 10:01 erreur disque\n      1 10:03 ok",
+     "lang": "Terminal",
+     "title": "uniq -f 1 : on ignore l'heure"
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `uniq -f1 -c` sur des lignes `10:01 erreur disque` ?",
+     "options": [
+      "Il ignore le 1er champ (l'heure) pour comparer et compter les lignes identiques",
+      "Il ne garde que le 1er champ",
+      "Il supprime la 1re ligne"
+     ],
+     "answer": 0,
+     "explain": "`-f1` : on **saute** le premier champ avant de comparer. Les deux « erreur disque » sont regroupées malgré des heures différentes."
+    },
+    {
+     "type": "choice",
+     "q": "Pour compter les occurrences **sans tenir compte des majuscules**, on peut utiliser…",
+     "options": [
+      "sort -f | uniq -ic",
+      "uniq -ic seul",
+      "sort -r | uniq -c"
+     ],
+     "answer": 0,
+     "explain": "`sort -f` replie la casse pour grouper, `uniq -i` ignore la casse en comparant, `-c` compte."
+    }
+   ]
+  },
+  {
+   "id": "sed-sub",
+   "title": "sed : la substitution s///",
+   "emoji": "🔄",
+   "minutes": 22,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**`sed`** (*stream editor*) transforme un texte **ligne par ligne**, sans l'ouvrir dans un éditeur. Sa commande reine : **`s`** (substituer). Et c'est une porte d'entrée vers les **expressions régulières**."
+    },
+    {
+     "type": "code",
+     "sql": "sed 's/ancien/nouveau/' fichier        # remplace la 1re occurrence de chaque ligne\nsed 's/ancien/nouveau/g' fichier       # remplace TOUTES les occurrences (g = global)",
+     "lang": "Terminal",
+     "title": "La forme de base"
+    },
+    {
+     "type": "code",
+     "sql": "phrase2.txt\nle chat et le chien\n\n$ sed 's/le/un/' phrase2.txt\nun chat et le chien\n$ sed 's/le/un/g' phrase2.txt\nun chat et un chien",
+     "lang": "Terminal",
+     "title": "Sans g / avec g"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `phrase2.txt`, remplace **toutes** les occurrences de `le` par `un`. (Affiche le résultat, n'écris pas dans le fichier.)",
+     "hints": [
+      "La lettre g à la fin"
+     ],
+     "accept": [
+      "sed \"s/le/un/g\" phrase2.txt",
+      "sed -e 's/le/un/g' phrase2.txt",
+      "sed -e \"s/le/un/g\" phrase2.txt"
+     ],
+     "solution": "sed 's/le/un/g' phrase2.txt",
+     "explain": "`g` = **g**lobal. Sans lui, seule la **première** occurrence de chaque ligne est remplacée.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "phrase2.txt\nle chat et le chien"
+    },
+    {
+     "type": "exercise",
+     "q": "Remplace **uniquement la 2ᵉ** occurrence de `le` par `un`.",
+     "hints": [
+      "Un nombre à la fin remplace seulement l'occurrence n°N"
+     ],
+     "accept": [
+      "sed \"s/le/un/2\" phrase2.txt"
+     ],
+     "solution": "sed 's/le/un/2' phrase2.txt",
+     "explain": "`s/le/un/2` : seulement la **2ᵉ** occurrence de chaque ligne.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "phrase2.txt\nle chat et le chien"
+    },
+    {
+     "type": "say",
+     "text": "**Changer le délimiteur.** Le `/` n'est pas obligatoire : le caractère juste après `s` devient le séparateur. Indispensable avec des **chemins** (qui contiennent déjà des `/`) :"
+    },
+    {
+     "type": "code",
+     "sql": "$ sed 's|/usr|/opt|' chemins.txt\n/opt/local/bin\n/opt/bin",
+     "lang": "Terminal",
+     "title": "s avec |"
+    },
+    {
+     "type": "exercise",
+     "q": "`chemins.txt` contient des chemins. Remplace `/usr` par `/opt` en choisissant un autre délimiteur que `/`.",
+     "hints": [
+      "Utilise | ou # comme séparateur"
+     ],
+     "accept": [
+      "sed \"s|/usr|/opt|\" chemins.txt",
+      "sed 's#/usr#/opt#' chemins.txt",
+      "sed \"s#/usr#/opt#\" chemins.txt",
+      "sed 's,/usr,/opt,' chemins.txt",
+      "sed \"s,/usr,/opt,\" chemins.txt"
+     ],
+     "solution": "sed 's|/usr|/opt|' chemins.txt",
+     "explain": "Avec `s|a|b|`, plus besoin d'échapper les `/`. (`#` et `,` marchent aussi.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "chemins.txt\n/usr/local/bin\n/usr/bin"
+    },
+    {
+     "type": "say",
+     "text": "**Drapeaux utiles** après le dernier `/` : `g` (toutes), `I` (ignorer la casse), un **nombre** (n-ième), `p` (afficher la ligne modifiée, avec `-n`)."
+    },
+    {
+     "type": "exercise",
+     "q": "`casse.txt` contient `Bonjour BONJOUR bonjour`. Remplace **toutes** les occurrences de `bonjour` (quelle que soit la casse) par `salut`.",
+     "hints": [
+      "Deux drapeaux : I et g"
+     ],
+     "accept": [
+      "sed \"s/bonjour/salut/Ig\" casse.txt",
+      "sed 's/bonjour/salut/gI' casse.txt",
+      "sed \"s/bonjour/salut/gI\" casse.txt"
+     ],
+     "solution": "sed 's/bonjour/salut/Ig' casse.txt",
+     "explain": "`I` ignore la casse, `g` remplace tout : `salut salut salut`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "casse.txt\nBonjour BONJOUR bonjour"
+    },
+    {
+     "type": "say",
+     "text": "**L'esperluette `&`** représente **tout ce qui a été trouvé**. Pratique pour encadrer ou répéter :"
+    },
+    {
+     "type": "code",
+     "sql": "$ echo 'ab12cd345' | sed -E 's/[0-9]+/<&>/g'\nab<12>cd<345>",
+     "lang": "Terminal",
+     "title": "& = le texte trouvé"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `texte.txt` (`ab12cd345`), entoure **chaque nombre** de chevrons : `ab<12>cd<345>`. Utilise `-E`.",
+     "hints": [
+      "[0-9]+ avec -E, et & pour le texte trouvé"
+     ],
+     "accept": [
+      "sed -E \"s/[0-9]+/<&>/g\" texte.txt",
+      "sed 's/[0-9]\\+/<&>/g' texte.txt",
+      "sed \"s/[0-9]\\+/<&>/g\" texte.txt"
+     ],
+     "solution": "sed -E 's/[0-9]+/<&>/g' texte.txt",
+     "explain": "`[0-9]+` : un ou plusieurs chiffres ; `&` : le nombre trouvé. `-E` active les expressions **étendues** (le `+` sans antislash).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "texte.txt\nab12cd345"
+    },
+    {
+     "type": "say",
+     "text": "**Les groupes `( )` et les références `\\1`, `\\2`…** Un groupe capture une partie ; on la **réutilise** dans le remplacement. Avec `-E`, les parenthèses sont directes :"
+    },
+    {
+     "type": "code",
+     "sql": "$ echo 'bonjour monde' | sed -E 's/([a-z]+) ([a-z]+)/\\2 \\1/'\nmonde bonjour\n$ echo '2025-03-12' | sed -E 's#([0-9]{4})-([0-9]{2})-([0-9]{2})#\\3/\\2/\\1#'\n12/03/2025",
+     "lang": "Terminal",
+     "title": "Inverser deux mots, puis une date"
+    },
+    {
+     "type": "exercise",
+     "q": "`mots.txt` contient `bonjour monde`. **Échange les deux mots** avec des groupes (`monde bonjour`). Utilise `-E`.",
+     "hints": [
+      "Deux groupes, puis \\2 \\1"
+     ],
+     "accept": [
+      "sed 's/\\([a-z]*\\) \\([a-z]*\\)/\\2 \\1/' mots.txt",
+      "sed -E 's/(\\w+) (\\w+)/\\2 \\1/' mots.txt"
+     ],
+     "solution": "sed -E 's/([a-z]+) ([a-z]+)/\\2 \\1/' mots.txt",
+     "explain": "Chaque groupe capture un mot ; `\\2 \\1` les restitue **dans l'autre ordre**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nbonjour monde"
+    },
+    {
+     "type": "exercise",
+     "q": "`dates.txt` contient `2025-03-12`. Transforme-la en `12/03/2025` (jour/mois/année) avec `-E` et des groupes.",
+     "hints": [
+      "Trois groupes ; dans le remplacement, \\3/\\2/\\1"
+     ],
+     "accept": [
+      "sed -E 's|([0-9]{4})-([0-9]{2})-([0-9]{2})|\\3/\\2/\\1|' dates.txt",
+      "sed -E 's/([0-9]{4})-([0-9]{2})-([0-9]{2})/\\3\\/\\2\\/\\1/' dates.txt"
+     ],
+     "solution": "sed -E 's#([0-9]{4})-([0-9]{2})-([0-9]{2})#\\3/\\2/\\1#' dates.txt",
+     "explain": "Trois groupes (année, mois, jour), restitués dans l'ordre **\\3/\\2/\\1**. Le délimiteur `#` évite d'échapper les `/`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "dates.txt\n2025-03-12"
+    },
+    {
+     "type": "choice",
+     "q": "Dans le remplacement d'un `sed -E 's/(a)(b)/\\2\\1/'`, à quoi sert `\\1` ?",
+     "options": [
+      "À insérer ce qu'a capturé le 1er groupe entre parenthèses",
+      "À répéter la commande une fois",
+      "À supprimer la ligne"
+     ],
+     "answer": 0,
+     "explain": "`\\1` = contenu du **1er** groupe, `\\2` du 2ᵉ, etc. `&` = tout ce qui a été trouvé."
+    },
+    {
+     "type": "say",
+     "text": "**`-E` ou pas ?** Sans `-E` (regex *basique*), il faut **échapper** `\\(`, `\\)`, `\\+`, `\\?`, `\\{`, `\\|`. Avec `-E` (*étendue*), ces symboles sont **directs**. Préfère `-E` : c'est bien plus lisible."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle option rend les parenthèses et le `+` utilisables **sans antislash** ?",
+     "options": [
+      "-E",
+      "-n",
+      "-i"
+     ],
+     "answer": 0,
+     "explain": "`sed -E` (ou `-r`) = expressions régulières étendues."
+    },
+    {
+     "type": "say",
+     "text": "**`-n` et `p`** : `-n` désactive l'affichage automatique ; `p` n'affiche que ce qu'on veut. `sed -n 's/x/y/p'` n'affiche **que les lignes modifiées**."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `conf.txt`, affiche **uniquement** les lignes où `8080` a été remplacé par `9090` (avec `-n` et `p`).",
+     "hints": [
+      "-n et le drapeau p"
+     ],
+     "accept": [
+      "sed -n \"s/8080/9090/p\" conf.txt"
+     ],
+     "solution": "sed -n 's/8080/9090/p' conf.txt",
+     "explain": "`-n` + `p` : on n'affiche **que** les lignes où la substitution a eu lieu : `port=9090`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    }
+   ]
+  },
+  {
+   "id": "sed-adr",
+   "title": "sed : adresses, suppression, insertion et modification en place",
+   "emoji": "🎯",
+   "minutes": 22,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Au-delà de `s`, `sed` sait **choisir des lignes** (par numéro ou par motif) et leur appliquer des commandes : `p` (afficher), `d` (supprimer), `i`/`a`/`c` (insérer, ajouter, changer)."
+    },
+    {
+     "type": "code",
+     "sql": "sed -n '3p'  f        # affiche la ligne 3\nsed -n '2,4p' f        # lignes 2 à 4\nsed -n '$p'   f        # dernière ligne\nsed -n '2~2p' f        # une ligne sur deux à partir de la 2e (2, 4, 6…)\nsed -n '/motif/p' f    # lignes qui contiennent « motif »\nsed -n '/deb/,/fin/p' f  # de la 1re ligne « deb » à la 1re ligne « fin »\nsed '3d' f             # SUPPRIME la ligne 3 (affiche le reste)\nsed '/^#/d' f          # supprime les lignes qui commencent par #",
+     "lang": "Terminal",
+     "title": "Les adresses"
+    },
+    {
+     "type": "code",
+     "sql": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq\n\n$ sed -n '2,4p' nl.txt\ndeux\ntrois\nquatre\n$ sed '3d' nl.txt\nun\ndeux\nquatre\ncinq\n$ sed -n '$p' nl.txt\ncinq",
+     "lang": "Terminal",
+     "title": "Exemples"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les lignes **2 à 4** de `nl.txt`.",
+     "hints": [
+      "-n et la plage 2,4 suivie de p"
+     ],
+     "accept": [
+      "sed -n \"2,4p\" nl.txt",
+      "sed -n -e '2,4p' nl.txt",
+      "sed -n -e \"2,4p\" nl.txt"
+     ],
+     "solution": "sed -n '2,4p' nl.txt",
+     "explain": "`-n` coupe l'affichage automatique ; `2,4p` n'affiche que ces lignes. Sans `-n`, tout serait affiché **en plus** (lignes 2 à 4 en double).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement la dernière** ligne de `nl.txt`.",
+     "hints": [
+      "$ désigne la dernière ligne"
+     ],
+     "accept": [
+      "sed '$!d' nl.txt"
+     ],
+     "solution": "sed -n '$p' nl.txt",
+     "explain": "`$` = dernière ligne. (`sed '$!d'` : « supprime tout sauf la dernière ».)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **une ligne sur deux** de `nl.txt` à partir de la 2ᵉ (deux et quatre).",
+     "hints": [
+      "premier~pas"
+     ],
+     "accept": [
+      "sed -n \"2~2p\" nl.txt",
+      "sed -n '0~2p' nl.txt",
+      "sed -n \"0~2p\" nl.txt"
+     ],
+     "solution": "sed -n '2~2p' nl.txt",
+     "explain": "`2~2` : à partir de la ligne 2, **de 2 en 2** (GNU sed).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime la **3ᵉ ligne** de `nl.txt` (affiche le résultat).",
+     "hints": [
+      "Numéro de ligne puis d"
+     ],
+     "accept": [
+      "sed \"3d\" nl.txt"
+     ],
+     "solution": "sed '3d' nl.txt",
+     "explain": "`3d` : la ligne 3 n'est pas affichée.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **les 2 premières lignes** de `nl.txt` avec `sed` (et rien de plus), en s'arrêtant tôt.",
+     "hints": [
+      "q = quitter"
+     ],
+     "accept": [
+      "sed '2q' nl.txt",
+      "sed \"2q\" nl.txt",
+      "sed -n '1,2p' nl.txt",
+      "sed -n \"1,2p\" nl.txt"
+     ],
+     "solution": "sed 2q nl.txt",
+     "explain": "`2q` : affiche, puis **quitte** après la ligne 2 : efficace sur un gros fichier.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "say",
+     "text": "**Nettoyer un fichier de configuration** : supprimer commentaires et lignes vides. `^` = début de ligne, `$` = fin ; donc `^$` = ligne vide, `^#` = commentaire."
+    },
+    {
+     "type": "code",
+     "sql": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost\n\n$ sed '/^#/d;/^$/d' conf.txt\nport=8080\ndebug=true\nhost=localhost",
+     "lang": "Terminal",
+     "title": "Commentaires et lignes vides"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `conf.txt`, supprime les **commentaires** (lignes commençant par `#`) **et les lignes vides**.",
+     "hints": [
+      "Deux commandes d séparées par ;"
+     ],
+     "accept": [
+      "sed \"/^#/d;/^$/d\" conf.txt",
+      "sed '/^$/d;/^#/d' conf.txt",
+      "sed \"/^$/d;/^#/d\" conf.txt",
+      "sed -e '/^#/d' -e '/^$/d' conf.txt",
+      "sed -e '/^#/d' -e \"/^$/d\" conf.txt",
+      "sed -e \"/^#/d\" -e '/^$/d' conf.txt",
+      "sed -e \"/^#/d\" -e \"/^$/d\" conf.txt",
+      "sed -e '/^$/d' -e '/^#/d' conf.txt",
+      "sed -e '/^$/d' -e \"/^#/d\" conf.txt",
+      "sed -e \"/^$/d\" -e '/^#/d' conf.txt",
+      "sed -e \"/^$/d\" -e \"/^#/d\" conf.txt",
+      "sed -E '/^(#|$)/d' conf.txt",
+      "sed -E \"/^(#|$)/d\" conf.txt"
+     ],
+     "solution": "sed '/^#/d;/^$/d' conf.txt",
+     "explain": "`/^#/d` supprime les commentaires, `/^$/d` les lignes vides ; on les sépare par `;` (ou avec deux `-e`).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement** les lignes de `conf.txt` qui contiennent `debug`.",
+     "hints": [
+      "-n et /motif/p"
+     ],
+     "accept": [
+      "sed -n \"/debug/p\" conf.txt"
+     ],
+     "solution": "sed -n '/debug/p' conf.txt",
+     "explain": "`/debug/p` avec `-n` : un `grep` fait avec sed (2 lignes : le commentaire et `debug=true`).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche toutes les lignes de `conf.txt` **sauf** les commentaires, en utilisant `!` (négation) avec `-n`.",
+     "hints": [
+      "Le point d'exclamation inverse l'adresse"
+     ],
+     "accept": [
+      "sed -n \"/^#/!p\" conf.txt"
+     ],
+     "solution": "sed -n '/^#/!p' conf.txt",
+     "explain": "`/^#/!p` : « pour les lignes **qui ne** commencent **pas** par `#`, affiche ».",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    },
+    {
+     "type": "say",
+     "text": "**Insérer, ajouter, remplacer une ligne entière** : `i` (avant), `a` (après), `c` (remplace)."
+    },
+    {
+     "type": "code",
+     "sql": "$ sed '1i titre' nl.txt\ntitre\nun\ndeux\ntrois\nquatre\ncinq\n$ sed '$a fin' nl.txt\nun\ndeux\ntrois\nquatre\ncinq\nfin\n$ sed '2c remplacee' nl.txt\nun\nremplacee\ntrois\nquatre\ncinq",
+     "lang": "Terminal",
+     "title": "i, a, c"
+    },
+    {
+     "type": "exercise",
+     "q": "Insère la ligne `titre` **avant** la première ligne de `nl.txt`.",
+     "hints": [
+      "Adresse, puis i, puis le texte"
+     ],
+     "accept": [
+      "sed \"1i titre\" nl.txt",
+      "sed '1i\\titre' nl.txt",
+      "sed \"1i\\titre\" nl.txt"
+     ],
+     "solution": "sed '1i titre' nl.txt",
+     "explain": "`1i titre` : insère **avant** la ligne 1.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute la ligne `fin` **à la fin** de `nl.txt` (après la dernière ligne).",
+     "hints": [
+      "$ + a + texte"
+     ],
+     "accept": [
+      "sed '$a\\fin' nl.txt"
+     ],
+     "solution": "sed '$a fin' nl.txt",
+     "explain": "`$a fin` : ajoute **après** la dernière ligne.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "nl.txt\nun\ndeux\ntrois\nquatre\ncinq"
+    },
+    {
+     "type": "say",
+     "text": "**Modifier le fichier lui-même : `-i`.** Sans `-i`, `sed` **affiche** le résultat et laisse le fichier intact. Avec `-i`, il **écrit dans le fichier**. `-i.bak` garde une **copie de sauvegarde**."
+    },
+    {
+     "type": "code",
+     "sql": "sed -i 's/8080/9090/' conf.txt         # modifie conf.txt directement (sans retour possible !)\nsed -i.bak 's/8080/9090/' conf.txt     # idem, avec sauvegarde conf.txt.bak",
+     "lang": "Terminal",
+     "title": "Édition en place"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `conf.txt`, remplace `8080` par `9090` **dans le fichier lui-même**.",
+     "hints": [
+      "Option -i"
+     ],
+     "accept": [
+      "sed -i \"s/8080/9090/\" conf.txt",
+      "sed --in-place 's/8080/9090/' conf.txt",
+      "sed --in-place \"s/8080/9090/\" conf.txt"
+     ],
+     "solution": "sed -i 's/8080/9090/' conf.txt",
+     "explain": "`sed -i` modifie le fichier. **Astuce de pro** : lance d'abord sans `-i` pour vérifier le résultat, ou utilise `-i.bak`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi lancer d'abord un `sed` **sans** `-i` avant de modifier un fichier ?",
+     "options": [
+      "Pour vérifier le résultat : -i est irréversible (sans sauvegarde)",
+      "Parce que -i est plus lent",
+      "Parce que -i ne marche pas sur les petits fichiers"
+     ],
+     "answer": 0,
+     "explain": "`-i` réécrit le fichier. Une faute dans l'expression le détruit : **teste à blanc**, ou utilise `-i.bak`."
+    },
+    {
+     "type": "say",
+     "text": "**`y/liste1/liste2/`** remplace caractère par caractère (comme `tr`) : `echo abracadabra | sed 'y/abc/ABC/'` donne `ABrACAdABrA`."
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `sed 'y/abc/xyz/'` ?",
+     "options": [
+      "Remplace a par x, b par y, c par z (caractère par caractère)",
+      "Remplace la chaîne « abc » par « xyz »",
+      "Supprime les lettres abc"
+     ],
+     "answer": 0,
+     "explain": "`y` est une **table de translittération** (comme `tr`) : 1ᵉʳ caractère de la 1ʳᵉ liste → 1ᵉʳ de la 2ᵉ, etc."
+    }
+   ]
+  },
+  {
+   "id": "find-avance",
+   "title": "find avancé : combiner, exclure, filtrer",
+   "emoji": "🔎",
+   "minutes": 24,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tu connais `find` pour chercher par nom ou par type. Ici on passe au niveau supérieur : **combiner** des critères, **exclure** un dossier, filtrer par **date**, **taille**, **droits**, et produire une sortie **sur mesure**. Tous les exemples utilisent ce dossier :"
+    },
+    {
+     "type": "prereq",
+     "formation": "recherche",
+     "why": "Les bases de `find` (-name, -type, -exec) sont vues dans « Rechercher comme un pro » : ici, on combine et on exclut."
+    },
+    {
+     "type": "code",
+     "sql": ".\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp",
+     "lang": "Terminal",
+     "title": "Le dossier d'exercice"
+    },
+    {
+     "type": "say",
+     "text": "**Combiner les critères.** Par défaut, les critères sont reliés par un **ET**. Pour un **OU**, on écrit `-o` ; pour un **NON**, `!` ou `-not`. On groupe avec des **parenthèses protégées** `\\( … \\)`."
+    },
+    {
+     "type": "code",
+     "sql": "$ find . -name '*.c' -o -name '*.sh'\n./src/util.c\n./src/run.sh\n./src/main.c\n$ find . -type f -not -name '*.c' | head -3\n./src/run.sh\n./README.md\n./tmp/vide.txt",
+     "lang": "Terminal",
+     "title": "OU, NON"
+    },
+    {
+     "type": "exercise",
+     "q": "Trouve les fichiers dont le nom finit par `.c` **ou** `.sh`.",
+     "hints": [
+      "-o entre deux critères -name"
+     ],
+     "accept": [
+      "find . -name '*.c' -o -name \"*.sh\"",
+      "find . -name \"*.c\" -o -name '*.sh'",
+      "find . -name \"*.c\" -o -name \"*.sh\"",
+      "find . \\( -name '*.c' -o -name '*.sh' \\)",
+      "find . \\( -name '*.c' -o -name \"*.sh\" \\)",
+      "find . \\( -name \"*.c\" -o -name '*.sh' \\)",
+      "find . \\( -name \"*.c\" -o -name \"*.sh\" \\)",
+      "find . -type f \\( -name '*.c' -o -name '*.sh' \\)",
+      "find . -type f \\( -name '*.c' -o -name \"*.sh\" \\)",
+      "find . -type f \\( -name \"*.c\" -o -name '*.sh' \\)",
+      "find . -type f \\( -name \"*.c\" -o -name \"*.sh\" \\)"
+     ],
+     "solution": "find . -name '*.c' -o -name '*.sh'",
+     "explain": "`-o` = **OU**. Quand on mélange avec d'autres critères, entoure le groupe de `\\( … \\)`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste tous les **fichiers** qui **ne sont pas** des `.c`.",
+     "hints": [
+      "-not ou !"
+     ],
+     "accept": [
+      "find . -type f -not -name \"*.c\"",
+      "find . -type f ! -name '*.c'",
+      "find . -type f ! -name \"*.c\"",
+      "find . ! -name '*.c' -type f",
+      "find . ! -name \"*.c\" -type f",
+      "find . -not -name '*.c' -type f",
+      "find . -not -name \"*.c\" -type f"
+     ],
+     "solution": "find . -type f -not -name '*.c'",
+     "explain": "`-not` (ou `!`) inverse le critère suivant.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "say",
+     "text": "**Fichiers vides, tailles, âges :**"
+    },
+    {
+     "type": "code",
+     "sql": "-empty              fichiers ET dossiers vides\n-size +1M           plus de 1 Mo   (k, M, G ; + plus, - moins)\n-mtime +30          modifié il y a PLUS de 30 jours   (-7 : dans les 7 derniers jours)\n-mmin -60           modifié dans la dernière heure (en minutes)\n-newer ref          modifié plus récemment que le fichier « ref »\n-user awa           appartient à awa           -group dev   -perm 755",
+     "lang": "Terminal",
+     "title": "Critères de temps, taille, propriétaire"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les **fichiers vides**.",
+     "hints": [
+      "-empty"
+     ],
+     "accept": [
+      "find . -empty -type f",
+      "find . -empty"
+     ],
+     "solution": "find . -type f -empty",
+     "explain": "`-empty` : taille 0 (pour un dossier : aucun contenu). Utile pour le ménage.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers de **plus de 1 Mo**.",
+     "hints": [
+      "-size +1M"
+     ],
+     "accept": [
+      "find . -size +1M -type f",
+      "find . -size +1M",
+      "find . -type f -size +1024k"
+     ],
+     "solution": "find . -type f -size +1M",
+     "explain": "`-size +1M` : strictement plus de 1 Mo. `+` plus grand, `-` plus petit, rien = exactement.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers modifiés il y a **plus de 30 jours**.",
+     "hints": [
+      "-mtime +30"
+     ],
+     "accept": [
+      "find . -mtime +30 -type f",
+      "find . -mtime +30"
+     ],
+     "solution": "find . -type f -mtime +30",
+     "explain": "`-mtime +30` : dernière modification **il y a plus de 30 jours**. `-mtime -30` : dans les 30 derniers jours.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers modifiés **dans la dernière heure** (60 minutes).",
+     "hints": [
+      "-mmin en minutes"
+     ],
+     "accept": [
+      "find . -mmin -60 -type f"
+     ],
+     "solution": "find . -type f -mmin -60",
+     "explain": "`-mmin -60` : moins de 60 minutes (ici : `notes.txt`, touché à l'instant).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "choice",
+     "q": "`-mtime +7`, `-mtime 7` et `-mtime -7` : lequel désigne les fichiers modifiés **dans les 7 derniers jours** ?",
+     "options": [
+      "-mtime -7",
+      "-mtime +7",
+      "-mtime 7"
+     ],
+     "answer": 0,
+     "explain": "`-7` = moins de 7 jours ; `+7` = plus de 7 jours ; `7` = exactement 7 jours (tranche de 24 h)."
+    },
+    {
+     "type": "say",
+     "text": "**Les droits.** `-perm 755` : droits **exactement** 755. `-perm -u+x` ou `-perm -100` : **au moins** ces bits (ici, exécutable par le propriétaire). `-perm /u+x` : **au moins un** de ces bits."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers **exécutables par leur propriétaire** (bit x du propriétaire).",
+     "hints": [
+      "-perm -u+x"
+     ],
+     "accept": [
+      "find . -type f -perm -100",
+      "find . -type f -perm /u+x",
+      "find . -type f -perm /100",
+      "find . -perm -u+x -type f"
+     ],
+     "solution": "find . -type f -perm -u+x",
+     "explain": "`-perm -u+x` : le propriétaire a **au moins** le droit d'exécution. Ici : `run.sh`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "choice",
+     "q": "Quel `find` repère les programmes **setuid** (une cible classique d'audit de sécurité) ?",
+     "options": [
+      "find / -perm -4000 -type f 2>/dev/null",
+      "find / -perm 4000",
+      "find / -setuid"
+     ],
+     "answer": 0,
+     "explain": "`-perm -4000` : le bit **setuid** est positionné (peu importe le reste). `2>/dev/null` masque les « Permission denied »."
+    },
+    {
+     "type": "say",
+     "text": "**Exclure un dossier** avec `-prune` : « n'entre pas dans ce dossier ». Forme : `find . -path ./tmp -prune -o -type f -print`."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste tous les **fichiers** en **excluant le dossier `tmp`**.",
+     "hints": [
+      "-path ./tmp -prune -o … -print"
+     ],
+     "accept": [
+      "find . -name tmp -prune -o -type f -print",
+      "find . -type d -name tmp -prune -o -type f -print",
+      "find . -path './tmp' -prune -o -type f -print",
+      "find . -path \"./tmp\" -prune -o -type f -print"
+     ],
+     "solution": "find . -path ./tmp -prune -o -type f -print",
+     "explain": "`-prune` coupe l'exploration du dossier, `-o` enchaîne sur la suite, et **`-print` est obligatoire** (sinon le dossier élagué s'afficherait aussi).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "say",
+     "text": "**Profondeur.** `-maxdepth N` limite la descente, `-mindepth N` ignore les niveaux trop hauts."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les **fichiers du dossier courant seulement** (pas ceux des sous-dossiers).",
+     "hints": [
+      "-maxdepth 1"
+     ],
+     "accept": [
+      "find . -type f -maxdepth 1"
+     ],
+     "solution": "find . -maxdepth 1 -type f",
+     "explain": "`-maxdepth 1` : seulement le niveau courant (ici : `README.md`). *Mets-le avant les autres critères* pour éviter un avertissement.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers `.c` situés **exactement un niveau sous** le dossier courant (dans `src`, donc à profondeur 2).",
+     "hints": [
+      "Combine -mindepth et -maxdepth"
+     ],
+     "accept": [
+      "find . -mindepth 2 -maxdepth 2 -name \"*.c\"",
+      "find . -maxdepth 2 -mindepth 2 -name '*.c'",
+      "find . -maxdepth 2 -mindepth 2 -name \"*.c\"",
+      "find . -mindepth 2 -name '*.c'",
+      "find . -mindepth 2 -name \"*.c\"",
+      "find . -maxdepth 2 -name '*.c'",
+      "find . -maxdepth 2 -name \"*.c\""
+     ],
+     "solution": "find . -mindepth 2 -maxdepth 2 -name '*.c'",
+     "explain": "`-mindepth 2 -maxdepth 2` : exactement le niveau 2.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "say",
+     "text": "**Sortie sur mesure avec `-printf`** : `%f` (nom seul), `%p` (chemin), `%s` (taille en octets), `%u` (propriétaire), `%TY-%Tm-%Td` (date de modification)."
+    },
+    {
+     "type": "code",
+     "sql": "$ find . -name '*.c' -printf '%f %s octets\\n'\nutil.c 10 octets\nmain.c 13 octets",
+     "lang": "Terminal",
+     "title": "-printf"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **uniquement le nom** (sans le chemin) des fichiers `.c`, un par ligne, avec `-printf`.",
+     "hints": [
+      "%f est le nom du fichier"
+     ],
+     "accept": [
+      "find . -name '*.c' -printf \"%f\\n\"",
+      "find . -name \"*.c\" -printf '%f\\n'",
+      "find . -name \"*.c\" -printf \"%f\\n\"",
+      "find . -type f -name '*.c' -printf '%f\\n'",
+      "find . -type f -name '*.c' -printf \"%f\\n\"",
+      "find . -type f -name \"*.c\" -printf '%f\\n'",
+      "find . -type f -name \"*.c\" -printf \"%f\\n\""
+     ],
+     "solution": "find . -name '*.c' -printf '%f\\n'",
+     "explain": "`%f` : le nom de fichier **sans dossier**. N'oublie pas `\\n` (retour à la ligne).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Tu es dans ce dossier :\n.\n├── README.md\n├── src/   main.c  util.c  run.sh (exécutable)\n├── docs/  rapport.pdf (3 Mo)  ancien.txt (40 jours)  notes.txt (à l'instant)\n└── tmp/   vide.txt (0 octet)  cache.tmp"
+    },
+    {
+     "type": "say",
+     "text": "**Agir : `-exec`.** Deux formes : `-exec cmd {} \\;` (une exécution **par fichier**) et `-exec cmd {} +` (**regroupe** les fichiers, comme `xargs`, bien plus rapide)."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle différence entre `-exec wc -l {} \\;` et `-exec wc -l {} +` ?",
+     "options": [
+      "`+` regroupe plusieurs fichiers dans une seule exécution (plus rapide) ; `\\;` lance la commande une fois par fichier",
+      "Aucune",
+      "`\\;` supprime les fichiers"
+     ],
+     "answer": 0,
+     "explain": "Avec `+`, `find` construit une longue liste d'arguments (comme `xargs`). Avec `\\;`, un **processus par fichier** : plus lent sur de gros volumes."
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `find . -name '*.tmp' -delete` ?",
+     "options": [
+      "Supprime immédiatement tous les fichiers .tmp trouvés, sans confirmation",
+      "Les liste seulement",
+      "Les déplace à la corbeille"
+     ],
+     "answer": 0,
+     "explain": "`-delete` est **définitif**. **Réflexe de pro** : lance d'abord la commande **sans** `-delete` pour voir ce qui sera supprimé."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi faut-il écrire `-name \"*.c\"` **entre guillemets** ?",
+     "options": [
+      "Pour empêcher le shell de développer *.c avant que find ne le reçoive",
+      "Pour que find soit plus rapide",
+      "Parce que * est interdit"
+     ],
+     "answer": 0,
+     "explain": "Sans guillemets, si le dossier courant contient des `.c`, le shell remplace `*.c` par leurs noms et `find` reçoit des arguments incorrects."
+    }
+   ]
+  },
+  {
+   "id": "xargs",
+   "title": "xargs : transformer une liste en arguments",
+   "emoji": "⛓️",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un tube envoie du **texte** sur l'entrée standard. Mais beaucoup de commandes (`rm`, `cp`, `grep`, `wc`…) attendent des **arguments**, pas de l'entrée standard. **`xargs`** fait le pont : il **lit une liste** et la transforme en **arguments** d'une commande."
+    },
+    {
+     "type": "code",
+     "sql": "echo a.txt b.txt | rm            # NE MARCHE PAS : rm ignore son entrée standard\necho a.txt b.txt | xargs rm      # xargs construit : rm a.txt b.txt",
+     "lang": "Terminal",
+     "title": "Le problème que résout xargs"
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert `xargs` ?",
+     "options": [
+      "À convertir l'entrée standard en arguments pour une commande",
+      "À trier des fichiers",
+      "À exécuter une commande en arrière-plan"
+     ],
+     "answer": 0,
+     "explain": "Il lit des mots sur l'entrée standard et lance la commande avec ces mots **en arguments**."
+    },
+    {
+     "type": "exercise",
+     "q": "`liste.txt` contient des noms de fichiers. **Supprime** les fichiers listés avec `xargs`.",
+     "hints": [
+      "xargs commande"
+     ],
+     "accept": [
+      "cat liste.txt | xargs rm",
+      "xargs -a liste.txt rm"
+     ],
+     "solution": "xargs rm < liste.txt",
+     "explain": "`xargs rm < liste.txt` : équivalent de `rm a.txt b.txt`. (`c.txt` n'est pas listé : il reste.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "a.txt\na\n\nb.txt\nb\n\nc.txt\nc\n\nliste.txt\na.txt\nb.txt"
+    },
+    {
+     "type": "say",
+     "text": "**`-n N`** : au plus **N arguments** par exécution."
+    },
+    {
+     "type": "code",
+     "sql": "$ echo 1 2 3 4 5 6 | xargs -n 2\n1 2\n3 4\n5 6\n$ echo 1 2 3 4 5 6 | xargs -n 1\n1\n2\n3\n4\n5\n6",
+     "lang": "Terminal",
+     "title": "-n"
+    },
+    {
+     "type": "exercise",
+     "q": "Regroupe les nombres `1 2 3 4 5 6` **par paires** (une paire par ligne) avec `xargs -n 2`.",
+     "hints": [
+      "xargs -n 2"
+     ],
+     "accept": [
+      "echo '1 2 3 4 5 6' | xargs -n 2",
+      "echo \"1 2 3 4 5 6\" | xargs -n 2",
+      "echo 1 2 3 4 5 6 | xargs -n2",
+      "echo '1 2 3 4 5 6' | xargs -n2",
+      "echo \"1 2 3 4 5 6\" | xargs -n2"
+     ],
+     "solution": "echo 1 2 3 4 5 6 | xargs -n 2",
+     "explain": "`-n 2` : `echo` est lancé **trois fois**, avec deux arguments à chaque fois.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**`-I{}`** : on choisit **où** placer l'élément (au lieu de le mettre à la fin) et on traite **un élément par exécution** :"
+    },
+    {
+     "type": "code",
+     "sql": "$ printf 'awa\\nkoffi\\n' | xargs -I{} echo Bonjour {}\nBonjour awa\nBonjour koffi",
+     "lang": "Terminal",
+     "title": "-I{}"
+    },
+    {
+     "type": "exercise",
+     "q": "`noms.txt` contient des prénoms (un par ligne). Pour chacun, affiche `Bonjour` suivi du prénom, avec `xargs -I{}`.",
+     "hints": [
+      "-I{} puis {} dans la commande"
+     ],
+     "accept": [
+      "cat noms.txt | xargs -I{} echo Bonjour {}",
+      "xargs -I % echo Bonjour % < noms.txt",
+      "cat noms.txt | xargs -I % echo Bonjour %",
+      "xargs -I{} echo 'Bonjour {'} < noms.txt",
+      "xargs -I{} echo \"Bonjour {\"} < noms.txt",
+      "cat noms.txt | xargs -I{} echo 'Bonjour {'}",
+      "cat noms.txt | xargs -I{} echo \"Bonjour {\"}"
+     ],
+     "solution": "xargs -I{} echo Bonjour {} < noms.txt",
+     "explain": "`{}` est remplacé par chaque ligne lue. (On peut choisir un autre symbole : `-I %`.)",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "noms.txt\nawa\nkoffi"
+    },
+    {
+     "type": "say",
+     "text": "**Le piège des espaces et des guillemets.** `xargs` coupe l'entrée sur les **espaces**. Un fichier `a b.tmp` devient **deux** arguments (`a` et `b.tmp`). **La solution fiable :** séparer par le caractère **nul** : `find … -print0 | xargs -0 …`."
+    },
+    {
+     "type": "code",
+     "sql": "find . -name '*.tmp' | xargs rm                # DANGER : casse sur « a b.tmp »\nfind . -name '*.tmp' -print0 | xargs -0 rm   # sûr : séparateur = caractère nul",
+     "lang": "Terminal",
+     "title": "-print0 et -0"
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime tous les fichiers `*.tmp` (dont `a b.tmp`, qui contient un **espace**), avec `find` et `xargs`, de façon **sûre**.",
+     "hints": [
+      "-print0 d'un côté, -0 de l'autre"
+     ],
+     "accept": [
+      "find . -name \"*.tmp\" -print0 | xargs -0 rm",
+      "find . -name '*.tmp' -print0 | xargs -0 rm -f",
+      "find . -name \"*.tmp\" -print0 | xargs -0 rm -f",
+      "find . -type f -name '*.tmp' -print0 | xargs -0 rm",
+      "find . -type f -name \"*.tmp\" -print0 | xargs -0 rm",
+      "find . -type f -name '*.tmp' -print0 | xargs -0 rm -f",
+      "find . -type f -name \"*.tmp\" -print0 | xargs -0 rm -f",
+      "find . -name '*.tmp' -print0 | xargs -0 -r rm",
+      "find . -name \"*.tmp\" -print0 | xargs -0 -r rm",
+      "find . -name '*.tmp' -print0 | xargs -r0 rm",
+      "find . -name \"*.tmp\" -print0 | xargs -r0 rm"
+     ],
+     "solution": "find . -name '*.tmp' -print0 | xargs -0 rm",
+     "explain": "`-print0` termine chaque nom par un **octet nul**, `xargs -0` le comprend : les espaces ne posent plus de problème. `keep.txt` n'est pas touché.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Dossier courant : « a b.tmp », « c.tmp », « keep.txt »"
+    },
+    {
+     "type": "say",
+     "text": "**Chercher dans plusieurs fichiers :** `find` trouve, `xargs grep` cherche dedans."
+    },
+    {
+     "type": "exercise",
+     "q": "Liste les fichiers `.c` du dossier qui **contiennent le mot `main`** (avec `find`, `xargs` et `grep -l`).",
+     "hints": [
+      "grep -l affiche seulement les noms de fichiers"
+     ],
+     "accept": [
+      "find . -name \"*.c\" | xargs grep -l main",
+      "find . -name '*.c' -print0 | xargs -0 grep -l main",
+      "find . -name \"*.c\" -print0 | xargs -0 grep -l main",
+      "find . -type f -name '*.c' | xargs grep -l main",
+      "find . -type f -name \"*.c\" | xargs grep -l main",
+      "find . -type f -name '*.c' -print0 | xargs -0 grep -l main",
+      "find . -type f -name \"*.c\" -print0 | xargs -0 grep -l main"
+     ],
+     "solution": "find . -name '*.c' | xargs grep -l main",
+     "explain": "`grep -l` : liste des fichiers qui contiennent le motif. Ici : `./src/a.c`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Dossier : src/a.c (contient « int main(){} »), src/b.c (contient « void f(){} »)"
+    },
+    {
+     "type": "exercise",
+     "q": "Compte le nombre de lignes de **tous** les fichiers `.c` en une seule commande (avec `xargs wc -l`).",
+     "hints": [
+      "xargs wc -l"
+     ],
+     "accept": [
+      "find . -name \"*.c\" | xargs wc -l",
+      "find . -name '*.c' -print0 | xargs -0 wc -l",
+      "find . -name \"*.c\" -print0 | xargs -0 wc -l",
+      "find . -type f -name '*.c' | xargs wc -l",
+      "find . -type f -name \"*.c\" | xargs wc -l",
+      "find . -type f -name '*.c' -print0 | xargs -0 wc -l",
+      "find . -type f -name \"*.c\" -print0 | xargs -0 wc -l"
+     ],
+     "solution": "find . -name '*.c' | xargs wc -l",
+     "explain": "`wc -l` reçoit tous les fichiers en arguments et affiche aussi le **total**.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Dossier : src/a.c (1 ligne), src/b.c (1 ligne)"
+    },
+    {
+     "type": "say",
+     "text": "**Autres options utiles :**"
+    },
+    {
+     "type": "code",
+     "sql": "-r   (--no-run-if-empty) ne lance PAS la commande si l'entrée est vide\n-t   affiche chaque commande avant de l'exécuter (sur stderr) : parfait pour vérifier\n-p   demande confirmation avant chaque exécution\n-P N  lance jusqu'à N commandes EN PARALLÈLE (ex. compresser avec 4 processus)\n-d '\\n'  utilise le retour à la ligne comme séparateur (garde les espaces dans les noms)",
+     "lang": "Terminal",
+     "title": "Options"
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il avec `find . -name '*.xyz' | xargs rm` s'il **n'y a aucun résultat** ?",
+     "options": [
+      "Sans -r, GNU xargs lance quand même `rm` sans argument (erreur) ; avec -r, rien n'est lancé",
+      "Rien, c'est toujours silencieux",
+      "Il supprime tout le dossier"
+     ],
+     "answer": 0,
+     "explain": "GNU `xargs` exécute la commande **au moins une fois**. `-r` (*no-run-if-empty*) évite de lancer `rm` sans argument."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle option permet de traiter 4 fichiers **en parallèle** ?",
+     "options": [
+      "-P 4",
+      "-n 4",
+      "-t 4"
+     ],
+     "answer": 0,
+     "explain": "`-P N` : jusqu'à N processus en parallèle. Combiné avec `-n 1`, c'est un mini « parallel ». (`-n 4` = 4 arguments par exécution.)"
+    },
+    {
+     "type": "choice",
+     "q": "Pour supprimer des fichiers trouvés par `find`, quelle forme est la **plus sûre** quand les noms peuvent contenir des espaces ?",
+     "options": [
+      "find … -print0 | xargs -0 rm",
+      "find … | xargs rm",
+      "for f in $(find …); do rm $f; done"
+     ],
+     "answer": 0,
+     "explain": "`-print0 | xargs -0` (ou `-exec rm {} +`) gère **tous** les noms, y compris avec espaces et retours à la ligne."
+    },
+    {
+     "type": "choice",
+     "q": "`find . -name '*.c' -exec wc -l {} +` ressemble à quelle commande avec xargs ?",
+     "options": [
+      "find . -name '*.c' -print0 | xargs -0 wc -l",
+      "find . -name '*.c' | wc -l",
+      "find . -name '*.c' | xargs -n 1 wc -l"
+     ],
+     "answer": 0,
+     "explain": "`-exec … {} +` regroupe les fichiers exactement comme `xargs` : une seule exécution (ou quelques-unes)."
+    }
+   ]
+  },
+  {
+   "id": "locate",
+   "title": "locate : chercher à la vitesse de l'éclair",
+   "emoji": "⚡",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`find` parcourt le disque **en direct** : précis, mais lent sur de gros volumes. **`locate`** interroge une **base de données** déjà construite : la réponse est **quasi instantanée**. Contrepartie : la base peut être **en retard**."
+    },
+    {
+     "type": "code",
+     "sql": "sudo updatedb            # (re)construit la base de données (souvent fait chaque nuit par cron/systemd)\nlocate nom                # liste tous les chemins contenant « nom »\nlocate -i readme          # insensible à la casse\nlocate -c '*.conf'         # compte les résultats au lieu de les afficher\nlocate -l 5 passwd         # limite à 5 résultats\nlocate -b '\\passwd'       # seulement les fichiers dont le NOM est exactement « passwd »\nlocate -r '\\.conf$'       # expression régulière\nlocate -e nom             # n'affiche que les fichiers qui existent ENCORE",
+     "lang": "Terminal",
+     "title": "Les commandes de locate"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi un fichier créé **il y a 5 minutes** n'apparaît-il pas avec `locate` ?",
+     "options": [
+      "La base n'a pas encore été mise à jour par updatedb",
+      "locate ne voit pas les fichiers récents par principe de sécurité",
+      "Le fichier est caché"
+     ],
+     "answer": 0,
+     "explain": "`locate` lit la **base** construite par `updatedb` (planifiée, souvent la nuit). Pour un fichier récent : `sudo updatedb` ou **`find`**."
+    },
+    {
+     "type": "exercise",
+     "q": "Mets à jour la base de données de `locate`.",
+     "hints": [
+      "La commande se termine par « db »"
+     ],
+     "accept": [
+      "updatedb"
+     ],
+     "solution": "sudo updatedb",
+     "explain": "`sudo updatedb` : réindexe le disque. Sans `sudo` (ou en tant que root) selon la configuration.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Cherche, **sans tenir compte de la casse**, tous les chemins qui contiennent `readme`.",
+     "hints": [
+      "Option -i"
+     ],
+     "accept": [
+      "locate --ignore-case readme"
+     ],
+     "solution": "locate -i readme",
+     "explain": "`-i` : *ignore case* : `README`, `Readme`, `readme`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "**Compte** les chemins contenant `.conf` au lieu de les afficher.",
+     "hints": [
+      "Option -c"
+     ],
+     "accept": [
+      "locate --count .conf",
+      "locate -c '.conf'",
+      "locate -c \".conf\""
+     ],
+     "solution": "locate -c .conf",
+     "explain": "`-c` (*count*) : affiche seulement le nombre de résultats.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche **au plus 5** résultats de la recherche de `passwd`.",
+     "hints": [
+      "Option -l suivie du nombre"
+     ],
+     "accept": [
+      "locate --limit=5 passwd",
+      "locate --limit 5 passwd",
+      "locate -n 5 passwd"
+     ],
+     "solution": "locate -l 5 passwd",
+     "explain": "`-l 5` (*limit*) : s'arrête après 5 résultats.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true
+    },
+    {
+     "type": "say",
+     "text": "**Piège : `locate passwd` renvoie tout ce qui contient « passwd » dans le chemin** (`/etc/passwd`, `/usr/share/doc/passwd/…`, `/var/lib/…/passwd.bak`…). Pour ne garder que les fichiers **nommés** exactement `passwd`, utilise **`-b` avec un antislash** : `locate -b '\\passwd'`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande affiche **seulement** les fichiers dont le nom est exactement `passwd` (et pas `/etc/passwd-` ni les dossiers `passwd/…`) ?",
+     "options": [
+      "locate -b '\\passwd'",
+      "locate passwd",
+      "locate -c passwd"
+     ],
+     "answer": 0,
+     "explain": "`-b` compare avec le **nom de base** seulement ; l'antislash `\\` demande une **correspondance exacte** (sans lui, c'est une recherche « contient » comme `*passwd*`)."
+    },
+    {
+     "type": "choice",
+     "q": "`locate '*.conf'` et `locate .conf` : y a-t-il une différence ?",
+     "options": [
+      "Oui : sans caractère générique, locate cherche « contient » ; avec un motif, il doit correspondre au chemin entier",
+      "Aucune, toujours identiques",
+      "Le premier supprime les fichiers"
+     ],
+     "answer": 0,
+     "explain": "Sans `*`, `?` ou `[ ]`, le motif est encadré de `*` implicitement. **Avec** un motif, il doit correspondre au chemin **en entier** (donc `'*.conf'` pour finir par `.conf`)."
+    },
+    {
+     "type": "say",
+     "text": "**Quand choisir quoi ?**"
+    },
+    {
+     "type": "code",
+     "sql": "Je connais (une partie du) nom, je veux de la VITESSE     → locate\nJe cherche par taille, date, droits, propriétaire              → find\nJe veux AGIR sur les résultats (supprimer, copier…)            → find (-exec) ou find | xargs\nJe cherche un fichier créé à l'instant                          → find (la base de locate est en retard)\nJe cherche DANS le contenu des fichiers                        → grep -r\nJe cherche l'emplacement d'une COMMANDE                        → which, type, whereis",
+     "lang": "Terminal",
+     "title": "Tableau de choix"
+    },
+    {
+     "type": "choice",
+     "q": "Tu dois supprimer tous les `.log` de plus de 90 jours. Quel outil ?",
+     "options": [
+      "find avec -mtime +90 (locate ne connaît ni les dates ni les actions)",
+      "locate -d 90",
+      "grep -r"
+     ],
+     "answer": 0,
+     "explain": "`locate` ne filtre que sur le **nom** ; `find` gère la date, la taille, les droits, et peut **agir** (`-delete`, `-exec`)."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `locate` ne montre-t-il pas les fichiers de **votre dossier personnel** à un autre utilisateur ?",
+     "options": [
+      "La base respecte les droits : on ne voit que les chemins auxquels on a accès (mlocate/plocate)",
+      "Parce que locate est limité à /usr",
+      "C'est un bug"
+     ],
+     "answer": 0,
+     "explain": "`mlocate` et `plocate` **respectent les permissions** : un utilisateur ne voit pas les chemins des dossiers qu'il n'a pas le droit de parcourir."
+    },
+    {
+     "type": "choice",
+     "q": "Où `plocate` stocke-t-il sa base ?",
+     "options": [
+      "Dans un fichier de base de données (par ex. /var/lib/plocate/plocate.db)",
+      "Dans le fichier ~/.bashrc",
+      "Dans la mémoire uniquement"
+     ],
+     "answer": 0,
+     "explain": "La base est un fichier (`/var/lib/plocate/plocate.db` ou `/var/lib/mlocate/mlocate.db`). Les dossiers exclus se règlent dans `/etc/updatedb.conf`."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : le shell avancé",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final.** Tu vas **combiner** tout ce que tu as appris : `for`, `cut`, `sort`, `uniq`, `sed`, `find`, `xargs`. Chaque question a une seule bonne façon de **chaîner** les outils."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 1/8** : pour chaque fichier `.txt` du dossier, affiche son nombre de lignes (juste le nombre), avec une boucle `for` (variable `f`).",
+     "hints": [
+      "for f in *.txt; do … done"
+     ],
+     "accept": [
+      "for f in *.txt; do wc -l < \"$f\"; done",
+      "for f in *.txt; do wc -l < ${f}; done"
+     ],
+     "solution": "for f in *.txt; do wc -l < $f; done",
+     "explain": "Boucle sur le motif `*.txt` + `wc -l <` pour n'obtenir que le nombre.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "a.txt\nun\ndeux\n\nb.txt\nun\ndeux\ntrois\n\nc.log\nx"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/8** : dans `acces.log`, affiche **l'adresse IP la plus active** avec son nombre de requêtes (une seule ligne).",
+     "hints": [
+      "extraire, trier, compter, retrier, garder la première ligne"
+     ],
+     "accept": [
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -nr | head -n 1",
+      "cut -d' ' -f1 acces.log | sort | uniq -c | sort -nr | head -1",
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -nr | head -1",
+      "cut -d' ' -f1 acces.log | sort | uniq -c | sort -rn | head -n 1",
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -rn | head -n 1",
+      "cut -d' ' -f1 acces.log | sort | uniq -c | sort -rn | head -1",
+      "cut -d\" \" -f1 acces.log | sort | uniq -c | sort -rn | head -1"
+     ],
+     "solution": "cut -d' ' -f1 acces.log | sort | uniq -c | sort -nr | head -n 1",
+     "explain": "Le motif complet : `cut | sort | uniq -c | sort -nr | head -n 1`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "acces.log\n10.0.0.5 GET /index\n10.0.0.7 GET /login\n10.0.0.5 POST /login\n10.0.0.9 GET /index\n10.0.0.5 GET /about\n10.0.0.7 GET /index"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/8** : dans `eleves.txt`, affiche la ligne de l'élève **le plus âgé** (champ 3 numérique, séparateur `:`).",
+     "hints": [
+      "tri décroissant sur le champ 3, première ligne"
+     ],
+     "accept": [
+      "sort -t: -k3 -nr eleves.txt | head -1",
+      "sort -t: -k3,3nr eleves.txt | head -n 1",
+      "sort -t: -k3,3nr eleves.txt | head -1",
+      "sort -t: -k3 -rn eleves.txt | head -n 1",
+      "sort -t: -k3 -rn eleves.txt | head -1"
+     ],
+     "solution": "sort -t: -k3 -nr eleves.txt | head -n 1",
+     "explain": "Tri inversé numérique sur l'âge, on garde la première ligne : `Yao:Parakou:30`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "eleves.txt\nAwa:Cotonou:22\nKoffi:Porto-Novo:25\nSenami:Cotonou:22\nYao:Parakou:30\nIbrahim:Cotonou:25"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/8** : affiche `conf.txt` **sans commentaires ni lignes vides**.",
+     "hints": [
+      "Deux commandes d"
+     ],
+     "accept": [
+      "sed \"/^#/d;/^$/d\" conf.txt",
+      "sed '/^$/d;/^#/d' conf.txt",
+      "sed \"/^$/d;/^#/d\" conf.txt",
+      "sed -e '/^#/d' -e '/^$/d' conf.txt",
+      "sed -e '/^#/d' -e \"/^$/d\" conf.txt",
+      "sed -e \"/^#/d\" -e '/^$/d' conf.txt",
+      "sed -e \"/^#/d\" -e \"/^$/d\" conf.txt",
+      "sed -E '/^(#|$)/d' conf.txt",
+      "sed -E \"/^(#|$)/d\" conf.txt"
+     ],
+     "solution": "sed '/^#/d;/^$/d' conf.txt",
+     "explain": "`/^#/d;/^$/d` supprime commentaires et lignes vides.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "conf.txt\n# configuration\nport=8080\n\n# debug\ndebug=true\nhost=localhost"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/8** : `mots.txt` contient `bonjour monde`. Affiche `monde bonjour` avec `sed -E` et deux groupes.",
+     "hints": [
+      "Deux groupes, \\2 \\1"
+     ],
+     "accept": [
+      "sed 's/\\([a-z]*\\) \\([a-z]*\\)/\\2 \\1/' mots.txt",
+      "sed -E 's/(\\w+) (\\w+)/\\2 \\1/' mots.txt"
+     ],
+     "solution": "sed -E 's/([a-z]+) ([a-z]+)/\\2 \\1/' mots.txt",
+     "explain": "Chaque groupe capture un mot ; on les restitue dans l'ordre inverse.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "mots.txt\nbonjour monde"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/8** : renomme chaque fichier `.txt` du dossier en `.bak` avec une boucle `for` (`rapport1.txt` → `rapport1.bak`).",
+     "hints": [
+      "${f%.txt}.bak"
+     ],
+     "accept": [
+      "for f in *.txt; do mv \"$f\" \"${f%.txt}.bak\"; done",
+      "for f in *.txt; do mv ${f} \"${f%.txt}.bak\"; done",
+      "for f in *.txt; do mv $f ${f%.txt}.bak; done",
+      "for f in *.txt; do mv \"$f\" ${f%.txt}.bak; done",
+      "for f in *.txt; do mv ${f} ${f%.txt}.bak; done"
+     ],
+     "solution": "for f in *.txt; do mv $f \"${f%.txt}.bak\"; done",
+     "explain": "`${f%.txt}` retire l'extension, on ajoute `.bak`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "rapport1.txt\nr1\n\nrapport2.txt\nr2\n\nnotes.md\nn"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/8** : liste (avec `find` et `xargs grep -l`) les fichiers `.c` qui contiennent `main`.",
+     "hints": [
+      "find puis xargs grep -l"
+     ],
+     "accept": [
+      "find . -name \"*.c\" | xargs grep -l main",
+      "find . -name '*.c' -print0 | xargs -0 grep -l main",
+      "find . -name \"*.c\" -print0 | xargs -0 grep -l main",
+      "find . -type f -name '*.c' | xargs grep -l main",
+      "find . -type f -name \"*.c\" | xargs grep -l main",
+      "find . -type f -name '*.c' -print0 | xargs -0 grep -l main",
+      "find . -type f -name \"*.c\" -print0 | xargs -0 grep -l main"
+     ],
+     "solution": "find . -name '*.c' | xargs grep -l main",
+     "explain": "`find` trouve les `.c`, `xargs grep -l` ne garde que les fichiers qui contiennent `main`.",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "Dossier : src/a.c (contient « int main(){} »), src/b.c (contient « void f(){} »)"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/8 (boss)** : compte **toutes** les lignes contenant `ERROR` dans **tous** les fichiers `.log` du dossier `logs` (sous-dossiers compris), avec **un seul nombre** en sortie. Utilise `find`, `xargs`, `grep` et `wc -l`.",
+     "hints": [
+      "find → xargs grep -h → wc -l",
+      "-h supprime le nom de fichier devant chaque ligne"
+     ],
+     "accept": [
+      "find logs -name \"*.log\" | xargs grep -h ERROR | wc -l",
+      "find logs -name '*.log' -print0 | xargs -0 grep -h ERROR | wc -l",
+      "find logs -name \"*.log\" -print0 | xargs -0 grep -h ERROR | wc -l",
+      "find logs -type f -name '*.log' | xargs grep -h ERROR | wc -l",
+      "find logs -type f -name \"*.log\" | xargs grep -h ERROR | wc -l",
+      "find logs -type f -name '*.log' -print0 | xargs -0 grep -h ERROR | wc -l",
+      "find logs -type f -name \"*.log\" -print0 | xargs -0 grep -h ERROR | wc -l",
+      "find logs -name '*.log' -print0 | xargs -0 cat | grep ERROR | wc -l",
+      "find logs -name \"*.log\" -print0 | xargs -0 cat | grep ERROR | wc -l",
+      "find logs -name '*.log' | xargs cat | grep ERROR | wc -l",
+      "find logs -name \"*.log\" | xargs cat | grep ERROR | wc -l"
+     ],
+     "solution": "find logs -name '*.log' | xargs grep -h ERROR | wc -l",
+     "explain": "`grep -h` n'affiche pas les noms de fichiers ; `wc -l` compte les lignes. Résultat : 3 (le `note.txt` n'est pas un `.log`).",
+     "placeholder": "Écris ta commande ici…",
+     "caseSensitive": true,
+     "table": "logs/app.log (2 lignes ERROR) · logs/sub/db.log (1 ligne ERROR) · logs/note.txt (1 ligne ERROR mais pas un .log)"
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu maîtrises les **boucles `for`**, le découpage (`cut`), le tri (`sort`), les doublons et les comptages (`uniq`), la **transformation de texte** (`sed`), la recherche avancée (`find`), le passage de listes en arguments (`xargs`) et la recherche rapide (`locate`). Réflexe de pro : **teste toujours sans effet destructeur** (`-n`, sans `-i`, sans `-delete`) avant de lancer pour de bon."
+    }
+   ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "tubes",
+   "why": "Les redirections, les tubes et les filtres de base (cut, sort, uniq) sont supposés connus : ici on les approfondit."
+  },
+  {
+   "formation": "recherche",
+   "why": "On y découvre grep et les bases de find, que cette formation pousse plus loin."
+  }
+ ]
+}
