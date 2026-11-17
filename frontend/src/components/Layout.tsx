@@ -220,7 +220,7 @@ export default function Layout() {
       {/* Sidebar Desktop Playful Soft UI */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col border-r border-line/70 bg-card/80 p-4 shadow-sm backdrop-blur-md lg:flex">
         <div className="px-2 pt-2">
-          <Logo />
+          {/* <Logo /> */}
         </div>
 
         {/* Carte de Statut Étudiant & Mascotte */}
