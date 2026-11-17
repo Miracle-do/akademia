@@ -27,11 +27,28 @@ export async function prepareOfflineContent(): Promise<void> {
   const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
   if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return;
   try { if (localStorage.getItem(OFFLINE_KEY) === __BUILD_ID__) return; } catch { /* stockage indisponible : on continue */ }
-  const loaders = [...Object.values(chapterLoaders), ...Object.values(quizLoaders)];
-  for (let i = 0; i < loaders.length; i += 4) {
-    if (!navigator.onLine) return;
-    await Promise.allSettled(loaders.slice(i, i + 4).map((load) => load()));
-    await idle();
+  // Tout ce que l'appli peut charger à la demande (pages, chapitres, QCM, flashcards, examens, formations).
+  let files: string[] = [];
+  try {
+    const res = await fetch('/asset-manifest.json', { cache: 'no-store' });
+    if (res.ok) files = (await res.json()) as string[];
+  } catch { /* indisponible (mode dev) */ }
+  if (!files.length) {
+    const loaders = [...Object.values(chapterLoaders), ...Object.values(quizLoaders), ...Object.values(cardLoaders), ...Object.values(examIndexLoaders), ...Object.values(examLoaders), ...Object.values(formationLoaders)];
+    for (let i = 0; i < loaders.length; i += 4) {
+      if (!navigator.onLine) return;
+      await Promise.allSettled(loaders.slice(i, i + 4).map((load) => load()));
+      await idle();
+    }
+  } else {
+    let failed = 0;
+    for (let i = 0; i < files.length; i += 6) {
+      if (!navigator.onLine) return;
+      const results = await Promise.allSettled(files.slice(i, i + 6).map((f) => fetch(f).then((r) => { if (!r.ok) throw new Error(f); })));
+      failed += results.filter((r) => r.status === 'rejected').length;
+      await idle();
+    }
+    if (failed > 0) return; // on réessaiera au prochain lancement
   }
   try { localStorage.setItem(OFFLINE_KEY, __BUILD_ID__); } catch { /* ignoré */ }
 }

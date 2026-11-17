@@ -2,8 +2,17 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
+// Liste de tous les fichiers générés (pages, chapitres, quiz… chargés à la demande) pour le précache hors ligne.
+const assetManifest = () => ({
+  name: 'asset-manifest',
+  generateBundle(_: unknown, bundle: Record<string, unknown>) {
+    const files = Object.keys(bundle).filter((f) => /\.(js|css)$/.test(f)).map((f) => '/' + f);
+    (this as unknown as { emitFile: (f: object) => void }).emitFile({ type: 'asset', fileName: 'asset-manifest.json', source: JSON.stringify(files) });
+  },
+});
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), assetManifest()],
   define: { __BUILD_ID__: JSON.stringify(String(Date.now())) },
   envDir: path.resolve(__dirname, '..'),
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
