@@ -37,6 +37,11 @@
      "text": "Une connexion TCP n'est pas un fil : c'est un **état partagé** entre deux machines. Chaque côté tient un **automate à états**. Les états visibles avec `ss -tan` ou `netstat -an` sont ceux-ci :"
     },
     {
+     "type": "prereq",
+     "formation": "decoder-trames",
+     "why": "Cette formation suppose que tu sais lire l'en-tête TCP (ports, drapeaux, options). Si ce n'est pas le cas, commence par là, puis reviens."
+    },
+    {
      "type": "code",
      "sql": "LISTEN        le serveur attend des connexions\nSYN-SENT      le client a envoyé un SYN, attend le SYN+ACK\nSYN-RECV      le serveur a reçu un SYN, a répondu SYN+ACK, attend le ACK\nESTABLISHED   connexion ouverte : les données circulent\nFIN-WAIT-1    j'ai envoyé mon FIN, j'attends son ACK\nFIN-WAIT-2    mon FIN est acquitté, j'attends le FIN de l'autre\nCLOSE-WAIT    l'autre a envoyé son FIN, MAIS mon programme n'a pas encore fermé\nLAST-ACK      j'ai envoyé mon FIN après le sien, j'attends l'ACK final\nTIME-WAIT     tout est fini, j'attends 2 × MSL pour les paquets retardataires\nCLOSED        plus de connexion",
      "lang": "États",
@@ -839,6 +844,11 @@
      "text": "L'espace d'options de l'en-tête TCP est limité à **40 octets**. Chaque option suit le schéma **Type | Longueur | Valeur**, sauf deux options courtes d'un seul octet."
     },
     {
+     "type": "prereq",
+     "formation": "decoder-trames",
+     "why": "Les options TCP sont lues en hexadécimal : la formation « Décoder une trame » t'y entraîne."
+    },
+    {
      "type": "code",
      "sql": "Type 0   EOL  (fin de liste, 1 octet)\nType 1   NOP  (aucune opération : bourrage, 1 octet)\nType 2   MSS  (longueur 4)  : taille max des données par segment\nType 3   Window Scale (longueur 3) : facteur de fenêtre\nType 4   SACK permitted (longueur 2) : autorise les SACK\nType 5   SACK (longueur 2 + 8n) : blocs reçus\nType 8   Timestamps (longueur 10) : horodatage (TSval, TSecr)",
      "lang": "Table",
@@ -1238,6 +1248,12 @@
      "text": "🎓 **Bravo !** Tu connais le cycle de vie d'une connexion TCP, sa comptabilité (séquence, ACK cumulatifs, SACK), son contrôle de flux et de congestion, et tu sais diagnostiquer une panne à la lecture d'une capture. Prochaine étape : **capture un vrai téléchargement** avec Wireshark, ouvre *Statistics → TCP Stream Graphs* et retrouve slow start, évitement et pertes sur le graphe."
     }
    ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "decoder-trames",
+   "why": "Tu y apprends à lire l'en-tête TCP octet par octet, base de tout ce qui suit."
   }
  ]
 }

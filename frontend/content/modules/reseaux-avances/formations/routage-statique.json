@@ -644,5 +644,11 @@
     }
    ]
   }
+ ],
+ "prerequisites": [
+  {
+   "formation": "subnetting",
+   "why": "Décider si une destination est locale ou distante demande de savoir lire un masque."
+  }
  ]
 }

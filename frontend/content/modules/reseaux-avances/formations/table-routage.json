@@ -281,6 +281,11 @@
      "text": "C'est LA question d'examen : « le routeur reçoit un paquet pour telle adresse, **par où le renvoie-t-il** ? ». Une seule règle gouverne tout : le **plus long préfixe** (*longest prefix match*)."
     },
     {
+     "type": "prereq",
+     "formation": "subnetting",
+     "why": "Le plus long préfixe repose sur les masques et la notation CIDR : si c'est fragile, révise le subnetting."
+    },
+    {
      "type": "say",
      "text": "Méthode en deux temps : **1)** garde **toutes les routes qui contiennent** l'adresse de destination ; **2)** parmi elles, prends celle dont le **masque est le plus long** (/25 bat /24 qui bat /16 qui bat /0)."
     },
@@ -884,6 +889,12 @@
      "text": "🎓 **Bravo !** Tu sais lire une table de routage : origine, AD, métrique, next-hop, plus long préfixe, route par défaut. C'est exactement ce qu'on te demande en examen et en dépannage."
     }
    ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "routage-statique",
+   "why": "Tu y verras comment les routes statiques et la route par défaut arrivent dans la table."
   }
  ]
 }

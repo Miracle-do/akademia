@@ -603,6 +603,11 @@
      "text": "L'**en-tête IPv4** fait **20 octets** (jusqu'à 60 avec des options). Il se lit **par lignes de 4 octets (32 bits)**. Voici l'en-tête de notre trame, extrait de l'offset 14 à 33 :"
     },
     {
+     "type": "prereq",
+     "formation": "ipv4",
+     "why": "Tu as besoin d'aisance avec les adresses IPv4 (classes, privées, masques) : si c'est flou, passe d'abord par cette formation."
+    },
+    {
      "type": "code",
      "sql": "45 00 00 3c 1c 46 40 00 40 06 20 73 c0 a8 01 0a cb 00 71 50",
      "lang": "Hexadécimal",
@@ -2055,6 +2060,12 @@
      "text": "🎓 **Bravo !** Tu sais maintenant ouvrir une trame et en lire **tous les champs** : Ethernet et VLAN, ARP, IPv4 (en-tête, checksum, fragmentation), ICMP, UDP, TCP (drapeaux, séquences, options), IPv6. Prochaine étape : ouvre **Wireshark**, capture un `ping` et un `curl`, et retrouve chaque octet de ce que tu viens d'apprendre. Un vrai pro s'entraîne sur des captures réelles."
     }
    ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "ipv4",
+   "why": "Tu y apprends à lire une adresse IPv4 ; ici, on la lit directement en hexadécimal."
   }
  ]
 }

@@ -1045,6 +1045,11 @@
      "text": "**Le problème.** IPv4 offre environ 4,3 milliards d'adresses… et il y a bien plus d'appareils. Solution : réserver des **plages privées** à usage interne (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) et n'utiliser qu'**une ou quelques adresses publiques** pour sortir. Le **NAT** fait la traduction **à la volée** sur le routeur."
     },
     {
+     "type": "prereq",
+     "formation": "ipv4",
+     "why": "Le NAT traduit des adresses privées en adresses publiques : sois à l'aise avec les plages privées d'abord."
+    },
+    {
      "type": "choice",
      "q": "Quelle adresse est **privée** ?",
      "options": [
@@ -1880,6 +1885,12 @@
      "text": "🎓 **Bravo !** Tu sais maintenant configurer **DHCP, DNS et NAT/PAT**, relayer le DHCP, publier un serveur et dépanner les pannes classiques d'une agence. Prochaine étape : les ACL et le routage dynamique. 🚀"
     }
    ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "ipv4",
+   "why": "Adresses privées, passerelle et adresses spéciales reviennent partout dans ces trois services."
   }
  ]
 }

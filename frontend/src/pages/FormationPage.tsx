@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Play } from '@getpapillon/papicons';
 import { Spinner } from '@/components/ui';
 import { GlassesCloud } from '@/components/GlassesCloud';
 import { ConfettiBackdrop } from '@/components/Decor';
 import { AnimatedEmoji } from '@/components/AnimatedEmoji';
+import { PrereqCard } from '@/components/PrereqCard';
 import { FormationShareAction } from '@/components/FormationShareModal';
 import { getModule, loadFormations } from '@/lib/content';
 import type { Formation } from '@/lib/types';
@@ -14,6 +15,9 @@ export default function FormationPage() {
   const { moduleId, fid } = useParams();
   const m = getModule(moduleId);
   const { state } = useStore();
+  const [search] = useSearchParams();
+  const from = search.get('from');
+  const backTo = from && from.startsWith('/m/') && !from.includes('//') ? from : null;
   const [list, setList] = useState<Formation[] | null>(null);
 
   useEffect(() => {
@@ -40,6 +44,12 @@ export default function FormationPage() {
         <FormationShareAction formation={f} moduleTitle={m.title} moduleEmoji={m.emoji} moduleColor={f.color} />
       </div>
 
+      {backTo && (
+        <Link to={backTo} className="card flex items-center gap-2 p-3 text-sm font-extrabold text-brand transition hover:-translate-y-0.5">
+          <ArrowLeft size={16} /> Reprendre la formation que tu suivais
+        </Link>
+      )}
+
       <section className="card relative overflow-hidden p-6 text-center" style={{ background: `linear-gradient(160deg, ${f.color}2e, transparent 70%)` }}>
         {finished && <ConfettiBackdrop />}
         <div className="relative z-10 flex flex-col items-center">
@@ -60,6 +70,14 @@ export default function FormationPage() {
           )}
         </div>
       </section>
+
+      {f.prerequisites && f.prerequisites.length > 0 && (
+        <section aria-label="Prérequis" className="space-y-2">
+          <h2 className="h-display text-xl">Avant de commencer</h2>
+          <p className="text-sm font-semibold text-muted">Ces formations t’aideront à tirer le meilleur de celle-ci. Rien n’est bloquant : tu peux aussi y aller directement.</p>
+          {f.prerequisites.map((r) => <PrereqCard key={`${r.moduleId ?? ''}${r.formation}`} r={r} moduleId={m.id} returnTo={`/m/${m.id}/formation/${f.id}`} />)}
+        </section>
+      )}
 
       <section aria-label="Parcours">
         <h2 className="h-display mb-3 text-xl">Ton parcours</h2>

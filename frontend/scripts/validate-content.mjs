@@ -12,6 +12,8 @@ const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); }
 
 if (!fs.existsSync(root)) { console.log('Aucun dossier content/modules'); process.exit(1); }
 const ids = new Set();
+const allFormations = new Map();
+const allFormationRefs = [];
 
 for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory())) {
   const base = path.join(root, dir.name);
@@ -81,6 +83,8 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
       if (f.id !== file.replace(/\.json$/, '')) err(`formation ${file} : id "${f.id}" ≠ nom du fichier`);
       if (fids.has(f.id)) err(`formation dupliquée : ${f.id}`); fids.add(f.id);
       for (const k of ['title', 'tagline', 'emoji', 'color', 'level', 'minutes', 'pitch', 'benefits', 'lessons']) if (f[k] === undefined) err(`formation ${f.id} : champ "${k}" manquant`);
+      allFormations.set(`${dir.name}:${f.id}`, f);
+      for (const r of f.prerequisites ?? []) allFormationRefs.push({ where: `formation ${f.id} (prérequis)`, mod: r.moduleId ?? dir.name, id: r.formation, from: `${dir.name}:${f.id}` });
       const lids = new Set(); let exos = 0;
       for (const l of f.lessons ?? []) {
         if (lids.has(l.id)) err(`formation ${f.id} : leçon dupliquée ${l.id}`); lids.add(l.id);
@@ -91,6 +95,7 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
           else if (st.type === 'code' && !st.sql) err(`${where} : code vide`);
           else if (st.type === 'choice') { if (!Array.isArray(st.options) || st.options.length < 2 || !Number.isInteger(st.answer) || st.answer < 0 || st.answer >= st.options.length) err(`${where} : choix invalide`); if (!st.explain) err(`${where} : explication manquante`); }
           else if (st.type === 'exercise') { exos++; if (!st.solution || !st.hints?.length || !st.explain) err(`${where} : exercice incomplet (solution, hints, explain)`); }
+          else if (st.type === 'prereq') { if (!st.formation) err(`${where} : prereq sans "formation"`); else allFormationRefs.push({ where, mod: st.moduleId ?? dir.name, id: st.formation }); }
           else if (!['say', 'code'].includes(st.type)) err(`${where} : type inconnu "${st.type}"`);
         });
       }
@@ -98,5 +103,15 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
     }
   }
 }
+// Prérequis : les formations citées existent, pas de boucle
+for (const r of allFormationRefs) {
+  if (!allFormations.has(`${r.mod}:${r.id}`)) err(`${r.where} : formation « ${r.mod}:${r.id} » introuvable`);
+  else if (r.from === `${r.mod}:${r.id}`) err(`${r.where} : une formation ne peut pas être son propre prérequis`);
+}
+const visit = (k, stack) => {
+  if (stack.includes(k)) { err(`prérequis circulaires : ${[...stack, k].join(' → ')}`); return; }
+  for (const r of allFormations.get(k)?.prerequisites ?? []) { const n = `${r.moduleId ?? k.split(':')[0]}:${r.formation}`; if (allFormations.has(n)) visit(n, [...stack, k]); }
+};
+for (const k of allFormations.keys()) visit(k, []);
 console.log(`\n${errors ? '✗' : '✓'} ${errors} erreur(s), ${warns} avertissement(s)`);
 process.exit(errors ? 1 : 0);

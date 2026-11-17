@@ -5,6 +5,7 @@ import { Spinner } from '@/components/ui';
 import { CoachBubble, TypingDots, UserBubble } from '@/components/CoachBubble';
 import { GlassesCloud } from '@/components/GlassesCloud';
 import { Inline } from '@/components/Markdown';
+import { PrereqCard } from '@/components/PrereqCard';
 import { fireConfetti } from '@/components/Celebrations';
 import { AnimatedEmoji, renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 import { getModule, loadFormations } from '@/lib/content';
@@ -65,6 +66,7 @@ function Player({ f, lessonId, moduleTitle }: { f: Formation; lessonId: string; 
   const li = f.lessons.findIndex((l) => l.id === lessonId);
   const nextLesson = f.lessons[li + 1];
   const steps = lesson.steps;
+  const returnTo = `/m/${f.moduleId}/formation/${f.id}/${lessonId}`;
   const nav = useNavigate();
   const { finishFormationLesson } = useStore();
 
@@ -122,10 +124,16 @@ function Player({ f, lessonId, moduleTitle }: { f: Formation; lessonId: string; 
         </div>
       </div>
 
+      {f.prerequisites && f.prerequisites.length > 0 && (
+        <div className="mb-3 space-y-2">
+          {f.prerequisites.map((r) => <PrereqCard key={`${r.moduleId ?? ''}${r.formation}`} r={r} moduleId={f.moduleId} returnTo={returnTo} hideWhenDone />)}
+        </div>
+      )}
+
       <div className="flex-1 space-y-3.5 pb-6">
         {steps.slice(0, pos).map((s, i) => {
           const prevCoach = i > 0 && steps[i - 1].type !== 'choice' && steps[i - 1].type !== 'exercise';
-          return <StepView key={i} s={s} showAvatar={!prevCoach} color={f.color} result={results[i]} onResult={(r) => answer(i, r)} />;
+          return <StepView key={i} s={s} showAvatar={!prevCoach} color={f.color} moduleId={f.moduleId} returnTo={returnTo} result={results[i]} onResult={(r) => answer(i, r)} />;
         })}
         {typing && (
           <button type="button" onClick={advance} className="block text-left" aria-label="Accélérer">
@@ -181,8 +189,8 @@ function CodeBlock({ title, sql }: { title?: string; sql: string }) {
   );
 }
 
-function StepView({ s, showAvatar, color, result, onResult }: {
-  s: FormationStep; showAvatar: boolean; color: string; result?: Result; onResult: (r: Result) => void;
+function StepView({ s, showAvatar, color, moduleId, returnTo, result, onResult }: {
+  s: FormationStep; showAvatar: boolean; color: string; moduleId: string; returnTo: string; result?: Result; onResult: (r: Result) => void;
 }) {
   if (s.type === 'say') return <CoachBubble text={s.text} avatar={showAvatar} color={color} />;
   if (s.type === 'code') {
@@ -193,6 +201,7 @@ function StepView({ s, showAvatar, color, result, onResult }: {
       </div>
     );
   }
+  if (s.type === 'prereq') return <div className="bubble-in ml-[3.4rem]"><PrereqCard r={s} moduleId={moduleId} returnTo={returnTo} /></div>;
   if (s.type === 'choice') return <ChoiceView s={s} color={color} result={result} onResult={onResult} />;
   return <ExerciseView s={s} color={color} result={result} onResult={onResult} />;
 }

@@ -75,7 +75,15 @@ export type FormationStep =
   | { type: 'say'; text: string; mood?: string }
   | { type: 'code'; title?: string; lang?: string; sql: string; note?: string }
   | { type: 'choice'; q: string; options: string[]; answer: number; explain: string }
+  | { type: 'prereq'; formation: string; moduleId?: string; why?: string }
   | { type: 'exercise'; q: string; table?: string; placeholder?: string; caseSensitive?: boolean; hints: string[]; accept: string[]; solution: string; explain: string };
+/** Renvoi vers une autre formation (par défaut du même module). */
+export interface FormationRef {
+  formation: string;
+  moduleId?: string;
+  /** Pourquoi elle est utile (une phrase) */
+  why?: string;
+}
 export interface FormationLesson {
   id: string;
   title: string;
@@ -97,6 +105,8 @@ export interface Formation {
   /** Dialogue d'accueil (le nuage explique la formation) */
   pitch: string[];
   benefits: string[];
+  /** Formations conseillées avant celle-ci */
+  prerequisites?: FormationRef[];
   lessons: FormationLesson[];
 }
 

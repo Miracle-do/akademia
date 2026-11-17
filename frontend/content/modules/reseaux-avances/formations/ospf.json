@@ -1918,5 +1918,11 @@
     }
    ]
   }
+ ],
+ "prerequisites": [
+  {
+   "formation": "table-routage",
+   "why": "OSPF alimente la table de routage : il faut savoir la lire pour vérifier son travail."
+  }
  ]
 }
