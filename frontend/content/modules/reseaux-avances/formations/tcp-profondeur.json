@@ -1,0 +1,1243 @@
+{
+ "id": "tcp-profondeur",
+ "order": 8,
+ "title": "TCP en profondeur",
+ "tagline": "États, séquences et ACK, fenêtre, retransmissions, SACK, congestion : comprends ce que TCP fait vraiment.",
+ "emoji": "🤝",
+ "color": "#F43F5E",
+ "level": "Avancé",
+ "minutes": 144,
+ "pitch": [
+  "Salut ! Je te propose **« TCP en profondeur »** 🤝.",
+  "Tu sais lire un en-tête TCP. Maintenant, on comprend **ce que TCP fait réellement** : comment une connexion vit et meurt, comment les numéros de séquence et d'accusé gardent la comptabilité, comment la fenêtre limite le débit, comment les pertes sont réparées et comment TCP évite de saturer le réseau.",
+  "Chaque notion est vue **dans une capture** : on calcule des `ack`, on repère un segment perdu, on décode un bloc SACK, on estime un débit maximal.",
+  "À la fin, tu diagnostiques une panne TCP en lisant une capture, comme un pro."
+ ],
+ "benefits": [
+  "Reconnaître les états d'une connexion et ce qu'ils révèlent",
+  "Calculer séquences et ACK, y compris cumulatifs et absolus",
+  "Estimer le débit maximal avec fenêtre et RTT, et le produit bande passante × délai",
+  "Repérer perte, ACK dupliqués, fast retransmit et décoder les blocs SACK",
+  "Comprendre slow start, évitement de congestion et AIMD",
+  "Diagnostiquer une panne à partir d'une capture"
+ ],
+ "lessons": [
+  {
+   "id": "etats",
+   "title": "Les états d'une connexion TCP",
+   "emoji": "🔁",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Dans la formation précédente tu as appris à **lire** un en-tête TCP. Ici, on comprend **ce que TCP fait réellement** : la vie d'une connexion, ses numéros, sa fenêtre, ses pertes, sa congestion. Et on lit tout ça dans des captures."
+    },
+    {
+     "type": "say",
+     "text": "Une connexion TCP n'est pas un fil : c'est un **état partagé** entre deux machines. Chaque côté tient un **automate à états**. Les états visibles avec `ss -tan` ou `netstat -an` sont ceux-ci :"
+    },
+    {
+     "type": "code",
+     "sql": "LISTEN        le serveur attend des connexions\nSYN-SENT      le client a envoyé un SYN, attend le SYN+ACK\nSYN-RECV      le serveur a reçu un SYN, a répondu SYN+ACK, attend le ACK\nESTABLISHED   connexion ouverte : les données circulent\nFIN-WAIT-1    j'ai envoyé mon FIN, j'attends son ACK\nFIN-WAIT-2    mon FIN est acquitté, j'attends le FIN de l'autre\nCLOSE-WAIT    l'autre a envoyé son FIN, MAIS mon programme n'a pas encore fermé\nLAST-ACK      j'ai envoyé mon FIN après le sien, j'attends l'ACK final\nTIME-WAIT     tout est fini, j'attends 2 × MSL pour les paquets retardataires\nCLOSED        plus de connexion",
+     "lang": "États",
+     "title": "Les états TCP"
+    },
+    {
+     "type": "code",
+     "sql": "sudo ss -tan                  # -t TCP, -a tous les états, -n numérique\nState     Recv-Q Send-Q  Local Address:Port   Peer Address:Port\nLISTEN    0      128         0.0.0.0:22          0.0.0.0:*\nESTAB     0      0      192.168.1.10:51514   203.0.113.80:80\nTIME-WAIT 0      0      192.168.1.10:51510   203.0.113.80:80",
+     "lang": "bash",
+     "title": "Voir les états avec ss"
+    },
+    {
+     "type": "say",
+     "text": "**Ouverture (3 temps).** Voici ce que voit chaque côté :"
+    },
+    {
+     "type": "code",
+     "sql": "Client                         Serveur\nCLOSED                        LISTEN\n  ── SYN ──────────────────────►\nSYN-SENT                      SYN-RECV\n  ◄───────────────── SYN+ACK ──\nESTABLISHED                   (en attente)\n  ── ACK ──────────────────────►\n                              ESTABLISHED",
+     "lang": "États",
+     "title": "Les états pendant l'ouverture"
+    },
+    {
+     "type": "choice",
+     "q": "Un client vient d'envoyer son SYN. Dans quel état est-il ?",
+     "options": [
+      "SYN-SENT",
+      "SYN-RECV",
+      "ESTABLISHED"
+     ],
+     "answer": 0,
+     "explain": "Le client est en **SYN-SENT** jusqu'à la réception du SYN+ACK."
+    },
+    {
+     "type": "choice",
+     "q": "Un serveur a reçu un SYN et répondu SYN+ACK. Dans quel état est-il ?",
+     "options": [
+      "SYN-RECV",
+      "SYN-SENT",
+      "LISTEN"
+     ],
+     "answer": 0,
+     "explain": "Il est en **SYN-RECV** (demi-ouvert) jusqu'à ce que le ACK final arrive."
+    },
+    {
+     "type": "choice",
+     "q": "Un serveur affiche des **milliers de connexions en SYN-RECV** venant d'adresses variées. Que suspecter ?",
+     "options": [
+      "Une inondation SYN (SYN flood) : des clients envoient des SYN sans jamais finir la poignée de main",
+      "Une bonne charge normale",
+      "Un problème de câble"
+     ],
+     "answer": 0,
+     "explain": "Chaque SYN réserve des ressources côté serveur. Sans le ACK final, la file se remplit : c'est une **attaque par déni de service**. Parade : les *SYN cookies*."
+    },
+    {
+     "type": "say",
+     "text": "**Fermeture (4 temps).** Chaque sens se ferme **indépendamment** (un FIN par sens)."
+    },
+    {
+     "type": "code",
+     "sql": "Celui qui ferme en premier    L'autre\nESTABLISHED                   ESTABLISHED\n  ── FIN ──────────────────────►\nFIN-WAIT-1                    CLOSE-WAIT\n  ◄──────────────────── ACK ──\nFIN-WAIT-2                    (le programme finit d'envoyer, puis close())\n  ◄──────────────────── FIN ──\nTIME-WAIT                     LAST-ACK\n  ── ACK ──────────────────────►\n(attend 2 × MSL)              CLOSED\nCLOSED",
+     "lang": "États",
+     "title": "Fermeture normale"
+    },
+    {
+     "type": "choice",
+     "q": "Quel côté passe par **TIME-WAIT** ?",
+     "options": [
+      "Celui qui a fermé en premier (il envoie le dernier ACK)",
+      "Toujours le serveur",
+      "Celui qui reçoit le premier FIN"
+     ],
+     "answer": 0,
+     "explain": "Le côté qui **ferme en premier** garde la connexion en TIME-WAIT après avoir envoyé le dernier ACK. Si c'est le serveur qui ferme, c'est lui qui accumule les TIME-WAIT."
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert TIME-WAIT (2 × MSL, souvent 60 s sous Linux) ?",
+     "options": [
+      "À retenir la connexion pour éviter qu'un vieux paquet perdu soit pris pour un paquet d'une nouvelle connexion, et à pouvoir renvoyer le dernier ACK",
+      "À attendre que le programme se ferme",
+      "À libérer immédiatement le port"
+     ],
+     "answer": 0,
+     "explain": "Le dernier ACK peut se perdre : l'autre côté renverra son FIN, et il faut pouvoir répondre. TIME-WAIT évite aussi qu'un retardataire pollue une nouvelle connexion de mêmes adresses et ports."
+    },
+    {
+     "type": "choice",
+     "q": "Une machine montre **de nombreuses connexions CLOSE-WAIT** qui ne disparaissent jamais. Que signifie-t-il ?",
+     "options": [
+      "Le programme local ne ferme pas ses sockets après avoir reçu le FIN (fuite de connexions : bug applicatif)",
+      "Le réseau est lent",
+      "Le pare-feu bloque les ACK"
+     ],
+     "answer": 0,
+     "explain": "CLOSE-WAIT = « l'autre a fermé, **c'est à mon programme** d'appeler close() ». S'ils s'accumulent, c'est un bug de l'application, pas du réseau."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de segments faut-il pour une fermeture normale (FIN, ACK, FIN, ACK) ?",
+     "hints": [
+      "Un FIN et un ACK pour chaque sens"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "**4** segments (3 si l'ACK et le FIN du second côté sont envoyés ensemble).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Que fait un **RST** reçu sur une connexion ouverte ?",
+     "options": [
+      "Il la coupe immédiatement, sans négociation",
+      "Il demande une pause",
+      "Il confirme la fermeture normale"
+     ],
+     "answer": 0,
+     "explain": "RST = « **coupe tout** » : port fermé, programme planté, pare-feu qui termine une session. La connexion passe directement à CLOSED."
+    }
+   ]
+  },
+  {
+   "id": "seq-ack",
+   "title": "Numéros de séquence et d'accusé : la comptabilité TCP",
+   "emoji": "🔢",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "TCP **numérote chaque octet** envoyé. Le **numéro de séquence** d'un segment est le numéro du **premier octet** de ses données. Le **numéro d'ACK** est le numéro de l'octet que le récepteur **attend ensuite**."
+    },
+    {
+     "type": "code",
+     "sql": "segment : seq = 1000, 100 octets de données  (octets 1000 à 1099)\nACK correspondant : ack = 1100   (« j'ai tout reçu jusqu'à 1099, envoie la suite à partir de 1100 »)\n\nRègle : ack = seq + nombre d'octets de données reçus",
+     "lang": "Règle",
+     "title": "La règle de base"
+    },
+    {
+     "type": "say",
+     "text": "**Cas particuliers.** Les drapeaux **SYN** et **FIN** consomment **un numéro** de séquence, même sans donnée. Un **ACK pur** (sans donnée) n'en consomme aucun."
+    },
+    {
+     "type": "code",
+     "sql": "SYN  seq = x           →  ack attendu = x + 1\nFIN  seq = z           →  ack attendu = z + 1\nACK pur seq = s        →  le prochain segment aura toujours seq = s",
+     "lang": "Règle",
+     "title": "SYN et FIN comptent pour 1"
+    },
+    {
+     "type": "exercise",
+     "q": "Un segment SYN a `seq = 500`. Quel `ack` doit contenir le SYN+ACK de réponse ?",
+     "hints": [
+      "SYN consomme un numéro"
+     ],
+     "accept": [],
+     "solution": "501",
+     "explain": "**501** = 500 + 1.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Un segment de **200 octets** de données a `seq = 3000`. Quel `ack` renvoie le récepteur ?",
+     "hints": [
+      "seq + 200"
+     ],
+     "accept": [],
+     "solution": "3200",
+     "explain": "3000 + 200 = **3200**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Un segment `FIN` a `seq = 7000` (sans donnée). Quel `ack` renvoie-t-on ?",
+     "hints": [
+      "FIN consomme un numéro"
+     ],
+     "accept": [],
+     "solution": "7001",
+     "explain": "**7001**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Un ACK pur (sans donnée) a `seq = 900`. Quel `seq` aura le segment suivant du même côté ?",
+     "options": [
+      "900 (un ACK pur ne consomme aucun numéro)",
+      "901",
+      "1000"
+     ],
+     "answer": 0,
+     "explain": "Rien n'a été envoyé de nouveau côté données : le numéro **ne bouge pas**."
+    },
+    {
+     "type": "say",
+     "text": "**ACK cumulatif.** L'ACK dit « **tout** ce qui précède est reçu » : un seul ACK peut accuser plusieurs segments. Voici un échange complet (numéros **relatifs**, comme Wireshark). Le client envoie une requête, le serveur répond en 3 segments de 1448 octets."
+    },
+    {
+     "type": "code",
+     "sql": "N°  Sens   Drapeaux  seq     ack    données\n 1  C→S    SYN         0       0        0\n 2  S→C    SYN,ACK     0       1        0\n 3  C→S    ACK         1       1        0\n 4  C→S    PSH,ACK     1       1      120\n 5  S→C    ACK         1     121        0\n 6  S→C    ACK         1     121     1448\n 7  S→C    ACK      1449     121     1448\n 8  C→S    ACK       121    2897        0\n 9  S→C    PSH,ACK  2897     121     1448\n10  C→S    ACK       121    4345        0",
+     "lang": "Wireshark",
+     "title": "Capture annotée (numéros relatifs)"
+    },
+    {
+     "type": "exercise",
+     "q": "Paquet 5 : le serveur accuse la requête de 120 octets (paquet 4, seq 1). Pourquoi `ack = 121` ? Donne le numéro d'octet attendu ensuite si seq=1 et 120 octets.",
+     "hints": [
+      "1 + 120"
+     ],
+     "accept": [],
+     "solution": "121",
+     "explain": "1 + 120 = **121**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Paquet 7 : quel est le `seq` du deuxième segment du serveur ? (Le premier a seq = 1 et 1448 octets.)",
+     "hints": [
+      "1 + 1448"
+     ],
+     "accept": [],
+     "solution": "1449",
+     "explain": "**1449**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Paquet 8 : le client envoie un seul ACK pour les paquets 6 **et** 7. Quelle valeur d'`ack` a-t-il ? (Données jusqu'à 1449 + 1448.)",
+     "hints": [
+      "1449 + 1448"
+     ],
+     "accept": [],
+     "solution": "2897",
+     "explain": "1449 + 1448 = **2897** : un ACK **cumulatif** couvre les deux segments.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Paquet 10 : quel `ack` pour accuser le paquet 9 (seq 2897, 1448 octets) ?",
+     "hints": [
+      "2897 + 1448"
+     ],
+     "accept": [],
+     "solution": "4345",
+     "explain": "**4345**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets le serveur a-t-il envoyés au total dans les paquets 6, 7 et 9 ?",
+     "hints": [
+      "3 × 1448"
+     ],
+     "accept": [],
+     "solution": "4344",
+     "explain": "3 × 1448 = **4344** octets (de seq 1 à 4344, d'où l'ack 4345).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Valeurs absolues et relatives.** Wireshark affiche des numéros **relatifs** (le SYN vaut 0). Sur le fil, les numéros initiaux (**ISN**) sont aléatoires. Rappel de l'exemple précédent : client x = 1 000 000 000, serveur y = 3 000 000 000. Un numéro relatif `n` correspond au numéro absolu **ISN + n**."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le paquet 5 (ack relatif 121), quel est l'`ack` **absolu** envoyé par le serveur ? (x + 121 avec x = 1 000 000 000)",
+     "hints": [
+      "x + 121"
+     ],
+     "accept": [],
+     "solution": "1000000121",
+     "explain": "1 000 000 000 + 121 = **1 000 000 121**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans le paquet 8 (ack relatif 2897), quel est l'`ack` **absolu** du client ? (y + 2897 avec y = 3 000 000 000)",
+     "hints": [
+      "y + 2897"
+     ],
+     "accept": [],
+     "solution": "3000002897",
+     "explain": "3 000 000 000 + 2897 = **3 000 002 897**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi les numéros initiaux sont-ils **aléatoires** et non pas 0 ?",
+     "options": [
+      "Pour qu'un attaquant ne puisse pas deviner les numéros et injecter des paquets, et pour éviter la confusion avec d'anciennes connexions",
+      "Pour économiser la bande passante",
+      "Parce que le 0 est réservé au serveur"
+     ],
+     "answer": 0,
+     "explain": "Des ISN prévisibles permettaient le **détournement de session** (TCP hijacking) ; l'aléa protège aussi des paquets retardataires d'une ancienne connexion."
+    }
+   ]
+  },
+  {
+   "id": "fenetre",
+   "title": "La fenêtre : contrôle de flux et débit",
+   "emoji": "🪟",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le champ **Fenêtre** de l'en-tête TCP dit à l'émetteur : « voici **combien d'octets de plus je peux accepter** avant que tu aies mon prochain ACK ». C'est le **contrôle de flux** : le récepteur empêche l'émetteur de le noyer."
+    },
+    {
+     "type": "code",
+     "sql": "fenêtre annoncée = 64240 octets\nL'émetteur peut avoir jusqu'à 64240 octets « en vol » (envoyés mais pas encore acquittés).",
+     "lang": "Règle",
+     "title": "Principe"
+    },
+    {
+     "type": "say",
+     "text": "**Window Scale.** Le champ fait 16 bits : max **65535** octets. C'est trop peu sur les liens modernes. L'option **Window Scale** (négociée dans les SYN) indique un **décalage** : la vraie fenêtre = valeur × 2^décalage."
+    },
+    {
+     "type": "exercise",
+     "q": "Le champ fenêtre vaut 501 et le décalage (Window Scale) vaut 7. Quelle est la fenêtre réelle en octets ? (501 × 128)",
+     "hints": [
+      "501 × 2⁷ = 501 × 128"
+     ],
+     "accept": [],
+     "solution": "64128",
+     "explain": "501 × 128 = **64128** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Fenêtre = 1000, décalage 4. Quelle fenêtre réelle ? (1000 × 16)",
+     "hints": [
+      "2⁴ = 16"
+     ],
+     "accept": [],
+     "solution": "16000",
+     "explain": "1000 × 16 = **16000** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Où le Window Scale est-il négocié ?",
+     "options": [
+      "Dans les segments SYN et SYN+ACK uniquement",
+      "Dans chaque segment de données",
+      "Dans le FIN"
+     ],
+     "answer": 0,
+     "explain": "L'option n'est valable que **dans les SYN**. Si l'un des deux côtés ne l'envoie pas, il n'y a **pas de mise à l'échelle**. Les pare-feu qui suppriment cette option brident le débit."
+    },
+    {
+     "type": "say",
+     "text": "**La fenêtre limite le débit.** Une fenêtre de W octets et un temps aller-retour de RTT secondes donnent un **débit maximal** de **W / RTT** octets par seconde (on ne peut pas envoyer plus de W avant d'avoir un ACK)."
+    },
+    {
+     "type": "code",
+     "sql": "Débit max = fenêtre / RTT\n\nExemple : fenêtre 65535 octets, RTT 100 ms\n  = 65535 / 0,1 = 655 350 octets/s\n  = 5 242 800 bits/s  ≈ 5,2 Mb/s\n\nMême sur une fibre à 1 Gb/s !",
+     "lang": "Calcul",
+     "title": "Le plafond de la fenêtre"
+    },
+    {
+     "type": "exercise",
+     "q": "Fenêtre 65535 octets, RTT 100 ms : débit maximal en **kilo-octets par seconde** (arrondi à l'entier) ? (65535 / 0,1 / 1000)",
+     "hints": [
+      "65535 / 0,1 = 655 350 octets/s"
+     ],
+     "accept": [],
+     "solution": "655",
+     "explain": "655 350 octets/s ≈ **655 ko/s**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Fenêtre 65535 octets, RTT **20 ms** : débit maximal en ko/s (arrondi) ?",
+     "hints": [
+      "65535 / 0,02 / 1000"
+     ],
+     "accept": [],
+     "solution": "3277",
+     "explain": "65535 / 0,02 = 3 276 750 octets/s ≈ **3277 ko/s**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Le produit bande passante × délai (BDP)** donne la fenêtre nécessaire pour **remplir** le lien : `BDP = débit (octets/s) × RTT`."
+    },
+    {
+     "type": "exercise",
+     "q": "Lien de **100 Mb/s** et RTT de **20 ms** : quel BDP en octets ? (100 000 000 / 8 × 0,02)",
+     "hints": [
+      "100 Mb/s = 12 500 000 octets/s"
+     ],
+     "accept": [],
+     "solution": "250000",
+     "explain": "12 500 000 × 0,02 = **250 000 octets**. Une fenêtre de 64 ko ne suffirait pas : il faut le Window Scale.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Fenêtre nulle.** Si l'application du récepteur ne lit plus ses données, le tampon se remplit : le récepteur annonce **fenêtre = 0**. L'émetteur arrête d'envoyer et envoie périodiquement de petites sondes (*zero window probe*). Quand le récepteur libère de la place, il annonce une **mise à jour de fenêtre** (*window update*)."
+    },
+    {
+     "type": "choice",
+     "q": "Dans Wireshark, tu vois `[TCP ZeroWindow]` sur les ACK d'un serveur. Que signifie-t-il ?",
+     "options": [
+      "Le récepteur est saturé : son application ne lit pas assez vite",
+      "Le réseau a perdu des paquets",
+      "La connexion est fermée"
+     ],
+     "answer": 0,
+     "explain": "Fenêtre = 0 = « **stop, mon tampon est plein** ». Le problème est côté **application** du récepteur (CPU saturé, programme bloqué), pas côté réseau."
+    },
+    {
+     "type": "choice",
+     "q": "Quel champ **empêche** l'émetteur de noyer le récepteur ?",
+     "options": [
+      "Fenêtre (contrôle de flux)",
+      "TTL",
+      "Checksum"
+     ],
+     "answer": 0,
+     "explain": "La fenêtre annoncée par le récepteur est le **contrôle de flux**. La congestion du réseau, elle, est gérée par la fenêtre de congestion (leçon 5)."
+    }
+   ]
+  },
+  {
+   "id": "retrans",
+   "title": "Pertes et retransmissions",
+   "emoji": "🔄",
+   "minutes": 22,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le réseau perd des paquets. TCP rend la communication fiable en **retransmettant** ce qui n'est pas acquitté. Il y a **deux** mécanismes : le **délai d'attente (RTO)** et la **retransmission rapide**."
+    },
+    {
+     "type": "say",
+     "text": "**1. Le RTO (Retransmission Timeout).** L'émetteur démarre un chronomètre à chaque envoi. S'il n'a pas reçu l'ACK avant la fin du délai, il **retransmet**. Le délai est calculé à partir du RTT mesuré :"
+    },
+    {
+     "type": "code",
+     "sql": "SRTT   = 7/8 × SRTT + 1/8 × R         (RTT lissé, R = dernière mesure)\nRTTVAR = 3/4 × RTTVAR + 1/4 × |SRTT − R|\nRTO    = SRTT + 4 × RTTVAR              (minimum 1 s)",
+     "lang": "Calcul",
+     "title": "Formules de RFC 6298"
+    },
+    {
+     "type": "exercise",
+     "q": "SRTT = 80 ms ; nouvelle mesure R = 160 ms. Quel est le nouveau SRTT en ms ? (7/8 × 80 + 1/8 × 160)",
+     "hints": [
+      "70 + 20"
+     ],
+     "accept": [],
+     "solution": "90",
+     "explain": "7/8 × 80 = 70 ; 1/8 × 160 = 20 ; total **90 ms**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "SRTT = 100 ms ; RTTVAR = 10 ms. Quel est le RTO en ms (avant le minimum) ? (SRTT + 4 × RTTVAR)",
+     "hints": [
+      "100 + 4 × 10"
+     ],
+     "accept": [],
+     "solution": "140",
+     "explain": "100 + 40 = **140 ms** (en pratique, plancher de 1 s selon la norme, 200 ms sous Linux).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Retard exponentiel.** À chaque retransmission **sans succès**, le RTO est **doublé**. C'est le *backoff* : on laisse le réseau respirer."
+    },
+    {
+     "type": "exercise",
+     "q": "RTO initial de 1 s. Quelle est la durée d'attente avant la **4e** tentative ? (1, 2, 4, …)",
+     "hints": [
+      "Double à chaque échec : 1 → 2 → 4 → 8"
+     ],
+     "accept": [],
+     "solution": "8",
+     "explain": "1 s, 2 s, 4 s, **8 s**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**2. La retransmission rapide.** Attendre le RTO est lent. Si un segment est perdu mais que les suivants arrivent, le récepteur renvoie à chaque fois le **même ACK** (celui qui attend le segment manquant) : ce sont les **ACK dupliqués**. Après **3 ACK dupliqués**, l'émetteur retransmet sans attendre le délai : c'est la **retransmission rapide** (*fast retransmit*)."
+    },
+    {
+     "type": "code",
+     "sql": "N°  Sens  seq(rel)  ack(rel)  données\n 1  S→C        1       121     1448   ← segment A reçu\n 2  S→C     1449       121     1448   ← segment B PERDU\n 3  S→C     2897       121     1448   ← segment C reçu\n 4  C→S      121      1449        0   ← ACK (accuse A, le trou commence en 1449)\n 5  S→C     4345       121     1448   ← segment D reçu\n 6  C→S      121      1449        0   ← ACK dupliqué n°1\n 7  S→C     5793       121     1448   ← segment E reçu\n 8  C→S      121      1449        0   ← ACK dupliqué n°2\n 9  S→C     7241       121     1448   ← segment F reçu\n10  C→S      121      1449        0   ← ACK dupliqué n°3\n11  S→C     1449       121     1448   ← RETRANSMISSION de B (sans attendre le RTO)\n12  C→S      121      8689        0   ← ACK cumulatif",
+     "lang": "Wireshark",
+     "title": "Une perte et sa réparation"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel segment a été perdu ? Donne son **numéro de séquence** (relatif).",
+     "hints": [
+      "C'est celui que l'ACK réclame : ack = 1449"
+     ],
+     "accept": [],
+     "solution": "1449",
+     "explain": "Le récepteur répète `ack = 1449` : il **attend** l'octet 1449. Le segment B (seq 1449) est le manquant.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'**ACK dupliqués** le client envoie-t-il avant la retransmission rapide ?",
+     "hints": [
+      "Cherche les ACK qui répètent 1449 après le premier"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "Le premier ACK 1449 (paquet 4) est normal ; les paquets **6, 8 et 10** le répètent : ce sont les 3 ACK dupliqués.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le paquet 12 a-t-il un `ack` de 8689 et non 1449 ?",
+     "options": [
+      "Le segment B retransmis comble le trou : l'ACK cumulatif couvre jusqu'au segment F (7241 + 1448 = 8689)",
+      "Parce que le client a perdu des données",
+      "Parce que le serveur a changé de numéro"
+     ],
+     "answer": 0,
+     "explain": "Le trou est comblé : tout est reçu jusqu'à l'octet 8688. **ack = 7241 + 1448 = 8689**."
+    },
+    {
+     "type": "choice",
+     "q": "Dans Wireshark, sur le paquet 11, tu verras…",
+     "options": [
+      "[TCP Fast Retransmission]",
+      "[TCP Window Full]",
+      "[TCP Port numbers reused]"
+     ],
+     "answer": 0,
+     "explain": "Wireshark étiquette ainsi une retransmission déclenchée par 3 ACK dupliqués ; une retransmission par délai serait `[TCP Retransmission]`."
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi 3 et pas 1 ?** Un ou deux ACK dupliqués peuvent venir d'un **simple déséquilibre** (paquets reçus dans le désordre). À 3, la perte est quasi sûre."
+    },
+    {
+     "type": "say",
+     "text": "**3. SACK (acquittements sélectifs).** Avec l'option SACK, le récepteur dit **précisément** quels blocs il a reçus au-delà du trou : l'émetteur ne retransmet que le manquant. Voici l'en-tête TCP d'un **ACK dupliqué avec SACK** (24 octets d'options), en valeurs **absolues** :"
+    },
+    {
+     "type": "code",
+     "sql": "c9 3a 00 50 3b 9a ca 79 b2 d0 63 a9 b0 10 01 f5 93 9c 00 00\n01 01 08 0a 00 a1 b3 c4 00 c2 d3 e4 01 01 05 0a b2 d0 69 51 b2 d0 6e f9",
+     "lang": "Hexadécimal",
+     "title": "En-tête TCP d'un ACK dupliqué (44 octets)",
+     "note": "20 octets fixes, puis 24 octets d'options : 01 01 | 08 0a ... (horodatage) | 01 01 | 05 0a ... (SACK)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'octet de **décalage de données** (octet 12) ? (Un en-tête de 44 octets = 11 mots.)",
+     "hints": [
+      "11 = 0xb, suivi de 0"
+     ],
+     "accept": [
+      "b0"
+     ],
+     "solution": "0xb0",
+     "explain": "11 mots de 32 bits = 44 octets → octet 12 = **0xb0**.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le numéro d'**accusé (ack)** de cet ACK dupliqué ? (octets 8-11 : `b2 d0 63 a9`)",
+     "hints": [
+      "0xb2d063a9 = 3 000 001 449"
+     ],
+     "accept": [],
+     "solution": "3000001449",
+     "explain": "**3 000 001 449** = y + 1449 : le client attend toujours l'octet relatif 1449 (le segment perdu).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Le bloc SACK** : `05 0a` = type 5 (SACK), longueur 10 = 2 + 8, donc **un bloc** (8 octets : bord gauche + bord droit). Bord gauche inclus, bord droit **exclu**."
+    },
+    {
+     "type": "code",
+     "sql": "05 0a  b2 d0 69 51  b2 d0 6e f9\n        └─ bord gauche ┘  └─ bord droit ─┘\n        = y + 2897         = y + 4345 (relatif : 2897 → 4345)",
+     "lang": "Hexadécimal",
+     "title": "Le bloc SACK décodé"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de blocs SACK contient une option de longueur **18** ? ((18 − 2) / 8)",
+     "hints": [
+      "Chaque bloc fait 8 octets ; 2 octets pour type et longueur"
+     ],
+     "accept": [],
+     "solution": "2",
+     "explain": "(18 − 2) / 8 = **2** blocs.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Le bloc SACK annonce des données reçues de 2897 à 4345 (relatif). Combien d'octets cela représente-t-il ?",
+     "hints": [
+      "4345 − 2897"
+     ],
+     "accept": [],
+     "solution": "1448",
+     "explain": "4345 − 2897 = **1448** octets : exactement le segment C.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Que dit un SACK `2897–4345` avec `ack = 1449` ?",
+     "options": [
+      "J'ai reçu l'intervalle 2897–4345, mais il me manque 1449–2896 : renvoie seulement ce trou",
+      "J'ai tout reçu jusqu'à 4345",
+      "J'ai perdu la connexion"
+     ],
+     "answer": 0,
+     "explain": "L'ACK dit où est le **trou** ; le SACK dit **ce qui a été reçu après**. L'émetteur retransmet uniquement le segment manquant."
+    }
+   ]
+  },
+  {
+   "id": "congestion",
+   "title": "La congestion : slow start et évitement",
+   "emoji": "🚦",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le contrôle de flux protège le **récepteur**. Mais le **réseau** aussi peut être saturé : les routeurs ont des files d'attente qui débordent. TCP détecte les pertes comme un signe de congestion et **ralentit**. C'est le rôle de la **fenêtre de congestion (cwnd)**."
+    },
+    {
+     "type": "code",
+     "sql": "Fenêtre d'envoi réelle = min(fenêtre annoncée, cwnd)\n\n  fenêtre annoncée  : décidée par le RÉCEPTEUR (contrôle de flux)\n  cwnd              : décidée par l'ÉMETTEUR (contrôle de congestion)",
+     "lang": "Règle",
+     "title": "Deux fenêtres, la plus petite gagne"
+    },
+    {
+     "type": "exercise",
+     "q": "Fenêtre annoncée = 64000 octets, cwnd = 14600 octets. Combien d'octets l'émetteur peut-il avoir en vol ?",
+     "hints": [
+      "Le minimum des deux"
+     ],
+     "accept": [],
+     "solution": "14600",
+     "explain": "min(64000, 14600) = **14600** octets : ici, c'est le réseau qui limite.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**1. Slow start (démarrage lent).** Au début, la connexion ne connaît pas la capacité du réseau. cwnd démarre petit (**IW = 10 MSS** aujourd'hui) et **double à chaque RTT** (+1 MSS par ACK reçu). Pas si lent : c'est une croissance **exponentielle**."
+    },
+    {
+     "type": "code",
+     "sql": "RTT 0 : cwnd = 10 MSS\nRTT 1 : cwnd = 20 MSS\nRTT 2 : cwnd = 40 MSS\nRTT 3 : cwnd = 80 MSS\n…jusqu'à atteindre le seuil ssthresh ou une perte",
+     "lang": "Croissance",
+     "title": "Slow start"
+    },
+    {
+     "type": "exercise",
+     "q": "IW = 10 MSS en slow start. Quelle est cwnd (en MSS) après **3 RTT** ? (10, 20, 40, …)",
+     "hints": [
+      "Double à chaque RTT : 10 → 20 → 40 → 80"
+     ],
+     "accept": [],
+     "solution": "80",
+     "explain": "10 × 2³ = **80 MSS**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec MSS = 1460 octets, combien d'octets représente un cwnd de 10 MSS ?",
+     "hints": [
+      "10 × 1460"
+     ],
+     "accept": [],
+     "solution": "14600",
+     "explain": "**14 600 octets** (c'est la fenêtre de départ de nombreux serveurs).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**2. Évitement de congestion.** Une fois cwnd ≥ **ssthresh** (seuil de slow start), on passe à une croissance **linéaire** : **+1 MSS par RTT**. On sonde prudemment."
+    },
+    {
+     "type": "code",
+     "sql": "ssthresh = 64 MSS\n… slow start : 10, 20, 40, 64 (on plafonne au seuil)\n… évitement : 65, 66, 67 … (+1 MSS par RTT)",
+     "lang": "Croissance",
+     "title": "Du slow start à l'évitement"
+    },
+    {
+     "type": "exercise",
+     "q": "ssthresh = 64 MSS, cwnd vaut 64 MSS (début de l'évitement). Quelle est cwnd (en MSS) **5 RTT** plus tard ?",
+     "hints": [
+      "+1 MSS par RTT"
+     ],
+     "accept": [],
+     "solution": "69",
+     "explain": "64 + 5 = **69 MSS**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**3. Que faire en cas de perte ?** Deux cas selon la manière dont la perte est détectée (**TCP Reno** / **NewReno**) :"
+    },
+    {
+     "type": "code",
+     "sql": "A. 3 ACK dupliqués (perte légère : les ACK arrivent encore)\n   ssthresh = cwnd / 2\n   cwnd     = ssthresh     (on reprend en évitement de congestion)\n\nB. Délai RTO expiré (perte grave : plus rien n'arrive)\n   ssthresh = cwnd / 2\n   cwnd     = 1 MSS        (on repart en slow start)",
+     "lang": "Règle",
+     "title": "Réaction à une perte"
+    },
+    {
+     "type": "exercise",
+     "q": "cwnd = 40 MSS, perte détectée par **3 ACK dupliqués**. Quelle est la nouvelle cwnd (en MSS) ?",
+     "hints": [
+      "cwnd / 2"
+     ],
+     "accept": [],
+     "solution": "20",
+     "explain": "ssthresh = 20, cwnd = **20 MSS**. On divise par deux : c'est le « *multiplicative decrease* ».",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "cwnd = 40 MSS, perte détectée par **expiration du RTO**. Quelle est la nouvelle cwnd (en MSS) ?",
+     "hints": [
+      "Le RTO est plus grave"
+     ],
+     "accept": [],
+     "solution": "1",
+     "explain": "cwnd retombe à **1 MSS** (slow start), et ssthresh vaut 20.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Après ce RTO (cwnd = 1, ssthresh = 20), combien de RTT en slow start pour atteindre cwnd = 16 ? (1, 2, 4, 8, 16)",
+     "hints": [
+      "Double à chaque RTT"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "1 → 2 → 4 → 8 → 16 : **4 RTT**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi la réaction à 3 ACK dupliqués est-elle **moins brutale** que celle au RTO ?",
+     "options": [
+      "Les ACK dupliqués prouvent que le réseau fonctionne encore (des paquets passent) ; un RTO suggère qu'il ne passe plus rien",
+      "Parce que les ACK dupliqués sont plus rapides",
+      "Parce qu'un RTO est un bug"
+     ],
+     "answer": 0,
+     "explain": "Trois ACK dupliqués = « un trou, mais le reste passe » : on réduit de moitié. Un RTO = « silence total » : retour à la prudence maximale."
+    },
+    {
+     "type": "choice",
+     "q": "Cette croissance en +1 / réduction par 2 s'appelle…",
+     "options": [
+      "AIMD (Additive Increase, Multiplicative Decrease)",
+      "Slow start",
+      "Fast recovery"
+     ],
+     "answer": 0,
+     "explain": "AIMD : **augmentation additive**, **diminution multiplicative**. C'est ce qui rend TCP globalement **équitable** entre plusieurs flux."
+    },
+    {
+     "type": "say",
+     "text": "**Pour aller plus loin.** Linux utilise par défaut **CUBIC**, qui remonte plus vite que Reno après une perte, et **BBR** (Google) estime la bande passante et le RTT plutôt que de réagir aux pertes. Le principe reste : la **perte ou le délai** signale la saturation."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande Linux affiche l'algorithme de congestion utilisé ?",
+     "options": [
+      "sysctl net.ipv4.tcp_congestion_control",
+      "ip route show",
+      "ss -s"
+     ],
+     "answer": 0,
+     "explain": "`sysctl net.ipv4.tcp_congestion_control` renvoie par exemple `cubic`."
+    },
+    {
+     "type": "choice",
+     "q": "Un lien long (RTT élevé) avec **peu de pertes** exploite mal la bande passante avec Reno. Pourquoi ?",
+     "options": [
+      "La croissance est liée au nombre de RTT : avec un RTT élevé, remonter cwnd est très lent",
+      "Reno ne gère pas les longs liens",
+      "Le MSS est trop petit"
+     ],
+     "answer": 0,
+     "explain": "+1 MSS **par RTT** : plus le RTT est grand, plus la remontée est lente. D'où CUBIC et BBR pour les liens à fort BDP."
+    }
+   ]
+  },
+  {
+   "id": "options",
+   "title": "Les options TCP en détail",
+   "emoji": "🧰",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "L'espace d'options de l'en-tête TCP est limité à **40 octets**. Chaque option suit le schéma **Type | Longueur | Valeur**, sauf deux options courtes d'un seul octet."
+    },
+    {
+     "type": "code",
+     "sql": "Type 0   EOL  (fin de liste, 1 octet)\nType 1   NOP  (aucune opération : bourrage, 1 octet)\nType 2   MSS  (longueur 4)  : taille max des données par segment\nType 3   Window Scale (longueur 3) : facteur de fenêtre\nType 4   SACK permitted (longueur 2) : autorise les SACK\nType 5   SACK (longueur 2 + 8n) : blocs reçus\nType 8   Timestamps (longueur 10) : horodatage (TSval, TSecr)",
+     "lang": "Table",
+     "title": "Les options à connaître"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **taille maximale** de l'espace d'options, en octets ? (en-tête max 60 octets, fixe 20)",
+     "hints": [
+      "60 − 20"
+     ],
+     "accept": [],
+     "solution": "40",
+     "explain": "60 − 20 = **40 octets**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "À quoi servent les octets `01 01` (NOP NOP) avant une option ?",
+     "options": [
+      "À aligner l'option sur 4 octets (en-tête multiple de 32 bits)",
+      "À signaler une erreur",
+      "À désactiver l'option suivante"
+     ],
+     "answer": 0,
+     "explain": "L'en-tête doit faire un **multiple de 4 octets**. Les NOP servent de **bourrage**."
+    },
+    {
+     "type": "say",
+     "text": "**Les horodatages (Timestamps)** : `08 0a TSval TSecr`. **TSval** = l'heure de l'émetteur. **TSecr** = l'heure du **dernier segment reçu** (écho). Ils servent à **mesurer le RTT** à chaque ACK et à rejeter d'anciens segments (PAWS)."
+    },
+    {
+     "type": "code",
+     "sql": "Segment envoyé par A : TSval = 1000 (horloge de A)\nAccusé de B :           TSval = 5000 (horloge de B), TSecr = 1000\nA reçoit l'accusé quand son horloge vaut 1040\n→ RTT = 1040 − 1000 = 40 ms (en ms, si l'horloge tourne en ms)",
+     "lang": "Calcul",
+     "title": "Mesurer le RTT avec TSecr"
+    },
+    {
+     "type": "exercise",
+     "q": "A envoie un segment à TSval = 2000. Il reçoit l'ACK qui répond avec TSecr = 2000 quand son horloge vaut 2065. Quel est le RTT (en ms) ?",
+     "hints": [
+      "2065 − 2000"
+     ],
+     "accept": [],
+     "solution": "65",
+     "explain": "2065 − 2000 = **65 ms**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Décoder la liste d'options du SYN de la formation précédente** :"
+    },
+    {
+     "type": "code",
+     "sql": "02 04 05 b4 | 04 02 | 08 0a 00 a1 b2 c3 00 00 00 00 | 01 | 03 03 07",
+     "lang": "Hexadécimal",
+     "title": "20 octets"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'options **réelles** (hors NOP) cette liste contient-elle ? (MSS, SACK-permitted, Timestamps, Window Scale)",
+     "hints": [
+      "Compte les types : 2, 4, 8, 3"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "**4** options : MSS, SACK permitted, Timestamps, Window Scale (et un NOP de bourrage).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi la liste contient-elle un `01` avant `03 03 07` ?",
+     "options": [
+      "Pour aligner : 4 + 2 + 10 = 16 octets, il manque 1 octet pour atteindre un multiple de 4 avant les 3 octets de Window Scale (total 20)",
+      "Pour séparer deux paquets",
+      "Parce que le Window Scale est facultatif"
+     ],
+     "answer": 0,
+     "explain": "4 + 2 + 10 + 1 + 3 = **20** : multiple de 4. Le NOP rend l'ensemble aligné."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle option annonce la **plus grosse quantité de données par segment** ?",
+     "options": [
+      "MSS (type 2)",
+      "Window Scale (type 3)",
+      "SACK (type 5)"
+     ],
+     "answer": 0,
+     "explain": "Le **MSS** limite les données d'un segment. Window Scale agit sur la fenêtre, SACK sur les acquittements."
+    },
+    {
+     "type": "say",
+     "text": "**MSS effectif.** Avec les horodatages activés (12 octets d'options dans chaque segment), les données par segment tombent de **1460** à **1448** octets : c'est la valeur vue dans nos captures."
+    },
+    {
+     "type": "exercise",
+     "q": "Calcule le nombre d'octets de données max d'un segment avec MTU 1500, IP 20, TCP 20 + 12 d'options.",
+     "hints": [
+      "1500 − 20 − 20 − 12"
+     ],
+     "accept": [],
+     "solution": "1448",
+     "explain": "1500 − 20 − 20 − 12 = **1448** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Un pare-feu supprime l'option **SACK permitted** des SYN. Quelle conséquence ?",
+     "options": [
+      "Les pertes sont moins bien gérées : retransmissions plus nombreuses et plus lentes",
+      "La connexion est refusée",
+      "Les ports sont inversés"
+     ],
+     "answer": 0,
+     "explain": "Sans SACK, l'émetteur ne sait pas ce que le récepteur a reçu après un trou : il retransmet plus que nécessaire. La connexion marche, mais **moins bien**."
+    },
+    {
+     "type": "choice",
+     "q": "Un SYN avec **MSS = 1360** vient d'un client derrière un tunnel VPN. Que peut-on supposer ?",
+     "options": [
+      "Le chemin a un MTU réduit (≈ 1400) à cause de l'encapsulation",
+      "Le client est un serveur",
+      "Le client n'a pas de fenêtre"
+     ],
+     "answer": 0,
+     "explain": "1360 + 40 = 1400 : le MTU est réduit pour laisser de la place à l'encapsulation (VPN, PPPoE : MSS 1452, GRE…). Le MSS **trahit** la topologie."
+    }
+   ]
+  },
+  {
+   "id": "diagnostic",
+   "title": "Diagnostic : lire les symptômes",
+   "emoji": "🩺",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tu sais lire un en-tête et comprendre le mécanisme. Voici le dernier pas : **reconnaître une panne** à ce que montre une capture. Chaque scénario a une **signature**."
+    },
+    {
+     "type": "code",
+     "sql": "SYMPTÔME DANS LA CAPTURE                          CAUSE PROBABLE\nSYN, puis SYN, SYN... sans réponse                  Pare-feu qui jette (DROP) ou hôte injoignable\nSYN, puis RST+ACK                                   Port fermé (aucun programme n'écoute)\nSYN, SYN+ACK, ACK, puis RST                         Application ou pare-feu qui coupe\nBeaucoup de [TCP Retransmission]                    Perte de paquets, lien saturé ou défectueux\n[TCP Dup ACK] puis Fast Retransmission              Perte isolée, récupérée rapidement\n[TCP ZeroWindow]                                    Récepteur saturé (application lente)\n[TCP Window Full]                                   Émetteur bloqué par la fenêtre du récepteur\nMilliers de SYN-RECV                                SYN flood\nMilliers de CLOSE-WAIT                              Fuite de sockets dans l'application\nMilliers de TIME-WAIT côté serveur                  Serveur qui ferme en premier (souvent normal)",
+     "lang": "Diagnostic",
+     "title": "Table des signatures"
+    },
+    {
+     "type": "choice",
+     "q": "Le client envoie un SYN, le serveur répond **RST+ACK**. Que conclure ?",
+     "options": [
+      "Le port est fermé : le serveur est joignable mais aucun programme n'écoute",
+      "Le serveur est éteint",
+      "Un pare-feu a jeté le paquet sans réponse"
+     ],
+     "answer": 0,
+     "explain": "Un **RST** immédiat prouve que la machine **est là** et répond : c'est le port qui est fermé."
+    },
+    {
+     "type": "choice",
+     "q": "Le client envoie 6 SYN espacés de 1, 2, 4, 8, 16 s, **sans aucune réponse**. Que conclure ?",
+     "options": [
+      "Un pare-feu jette silencieusement les paquets ou la machine est injoignable",
+      "Le port est fermé",
+      "Le service est lent"
+     ],
+     "answer": 0,
+     "explain": "Un silence total est la signature d'un **DROP** (ou d'un hôte éteint). Notez les délais qui **doublent** : c'est le backoff du RTO."
+    },
+    {
+     "type": "choice",
+     "q": "La connexion s'établit, puis le client reçoit un **RST** dès qu'il envoie sa requête. Que suspecter ?",
+     "options": [
+      "Un équipement intermédiaire (pare-feu, IPS) qui inspecte et coupe la session",
+      "Un port fermé",
+      "Un TTL trop bas"
+     ],
+     "answer": 0,
+     "explain": "La poignée de main passe (c'est du trafic anodin), mais le contenu est **bloqué** par un équipement qui envoie un RST : typique d'un IPS ou d'un filtre."
+    },
+    {
+     "type": "choice",
+     "q": "Un téléchargement est lent malgré un lien de 1 Gb/s. La capture montre un RTT de 80 ms et une fenêtre plafonnée à 64 ko (pas de Window Scale). Pourquoi ?",
+     "options": [
+      "Débit max = fenêtre / RTT ≈ 6,5 Mb/s : la fenêtre limite, pas le lien",
+      "Le lien est saturé",
+      "Le serveur est en panne"
+     ],
+     "answer": 0,
+     "explain": "65 535 / 0,08 ≈ 819 000 octets/s ≈ **6,5 Mb/s** : la fenêtre est le goulot. Vérifie le Window Scale dans les SYN (souvent supprimé par un équipement)."
+    },
+    {
+     "type": "exercise",
+     "q": "Pour la question précédente, quel est le débit max en **kilo-octets par seconde** (arrondi) ? (65535 / 0,08 / 1000)",
+     "hints": [
+      "65535 / 0,08 = 819 187 octets/s"
+     ],
+     "accept": [],
+     "solution": "819",
+     "explain": "65 535 / 0,08 ≈ **819 ko/s**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Un serveur web a **20 000 connexions TIME-WAIT** mais peu d'ESTABLISHED. Est-ce inquiétant ?",
+     "options": [
+      "Pas nécessairement : c'est normal pour un serveur qui ferme beaucoup de connexions courtes (il peut y avoir un coût en ports/ressources)",
+      "Oui, c'est une attaque",
+      "Oui, c'est un bug du client"
+     ],
+     "answer": 0,
+     "explain": "TIME-WAIT est un **état sain**. Le seul risque est l'épuisement de ports côté **client** ou proxy qui ouvre beaucoup de connexions sortantes."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle capture montre un **scan de ports SYN** (type nmap -sS) ?",
+     "options": [
+      "Beaucoup de SYN vers de nombreux ports différents, et RST+ACK pour les ports fermés",
+      "Beaucoup de SYN+ACK vers un seul port",
+      "Beaucoup d'ACK dupliqués"
+     ],
+     "answer": 0,
+     "explain": "Le scan envoie un SYN par port : **SYN+ACK** = port ouvert (puis RST du scanner, sans finir la poignée de main), **RST+ACK** = fermé."
+    },
+    {
+     "type": "say",
+     "text": "**Filtres utiles** (à retenir) :"
+    },
+    {
+     "type": "code",
+     "sql": "# Wireshark (filtres d'affichage)\ntcp.flags.syn == 1 && tcp.flags.ack == 0     # SYN purs (nouvelles connexions)\ntcp.analysis.retransmission                  # retransmissions\ntcp.analysis.duplicate_ack                   # ACK dupliqués\ntcp.analysis.zero_window                     # fenêtres nulles\ntcp.flags.reset == 1                         # RST\n\n# tcpdump (filtre de capture)\nsudo tcpdump -nn 'tcp[tcpflags] & (tcp-syn|tcp-ack) == tcp-syn'   # SYN purs\nsudo tcpdump -nn 'tcp[tcpflags] & tcp-rst != 0'                   # RST",
+     "lang": "bash",
+     "title": "Filtres Wireshark et tcpdump"
+    },
+    {
+     "type": "choice",
+     "q": "Quel filtre Wireshark affiche les **retransmissions** ?",
+     "options": [
+      "tcp.analysis.retransmission",
+      "tcp.flags.syn == 1",
+      "ip.ttl < 5"
+     ],
+     "answer": 0,
+     "explain": "Wireshark analyse les flux et fournit des champs `tcp.analysis.*` : retransmission, duplicate_ack, zero_window, lost_segment…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel filtre tcpdump isole les **nouvelles connexions** (SYN sans ACK) ?",
+     "options": [
+      "tcp[tcpflags] & (tcp-syn|tcp-ack) == tcp-syn",
+      "tcp[tcpflags] == tcp-ack",
+      "tcp port 80"
+     ],
+     "answer": 0,
+     "explain": "On masque SYN et ACK et on exige SYN **seul** : c'est le **premier** paquet de chaque connexion."
+    },
+    {
+     "type": "choice",
+     "q": "Pour lister toutes les connexions TCP et leurs états sous Linux, on tape…",
+     "options": [
+      "ss -tan",
+      "ip route",
+      "ip neigh"
+     ],
+     "answer": 0,
+     "explain": "`ss -tan` : TCP, tous les états, numérique. (`ss -s` donne un résumé par état.)"
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : analyse d'une capture complète",
+   "emoji": "🏆",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final.** Voici un extrait de capture (numéros **relatifs**, MSS effectif 1448). Applique tout : ouverture, numéros, fenêtre, perte, retransmission, congestion."
+    },
+    {
+     "type": "code",
+     "sql": "N°  Sens   Drapeaux   seq     ack     long.  win     Remarque\n 1  C→S    SYN          0       0       0    64240   MSS 1460, WS 7, SACK, TS\n 2  S→C    SYN,ACK      0       1       0    65160   MSS 1460, WS 7, SACK, TS\n 3  C→S    ACK          1       1       0      501\n 4  C→S    PSH,ACK      1       1     120      501   requête HTTP\n 5  S→C    ACK          1     121       0      509\n 6  S→C    ACK          1     121    1448      509\n 7  S→C    ACK       1449     121    1448      509   (jamais reçu : perdu)\n 8  S→C    ACK       2897     121    1448      509\n 9  C→S    ACK        121    1449       0      501   SACK 2897-4345\n10  S→C    ACK       4345     121    1448      509\n11  C→S    ACK        121    1449       0      501   SACK 2897-5793\n12  S→C    ACK       5793     121    1448      509\n13  C→S    ACK        121    1449       0      501   SACK 2897-7241\n14  S→C    ACK       7241     121    1448      509\n15  C→S    ACK        121    1449       0      501   SACK 2897-8689\n16  S→C    ACK       1449     121    1448      509   retransmission\n17  C→S    ACK        121    8689       0      501",
+     "lang": "Wireshark",
+     "title": "Capture à analyser"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 1/10** : quel est l'état du client après le paquet 3 ?",
+     "options": [
+      "ESTABLISHED",
+      "SYN-SENT",
+      "SYN-RECV"
+     ],
+     "answer": 0,
+     "explain": "Après avoir envoyé le ACK final, le client est **ESTABLISHED** (le serveur le devient en le recevant)."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/10** : la fenêtre annoncée par le client dans le paquet 3 est 501. Avec Window Scale = 7, quelle fenêtre réelle ? (501 × 128)",
+     "hints": [
+      "501 × 2⁷"
+     ],
+     "accept": [],
+     "solution": "64128",
+     "explain": "501 × 128 = **64128** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/10** : quel est le `seq` du segment **perdu** ?",
+     "hints": [
+      "Cherche l'ack qui se répète dans les ACK du client"
+     ],
+     "accept": [],
+     "solution": "1449",
+     "explain": "Le client réclame toujours **1449** : c'est le segment du paquet 7 qui n'est jamais arrivé.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/10** : combien d'ACK **dupliqués** le client envoie-t-il ? (Le paquet 9 est le premier ACK 1449 ; compte les suivants avant la retransmission.)",
+     "hints": [
+      "Paquets 11, 13, 15"
+     ],
+     "accept": [],
+     "solution": "3",
+     "explain": "Le paquet 9 est l'ACK normal ; les paquets **11, 13 et 15** le répètent : **3** ACK dupliqués, d'où la retransmission rapide du paquet 16.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/10** : quelle est la valeur du dernier `ack` (paquet 17) ?",
+     "hints": [
+      "7241 + 1448"
+     ],
+     "accept": [],
+     "solution": "8689",
+     "explain": "Le trou est comblé : **8689 = 7241 + 1448**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/10** : combien d'octets de données le serveur a-t-il envoyés au total dans la réponse (paquets 6, 7, 8, 10, 12, 14, sans la retransmission) ?",
+     "hints": [
+      "6 × 1448"
+     ],
+     "accept": [],
+     "solution": "8688",
+     "explain": "6 × 1448 = **8688** octets (de 1 à 8688, d'où ack 8689).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 7/10** : cwnd valait 10 MSS quand la perte a été détectée par ACK dupliqués (Reno). Quelle est la nouvelle cwnd, en MSS ?",
+     "hints": [
+      "cwnd / 2"
+     ],
+     "accept": [],
+     "solution": "5",
+     "explain": "10 / 2 = **5 MSS** (ssthresh = 5).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 8/10** : avec cwnd = 5 MSS et MSS = 1448, combien d'octets au maximum peut-il y avoir en vol ?",
+     "hints": [
+      "5 × 1448"
+     ],
+     "accept": [],
+     "solution": "7240",
+     "explain": "5 × 1448 = **7240** octets.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 9/10** : sur le paquet 14, Wireshark affiche…",
+     "options": [
+      "[TCP Fast Retransmission]",
+      "[TCP ZeroWindow]",
+      "[TCP Keep-Alive]"
+     ],
+     "answer": 0,
+     "explain": "Retransmission déclenchée **avant** le RTO par les ACK dupliqués → **Fast Retransmission**."
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 10/10 (boss)** : si le paquet 14 avait été perdu à son tour et que **plus rien** n'arrive, que ferait l'émetteur ?",
+     "options": [
+      "Attendre la fin du RTO, retransmettre, doubler le RTO, et remettre cwnd à 1 MSS (slow start)",
+      "Envoyer un RST immédiat",
+      "Réduire cwnd de moitié seulement"
+     ],
+     "answer": 0,
+     "explain": "Plus d'ACK dupliqués = **silence** : c'est le **RTO** qui déclenche. Backoff exponentiel, ssthresh = cwnd/2 et cwnd = 1 MSS."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu connais le cycle de vie d'une connexion TCP, sa comptabilité (séquence, ACK cumulatifs, SACK), son contrôle de flux et de congestion, et tu sais diagnostiquer une panne à la lecture d'une capture. Prochaine étape : **capture un vrai téléchargement** avec Wireshark, ouvre *Statistics → TCP Stream Graphs* et retrouve slow start, évitement et pertes sur le graphe."
+    }
+   ]
+  }
+ ]
+}
