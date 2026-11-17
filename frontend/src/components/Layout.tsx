@@ -293,7 +293,7 @@ export default function Layout() {
       <header className="sticky top-0 z-30 border-b border-line/60 bg-bg/90 backdrop-blur-md">
         <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-2 px-4 py-2.5">
           <div className="lg:hidden flex items-center gap-2">
-           {/* <Logo /> *}
+           {/* <Logo /> */}
           </div>
           <div className="hidden items-center gap-2 text-sm font-extrabold text-muted lg:flex">
             <span>
