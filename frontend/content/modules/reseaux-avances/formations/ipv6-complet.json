@@ -1,0 +1,2325 @@
+{
+ "id": "ipv6-complet",
+ "order": 9,
+ "title": "IPv6 complet",
+ "tagline": "Adressage, SLAAC, NDP, routage et transition : maîtrise IPv6 de l'adresse au paquet.",
+ "emoji": "🌍",
+ "color": "#06B6D4",
+ "level": "Intermédiaire → Avancé",
+ "minutes": 185,
+ "pitch": [
+  "Salut ! Je te propose **« IPv6 complet »** 🌍.",
+  "IPv6 n'est plus une option : tu le rencontres dans tous les réseaux modernes. Pourtant on le comprend souvent à moitié. Ici, on le prend **de bout en bout** : écrire et lire les adresses, reconnaître leur type, planifier les sous-réseaux, comprendre comment une machine s'auto-configure (SLAAC) et trouve ses voisins (NDP).",
+  "On décode de **vraies trames** NS et RA en hexadécimal, puis on passe à la configuration (Linux et Cisco), au routage (statique, par défaut, OSPFv3), à la cohabitation avec IPv4 et à la sécurité.",
+  "À la fin, tu planifies, configures et dépannes un réseau IPv6 comme un pro."
+ ],
+ "benefits": [
+  "Compresser, décompresser et reconnaître n'importe quelle adresse IPv6",
+  "Planifier un plan d'adressage en /48, /56, /64",
+  "Construire une adresse EUI-64 et une adresse solicited-node",
+  "Décoder un NS et un RA en hexadécimal",
+  "Comprendre SLAAC, DHCPv6, les drapeaux M/O/A/L",
+  "Configurer et router IPv6 (statique, par défaut, OSPFv3)",
+  "Faire cohabiter IPv4/IPv6 et éviter les pièges de sécurité"
+ ],
+ "lessons": [
+  {
+   "id": "pourquoi",
+   "title": "Pourquoi IPv6 ? L'essentiel en 10 minutes",
+   "emoji": "🌍",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! IPv6 est l'avenir (et déjà le présent) d'Internet. Dans cette formation, on va tout voir : **écrire** les adresses, **reconnaître leur type**, **planifier** un réseau, comprendre comment les machines **s'auto-configurent (SLAAC)**, comment elles **se trouvent (NDP)**, et comment on **route** l'IPv6."
+    },
+    {
+     "type": "say",
+     "text": "**Le problème d'IPv4** : 32 bits = environ **4,3 milliards** d'adresses, épuisées depuis longtemps. Le NAT a retardé l'échéance, mais il **casse la communication de bout en bout**."
+    },
+    {
+     "type": "say",
+     "text": "**La solution** : IPv6 code les adresses sur **128 bits**. Cela donne 2¹²⁸ ≈ **3,4 × 10³⁸** adresses : plus de quoi donner une adresse à chaque grain de sable de la Terre, et même bien davantage. Plus besoin de NAT pour économiser des adresses."
+    },
+    {
+     "type": "code",
+     "sql": "IPv4 : 32 bits  =  4 octets   →  192.168.1.10          (décimal, séparé par des points)\nIPv6 : 128 bits = 16 octets   →  2001:0db8:acad:0001:0000:0000:0000:0001   (hexadécimal, séparé par « : »)",
+     "lang": "Format",
+     "title": "Comparaison"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de **bits** a une adresse IPv6 ?",
+     "hints": [
+      "4 × plus que IPv4 (32 bits)"
+     ],
+     "accept": [],
+     "solution": "128",
+     "explain": "**128 bits** (16 octets).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Chaque chiffre hexadécimal représente 4 bits. Combien de chiffres hexa faut-il pour écrire 128 bits ?",
+     "hints": [
+      "128 / 4"
+     ],
+     "accept": [],
+     "solution": "32",
+     "explain": "128 / 4 = **32** chiffres hexa.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Une adresse IPv6 s'écrit en groupes de 4 chiffres hexa (16 bits). Combien de **groupes** ?",
+     "hints": [
+      "32 / 4"
+     ],
+     "accept": [],
+     "solution": "8",
+     "explain": "32 / 4 = **8 groupes**, séparés par `:`.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Ce qui change par rapport à IPv4 :**"
+    },
+    {
+     "type": "code",
+     "sql": "• Plus de NAT obligatoire : chaque appareil peut avoir une adresse globale\n• Plus de broadcast : on utilise le multicast\n• ARP est remplacé par NDP (ICMPv6)\n• Auto-configuration native (SLAAC), sans serveur DHCP obligatoire\n• En-tête simplifié de 40 octets fixes, sans checksum\n• Les routeurs ne fragmentent plus : seule la source fragmente\n• Une interface a plusieurs adresses en même temps (lien-local + globale...)",
+     "lang": "Résumé",
+     "title": "IPv6 en bref"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle fonctionnalité d'IPv4 **n'existe plus** en IPv6 ?",
+     "options": [
+      "Le broadcast (diffusion)",
+      "L'adresse de loopback",
+      "Le routage"
+     ],
+     "answer": 0,
+     "explain": "Le broadcast est remplacé par le **multicast** : seuls les équipements intéressés reçoivent le paquet (moins de bruit sur le réseau)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel protocole remplace **ARP** en IPv6 ?",
+     "options": [
+      "NDP (Neighbor Discovery Protocol)",
+      "DHCPv6",
+      "ICMP"
+     ],
+     "answer": 0,
+     "explain": "**NDP**, fondé sur ICMPv6 : messages NS/NA pour trouver la MAC d'un voisin."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi IPv6 fait-il disparaître le besoin du NAT ?",
+     "options": [
+      "Parce qu'il y a assez d'adresses globales pour tous les équipements",
+      "Parce qu'il chiffre tout",
+      "Parce qu'il n'y a plus de routeurs"
+     ],
+     "answer": 0,
+     "explain": "Le NAT existait pour **économiser** les adresses IPv4. Avec IPv6, chaque équipement peut avoir une adresse publique ; la sécurité vient du **pare-feu**, pas de la traduction."
+    },
+    {
+     "type": "choice",
+     "q": "Une machine peut-elle avoir **plusieurs** adresses IPv6 sur la même interface ?",
+     "options": [
+      "Oui, c'est normal (lien-local, globale, temporaires…)",
+      "Non, une seule",
+      "Seulement sur un routeur"
+     ],
+     "answer": 0,
+     "explain": "C'est la norme en IPv6 : une adresse **lien-local** (toujours présente) plus une ou plusieurs adresses globales."
+    }
+   ]
+  },
+  {
+   "id": "ecriture",
+   "title": "Écrire et lire une adresse IPv6",
+   "emoji": "✍️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe à la pratique. Une adresse IPv6 : **8 groupes de 16 bits** en hexadécimal, séparés par `:`. Par exemple :"
+    },
+    {
+     "type": "code",
+     "sql": "2001:0db8:0000:0000:0008:0800:200c:417a",
+     "lang": "IPv6",
+     "title": "Forme complète"
+    },
+    {
+     "type": "say",
+     "text": "Deux règles permettent de l'**abréger** :\n1. dans un groupe, on supprime les **zéros de tête** (`0db8` → `db8`, `0008` → `8`, `0000` → `0`) ;\n2. **une seule fois** par adresse, une suite de groupes nuls consécutifs devient `::`."
+    },
+    {
+     "type": "code",
+     "sql": "2001:0db8:0000:0000:0008:0800:200c:417a\n  → zéros de tête enlevés :   2001:db8:0:0:8:800:200c:417a\n  → suite de 0 remplacée :    2001:db8::8:800:200c:417a",
+     "lang": "IPv6",
+     "title": "Compression pas à pas"
+    },
+    {
+     "type": "exercise",
+     "q": "Compresse au maximum : `2001:0db8:0000:0000:0000:0000:0000:0001`.",
+     "hints": [
+      "Enlève les zéros de tête, puis remplace la plus longue suite de groupes nuls par ::"
+     ],
+     "accept": [
+      "2001:db8:0:0:0:0:0:1",
+      "2001:db8::0:0:0:0:1",
+      "2001:db8::0:0:0:1",
+      "2001:db8::0:0:1",
+      "2001:db8::0:1",
+      "2001:db8:0::0:0:0:1",
+      "2001:db8:0::0:0:1",
+      "2001:db8:0::0:1",
+      "2001:db8:0::1",
+      "2001:db8:0:0::0:0:1",
+      "2001:db8:0:0::0:1",
+      "2001:db8:0:0::1",
+      "2001:db8:0:0:0::0:1",
+      "2001:db8:0:0:0::1",
+      "2001:db8:0:0:0:0::1",
+      "2001:0db8:0000:0000:0000:0000:0000:0001",
+      "2001:0db8::0000:0000:0000:0000:0001",
+      "2001:0db8::0000:0000:0000:0001",
+      "2001:0db8::0000:0000:0001",
+      "2001:0db8::0000:0001",
+      "2001:0db8::0001",
+      "2001:0db8:0000::0000:0000:0000:0001",
+      "2001:0db8:0000::0000:0000:0001",
+      "2001:0db8:0000::0000:0001",
+      "2001:0db8:0000::0001",
+      "2001:0db8:0000:0000::0000:0000:0001",
+      "2001:0db8:0000:0000::0000:0001",
+      "2001:0db8:0000:0000::0001",
+      "2001:0db8:0000:0000:0000::0000:0001",
+      "2001:0db8:0000:0000:0000::0001",
+      "2001:0db8:0000:0000:0000:0000::0001"
+     ],
+     "solution": "2001:db8::1",
+     "explain": "`0db8` → `db8`, puis les 5 groupes nuls deviennent `::` → **2001:db8::1**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Compresse au maximum : `fe80:0000:0000:0000:0a00:27ff:fea1:b2c3`.",
+     "hints": [
+      "`0a00` devient `a00`"
+     ],
+     "accept": [
+      "fe80:0:0:0:a00:27ff:fea1:b2c3",
+      "fe80::0:0:a00:27ff:fea1:b2c3",
+      "fe80::0:a00:27ff:fea1:b2c3",
+      "fe80:0::0:a00:27ff:fea1:b2c3",
+      "fe80:0::a00:27ff:fea1:b2c3",
+      "fe80:0:0::a00:27ff:fea1:b2c3",
+      "fe80:0000:0000:0000:0a00:27ff:fea1:b2c3",
+      "fe80::0000:0000:0a00:27ff:fea1:b2c3",
+      "fe80::0000:0a00:27ff:fea1:b2c3",
+      "fe80::0a00:27ff:fea1:b2c3",
+      "fe80:0000::0000:0a00:27ff:fea1:b2c3",
+      "fe80:0000::0a00:27ff:fea1:b2c3",
+      "fe80:0000:0000::0a00:27ff:fea1:b2c3"
+     ],
+     "solution": "fe80::a00:27ff:fea1:b2c3",
+     "explain": "`0a00` → `a00` ; les 3 groupes nuls → `::` : **fe80::a00:27ff:fea1:b2c3**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Compresse : `0000:0000:0000:0000:0000:0000:0000:0001` (c'est l'adresse de **loopback**).",
+     "hints": [
+      "Tous les groupes sont nuls sauf le dernier"
+     ],
+     "accept": [
+      "0:0:0:0:0:0:0:1",
+      "::0:0:0:0:0:0:1",
+      "::0:0:0:0:0:1",
+      "::0:0:0:0:1",
+      "::0:0:0:1",
+      "::0:0:1",
+      "::0:1",
+      "0::0:0:0:0:0:1",
+      "0::0:0:0:0:1",
+      "0::0:0:0:1",
+      "0::0:0:1",
+      "0::0:1",
+      "0::1",
+      "0:0::0:0:0:0:1",
+      "0:0::0:0:0:1",
+      "0:0::0:0:1",
+      "0:0::0:1",
+      "0:0::1",
+      "0:0:0::0:0:0:1",
+      "0:0:0::0:0:1",
+      "0:0:0::0:1",
+      "0:0:0::1",
+      "0:0:0:0::0:0:1",
+      "0:0:0:0::0:1",
+      "0:0:0:0::1",
+      "0:0:0:0:0::0:1",
+      "0:0:0:0:0::1",
+      "0:0:0:0:0:0::1",
+      "0000:0000:0000:0000:0000:0000:0000:0001",
+      "::0000:0000:0000:0000:0000:0000:0001",
+      "::0000:0000:0000:0000:0000:0001",
+      "::0000:0000:0000:0000:0001",
+      "::0000:0000:0000:0001",
+      "::0000:0000:0001",
+      "::0000:0001",
+      "::0001",
+      "0000::0000:0000:0000:0000:0000:0001",
+      "0000::0000:0000:0000:0000:0001",
+      "0000::0000:0000:0000:0001",
+      "0000::0000:0000:0001",
+      "0000::0000:0001",
+      "0000::0001",
+      "0000:0000::0000:0000:0000:0000:0001",
+      "0000:0000::0000:0000:0000:0001",
+      "0000:0000::0000:0000:0001",
+      "0000:0000::0000:0001",
+      "0000:0000::0001",
+      "0000:0000:0000::0000:0000:0000:0001",
+      "0000:0000:0000::0000:0000:0001",
+      "0000:0000:0000::0000:0001",
+      "0000:0000:0000::0001",
+      "0000:0000:0000:0000::0000:0000:0001",
+      "0000:0000:0000:0000::0000:0001",
+      "0000:0000:0000:0000::0001",
+      "0000:0000:0000:0000:0000::0000:0001",
+      "0000:0000:0000:0000:0000::0001",
+      "0000:0000:0000:0000:0000:0000::0001"
+     ],
+     "solution": "::1",
+     "explain": "**::1** : l'équivalent de 127.0.0.1.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Compresse : `0000:0000:0000:0000:0000:0000:0000:0000` (l'adresse **non spécifiée**).",
+     "hints": [
+      "Tout est nul"
+     ],
+     "accept": [
+      "0:0:0:0:0:0:0:0",
+      "::0:0:0:0:0:0:0",
+      "::0:0:0:0:0:0",
+      "::0:0:0:0:0",
+      "::0:0:0:0",
+      "::0:0:0",
+      "::0:0",
+      "::0",
+      "0::0:0:0:0:0:0",
+      "0::0:0:0:0:0",
+      "0::0:0:0:0",
+      "0::0:0:0",
+      "0::0:0",
+      "0::0",
+      "0::",
+      "0:0::0:0:0:0:0",
+      "0:0::0:0:0:0",
+      "0:0::0:0:0",
+      "0:0::0:0",
+      "0:0::0",
+      "0:0::",
+      "0:0:0::0:0:0:0",
+      "0:0:0::0:0:0",
+      "0:0:0::0:0",
+      "0:0:0::0",
+      "0:0:0::",
+      "0:0:0:0::0:0:0",
+      "0:0:0:0::0:0",
+      "0:0:0:0::0",
+      "0:0:0:0::",
+      "0:0:0:0:0::0:0",
+      "0:0:0:0:0::0",
+      "0:0:0:0:0::",
+      "0:0:0:0:0:0::0",
+      "0:0:0:0:0:0::",
+      "0:0:0:0:0:0:0::",
+      "0000:0000:0000:0000:0000:0000:0000:0000",
+      "::0000:0000:0000:0000:0000:0000:0000",
+      "::0000:0000:0000:0000:0000:0000",
+      "::0000:0000:0000:0000:0000",
+      "::0000:0000:0000:0000",
+      "::0000:0000:0000",
+      "::0000:0000",
+      "::0000",
+      "0000::0000:0000:0000:0000:0000:0000",
+      "0000::0000:0000:0000:0000:0000",
+      "0000::0000:0000:0000:0000",
+      "0000::0000:0000:0000",
+      "0000::0000:0000",
+      "0000::0000",
+      "0000::",
+      "0000:0000::0000:0000:0000:0000:0000",
+      "0000:0000::0000:0000:0000:0000",
+      "0000:0000::0000:0000:0000",
+      "0000:0000::0000:0000",
+      "0000:0000::0000",
+      "0000:0000::",
+      "0000:0000:0000::0000:0000:0000:0000",
+      "0000:0000:0000::0000:0000:0000",
+      "0000:0000:0000::0000:0000",
+      "0000:0000:0000::0000",
+      "0000:0000:0000::",
+      "0000:0000:0000:0000::0000:0000:0000",
+      "0000:0000:0000:0000::0000:0000",
+      "0000:0000:0000:0000::0000",
+      "0000:0000:0000:0000::",
+      "0000:0000:0000:0000:0000::0000:0000",
+      "0000:0000:0000:0000:0000::0000",
+      "0000:0000:0000:0000:0000::",
+      "0000:0000:0000:0000:0000:0000::0000",
+      "0000:0000:0000:0000:0000:0000::",
+      "0000:0000:0000:0000:0000:0000:0000::"
+     ],
+     "solution": "::",
+     "explain": "**::** : « aucune adresse ». Utilisée comme source avant d'avoir une adresse (par exemple lors de la détection de doublon).",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris **sans compression** (8 groupes de 4 chiffres) : `fe80::1`.",
+     "hints": [
+      "`::` remplace combien de groupes ? 8 − 2 = 6"
+     ],
+     "accept": [
+      "fe80:0:0:0:0:0:0:1"
+     ],
+     "solution": "fe80:0000:0000:0000:0000:0000:0000:0001",
+     "explain": "`fe80` + **6** groupes nuls + `0001` : **fe80:0000:0000:0000:0000:0000:0000:0001**.",
+     "placeholder": "8 groupes de 4 chiffres"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris **sans compression** : `2001:db8:acad::10`.",
+     "hints": [
+      "Il y a 4 groupes explicites, donc `::` remplace 4 groupes"
+     ],
+     "accept": [
+      "2001:db8:acad:0:0:0:0:10"
+     ],
+     "solution": "2001:0db8:acad:0000:0000:0000:0000:0010",
+     "explain": "**2001:0db8:acad:0000:0000:0000:0000:0010** : on rend aux groupes leurs zéros de tête.",
+     "placeholder": "8 groupes de 4 chiffres"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans `2001:db8:acad::10`, par combien de groupes de zéros le `::` est-il remplacé ?",
+     "hints": [
+      "8 − nombre de groupes écrits (2001, db8, acad, 10)"
+     ],
+     "accept": [],
+     "solution": "4",
+     "explain": "4 groupes écrits → le `::` en remplace **4**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `2001:db8::acad::10` est-elle **invalide** ?",
+     "options": [
+      "Deux `::` rendent l'adresse ambiguë : on ne sait pas combien de groupes chacun remplace",
+      "Parce qu'elle contient des lettres",
+      "Parce qu'elle est trop courte"
+     ],
+     "answer": 0,
+     "explain": "Le `::` n'est autorisé qu'**une seule fois**."
+    },
+    {
+     "type": "choice",
+     "q": "Une adresse contient deux suites de zéros de longueurs différentes. Laquelle remplace-t-on par `::` ?",
+     "options": [
+      "La plus longue (à égalité, la première)",
+      "La plus courte",
+      "La dernière"
+     ],
+     "answer": 0,
+     "explain": "Règle de la RFC 5952 : on compresse la **plus longue** suite (au moins 2 groupes) ; à égalité, la **première**. Exemple : `2001:db8:0:0:1:0:0:1` s'écrit `2001:db8::1:0:0:1`."
+    },
+    {
+     "type": "choice",
+     "q": "Que vaut `2001:db8:10::1` : le groupe `10` est-il égal à `1` ?",
+     "options": [
+      "Non : 10 (hexa) = 16, jamais « 1 »",
+      "Oui, c'est équivalent",
+      "Oui car les zéros ne comptent pas"
+     ],
+     "answer": 0,
+     "explain": "On ne supprime que les zéros **de tête**. `10` reste `10`, qui vaut **16** en décimal."
+    },
+    {
+     "type": "say",
+     "text": "**Dans une URL**, l'adresse se met entre **crochets** (sinon les `:` se mélangent avec le port) : `http://[2001:db8::1]:8080/`. Le **préfixe** s'écrit comme en CIDR : `2001:db8:acad:1::/64`."
+    },
+    {
+     "type": "choice",
+     "q": "Comment écrire l'accès au port 8080 du serveur `2001:db8::1` dans un navigateur ?",
+     "options": [
+      "http://[2001:db8::1]:8080/",
+      "http://2001:db8::1:8080/",
+      "http://2001:db8::1/8080"
+     ],
+     "answer": 0,
+     "explain": "Les **crochets** isolent l'adresse du numéro de port."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'écriture compressée de `2001:0db8:0000:0000:0000:ff00:0042:8329` ?",
+     "hints": [
+      "3 groupes nuls au milieu"
+     ],
+     "accept": [
+      "2001:db8:0:0:0:ff00:42:8329",
+      "2001:db8::0:0:ff00:42:8329",
+      "2001:db8::0:ff00:42:8329",
+      "2001:db8:0::0:ff00:42:8329",
+      "2001:db8:0::ff00:42:8329",
+      "2001:db8:0:0::ff00:42:8329",
+      "2001:0db8:0000:0000:0000:ff00:0042:8329",
+      "2001:0db8::0000:0000:ff00:0042:8329",
+      "2001:0db8::0000:ff00:0042:8329",
+      "2001:0db8::ff00:0042:8329",
+      "2001:0db8:0000::0000:ff00:0042:8329",
+      "2001:0db8:0000::ff00:0042:8329",
+      "2001:0db8:0000:0000::ff00:0042:8329"
+     ],
+     "solution": "2001:db8::ff00:42:8329",
+     "explain": "**2001:db8::ff00:42:8329**.",
+     "placeholder": "Adresse IPv6"
+    }
+   ]
+  },
+  {
+   "id": "types",
+   "title": "Reconnaître le type d'une adresse",
+   "emoji": "🏷️",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "En IPv4 on reconnaît une adresse privée, loopback, multicast à son premier octet. En IPv6, c'est le **préfixe** (les premiers bits) qui donne le type. À connaître :"
+    },
+    {
+     "type": "code",
+     "sql": "2000::/3     Global unicast (GUA)   routable sur Internet (commence par 2 ou 3)\nfe80::/10    Lien-local (LLA)       valable sur le lien seul, non routable\nfc00::/7     Unique locale (ULA)    adresses « privées » (en pratique fd00::/8)\nff00::/8     Multicast               commence par ff\n::1/128      Loopback\n::/128       Non spécifiée\n2001:db8::/32  Documentation        réservé aux exemples",
+     "lang": "Types",
+     "title": "Les préfixes à connaître"
+    },
+    {
+     "type": "choice",
+     "q": "`2a00:1450:4007::200e` est de type…",
+     "options": [
+      "Global unicast",
+      "Lien-local",
+      "Multicast"
+     ],
+     "answer": 0,
+     "explain": "Commence par `2` : appartient à `2000::/3`, donc **global unicast**."
+    },
+    {
+     "type": "choice",
+     "q": "`fe80::21a:2bff:fe3c:4d5e` est de type…",
+     "options": [
+      "Lien-local",
+      "Global unicast",
+      "Unique locale"
+     ],
+     "answer": 0,
+     "explain": "`fe80::/10` = **lien-local**, présente automatiquement sur chaque interface IPv6."
+    },
+    {
+     "type": "choice",
+     "q": "`fd12:3456:789a::1` est de type…",
+     "options": [
+      "Unique locale (ULA)",
+      "Lien-local",
+      "Global unicast"
+     ],
+     "answer": 0,
+     "explain": "`fc00::/7` (en pratique `fd…`) = **ULA**, l'équivalent des adresses privées IPv4 (10.x, 192.168.x)."
+    },
+    {
+     "type": "choice",
+     "q": "`ff02::2` est de type…",
+     "options": [
+      "Multicast : tous les routeurs du lien",
+      "Lien-local",
+      "Loopback"
+     ],
+     "answer": 0,
+     "explain": "Commence par `ff` : **multicast**. `ff02::2` = tous les routeurs du lien."
+    },
+    {
+     "type": "choice",
+     "q": "`2001:db8:acad:1::1` est de type…",
+     "options": [
+      "Documentation (utilisée dans les cours)",
+      "Lien-local",
+      "Unique locale"
+     ],
+     "answer": 0,
+     "explain": "`2001:db8::/32` est **réservé à la documentation**, ne circule jamais sur Internet. C'est pourquoi on le voit partout dans les exemples."
+    },
+    {
+     "type": "say",
+     "text": "**La lettre qui suit `ff` donne la portée du multicast.** Format : `ff` + flags + **portée** :"
+    },
+    {
+     "type": "code",
+     "sql": "ff01  portée interface (la machine)\nff02  portée LIEN (le segment local)    ← le plus courant\nff05  portée site\nff08  portée organisation\nff0e  portée globale",
+     "lang": "Multicast",
+     "title": "Portée du multicast"
+    },
+    {
+     "type": "code",
+     "sql": "ff02::1     tous les nœuds du lien       (remplace le broadcast)\nff02::2     tous les routeurs du lien\nff02::5     routeurs OSPFv3\nff02::6     DR/BDR OSPFv3\nff02::fb    mDNS\nff02::1:2   serveurs et relais DHCPv6\nff02::1:ffXX:XXXX   adresse « solicited-node » (voir leçon NDP)",
+     "lang": "Multicast",
+     "title": "Multicast bien connus"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle adresse utilise-t-on à la place du **broadcast** IPv4 pour joindre tous les hôtes du lien ?",
+     "options": [
+      "ff02::1",
+      "ff02::2",
+      "::1"
+     ],
+     "answer": 0,
+     "explain": "`ff02::1` = tous les nœuds du lien. `ff02::2` = tous les **routeurs**."
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet est destiné à `ff02::5`. Qui le reçoit ?",
+     "options": [
+      "Les routeurs OSPFv3 du lien",
+      "Tous les serveurs web",
+      "Tous les hôtes d'Internet"
+     ],
+     "answer": 0,
+     "explain": "`ff02::5` est le groupe des routeurs **OSPFv3**."
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie le « 2 » dans `ff02::1` ?",
+     "options": [
+      "La portée : lien local (le paquet ne sort pas du segment)",
+      "Le numéro du réseau",
+      "La version du protocole"
+     ],
+     "answer": 0,
+     "explain": "Le 4e chiffre hexa donne la **portée** : `ff02` = lien local ; un routeur ne transmet jamais un `ff02` hors du lien."
+    },
+    {
+     "type": "say",
+     "text": "**Trois modes d'envoi** : **unicast** (un vers un), **multicast** (un vers plusieurs abonnés), **anycast** (un vers le **plus proche** parmi plusieurs équipements qui portent la même adresse, par exemple des serveurs DNS racine)."
+    },
+    {
+     "type": "choice",
+     "q": "Une même adresse est configurée sur plusieurs serveurs répartis dans le monde ; le trafic va vers le plus proche. Quel mode ?",
+     "options": [
+      "Anycast",
+      "Multicast",
+      "Broadcast"
+     ],
+     "answer": 0,
+     "explain": "**Anycast** : on atteint le plus proche (au sens du routage)."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle adresse est **toujours** présente sur une interface IPv6 activée ?",
+     "options": [
+      "Une adresse lien-local (fe80::…)",
+      "Une adresse globale",
+      "Une adresse multicast ff02::2"
+     ],
+     "answer": 0,
+     "explain": "Toute interface IPv6 s'auto-attribue une adresse **lien-local** : c'est avec elle que les routeurs et NDP communiquent."
+    }
+   ]
+  },
+  {
+   "id": "prefixes",
+   "title": "Préfixes et plan d'adressage : /48, /56, /64",
+   "emoji": "🧩",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un opérateur ne vous donne pas **une** adresse mais un **préfixe**. La structure classique d'une adresse globale :"
+    },
+    {
+     "type": "code",
+     "sql": "|<---------- 48 bits ---------->|<-- 16 bits -->|<----------- 64 bits ----------->|\n|   préfixe global (opérateur)    | ID de sous-   |  identifiant d'interface (IID)  |\n|   attribué à votre site         |  réseau       |                                 |\n|           /48                   |  → /64        |                                 |\n\nExemple : 2001:0db8:acad : 0001 : 0000:0000:0000:0001\n          └─ préfixe /48 ─┘ └ sous-réseau ┘ └──── IID ────┘",
+     "lang": "Structure",
+     "title": "Structure d'une adresse globale"
+    },
+    {
+     "type": "say",
+     "text": "Règle d'or : **les sous-réseaux de LAN sont des /64**. Les 64 derniers bits sont l'identifiant d'interface : SLAAC **l'exige**. Un site reçoit en général un **/48** (65 536 sous-réseaux) ou un **/56** (256 sous-réseaux)."
+    },
+    {
+     "type": "exercise",
+     "q": "Un site reçoit un **/48**. Combien de bits restent pour numéroter les sous-réseaux /64 ? (64 − 48)",
+     "hints": [
+      "64 − 48"
+     ],
+     "accept": [],
+     "solution": "16",
+     "explain": "**16 bits** d'ID de sous-réseau.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de sous-réseaux /64 dans un **/48** ? (2¹⁶)",
+     "hints": [
+      "2 puissance 16"
+     ],
+     "accept": [],
+     "solution": "65536",
+     "explain": "2¹⁶ = **65 536** sous-réseaux /64.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de sous-réseaux /64 dans un **/56** ? (2⁸)",
+     "hints": [
+      "64 − 56 = 8 bits"
+     ],
+     "accept": [],
+     "solution": "256",
+     "explain": "2⁸ = **256**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'adresses dans **un seul /64** ? Réponds par la puissance de 2 : 2 puissance … ?",
+     "hints": [
+      "Les 64 bits de l'identifiant d'interface"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "2⁶⁴ ≈ **1,8 × 10¹⁹** adresses : un seul sous-réseau est déjà plus grand que tout IPv4 au carré.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Trouver le préfixe d'une adresse.** Avec un /64, le préfixe = les **4 premiers groupes** ; le reste est l'identifiant d'interface."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le préfixe /64 (écris juste l'adresse du réseau, sans le /64) de l'hôte `2001:db8:acad:10:a00:27ff:fea1:b2c3` ?",
+     "hints": [
+      "4 premiers groupes, puis `::`"
+     ],
+     "accept": [
+      "2001:db8:acad:10:0:0:0:0",
+      "2001:db8:acad:10::0:0:0",
+      "2001:db8:acad:10::0:0",
+      "2001:db8:acad:10::0",
+      "2001:db8:acad:10:0::0:0",
+      "2001:db8:acad:10:0::0",
+      "2001:db8:acad:10:0::",
+      "2001:db8:acad:10:0:0::0",
+      "2001:db8:acad:10:0:0::",
+      "2001:db8:acad:10:0:0:0::",
+      "2001:0db8:acad:0010:0000:0000:0000:0000",
+      "2001:0db8:acad:0010::0000:0000:0000",
+      "2001:0db8:acad:0010::0000:0000",
+      "2001:0db8:acad:0010::0000",
+      "2001:0db8:acad:0010::",
+      "2001:0db8:acad:0010:0000::0000:0000",
+      "2001:0db8:acad:0010:0000::0000",
+      "2001:0db8:acad:0010:0000::",
+      "2001:0db8:acad:0010:0000:0000::0000",
+      "2001:0db8:acad:0010:0000:0000::",
+      "2001:0db8:acad:0010:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:acad:10::",
+     "explain": "4 premiers groupes : `2001:db8:acad:10`, le reste à zéro → **2001:db8:acad:10::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le préfixe /64 de `2001:db8:1:2:3:4:5:6` ?",
+     "hints": [
+      "4 premiers groupes"
+     ],
+     "accept": [
+      "2001:db8:1:2:0:0:0:0",
+      "2001:db8:1:2::0:0:0",
+      "2001:db8:1:2::0:0",
+      "2001:db8:1:2::0",
+      "2001:db8:1:2:0::0:0",
+      "2001:db8:1:2:0::0",
+      "2001:db8:1:2:0::",
+      "2001:db8:1:2:0:0::0",
+      "2001:db8:1:2:0:0::",
+      "2001:db8:1:2:0:0:0::",
+      "2001:0db8:0001:0002:0000:0000:0000:0000",
+      "2001:0db8:0001:0002::0000:0000:0000",
+      "2001:0db8:0001:0002::0000:0000",
+      "2001:0db8:0001:0002::0000",
+      "2001:0db8:0001:0002::",
+      "2001:0db8:0001:0002:0000::0000:0000",
+      "2001:0db8:0001:0002:0000::0000",
+      "2001:0db8:0001:0002:0000::",
+      "2001:0db8:0001:0002:0000:0000::0000",
+      "2001:0db8:0001:0002:0000:0000::",
+      "2001:0db8:0001:0002:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:1:2::",
+     "explain": "**2001:db8:1:2::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "say",
+     "text": "**Planifier les sous-réseaux.** Le 4e groupe est l'ID de sous-réseau : on écrit le numéro en **hexadécimal**. L'opérateur vous donne `2001:db8:abcd::/48`. Vous numérotez les VLAN et créez un /64 par VLAN :"
+    },
+    {
+     "type": "code",
+     "sql": "VLAN 10  →  4e groupe = 0x000a  →  2001:db8:abcd:a::/64\nVLAN 20  →  4e groupe = 0x0014  →  2001:db8:abcd:14::/64\nVLAN 30  →  4e groupe = 0x001e  →  2001:db8:abcd:1e::/64\nVLAN 100 →  4e groupe = 0x0064  →  2001:db8:abcd:64::/64",
+     "lang": "Plan",
+     "title": "Un /64 par VLAN (numéro VLAN converti en hexa)"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le /64 du **VLAN 40** si on écrit son numéro en hexa dans le 4e groupe ? (40 en décimal = 0x28)",
+     "hints": [
+      "40 = 2×16 + 8"
+     ],
+     "accept": [
+      "2001:db8:abcd:28:0:0:0:0",
+      "2001:db8:abcd:28::0:0:0",
+      "2001:db8:abcd:28::0:0",
+      "2001:db8:abcd:28::0",
+      "2001:db8:abcd:28:0::0:0",
+      "2001:db8:abcd:28:0::0",
+      "2001:db8:abcd:28:0::",
+      "2001:db8:abcd:28:0:0::0",
+      "2001:db8:abcd:28:0:0::",
+      "2001:db8:abcd:28:0:0:0::",
+      "2001:0db8:abcd:0028:0000:0000:0000:0000",
+      "2001:0db8:abcd:0028::0000:0000:0000",
+      "2001:0db8:abcd:0028::0000:0000",
+      "2001:0db8:abcd:0028::0000",
+      "2001:0db8:abcd:0028::",
+      "2001:0db8:abcd:0028:0000::0000:0000",
+      "2001:0db8:abcd:0028:0000::0000",
+      "2001:0db8:abcd:0028:0000::",
+      "2001:0db8:abcd:0028:0000:0000::0000",
+      "2001:0db8:abcd:0028:0000:0000::",
+      "2001:0db8:abcd:0028:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:abcd:28::",
+     "explain": "40 décimal = **0x28** → **2001:db8:abcd:28::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le /64 du **VLAN 99** ? (99 = 6×16 + 3)",
+     "hints": [
+      "99 = 0x63"
+     ],
+     "accept": [
+      "2001:db8:abcd:63:0:0:0:0",
+      "2001:db8:abcd:63::0:0:0",
+      "2001:db8:abcd:63::0:0",
+      "2001:db8:abcd:63::0",
+      "2001:db8:abcd:63:0::0:0",
+      "2001:db8:abcd:63:0::0",
+      "2001:db8:abcd:63:0::",
+      "2001:db8:abcd:63:0:0::0",
+      "2001:db8:abcd:63:0:0::",
+      "2001:db8:abcd:63:0:0:0::",
+      "2001:0db8:abcd:0063:0000:0000:0000:0000",
+      "2001:0db8:abcd:0063::0000:0000:0000",
+      "2001:0db8:abcd:0063::0000:0000",
+      "2001:0db8:abcd:0063::0000",
+      "2001:0db8:abcd:0063::",
+      "2001:0db8:abcd:0063:0000::0000:0000",
+      "2001:0db8:abcd:0063:0000::0000",
+      "2001:0db8:abcd:0063:0000::",
+      "2001:0db8:abcd:0063:0000:0000::0000",
+      "2001:0db8:abcd:0063:0000:0000::",
+      "2001:0db8:abcd:0063:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:abcd:63::",
+     "explain": "99 = 0x63 → **2001:db8:abcd:63::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "say",
+     "text": "**Sous-réseau suivant.** Pour passer au /64 suivant, on **ajoute 1 au 4e groupe**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le /64 qui suit `2001:db8:abcd:9::/64` ?",
+     "hints": [
+      "9 + 1 en hexa = a"
+     ],
+     "accept": [
+      "2001:db8:abcd:a:0:0:0:0",
+      "2001:db8:abcd:a::0:0:0",
+      "2001:db8:abcd:a::0:0",
+      "2001:db8:abcd:a::0",
+      "2001:db8:abcd:a:0::0:0",
+      "2001:db8:abcd:a:0::0",
+      "2001:db8:abcd:a:0::",
+      "2001:db8:abcd:a:0:0::0",
+      "2001:db8:abcd:a:0:0::",
+      "2001:db8:abcd:a:0:0:0::",
+      "2001:0db8:abcd:000a:0000:0000:0000:0000",
+      "2001:0db8:abcd:000a::0000:0000:0000",
+      "2001:0db8:abcd:000a::0000:0000",
+      "2001:0db8:abcd:000a::0000",
+      "2001:0db8:abcd:000a::",
+      "2001:0db8:abcd:000a:0000::0000:0000",
+      "2001:0db8:abcd:000a:0000::0000",
+      "2001:0db8:abcd:000a:0000::",
+      "2001:0db8:abcd:000a:0000:0000::0000",
+      "2001:0db8:abcd:000a:0000:0000::",
+      "2001:0db8:abcd:000a:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:abcd:a::",
+     "explain": "Après `9` vient `a` (10 en décimal) : **2001:db8:abcd:a::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le /64 qui suit `2001:db8:abcd:ff::/64` ?",
+     "hints": [
+      "ff + 1 = 100 en hexa"
+     ],
+     "accept": [
+      "2001:db8:abcd:100:0:0:0:0",
+      "2001:db8:abcd:100::0:0:0",
+      "2001:db8:abcd:100::0:0",
+      "2001:db8:abcd:100::0",
+      "2001:db8:abcd:100:0::0:0",
+      "2001:db8:abcd:100:0::0",
+      "2001:db8:abcd:100:0::",
+      "2001:db8:abcd:100:0:0::0",
+      "2001:db8:abcd:100:0:0::",
+      "2001:db8:abcd:100:0:0:0::",
+      "2001:0db8:abcd:0100:0000:0000:0000:0000",
+      "2001:0db8:abcd:0100::0000:0000:0000",
+      "2001:0db8:abcd:0100::0000:0000",
+      "2001:0db8:abcd:0100::0000",
+      "2001:0db8:abcd:0100::",
+      "2001:0db8:abcd:0100:0000::0000:0000",
+      "2001:0db8:abcd:0100:0000::0000",
+      "2001:0db8:abcd:0100:0000::",
+      "2001:0db8:abcd:0100:0000:0000::0000",
+      "2001:0db8:abcd:0100:0000:0000::",
+      "2001:0db8:abcd:0100:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:abcd:100::",
+     "explain": "0xff + 1 = **0x100** : **2001:db8:abcd:100::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi utilise-t-on **/64** pour un LAN, même s'il n'y a que 10 machines ?",
+     "options": [
+      "SLAAC a besoin de 64 bits d'identifiant d'interface, et les adresses ne manquent pas",
+      "Pour économiser le préfixe",
+      "Parce que le /64 est plus rapide"
+     ],
+     "answer": 0,
+     "explain": "En IPv6 on **ne compte plus les hôtes**. Le /64 est la norme : SLAAC et beaucoup de fonctions supposent 64 bits d'IID."
+    },
+    {
+     "type": "choice",
+     "q": "Que dit-on d'un LAN IPv6 en **/127** ou **/126** ?",
+     "options": [
+      "C'est réservé aux liaisons point à point entre routeurs",
+      "C'est la norme pour les postes",
+      "C'est interdit"
+     ],
+     "answer": 0,
+     "explain": "Les liaisons routeur-routeur utilisent parfois /127 (RFC 6164) ou /126 ; les LAN d'utilisateurs restent en /64."
+    }
+   ]
+  },
+  {
+   "id": "iid",
+   "title": "L'identifiant d'interface : EUI-64 et adresses aléatoires",
+   "emoji": "🔑",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les 64 derniers bits d'une adresse (l'**IID**) peuvent venir de **trois sources** : l'**adresse MAC** (EUI-64), un **tirage aléatoire** (confidentialité), ou une **configuration manuelle**."
+    },
+    {
+     "type": "say",
+     "text": "**EUI-64.** On fabrique l'IID à partir des 48 bits de la MAC en 3 étapes :\n1. couper la MAC en deux moitiés de 3 octets ;\n2. insérer **`ff:fe`** au milieu (48 + 16 = 64 bits) ;\n3. **inverser le 7ᵉ bit** du premier octet (le bit U/L, valeur 0x02)."
+    },
+    {
+     "type": "code",
+     "sql": "MAC       00:1a:2b:3c:4d:5e\n  1) coupe        00:1a:2b | 3c:4d:5e\n  2) insère fffe  00:1a:2b:ff:fe:3c:4d:5e\n  3) inverse U/L  0x00 → 0x02  :  02:1a:2b:ff:fe:3c:4d:5e\n  IID             021a:2bff:fe3c:4d5e → 21a:2bff:fe3c:4d5e\n  lien-local      fe80::21a:2bff:fe3c:4d5e",
+     "lang": "Hexadécimal",
+     "title": "Exemple complet"
+    },
+    {
+     "type": "say",
+     "text": "**Pourquoi inverser le bit ?** Dans une MAC, le bit 0x02 vaut **0** pour une adresse universelle (fabricant). En IPv6 on a décidé l'inverse (1 = universelle) pour qu'une adresse **saisie à la main** (`::1`, `::2`) ait un bit U/L à 0 : plus simple à écrire."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse **lien-local** EUI-64 de la MAC `08:00:27:a1:b2:c3` ?",
+     "hints": [
+      "08 → 0a (bit 0x02 inversé), puis fffe au milieu"
+     ],
+     "accept": [
+      "fe80:0:0:0:a00:27ff:fea1:b2c3",
+      "fe80::0:0:a00:27ff:fea1:b2c3",
+      "fe80::0:a00:27ff:fea1:b2c3",
+      "fe80:0::0:a00:27ff:fea1:b2c3",
+      "fe80:0::a00:27ff:fea1:b2c3",
+      "fe80:0:0::a00:27ff:fea1:b2c3",
+      "fe80:0000:0000:0000:0a00:27ff:fea1:b2c3",
+      "fe80::0000:0000:0a00:27ff:fea1:b2c3",
+      "fe80::0000:0a00:27ff:fea1:b2c3",
+      "fe80::0a00:27ff:fea1:b2c3",
+      "fe80:0000::0000:0a00:27ff:fea1:b2c3",
+      "fe80:0000::0a00:27ff:fea1:b2c3",
+      "fe80:0000:0000::0a00:27ff:fea1:b2c3"
+     ],
+     "solution": "fe80::a00:27ff:fea1:b2c3",
+     "explain": "08:00:27:**ff:fe**:a1:b2:c3 ; 0x08 XOR 0x02 = **0x0a** ; IID `0a00:27ff:fea1:b2c3` → **fe80::a00:27ff:fea1:b2c3**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse lien-local EUI-64 de la MAC `00:1a:2b:3c:4d:5e` ?",
+     "hints": [
+      "00 → 02"
+     ],
+     "accept": [
+      "fe80:0:0:0:21a:2bff:fe3c:4d5e",
+      "fe80::0:0:21a:2bff:fe3c:4d5e",
+      "fe80::0:21a:2bff:fe3c:4d5e",
+      "fe80:0::0:21a:2bff:fe3c:4d5e",
+      "fe80:0::21a:2bff:fe3c:4d5e",
+      "fe80:0:0::21a:2bff:fe3c:4d5e",
+      "fe80:0000:0000:0000:021a:2bff:fe3c:4d5e",
+      "fe80::0000:0000:021a:2bff:fe3c:4d5e",
+      "fe80::0000:021a:2bff:fe3c:4d5e",
+      "fe80::021a:2bff:fe3c:4d5e",
+      "fe80:0000::0000:021a:2bff:fe3c:4d5e",
+      "fe80:0000::021a:2bff:fe3c:4d5e",
+      "fe80:0000:0000::021a:2bff:fe3c:4d5e"
+     ],
+     "solution": "fe80::21a:2bff:fe3c:4d5e",
+     "explain": "0x00 XOR 0x02 = 0x02 → IID `021a:2bff:fe3c:4d5e` → **fe80::21a:2bff:fe3c:4d5e**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse lien-local EUI-64 de la MAC `52:54:00:12:34:56` ? (0x52 XOR 0x02 = ?)",
+     "hints": [
+      "0x52 = 0101 0010 : le bit 0x02 est à 1, il passe à 0 → 0x50"
+     ],
+     "accept": [
+      "fe80:0:0:0:5054:ff:fe12:3456",
+      "fe80::0:0:5054:ff:fe12:3456",
+      "fe80::0:5054:ff:fe12:3456",
+      "fe80:0::0:5054:ff:fe12:3456",
+      "fe80:0::5054:ff:fe12:3456",
+      "fe80:0:0::5054:ff:fe12:3456",
+      "fe80:0000:0000:0000:5054:00ff:fe12:3456",
+      "fe80::0000:0000:5054:00ff:fe12:3456",
+      "fe80::0000:5054:00ff:fe12:3456",
+      "fe80::5054:00ff:fe12:3456",
+      "fe80:0000::0000:5054:00ff:fe12:3456",
+      "fe80:0000::5054:00ff:fe12:3456",
+      "fe80:0000:0000::5054:00ff:fe12:3456"
+     ],
+     "solution": "fe80::5054:ff:fe12:3456",
+     "explain": "0x52 XOR 0x02 = **0x50** → `5054:ff:fe12:3456` → **fe80::5054:ff:fe12:3456**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur du premier octet de l'IID pour la MAC `ac:de:48:11:22:33` ? (0xac XOR 0x02)",
+     "hints": [
+      "0xac = 1010 1100 ; bit 0x02 passe de 0 à 1"
+     ],
+     "accept": [
+      "ae"
+     ],
+     "solution": "0xae",
+     "explain": "0xac XOR 0x02 = **0xae**.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "exercise",
+     "q": "À partir de `fe80::21a:2bff:fe3c:4d5e`, retrouve la MAC d'origine. (Retire `fffe`, ré-inverse 0x02.)",
+     "hints": [
+      "IID = 021a:2bff:fe3c:4d5e → octets 02 1a 2b ff fe 3c 4d 5e"
+     ],
+     "accept": [
+      "00-1a-2b-3c-4d-5e",
+      "001a2b3c4d5e",
+      "001a.2b3c.4d5e"
+     ],
+     "solution": "00:1a:2b:3c:4d:5e",
+     "explain": "On retire `ff:fe` et on ré-inverse : 0x02 XOR 0x02 = **0x00** → **00:1a:2b:3c:4d:5e**.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "choice",
+     "q": "Une adresse IPv6 contient `...:ff:fe...` au milieu de l'IID. Que peut-on en déduire ?",
+     "options": [
+      "Elle a probablement été construite par EUI-64 à partir d'une MAC",
+      "Elle est multicast",
+      "Elle est une adresse de documentation"
+     ],
+     "answer": 0,
+     "explain": "Le motif **ff:fe** à cet endroit est la signature d'EUI-64 : on peut **retrouver la MAC** de la machine."
+    },
+    {
+     "type": "say",
+     "text": "**Le problème de confidentialité.** Avec EUI-64, l'IID ne change jamais : on peut **suivre un appareil** d'un réseau à l'autre. Les systèmes modernes utilisent donc :\n- des **adresses temporaires (privacy extensions, RFC 8981)** : IID aléatoire qui change régulièrement, utilisé pour les connexions sortantes ;\n- des **IID stables opaques (RFC 7217)** : calculés à partir d'un secret et du préfixe, stables par réseau mais sans lien avec la MAC."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi les systèmes actuels évitent-ils l'EUI-64 pour leurs adresses globales ?",
+     "options": [
+      "Il permet de suivre un appareil d'un réseau à un autre (vie privée)",
+      "Il est trop lent",
+      "Il ne fonctionne qu'en IPv4"
+     ],
+     "answer": 0,
+     "explain": "L'IID dérivé de la MAC est **identique partout** : un tracker peut reconnaître l'appareil quel que soit le réseau. D'où les adresses **temporaires** et **stables opaques**."
+    },
+    {
+     "type": "choice",
+     "q": "Sous Linux, `ip -6 addr` montre une adresse marquée `temporary`. Elle sert à…",
+     "options": [
+      "Initier des connexions sortantes avec un IID aléatoire renouvelé",
+      "Recevoir les connexions entrantes de façon permanente",
+      "Faire du routage"
+     ],
+     "answer": 0,
+     "explain": "Les adresses **temporary** (privacy extensions) sont utilisées pour les connexions **sortantes** ; l'adresse stable reste pour les connexions entrantes."
+    }
+   ]
+  },
+  {
+   "id": "ndp",
+   "title": "NDP : trouver ses voisins (le « ARP » d'IPv6)",
+   "emoji": "📞",
+   "minutes": 22,
+   "steps": [
+    {
+     "type": "say",
+     "text": "En IPv4, ARP envoie un **broadcast** : tout le monde est dérangé. NDP fait mieux : il envoie un **multicast ciblé** que seule la bonne machine écoute. NDP utilise **ICMPv6** (Next Header **58**, soit **0x3a**) avec **5 types de messages** :"
+    },
+    {
+     "type": "code",
+     "sql": "Type 133  RS  Router Solicitation       Un hôte demande « y a-t-il un routeur ? »\nType 134  RA  Router Advertisement       Le routeur annonce préfixe, passerelle, options\nType 135  NS  Neighbor Solicitation      « Qui a l'adresse X ? » (remplace la requête ARP)\nType 136  NA  Neighbor Advertisement     « C'est moi, ma MAC est … » (remplace la réponse ARP)\nType 137  Redirect                        « Il existe un meilleur routeur pour cette destination »",
+     "lang": "ICMPv6",
+     "title": "Les 5 messages NDP"
+    },
+    {
+     "type": "exercise",
+     "q": "Le type ICMPv6 d'un **Neighbor Solicitation** vaut 135. Écris-le en hexadécimal.",
+     "hints": [
+      "135 = 8×16 + 7"
+     ],
+     "accept": [
+      "87"
+     ],
+     "solution": "0x87",
+     "explain": "135 = 8×16 + 7 = **0x87**.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "choice",
+     "q": "Quel message NDP ressemble à la **réponse ARP** ?",
+     "options": [
+      "NA (type 136)",
+      "NS (type 135)",
+      "RS (type 133)"
+     ],
+     "answer": 0,
+     "explain": "NS = « qui a X ? » (requête ARP) ; **NA** = « c'est moi » (réponse ARP)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel message un hôte envoie-t-il pour demander immédiatement un routeur au démarrage ?",
+     "options": [
+      "RS (Router Solicitation, 133)",
+      "RA (134)",
+      "Redirect (137)"
+     ],
+     "answer": 0,
+     "explain": "L'hôte envoie un RS à `ff02::2` (tous les routeurs) pour ne pas attendre le prochain RA périodique."
+    },
+    {
+     "type": "say",
+     "text": "**L'adresse « solicited-node ».** Pour ne déranger que la bonne machine, NDP calcule un multicast à partir de l'adresse cherchée : on prend le préfixe **`ff02::1:ff00:0/104`** et on lui colle les **24 derniers bits** de l'adresse."
+    },
+    {
+     "type": "code",
+     "sql": "Cible : fe80::21a:2bff:fe3c:4d5e\n  24 derniers bits : 3c:4d:5e\n  solicited-node  : ff02::1:ff3c:4d5e\n  MAC multicast   : 33:33:ff:3c:4d:5e   (33:33 + les 32 derniers bits de l'adresse IPv6)",
+     "lang": "NDP",
+     "title": "Calcul pas à pas"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse solicited-node de `fe80::a00:27ff:fea1:b2c3` ? (ff02::1:ff + 24 derniers bits)",
+     "hints": [
+      "Les 24 derniers bits sont `a1:b2:c3`"
+     ],
+     "accept": [
+      "ff02:0:0:0:0:1:ffa1:b2c3",
+      "ff02::0:0:0:1:ffa1:b2c3",
+      "ff02::0:0:1:ffa1:b2c3",
+      "ff02::0:1:ffa1:b2c3",
+      "ff02:0::0:0:1:ffa1:b2c3",
+      "ff02:0::0:1:ffa1:b2c3",
+      "ff02:0::1:ffa1:b2c3",
+      "ff02:0:0::0:1:ffa1:b2c3",
+      "ff02:0:0::1:ffa1:b2c3",
+      "ff02:0:0:0::1:ffa1:b2c3",
+      "ff02:0000:0000:0000:0000:0001:ffa1:b2c3",
+      "ff02::0000:0000:0000:0001:ffa1:b2c3",
+      "ff02::0000:0000:0001:ffa1:b2c3",
+      "ff02::0000:0001:ffa1:b2c3",
+      "ff02::0001:ffa1:b2c3",
+      "ff02:0000::0000:0000:0001:ffa1:b2c3",
+      "ff02:0000::0000:0001:ffa1:b2c3",
+      "ff02:0000::0001:ffa1:b2c3",
+      "ff02:0000:0000::0000:0001:ffa1:b2c3",
+      "ff02:0000:0000::0001:ffa1:b2c3",
+      "ff02:0000:0000:0000::0001:ffa1:b2c3"
+     ],
+     "solution": "ff02::1:ffa1:b2c3",
+     "explain": "Les 24 derniers bits sont `a1b2c3` → **ff02::1:ffa1:b2c3**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse solicited-node de `2001:db8:1::1`, dont l'IID se termine par `00:00:01` ?",
+     "hints": [
+      "Les 24 derniers bits : 00 00 01"
+     ],
+     "accept": [
+      "ff02:0:0:0:0:1:ff00:1",
+      "ff02::0:0:0:1:ff00:1",
+      "ff02::0:0:1:ff00:1",
+      "ff02::0:1:ff00:1",
+      "ff02:0::0:0:1:ff00:1",
+      "ff02:0::0:1:ff00:1",
+      "ff02:0::1:ff00:1",
+      "ff02:0:0::0:1:ff00:1",
+      "ff02:0:0::1:ff00:1",
+      "ff02:0:0:0::1:ff00:1",
+      "ff02:0000:0000:0000:0000:0001:ff00:0001",
+      "ff02::0000:0000:0000:0001:ff00:0001",
+      "ff02::0000:0000:0001:ff00:0001",
+      "ff02::0000:0001:ff00:0001",
+      "ff02::0001:ff00:0001",
+      "ff02:0000::0000:0000:0001:ff00:0001",
+      "ff02:0000::0000:0001:ff00:0001",
+      "ff02:0000::0001:ff00:0001",
+      "ff02:0000:0000::0000:0001:ff00:0001",
+      "ff02:0000:0000::0001:ff00:0001",
+      "ff02:0000:0000:0000::0001:ff00:0001"
+     ],
+     "solution": "ff02::1:ff00:1",
+     "explain": "`ff02::1:ff00:1`.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse **MAC multicast** d'un paquet envoyé à `ff02::1:ff3c:4d5e` ? (33:33: + 4 derniers octets)",
+     "hints": [
+      "33:33:ff:3c:4d:5e"
+     ],
+     "accept": [
+      "33-33-ff-3c-4d-5e",
+      "3333ff3c4d5e",
+      "3333.ff3c.4d5e"
+     ],
+     "solution": "33:33:ff:3c:4d:5e",
+     "explain": "**33:33:ff:3c:4d:5e** : préfixe `33:33` + les 32 derniers bits.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi le solicited-node vaut-il mieux que le broadcast d'ARP ?",
+     "options": [
+      "Seules les machines dont l'adresse finit pareil traitent le paquet ; les autres l'ignorent dès la carte réseau",
+      "Il est chiffré",
+      "Il traverse les routeurs"
+     ],
+     "answer": 0,
+     "explain": "Très peu de machines partagent les mêmes 24 derniers bits : **presque aucune** n'est dérangée, contrairement au broadcast."
+    },
+    {
+     "type": "say",
+     "text": "**Voici une vraie trame NS** : l'hôte `fe80::a00:27ff:fea1:b2c3` cherche la MAC du routeur `fe80::21a:2bff:fe3c:4d5e`."
+    },
+    {
+     "type": "code",
+     "sql": "0000  33 33 ff 3c 4d 5e 08 00 27 a1 b2 c3 86 dd 60 00\n0010  00 00 00 20 3a ff fe 80 00 00 00 00 00 00 0a 00\n0020  27 ff fe a1 b2 c3 ff 02 00 00 00 00 00 00 00 00\n0030  00 01 ff 3c 4d 5e 87 00 ef 84 00 00 00 00 fe 80\n0040  00 00 00 00 00 00 02 1a 2b ff fe 3c 4d 5e 01 01\n0050  08 00 27 a1 b2 c3",
+     "lang": "Hexadécimal",
+     "title": "Trame Neighbor Solicitation (86 octets)"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est l'EtherType (octets 12-13) ?",
+     "hints": [
+      "Rappel : IPv4 = 0x0800"
+     ],
+     "accept": [
+      "86dd"
+     ],
+     "solution": "0x86dd",
+     "explain": "**0x86dd** : IPv6.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la MAC **destination** (octets 0-5) ?",
+     "hints": [
+      "33:33 puis les 4 derniers octets du solicited-node"
+     ],
+     "accept": [
+      "33-33-ff-3c-4d-5e",
+      "3333ff3c4d5e",
+      "3333.ff3c.4d5e"
+     ],
+     "solution": "33:33:ff:3c:4d:5e",
+     "explain": "**33:33:ff:3c:4d:5e** : la MAC multicast calculée juste avant.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la valeur de **Hop Limit** (octet 21 de la trame : `ff`) ?",
+     "hints": [
+      "0xff"
+     ],
+     "accept": [],
+     "solution": "255",
+     "explain": "**255** : toujours 255 en NDP (voir la question suivante).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi les messages NDP ont-ils un Hop Limit de **255** ?",
+     "options": [
+      "Si un paquet NDP arrive avec 255, il vient forcément du même lien (aucun routeur n'a pu le décrémenter) : protection contre les attaques extérieures",
+      "Parce que 255 est la valeur par défaut de tout IPv6",
+      "Pour qu'il traverse Internet"
+     ],
+     "answer": 0,
+     "explain": "Un routeur décrémente le Hop Limit : un message à **255** n'a donc **jamais traversé de routeur**. Les récepteurs rejettent tout NDP avec une valeur plus faible."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **Next Header** (octet 20) en décimal ? (`3a`)",
+     "hints": [
+      "0x3a = 3×16 + 10"
+     ],
+     "accept": [],
+     "solution": "58",
+     "explain": "0x3a = **58** = ICMPv6.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **longueur de la charge utile** IPv6 (octets 18-19 : `00 20`) ?",
+     "hints": [
+      "0x20"
+     ],
+     "accept": [],
+     "solution": "32",
+     "explain": "**32** octets : 4 (type, code, checksum) + 4 (réservé) + 16 (cible) + 8 (option).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **type ICMPv6** (octet 54) ?",
+     "hints": [
+      "Le premier octet après l'en-tête IPv6"
+     ],
+     "accept": [
+      "87"
+     ],
+     "solution": "0x87",
+     "explain": "**0x87 = 135** : Neighbor Solicitation.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'**adresse cherchée** (le champ « Target » : 16 octets après les 8 premiers octets ICMPv6) ?",
+     "hints": [
+      "fe 80 00 00 00 00 00 00 02 1a 2b ff fe 3c 4d 5e"
+     ],
+     "accept": [
+      "fe80:0:0:0:21a:2bff:fe3c:4d5e",
+      "fe80::0:0:21a:2bff:fe3c:4d5e",
+      "fe80::0:21a:2bff:fe3c:4d5e",
+      "fe80:0::0:21a:2bff:fe3c:4d5e",
+      "fe80:0::21a:2bff:fe3c:4d5e",
+      "fe80:0:0::21a:2bff:fe3c:4d5e",
+      "fe80:0000:0000:0000:021a:2bff:fe3c:4d5e",
+      "fe80::0000:0000:021a:2bff:fe3c:4d5e",
+      "fe80::0000:021a:2bff:fe3c:4d5e",
+      "fe80::021a:2bff:fe3c:4d5e",
+      "fe80:0000::0000:021a:2bff:fe3c:4d5e",
+      "fe80:0000::021a:2bff:fe3c:4d5e",
+      "fe80:0000:0000::021a:2bff:fe3c:4d5e"
+     ],
+     "solution": "fe80::21a:2bff:fe3c:4d5e",
+     "explain": "`fe80::21a:2bff:fe3c:4d5e` : l'hôte demande « qui possède cette adresse ? ».",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "L'option `01 01 08 00 27 a1 b2 c3` est la **Source Link-Layer Address** : l'hôte donne sa propre MAC. Laquelle ?",
+     "hints": [
+      "Les 6 octets après `01 01`"
+     ],
+     "accept": [
+      "08-00-27-a1-b2-c3",
+      "080027a1b2c3",
+      "0800.27a1.b2c3"
+     ],
+     "solution": "08:00:27:a1:b2:c3",
+     "explain": "**08:00:27:a1:b2:c3** : le routeur n'aura pas besoin de demander à son tour (un NA direct suffit).",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "choice",
+     "q": "L'option NDP `01 01 …` : à quoi correspond le deuxième `01` ?",
+     "options": [
+      "La longueur de l'option en blocs de **8 octets** (1 × 8 = 8 octets)",
+      "Le numéro de version",
+      "Le numéro de port"
+     ],
+     "answer": 0,
+     "explain": "Le champ « longueur » des options NDP est en **unités de 8 octets**."
+    },
+    {
+     "type": "say",
+     "text": "**Réponse :** le routeur envoie un **NA** (type 136) en unicast avec ses drapeaux (R = routeur, S = sollicité, O = écraser) et sa MAC. L'hôte l'enregistre dans sa **table de voisins** :"
+    },
+    {
+     "type": "code",
+     "sql": "ip -6 neigh show\nfe80::21a:2bff:fe3c:4d5e dev eth0 lladdr 00:1a:2b:3c:4d:5e router REACHABLE",
+     "lang": "bash",
+     "title": "Table de voisins Linux"
+    },
+    {
+     "type": "choice",
+     "q": "Les états d'une entrée de la table de voisins : quel ordre correspond à un voisin récemment confirmé qui n'a plus parlé depuis un moment ?",
+     "options": [
+      "REACHABLE → STALE",
+      "STALE → INCOMPLETE",
+      "FAILED → REACHABLE"
+     ],
+     "answer": 0,
+     "explain": "**REACHABLE** (confirmé récemment) devient **STALE** après un délai d'inactivité ; **DELAY/PROBE** revérifient quand on veut l'utiliser ; **INCOMPLETE** = résolution en cours ; **FAILED** = pas de réponse."
+    },
+    {
+     "type": "say",
+     "text": "**DAD : détection de doublons.** Avant d'utiliser une adresse, l'hôte envoie un **NS** pour **sa propre adresse**, avec comme source `::` (non spécifiée). Si quelqu'un répond, l'adresse existe déjà : elle n'est pas utilisée."
+    },
+    {
+     "type": "choice",
+     "q": "Pendant la DAD, quelle adresse source un NS utilise-t-il ?",
+     "options": [
+      "::  (adresse non spécifiée)",
+      "L'adresse testée",
+      "ff02::1"
+     ],
+     "answer": 0,
+     "explain": "L'adresse n'est pas encore validée : on envoie depuis `::` vers le solicited-node **de l'adresse testée**."
+    }
+   ]
+  },
+  {
+   "id": "slaac",
+   "title": "SLAAC, Router Advertisement et DHCPv6",
+   "emoji": "🪄",
+   "minutes": 24,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Comment une machine obtient-elle son adresse **toute seule** ? C'est **SLAAC** (*Stateless Address Autoconfiguration*) : le routeur **annonce le préfixe**, la machine **fabrique le reste**. Sans serveur à configurer."
+    },
+    {
+     "type": "prereq",
+     "formation": "decoder-trames",
+     "why": "Dans cette leçon, on décode un Router Advertisement en hexadécimal : si lire un dump est nouveau pour toi, commence par « Décoder une trame comme un pro »."
+    },
+    {
+     "type": "code",
+     "sql": "1. L'hôte se fabrique une adresse LIEN-LOCAL (fe80:: + IID) et fait la DAD.\n2. Il envoie un RS (Router Solicitation) à ff02::2.\n3. Le routeur répond par un RA (Router Advertisement) à ff02::1 (ou en unicast).\n4. L'hôte lit le préfixe /64 dans le RA et forme son adresse GLOBALE : préfixe + IID.\n5. Il refait la DAD sur la nouvelle adresse.\n6. Il adopte l'adresse lien-local du routeur comme passerelle par défaut.",
+     "lang": "SLAAC",
+     "title": "Les 6 étapes de SLAAC"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle adresse un hôte utilise-t-il comme **passerelle par défaut** en IPv6 ?",
+     "options": [
+      "L'adresse lien-local du routeur (source du RA)",
+      "L'adresse globale du routeur",
+      "Toujours ::1"
+     ],
+     "answer": 0,
+     "explain": "La passerelle est **l'adresse lien-local** du routeur qui envoie le RA : c'est elle qui apparaît dans `ip -6 route` (`default via fe80::… dev eth0`)."
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre un hôte obtient-il ses adresses ?",
+     "options": [
+      "Lien-local d'abord, puis globale (après le RA)",
+      "Globale d'abord, puis lien-local",
+      "Les deux en même temps"
+     ],
+     "answer": 0,
+     "explain": "Il lui faut d'abord une adresse lien-local pour **pouvoir parler** et envoyer le RS."
+    },
+    {
+     "type": "say",
+     "text": "**Voici un vrai RA.** Le routeur `fe80::21a:2bff:fe3c:4d5e` annonce le préfixe `2001:db8:acad:1::/64` à tous les nœuds du lien (`ff02::1`)."
+    },
+    {
+     "type": "code",
+     "sql": "0000  33 33 00 00 00 01 00 1a 2b 3c 4d 5e 86 dd 60 00\n0010  00 00 00 58 3a ff fe 80 00 00 00 00 00 00 02 1a\n0020  2b ff fe 3c 4d 5e ff 02 00 00 00 00 00 00 00 00\n0030  00 00 00 00 00 01 86 00 55 b6 40 40 07 08 00 00\n0040  00 00 00 00 00 00 01 01 00 1a 2b 3c 4d 5e 05 01\n0050  00 00 00 00 05 dc 03 04 40 c0 00 27 8d 00 00 09\n0060  3a 80 00 00 00 00 20 01 0d b8 ac ad 00 01 00 00\n0070  00 00 00 00 00 00 19 03 00 00 00 00 07 08 20 01\n0080  0d b8 ac ad 00 01 00 00 00 00 00 00 00 53",
+     "lang": "Hexadécimal",
+     "title": "Trame Router Advertisement (142 octets)"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la MAC destination (octets 0-5) ?",
+     "hints": [
+      "Le multicast `ff02::1` donne 33:33 + 00:00:00:01"
+     ],
+     "accept": [
+      "33-33-00-00-00-01",
+      "333300000001",
+      "3333.0000.0001"
+     ],
+     "solution": "33:33:00:00:00:01",
+     "explain": "**33:33:00:00:00:01** : multicast MAC de `ff02::1` (tous les nœuds).",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **type ICMPv6** (octet 54) en décimal ? (`86`)",
+     "hints": [
+      "0x86 = 8×16 + 6"
+     ],
+     "accept": [],
+     "solution": "134",
+     "explain": "0x86 = **134** : Router Advertisement.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Le corps du RA** (après type, code, checksum) : **Cur Hop Limit** (1 octet), **flags M/O** (1 octet), **Router Lifetime** (2 octets), Reachable Time (4), Retrans Timer (4), puis des **options**."
+    },
+    {
+     "type": "exercise",
+     "q": "**Cur Hop Limit** (octet 58 : `40`) : quelle valeur annonce le routeur aux hôtes ?",
+     "hints": [
+      "0x40"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "**64** : le Hop Limit par défaut que les hôtes utiliseront.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "Que vaut l'octet des **drapeaux** (octet 59) ?",
+     "hints": [
+      "Après Cur Hop Limit"
+     ],
+     "accept": [
+      "40"
+     ],
+     "solution": "0x40",
+     "explain": "**0x40** = bit O (Other) à 1, bit M à 0.",
+     "placeholder": "Valeur hexadécimale, ex. 0x0800"
+    },
+    {
+     "type": "code",
+     "sql": "Octet de drapeaux du RA :   M O H Prf Prf P R R\n\nM = 0x80  Managed : adresse via DHCPv6 (avec état)\nO = 0x40  Other   : autres infos (DNS…) via DHCPv6 sans état\n\n0x40 → M=0, O=1 : SLAAC pour l'adresse + DHCPv6 sans état pour le DNS",
+     "lang": "RA",
+     "title": "Les drapeaux M et O"
+    },
+    {
+     "type": "choice",
+     "q": "Avec `M=0, O=1`, comment l'hôte obtient-il son **adresse** et son **DNS** ?",
+     "options": [
+      "Adresse par SLAAC, DNS par DHCPv6 sans état",
+      "Adresse et DNS par DHCPv6 avec état",
+      "Rien : il n'a pas de DNS"
+     ],
+     "answer": 0,
+     "explain": "M=0 : pas de DHCPv6 pour l'adresse (SLAAC). O=1 : il interroge DHCPv6 **pour les autres paramètres** (DNS, domaine)."
+    },
+    {
+     "type": "choice",
+     "q": "Avec `M=1`, comment l'hôte obtient-il son adresse ?",
+     "options": [
+      "Auprès d'un serveur DHCPv6 (mode avec état)",
+      "Par SLAAC uniquement",
+      "Il n'en obtient pas"
+     ],
+     "answer": 0,
+     "explain": "**M = Managed** : DHCPv6 attribue l'adresse (comme DHCPv4). Un RA peut aussi annoncer le préfixe avec le drapeau A à 0 pour interdire SLAAC."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la **durée de vie de routeur** (octets 60-61 : `07 08`), en secondes ? (0x0708 = 7×256 + 8)",
+     "hints": [
+      "7×256 + 8"
+     ],
+     "accept": [],
+     "solution": "1800",
+     "explain": "0x0708 = **1800 s** (30 min) : le routeur est utilisable comme passerelle pendant ce temps. À 0, il n'est **pas** une passerelle.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**Les options du RA.** Chaque option : **Type | Longueur (blocs de 8 octets) | Valeur** :"
+    },
+    {
+     "type": "code",
+     "sql": "Type 1   Source Link-Layer Address   MAC du routeur\nType 3   Prefix Information         préfixe à utiliser (SLAAC), durées de vie, drapeaux L et A\nType 5   MTU                        MTU du lien\nType 25  RDNSS                      serveurs DNS récursifs",
+     "lang": "NDP",
+     "title": "Options du RA"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le **type** de l'option qui annonce le préfixe ? (3)",
+     "hints": [
+      "Prefix Information"
+     ],
+     "accept": [
+      "03",
+      "0x3",
+      "3"
+     ],
+     "solution": "0x03",
+     "explain": "**Type 3** = Prefix Information.",
+     "placeholder": "0x.."
+    },
+    {
+     "type": "exercise",
+     "q": "Dans l'option Prefix Information, la **longueur du préfixe** (le champ `40` en hexa) vaut en décimal ?",
+     "hints": [
+      "0x40 = 4×16"
+     ],
+     "accept": [],
+     "solution": "64",
+     "explain": "0x40 = **64** : préfixe /64.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "code",
+     "sql": "03 04 40 c0  00 27 8d 00  00 09 3a 80  00 00 00 00  20 01 0d b8 ...\n │  │  │  └ flags L=1, A=1 (0xc0)\n │  │  └ longueur du préfixe : 64\n │  └ longueur de l'option : 4 × 8 = 32 octets\n └ type 3\n valid lifetime 0x00278d00 = 2 592 000 s (30 jours)\n preferred lifetime 0x00093a80 = 604 800 s (7 jours)",
+     "lang": "Hexadécimal",
+     "title": "Option Prefix Information décodée"
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie le drapeau **A (Autonomous)** de l'option préfixe ?",
+     "options": [
+      "L'hôte peut former une adresse par SLAAC avec ce préfixe",
+      "Le préfixe est anycast",
+      "Le préfixe est interdit"
+     ],
+     "answer": 0,
+     "explain": "**A = 1** : SLAAC autorisé. **L = 1** : le préfixe est « on-link » (les adresses du préfixe sont directement joignables sans routeur)."
+    },
+    {
+     "type": "exercise",
+     "q": "`0x00278d00` secondes (valid lifetime) : combien de **jours** ? (2 592 000 / 86 400)",
+     "hints": [
+      "86 400 s par jour"
+     ],
+     "accept": [],
+     "solution": "30",
+     "explain": "2 592 000 / 86 400 = **30 jours**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "`0x00093a80` secondes (preferred lifetime) : combien de **jours** ? (604 800 / 86 400)",
+     "hints": [
+      "604 800 / 86 400"
+     ],
+     "accept": [],
+     "solution": "7",
+     "explain": "**7 jours** : après cette durée, l'adresse est « deprecated » (conservée pour les connexions en cours, plus utilisée pour de nouvelles).",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "say",
+     "text": "**RDNSS (type 25)** : le RA peut annoncer les serveurs DNS directement. L'option `19 03 00 00 00 00 07 08 20 01 0d b8 … 00 53` donne la durée de vie (1800 s) et le serveur `2001:db8:acad:1::53`."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est l'adresse du serveur DNS annoncé par RDNSS ? (`20 01 0d b8 ac ad 00 01 00 00 00 00 00 00 00 53`)",
+     "hints": [
+      "Groupes : 2001 0db8 acad 0001 0000 0000 0000 0053"
+     ],
+     "accept": [
+      "2001:db8:acad:1:0:0:0:53",
+      "2001:db8:acad:1::0:0:53",
+      "2001:db8:acad:1::0:53",
+      "2001:db8:acad:1:0::0:53",
+      "2001:db8:acad:1:0::53",
+      "2001:db8:acad:1:0:0::53",
+      "2001:0db8:acad:0001:0000:0000:0000:0053",
+      "2001:0db8:acad:0001::0000:0000:0053",
+      "2001:0db8:acad:0001::0000:0053",
+      "2001:0db8:acad:0001::0053",
+      "2001:0db8:acad:0001:0000::0000:0053",
+      "2001:0db8:acad:0001:0000::0053",
+      "2001:0db8:acad:0001:0000:0000::0053"
+     ],
+     "solution": "2001:db8:acad:1::53",
+     "explain": "**2001:db8:acad:1::53**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "say",
+     "text": "**SLAAC contre DHCPv6.** Les trois modes :"
+    },
+    {
+     "type": "code",
+     "sql": "SLAAC seul    : RA avec A=1, M=0, O=0.  Adresse auto. DNS via option RDNSS du RA.\nSLAAC + DHCPv6 sans état : RA avec A=1, O=1.  Adresse auto, DNS/domaine via DHCPv6.\nDHCPv6 avec état : RA avec M=1 (A=0 pour interdire SLAAC).  Adresse attribuée comme en IPv4.",
+     "lang": "Modes",
+     "title": "Les trois modes"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle différence **majeure** entre DHCPv6 et DHCPv4 ?",
+     "options": [
+      "DHCPv6 ne fournit pas la passerelle : elle vient du RA",
+      "DHCPv6 n'existe pas",
+      "DHCPv6 utilise le broadcast"
+     ],
+     "answer": 0,
+     "explain": "La **passerelle** est donnée par le **RA** (jamais par DHCPv6). DHCPv6 utilise le multicast `ff02::1:2` et les ports UDP **546** (client) / **547** (serveur)."
+    },
+    {
+     "type": "exercise",
+     "q": "DHCPv6 : quel **port UDP** écoute le serveur ? (546 = client)",
+     "hints": [
+      "Client 546, serveur 547"
+     ],
+     "accept": [],
+     "solution": "547",
+     "explain": "Le serveur écoute sur **547**, le client sur **546**.",
+     "placeholder": "Un nombre"
+    }
+   ]
+  },
+  {
+   "id": "config",
+   "title": "Configurer IPv6 sous Linux et Cisco",
+   "emoji": "🛠️",
+   "minutes": 14,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe aux commandes. D'abord **Linux** :"
+    },
+    {
+     "type": "code",
+     "sql": "ip -6 addr show                              # adresses IPv6 de toutes les interfaces\nip -6 addr add 2001:db8:acad:1::10/64 dev eth0 # ajouter une adresse\nip -6 route show                              # table de routage IPv6\nip -6 route add default via fe80::1 dev eth0   # passerelle (lien-local → interface obligatoire)\nip -6 neigh show                              # table de voisins (équivalent de arp -a)\nping -6 2001:db8:acad:1::1\nping fe80::1%eth0                              # lien-local : préciser l'interface avec %\ntraceroute -6 2001:db8::1",
+     "lang": "bash",
+     "title": "Commandes Linux"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi `ping fe80::1` seul ne fonctionne-t-il pas, alors que `ping fe80::1%eth0` oui ?",
+     "options": [
+      "Une adresse lien-local n'a de sens que sur un lien : il faut préciser l'interface",
+      "Parce que fe80::1 est invalide",
+      "Parce qu'il faut un mot de passe"
+     ],
+     "answer": 0,
+     "explain": "La même adresse `fe80::1` peut exister sur **chaque lien**. Le système doit savoir par **quelle interface** émettre : d'où le `%eth0`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande Linux remplace `arp -a` pour IPv6 ?",
+     "options": [
+      "ip -6 neigh show",
+      "ip -6 route show",
+      "ip -6 addr show"
+     ],
+     "answer": 0,
+     "explain": "`ip -6 neigh show` affiche la **table de voisins** (le cache NDP)."
+    },
+    {
+     "type": "say",
+     "text": "Maintenant **Cisco**. Deux commandes à ne jamais oublier :"
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ipv6 unicast-routing              ! INDISPENSABLE : active le routage IPv6\nR1(config)# interface g0/0\nR1(config-if)# ipv6 address 2001:db8:acad:1::1/64\nR1(config-if)# ipv6 address fe80::1 link-local   ! lien-local simple (optionnel)\nR1(config-if)# no shutdown",
+     "lang": "Cisco",
+     "title": "Configuration d'une interface"
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il **sans** `ipv6 unicast-routing` sur un routeur Cisco ?",
+     "options": [
+      "Le routeur ne route pas l'IPv6 et n'envoie pas de RA : il se comporte comme un simple hôte",
+      "Rien : tout fonctionne",
+      "Le routeur s'éteint"
+     ],
+     "answer": 0,
+     "explain": "Sans cette commande, le routeur n'achemine pas l'IPv6 **ni n'envoie de Router Advertisement**. C'est l'oubli numéro 1."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande qui attribue `2001:db8:acad:1::1/64` à une interface Cisco.",
+     "hints": [
+      "`ipv6 address` suivi de l'adresse/préfixe"
+     ],
+     "accept": [],
+     "solution": "ipv6 address 2001:db8:acad:1::1/64",
+     "explain": "`ipv6 address 2001:db8:acad:1::1/64`.",
+     "placeholder": "Commande Cisco"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la commande, en configuration globale, qui active le routage IPv6.",
+     "hints": [
+      "Elle contient « unicast-routing »"
+     ],
+     "accept": [],
+     "solution": "ipv6 unicast-routing",
+     "explain": "`ipv6 unicast-routing`.",
+     "placeholder": "Commande Cisco"
+    },
+    {
+     "type": "say",
+     "text": "**Vérifier :**"
+    },
+    {
+     "type": "code",
+     "sql": "R1# show ipv6 interface brief\nGigabitEthernet0/0   [up/up]\n    FE80::1\n    2001:DB8:ACAD:1::1\n\nR1# show ipv6 route\nR1# show ipv6 neighbors",
+     "lang": "Cisco",
+     "title": "Commandes de vérification Cisco"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande Cisco affiche un **résumé des adresses IPv6** par interface ?",
+     "options": [
+      "show ipv6 interface brief",
+      "show ip route",
+      "show ipv6 ospf"
+     ],
+     "answer": 0,
+     "explain": "`show ipv6 interface brief` : état et adresses (lien-local et globales) de chaque interface."
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'équivalent Cisco de `ip -6 neigh show` ?",
+     "options": [
+      "show ipv6 neighbors",
+      "show arp",
+      "show mac address-table"
+     ],
+     "answer": 0,
+     "explain": "`show ipv6 neighbors` affiche le cache NDP."
+    }
+   ]
+  },
+  {
+   "id": "routage",
+   "title": "Le routage IPv6 : statique, par défaut et OSPFv3",
+   "emoji": "🗺️",
+   "minutes": 20,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le principe du routage ne change pas : **plus long préfixe**, puis distance administrative, puis métrique. Seules les adresses (et quelques mots-clés) changent. Rappel de la **table de routage** IPv6 d'un routeur :"
+    },
+    {
+     "type": "code",
+     "sql": "R1# show ipv6 route\nC   2001:DB8:ACAD:1::/64 [0/0]       via GigabitEthernet0/0, directly connected\nL   2001:DB8:ACAD:1::1/128 [0/0]      via GigabitEthernet0/0, receive\nC   2001:DB8:ACAD:12::/64 [0/0]      via GigabitEthernet0/1, directly connected\nL   2001:DB8:ACAD:12::1/128 [0/0]     via GigabitEthernet0/1, receive\nS   2001:DB8:ACAD:3::/64 [1/0]       via 2001:DB8:ACAD:12::2\nS   ::/0 [1/0]                        via 2001:DB8:ACAD:12::2",
+     "lang": "Cisco",
+     "title": "Table IPv6 Cisco"
+    },
+    {
+     "type": "choice",
+     "q": "Que signifie le code **L** dans la table IPv6 ?",
+     "options": [
+      "Adresse locale de l'interface (route /128 « receive »)",
+      "Route apprise par OSPF",
+      "Route par défaut"
+     ],
+     "answer": 0,
+     "explain": "**L = Local** : chaque adresse configurée crée une route /128 « receive » (le routeur est le destinataire)."
+    },
+    {
+     "type": "choice",
+     "q": "Que désigne `::/0` ?",
+     "options": [
+      "La route par défaut IPv6",
+      "L'adresse de loopback",
+      "Toutes les routes statiques"
+     ],
+     "answer": 0,
+     "explain": "`::/0` = préfixe de longueur **0** : correspond à toute destination, donc c'est la **route par défaut** (équivalent de 0.0.0.0/0)."
+    },
+    {
+     "type": "say",
+     "text": "**La route statique IPv6** : `ipv6 route <préfixe/longueur> <next-hop ou interface>`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la route statique vers `2001:db8:acad:3::/64` via le routeur voisin `2001:db8:acad:12::2`.",
+     "hints": [
+      "`ipv6 route` + préfixe + next-hop"
+     ],
+     "accept": [],
+     "solution": "ipv6 route 2001:db8:acad:3::/64 2001:db8:acad:12::2",
+     "explain": "`ipv6 route 2001:db8:acad:3::/64 2001:db8:acad:12::2`.",
+     "placeholder": "Commande Cisco"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **route par défaut** IPv6 vers `2001:db8:acad:12::2`.",
+     "hints": [
+      "Le préfixe de la route par défaut est ::/0"
+     ],
+     "accept": [],
+     "solution": "ipv6 route ::/0 2001:db8:acad:12::2",
+     "explain": "`ipv6 route ::/0 2001:db8:acad:12::2`.",
+     "placeholder": "Commande Cisco"
+    },
+    {
+     "type": "choice",
+     "q": "Le next-hop d'une route statique est une adresse **lien-local** (`fe80::2`). Que faut-il ajouter ?",
+     "options": [
+      "L'interface de sortie : `ipv6 route 2001:db8:3::/64 g0/1 fe80::2`",
+      "Rien de plus",
+      "Un mot de passe"
+     ],
+     "answer": 0,
+     "explain": "Une lien-local n'est unique que **par lien** : on précise donc l'**interface de sortie** en plus."
+    },
+    {
+     "type": "say",
+     "text": "**Plus long préfixe.** Même règle qu'en IPv4 : le préfixe le plus **spécifique** qui correspond gagne. Table :"
+    },
+    {
+     "type": "code",
+     "sql": "A : 2001:db8::/32\nB : 2001:db8:acad::/48\nC : 2001:db8:acad:3::/64\nD : ::/0",
+     "lang": "IPv6",
+     "title": "Quatre routes"
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet pour `2001:db8:acad:3::55` : quelle route est choisie ?",
+     "options": [
+      "C : 2001:db8:acad:3::/64 (le /64 le plus long)",
+      "A : 2001:db8::/32",
+      "D : ::/0"
+     ],
+     "answer": 0,
+     "explain": "Les routes A, B, C et D correspondent toutes ; la plus longue (**/64**) gagne."
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet pour `2001:db8:acad:9::1` : quelle route est choisie ?",
+     "options": [
+      "B : 2001:db8:acad::/48",
+      "C : 2001:db8:acad:3::/64",
+      "D : ::/0"
+     ],
+     "answer": 0,
+     "explain": "C ne correspond pas (4e groupe = 9, pas 3). Parmi A, B et D, la plus longue est **B (/48)**."
+    },
+    {
+     "type": "choice",
+     "q": "Un paquet pour `2a00:1450::1` : quelle route est choisie ?",
+     "options": [
+      "D : ::/0 (la route par défaut)",
+      "A : 2001:db8::/32",
+      "B : 2001:db8:acad::/48"
+     ],
+     "answer": 0,
+     "explain": "Aucun préfixe spécifique ne correspond : on utilise la **route par défaut**."
+    },
+    {
+     "type": "say",
+     "text": "**OSPFv3** est la version d'OSPF pour IPv6 : mêmes principes (voisins, aires, DR/BDR, coût), mais configuré **sur l'interface**, et il communique en **lien-local** via `ff02::5` et `ff02::6`. Il faut toujours un **router-id sur 32 bits** (écrit comme une adresse IPv4)."
+    },
+    {
+     "type": "code",
+     "sql": "R1(config)# ipv6 unicast-routing\nR1(config)# ipv6 router ospf 1\nR1(config-rtr)# router-id 1.1.1.1\nR1(config-rtr)# exit\nR1(config)# interface g0/0\nR1(config-if)# ipv6 ospf 1 area 0\nR1(config-if)# exit\nR1# show ipv6 ospf neighbor",
+     "lang": "Cisco",
+     "title": "OSPFv3 de base"
+    },
+    {
+     "type": "choice",
+     "q": "En OSPFv3, **comment** active-t-on OSPF sur une interface ?",
+     "options": [
+      "Directement sur l'interface : `ipv6 ospf 1 area 0` (pas de commande network)",
+      "Avec la commande `network` comme en OSPFv2",
+      "Automatiquement sur toutes les interfaces"
+     ],
+     "answer": 0,
+     "explain": "OSPFv3 s'active **par interface** (`ipv6 ospf <pid> area <n>`), il n'y a pas de commande `network`."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi OSPFv3 exige-t-il parfois un `router-id` manuel ?",
+     "options": [
+      "Il n'a pas d'adresse IPv4 à utiliser pour en dériver un, et l'ID reste codé sur 32 bits",
+      "Parce que l'IPv6 est plus long",
+      "Pour désactiver OSPF"
+     ],
+     "answer": 0,
+     "explain": "Sur un réseau 100 % IPv6 sans adresse IPv4, le routeur n'a rien pour fabriquer un router-id : il faut le **fixer à la main**."
+    },
+    {
+     "type": "choice",
+     "q": "Sur quelles adresses les voisins OSPFv3 communiquent-ils ?",
+     "options": [
+      "Adresses lien-local, et multicast ff02::5 / ff02::6",
+      "Adresses globales uniquement",
+      "Broadcast"
+     ],
+     "answer": 0,
+     "explain": "OSPFv3 utilise les **lien-local** pour former les adjacences, et `ff02::5` (tous les routeurs OSPF) / `ff02::6` (DR/BDR)."
+    }
+   ]
+  },
+  {
+   "id": "transition",
+   "title": "Coexister avec IPv4, et sécuriser",
+   "emoji": "🔀",
+   "minutes": 16,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le monde n'est pas passé à IPv6 du jour au lendemain. Trois grandes familles de techniques permettent de **cohabiter** :"
+    },
+    {
+     "type": "code",
+     "sql": "DOUBLE PILE (dual stack)   Chaque équipement a IPv4 ET IPv6 en même temps. Le plus répandu et le plus simple.\nTUNNELS                    IPv6 encapsulé dans IPv4 (protocole 41) : 6in4, 6to4 (obsolète), 6rd, GRE...\nTRADUCTION                 NAT64 / DNS64 : un réseau IPv6 seul atteint des serveurs IPv4. 464XLAT pour les mobiles.",
+     "lang": "Transition",
+     "title": "Techniques de transition"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle technique est la **plus simple** et la plus répandue ?",
+     "options": [
+      "La double pile (dual stack)",
+      "Les tunnels 6to4",
+      "NAT64 uniquement"
+     ],
+     "answer": 0,
+     "explain": "En **double pile**, chaque hôte parle les deux protocoles. L'application choisit (en général IPv6 de préférence, algorithme *Happy Eyeballs*)."
+    },
+    {
+     "type": "choice",
+     "q": "Un réseau n'a **que** de l'IPv6 mais veut joindre un site qui n'a que de l'IPv4. Quelle solution ?",
+     "options": [
+      "NAT64 avec DNS64",
+      "Un tunnel 6to4",
+      "Un double NAT"
+     ],
+     "answer": 0,
+     "explain": "**DNS64** fabrique des adresses IPv6 « synthétiques » pour les noms IPv4, et **NAT64** traduit les paquets."
+    },
+    {
+     "type": "choice",
+     "q": "Dans un tunnel 6in4, le champ Protocole du paquet IPv4 externe vaut…",
+     "options": [
+      "41 (0x29)",
+      "6",
+      "17"
+     ],
+     "answer": 0,
+     "explain": "**Protocole 41** = IPv6 encapsulé dans IPv4 (on l'a vu dans la table des protocoles IP)."
+    },
+    {
+     "type": "say",
+     "text": "**DNS et IPv6.** Un enregistrement **AAAA** (« quad-A ») associe un nom à une adresse IPv6, comme **A** pour IPv4."
+    },
+    {
+     "type": "choice",
+     "q": "Quel enregistrement DNS donne l'adresse IPv6 d'un nom ?",
+     "options": [
+      "AAAA",
+      "A",
+      "MX"
+     ],
+     "answer": 0,
+     "explain": "**AAAA** (quatre fois plus long qu'un A). Commande : `dig AAAA example.com`."
+    },
+    {
+     "type": "say",
+     "text": "**Sécurité : les pièges propres à IPv6.**"
+    },
+    {
+     "type": "code",
+     "sql": "• Ne JAMAIS bloquer tout ICMPv6 : NDP, PMTUD et les RA en dépendent. Il faut une politique fine.\n• Les routeurs ne fragmentent pas : le PMTUD (ICMPv6 type 2, « Packet Too Big ») est indispensable.\n• RA Guard : sur les switchs, n'autoriser les Router Advertisement que depuis les ports routeurs (contre les faux routeurs).\n• Sans NAT, plus de « protection par accident » : un pare-feu avec état reste indispensable.\n• Une double pile a deux surfaces d'attaque : filtrer les deux protocoles.",
+     "lang": "Sécurité",
+     "title": "Sécurité IPv6"
+    },
+    {
+     "type": "choice",
+     "q": "Un administrateur bloque **tout** ICMPv6 sur le pare-feu. Quelle conséquence ?",
+     "options": [
+      "Plus de NDP ni de découverte de MTU : le réseau tombe en panne ou se fige",
+      "Le réseau est mieux protégé, sans autre effet",
+      "Uniquement le ping ne marche plus"
+     ],
+     "answer": 0,
+     "explain": "ICMPv6 est **essentiel** : NDP (voisins), RA, Packet Too Big pour le PMTUD. On filtre les types, on ne bloque jamais tout."
+    },
+    {
+     "type": "choice",
+     "q": "Contre un **faux routeur** qui envoie de faux RA sur le LAN, quelle protection sur le switch ?",
+     "options": [
+      "RA Guard",
+      "Port security IPv4",
+      "Spanning Tree"
+     ],
+     "answer": 0,
+     "explain": "**RA Guard** n'autorise les RA que depuis les ports connus comme routeurs, comme *DHCP snooping* en IPv4."
+    },
+    {
+     "type": "choice",
+     "q": "Quel message ICMPv6 sert à la **découverte du MTU de chemin** (PMTUD) ?",
+     "options": [
+      "Packet Too Big (type 2)",
+      "Echo Request (type 128)",
+      "Neighbor Solicitation (type 135)"
+     ],
+     "answer": 0,
+     "explain": "Un routeur qui ne peut pas faire passer un paquet trop gros ne le fragmente pas : il renvoie **Packet Too Big** (type 2) avec le MTU à respecter."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : mets tout ensemble",
+   "emoji": "🏆",
+   "minutes": 18,
+   "steps": [
+    {
+     "type": "say",
+     "text": "🏆 **Défi final.** Une entreprise reçoit `2001:db8:cafe::/48`. Tu dois planifier, calculer et vérifier. Applique tout ce que tu as appris."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 1/10** : le **VLAN 50** (hexa 0x32) reçoit son /64 dans ce /48. Écris le préfixe (sans le /64).",
+     "hints": [
+      "Mets 32 dans le 4e groupe"
+     ],
+     "accept": [
+      "2001:db8:cafe:32:0:0:0:0",
+      "2001:db8:cafe:32::0:0:0",
+      "2001:db8:cafe:32::0:0",
+      "2001:db8:cafe:32::0",
+      "2001:db8:cafe:32:0::0:0",
+      "2001:db8:cafe:32:0::0",
+      "2001:db8:cafe:32:0::",
+      "2001:db8:cafe:32:0:0::0",
+      "2001:db8:cafe:32:0:0::",
+      "2001:db8:cafe:32:0:0:0::",
+      "2001:0db8:cafe:0032:0000:0000:0000:0000",
+      "2001:0db8:cafe:0032::0000:0000:0000",
+      "2001:0db8:cafe:0032::0000:0000",
+      "2001:0db8:cafe:0032::0000",
+      "2001:0db8:cafe:0032::",
+      "2001:0db8:cafe:0032:0000::0000:0000",
+      "2001:0db8:cafe:0032:0000::0000",
+      "2001:0db8:cafe:0032:0000::",
+      "2001:0db8:cafe:0032:0000:0000::0000",
+      "2001:0db8:cafe:0032:0000:0000::",
+      "2001:0db8:cafe:0032:0000:0000:0000::"
+     ],
+     "solution": "2001:db8:cafe:32::",
+     "explain": "**2001:db8:cafe:32::/64**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 2/10** : combien de /64 peut-on créer dans ce /48 ?",
+     "hints": [
+      "2¹⁶"
+     ],
+     "accept": [],
+     "solution": "65536",
+     "explain": "**65 536**.",
+     "placeholder": "Un nombre"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 3/10** : un PC du VLAN 50 a la MAC `08:00:27:aa:bb:cc`. Quelle est son adresse **globale EUI-64** dans ce /64 ?",
+     "hints": [
+      "IID : 08 → 0a, insère fffe : 0a00:27ff:feaa:bbcc"
+     ],
+     "accept": [
+      "2001:0db8:cafe:0032:0a00:27ff:feaa:bbcc"
+     ],
+     "solution": "2001:db8:cafe:32:a00:27ff:feaa:bbcc",
+     "explain": "IID `0a00:27ff:feaa:bbcc` → **2001:db8:cafe:32:a00:27ff:feaa:bbcc**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 4/10** : quelle est son adresse **lien-local** ?",
+     "hints": [
+      "Même IID, préfixe fe80::"
+     ],
+     "accept": [
+      "fe80:0:0:0:a00:27ff:feaa:bbcc",
+      "fe80::0:0:a00:27ff:feaa:bbcc",
+      "fe80::0:a00:27ff:feaa:bbcc",
+      "fe80:0::0:a00:27ff:feaa:bbcc",
+      "fe80:0::a00:27ff:feaa:bbcc",
+      "fe80:0:0::a00:27ff:feaa:bbcc",
+      "fe80:0000:0000:0000:0a00:27ff:feaa:bbcc",
+      "fe80::0000:0000:0a00:27ff:feaa:bbcc",
+      "fe80::0000:0a00:27ff:feaa:bbcc",
+      "fe80::0a00:27ff:feaa:bbcc",
+      "fe80:0000::0000:0a00:27ff:feaa:bbcc",
+      "fe80:0000::0a00:27ff:feaa:bbcc",
+      "fe80:0000:0000::0a00:27ff:feaa:bbcc"
+     ],
+     "solution": "fe80::a00:27ff:feaa:bbcc",
+     "explain": "**fe80::a00:27ff:feaa:bbcc**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 5/10** : son adresse **solicited-node** ?",
+     "hints": [
+      "24 derniers bits : aa bb cc"
+     ],
+     "accept": [
+      "ff02:0:0:0:0:1:ffaa:bbcc",
+      "ff02::0:0:0:1:ffaa:bbcc",
+      "ff02::0:0:1:ffaa:bbcc",
+      "ff02::0:1:ffaa:bbcc",
+      "ff02:0::0:0:1:ffaa:bbcc",
+      "ff02:0::0:1:ffaa:bbcc",
+      "ff02:0::1:ffaa:bbcc",
+      "ff02:0:0::0:1:ffaa:bbcc",
+      "ff02:0:0::1:ffaa:bbcc",
+      "ff02:0:0:0::1:ffaa:bbcc",
+      "ff02:0000:0000:0000:0000:0001:ffaa:bbcc",
+      "ff02::0000:0000:0000:0001:ffaa:bbcc",
+      "ff02::0000:0000:0001:ffaa:bbcc",
+      "ff02::0000:0001:ffaa:bbcc",
+      "ff02::0001:ffaa:bbcc",
+      "ff02:0000::0000:0000:0001:ffaa:bbcc",
+      "ff02:0000::0000:0001:ffaa:bbcc",
+      "ff02:0000::0001:ffaa:bbcc",
+      "ff02:0000:0000::0000:0001:ffaa:bbcc",
+      "ff02:0000:0000::0001:ffaa:bbcc",
+      "ff02:0000:0000:0000::0001:ffaa:bbcc"
+     ],
+     "solution": "ff02::1:ffaa:bbcc",
+     "explain": "**ff02::1:ffaa:bbcc**.",
+     "placeholder": "Adresse IPv6"
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 6/10** : la MAC multicast correspondant à ce solicited-node ?",
+     "hints": [
+      "33:33 + 4 derniers octets"
+     ],
+     "accept": [
+      "33-33-ff-aa-bb-cc",
+      "3333ffaabbcc",
+      "3333.ffaa.bbcc"
+     ],
+     "solution": "33:33:ff:aa:bb:cc",
+     "explain": "**33:33:ff:aa:bb:cc**.",
+     "placeholder": "Format 00:1a:2b:3c:4d:5e"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 7/10** : le routeur annonce le préfixe avec les drapeaux **L=1, A=1** et le RA a **M=0, O=0**. Comment le PC obtient-il son adresse ?",
+     "options": [
+      "Par SLAAC, sans aucun serveur",
+      "Par DHCPv6 avec état",
+      "Il ne l'obtient pas"
+     ],
+     "answer": 0,
+     "explain": "A=1 → SLAAC autorisé ; M=0 → pas de DHCPv6 pour l'adresse. Aucun serveur n'est nécessaire."
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 8/10** : le PC a `2001:db8:cafe:32::…`. Une route du routeur est `::/0 via fe80::1`. Un paquet part vers `2a00:1450::1`. Quelle règle s'applique ?",
+     "options": [
+      "La route par défaut, car aucun préfixe plus long ne correspond",
+      "La route connectée /64",
+      "Aucune : le paquet est perdu"
+     ],
+     "answer": 0,
+     "explain": "`2a00:1450::1` n'appartient à aucun préfixe connu : seule `::/0` correspond."
+    },
+    {
+     "type": "exercise",
+     "q": "**Défi 9/10** : écris la route statique vers `2001:db8:cafe:64::/64` via `2001:db8:cafe:ff::2`.",
+     "hints": [
+      "`ipv6 route` + préfixe + next-hop"
+     ],
+     "accept": [],
+     "solution": "ipv6 route 2001:db8:cafe:64::/64 2001:db8:cafe:ff::2",
+     "explain": "`ipv6 route 2001:db8:cafe:64::/64 2001:db8:cafe:ff::2`.",
+     "placeholder": "Commande Cisco"
+    },
+    {
+     "type": "choice",
+     "q": "**Défi 10/10 (boss)** : sur le LAN, un message NDP arrive avec un **Hop Limit de 64**. Que fait le récepteur ?",
+     "options": [
+      "Il l'ignore : il n'est pas à 255, donc il pourrait venir d'un autre réseau",
+      "Il l'accepte",
+      "Il le retransmet"
+     ],
+     "answer": 0,
+     "explain": "Les messages NDP légitimes ont **toujours** un Hop Limit de **255**. Une valeur plus faible prouve que le paquet a traversé un routeur : rejeté."
+    },
+    {
+     "type": "say",
+     "text": "🎓 **Bravo !** Tu sais écrire et compresser n'importe quelle adresse IPv6, reconnaître son type, planifier un plan d'adressage, construire une adresse EUI-64 et un solicited-node, décoder un NS et un RA en hexadécimal, comprendre SLAAC et DHCPv6, configurer et router en IPv6, et cohabiter avec IPv4. Prochaine étape : active IPv6 sur ton réseau (ou Packet Tracer) et capture un RA avec Wireshark : tu sauras tout lire."
+    }
+   ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "ipv4",
+   "why": "Les notions d'adresse, de masque et de passerelle d'IPv4 servent de point de comparaison tout au long de la formation."
+  },
+  {
+   "formation": "decoder-trames",
+   "why": "On y lit les trames NS et RA en hexadécimal ; les en-têtes IPv6 y sont aussi abordés."
+  }
+ ]
+}
