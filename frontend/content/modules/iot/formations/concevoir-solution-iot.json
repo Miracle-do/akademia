@@ -1,0 +1,900 @@
+{
+ "id": "concevoir-solution-iot",
+ "order": 1,
+ "title": "Concevoir une solution IoT complète",
+ "tagline": "Du besoin du client à la mise en production : réseau, architecture, messages, données, énergie, sécurité.",
+ "emoji": "🏗️",
+ "color": "#0E9F9A",
+ "level": "Intermédiaire",
+ "minutes": 75,
+ "pitch": [
+  "Bonjour ! Aujourd'hui : **« Concevoir une solution IoT complète »** 🏗️.",
+  "À l'examen comme en entreprise, on ne te demande pas de réciter des définitions : on te donne **un besoin** (une ferme, une ville, un hôpital) et tu dois **proposer et justifier une solution complète**.",
+  "Nous suivons un fil rouge : **Kevin**, maraîcher à Abomey-Calavi. Tu transformes sa demande en **exigences chiffrées**, tu choisis le réseau, tu dessines l'architecture, tu conçois topics et messages, tu dimensionnes la base et **la batterie**, puis tu sécurises. Un défi final te fait refaire la démarche pour 500 poubelles connectées.",
+  "Chaque leçon est interactive : indices, corrections et calculs vérifiés."
+ ],
+ "benefits": [
+  "Transformer une demande en exigences mesurables et en volumes chiffrés",
+  "Justifier le choix du réseau (LoRaWAN, NB-IoT, Wi-Fi…)",
+  "Dessiner l'architecture de bout en bout et concevoir topics MQTT et payloads compacts",
+  "Dimensionner base de données et autonomie de batterie, et sécuriser la mise en production"
+ ],
+ "lessons": [
+  {
+   "id": "besoin",
+   "title": "Du besoin au cahier des charges",
+   "emoji": "🎯",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Moi c'est **Nimbo** ☁️. Un projet IoT qui échoue, c'est presque toujours parce qu'on a commencé par **choisir le capteur** au lieu de **comprendre le besoin**. Ici, on fait l'inverse, étape par étape."
+    },
+    {
+     "type": "say",
+     "text": "Notre fil rouge : **Kevin**, maraîcher près d'Abomey-Calavi. Il a **6 parcelles** et perd des récoltes parce qu'il arrose trop ou pas assez. Il n'a **pas de Wi-Fi** aux champs. Il veut : *« savoir l'humidité de chaque parcelle et que l'arrosage se déclenche tout seul quand c'est sec »*."
+    },
+    {
+     "type": "say",
+     "text": "Première étape : transformer cette phrase en **exigences mesurables**. On distingue les exigences **fonctionnelles** (ce que le système *fait*) et **non fonctionnelles** (comment il doit se comporter : autonomie, coût, fiabilité, sécurité)."
+    },
+    {
+     "type": "code",
+     "sql": "FONCTIONNEL\n  F1  Mesurer l'humidité du sol de chaque parcelle\n  F2  Déclencher l'électrovanne si humidité < 30 %\n  F3  Consulter les mesures sur téléphone\n  F4  Garder l'historique des mesures\n\nNON FONCTIONNEL\n  N1  Autonomie des capteurs : au moins 3 ans sur pile\n  N2  Couverture : 6 parcelles, aucun Wi-Fi au champ\n  N3  Mesure toutes les 15 minutes\n  N4  Alerte au téléphone en moins de 1 minute si panne de vanne\n  N5  Données protégées (accès par mot de passe)",
+     "lang": "Architecture",
+     "title": "Cahier des charges de Kevin"
+    },
+    {
+     "type": "choice",
+     "q": "« Le système doit être rapide » est-elle une bonne exigence ?",
+     "options": [
+      "Oui, c'est clair",
+      "Non : elle n'est pas mesurable, il faut un chiffre (ex. alerte en moins de 1 minute)",
+      "Oui, car tout système doit être rapide"
+     ],
+     "answer": 1,
+     "explain": "Une exigence doit être **vérifiable**. « Rapide » ne l'est pas ; « alerte en moins de 1 minute » l'est."
+    },
+    {
+     "type": "choice",
+     "q": "« Autonomie d'au moins 3 ans sur pile » est une exigence…",
+     "options": [
+      "Non fonctionnelle",
+      "Fonctionnelle",
+      "Ni l'une ni l'autre"
+     ],
+     "answer": 0,
+     "explain": "Elle décrit *comment* le système doit se comporter (qualité), pas une fonction : c'est une exigence **non fonctionnelle**."
+    },
+    {
+     "type": "say",
+     "text": "Maintenant on **dimensionne** : Kevin met **4 capteurs d'humidité par parcelle** pour avoir une moyenne fiable. Chaque capteur mesure toutes les **15 minutes**."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de capteurs d'humidité au total ?",
+     "hints": [
+      "6 parcelles × 4 capteurs."
+     ],
+     "accept": [],
+     "solution": "24",
+     "explain": "6 × 4 = **24 capteurs**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de mesures **par jour** pour **un** capteur (une toutes les 15 minutes) ?",
+     "hints": [
+      "Une heure = 4 mesures.",
+      "24 h × 4."
+     ],
+     "accept": [],
+     "solution": "96",
+     "explain": "24 × 4 = **96 mesures/jour** par capteur.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de messages **par jour** pour l'ensemble des 24 capteurs ?",
+     "hints": [
+      "24 capteurs × 96 mesures."
+     ],
+     "accept": [
+      "2 304",
+      "2304 messages"
+     ],
+     "solution": "2304",
+     "explain": "24 × 96 = **2 304 messages/jour**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Retiens ce réflexe : **chaque décision de conception viendra d'un chiffre** de ce tableau. Ces 2 304 messages par jour, on va les retrouver partout (réseau, base, énergie)."
+    }
+   ]
+  },
+  {
+   "id": "reseau",
+   "title": "Choisir le réseau sans se tromper",
+   "emoji": "📡",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le réseau se choisit avec les **critères** du cours : **débit, consommation, portée, nombre d'appareils, coût, sécurité, interopérabilité**. On les confronte aux exigences de Kevin."
+    },
+    {
+     "type": "code",
+     "sql": "Exigence                         Wi-Fi   BLE    Zigbee  LoRaWAN  NB-IoT\nPas de réseau au champ (N2)      non     non    maillage  oui     si opérateur\nPortée plusieurs centaines de m  non     non    non       oui     oui\nAutonomie 3 ans (N1)             non     oui    oui       oui     oui\nPetits messages, faible débit    -       -      -         oui     oui\nRéseau privé possible            -       -      -         oui     non\nCoût d'abonnement                0       0      0         0       oui",
+     "lang": "Architecture",
+     "title": "Confrontation exigences → technologies"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi écarter le **Wi-Fi** pour Kevin ?",
+     "options": [
+      "Il est trop lent",
+      "Il est interdit en agriculture",
+      "Pas de couverture au champ et consommation élevée"
+     ],
+     "answer": 2,
+     "explain": "Le Wi-Fi a la consommation la plus élevée et n'existe pas aux champs. Ce n'est pas la vitesse le problème."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi **LoRaWAN** plutôt que **NB-IoT** ici ?",
+     "options": [
+      "LoRaWAN est plus rapide",
+      "NB-IoT n'existe pas",
+      "LoRaWAN permet un réseau **privé** sans dépendre d'un opérateur, utile en zone rurale sans couverture cellulaire"
+     ],
+     "answer": 2,
+     "explain": "En zone rurale, la couverture NB-IoT est souvent absente ; LoRaWAN permet de déployer **sa propre passerelle**."
+    },
+    {
+     "type": "say",
+     "text": "Un **message LoRaWAN** est petit : le but est d'envoyer **quelques octets**, pas du JSON verbeux. C'est un choix qui découle du réseau choisi (on y revient en leçon 4)."
+    },
+    {
+     "type": "choice",
+     "q": "Kevin veut **filmer** ses parcelles en continu. LoRaWAN convient-il ?",
+     "options": [
+      "Non : débit trop faible, il faudrait une autre technologie (4G/Wi-Fi)",
+      "Oui, c'est du longue portée",
+      "Oui avec NB-IoT"
+     ],
+     "answer": 0,
+     "explain": "Les LPWAN sont faits pour de **petits messages**, pas pour la vidéo."
+    },
+    {
+     "type": "say",
+     "text": "Autre cas, pour t'entraîner : **la mairie** veut des compteurs d'eau dans toute une ville où l'opérateur mobile a une bonne couverture."
+    },
+    {
+     "type": "choice",
+     "q": "Quel choix est plutôt adapté pour des compteurs d'eau répartis dans une ville couverte ?",
+     "options": [
+      "LoRaWAN avec des passerelles privées partout",
+      "NB-IoT si l'opérateur offre la couverture",
+      "Bluetooth"
+     ],
+     "answer": 1,
+     "explain": "Pas de passerelles privées à installer sur chaque site : on utilise le **réseau de l'opérateur**. À condition que la couverture NB-IoT existe réellement."
+    },
+    {
+     "type": "exercise",
+     "q": "Sur quel type de spectre fonctionne LoRaWAN : avec licence ou sans licence ?",
+     "hints": [
+      "868 MHz en Europe/Afrique, 915 MHz en Amérique du Nord."
+     ],
+     "accept": [
+      "sans",
+      "sans licence (ism)"
+     ],
+     "solution": "sans licence",
+     "explain": "LoRaWAN utilise des **bandes sans licence** ; NB-IoT utilise un spectre **sous licence** d'opérateur.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle classe d'appareil LoRaWAN est obligatoire et la plus économe en énergie ? (A, B ou C)",
+     "hints": [
+      "Elle n'écoute que brièvement après chaque émission."
+     ],
+     "accept": [
+      "classe a",
+      "a"
+     ],
+     "solution": "A",
+     "explain": "**Classe A** : courtes fenêtres de réception après chaque transmission ; obligatoire et la plus sobre.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "architecture",
+   "title": "L'architecture de bout en bout",
+   "emoji": "🏗️",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On a le besoin et le réseau. On dessine maintenant **toute la chaîne**, du capteur jusqu'au téléphone de Kevin, et on place chaque fonction à sa place."
+    },
+    {
+     "type": "code",
+     "sql": "COUCHE PERCEPTION     COUCHE RÉSEAU                  COUCHE TRAITEMENT                COUCHE APPLICATION\n\n Capteur humidité ─┐\n Capteur humidité ─┼─ ESP32 + LoRa ─► Passerelle LoRaWAN ─► Serveur réseau ─► Broker MQTT ─► Base de données ─► Appli mobile\n Électrovanne ◄────┘   (décision locale)       (IP, 4G)     (déduplication)    (QoS 1)          (historique)       (tableau de bord)",
+     "lang": "Architecture",
+     "title": "Chaîne retenue pour Kevin"
+    },
+    {
+     "type": "say",
+     "text": "Rôle de chaque maillon :"
+    },
+    {
+     "type": "code",
+     "sql": "Capteur + ESP32     mesure, applique la règle locale, envoie 4 octets\nPasserelle LoRaWAN  relaie les trames radio vers Internet (ne comprend pas les données)\nServeur réseau      supprime les doublons si plusieurs passerelles reçoivent la même trame\nBroker MQTT         redistribue les messages à tous les abonnés (base, appli, alertes)\nBase de données     conserve l'historique (le broker ne garde pas les messages)\nAppli mobile        affiche, alerte, permet une commande manuelle",
+     "lang": "Architecture",
+     "title": "Qui fait quoi ?"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel composant relie les capteurs LoRa à Internet ?",
+     "hints": [
+      "Il relaie les trames radio sans interpréter les données."
+     ],
+     "accept": [
+      "la passerelle",
+      "gateway"
+     ],
+     "solution": "passerelle",
+     "explain": "La **passerelle** (*gateway*) reçoit les trames radio et les transmet au serveur réseau par IP.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel composant supprime les doublons quand deux passerelles reçoivent le même message ?",
+     "hints": [
+      "Ce n'est pas la passerelle : elle est « transparente »."
+     ],
+     "accept": [
+      "le serveur réseau",
+      "network server"
+     ],
+     "solution": "serveur réseau",
+     "explain": "Le **serveur réseau** (*Network Server*) fait la déduplication.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi stocker dans une **base de données** alors que le broker reçoit déjà tout ?",
+     "options": [
+      "Le broker est trop lent",
+      "Le broker ne conserve pas les messages : sans base, pas d'historique",
+      "Pour chiffrer les messages"
+     ],
+     "answer": 1,
+     "explain": "Un broker **redistribue**, il n'**archive** pas. Chaque message devient une ligne en base."
+    },
+    {
+     "type": "choice",
+     "q": "Si la **connexion Internet de la ferme tombe**, que doit-il se passer pour l'arrosage ?",
+     "options": [
+      "La règle locale sur l'ESP32 continue de commander la vanne",
+      "Plus rien ne marche",
+      "La passerelle commande la vanne"
+     ],
+     "answer": 0,
+     "explain": "La décision **à la périphérie** (edge) évite de dépendre du cloud : l'ESP32 agit seul."
+    },
+    {
+     "type": "say",
+     "text": "Principe de conception à retenir : **ce qui est critique et rapide se décide au plus près de l'objet ; ce qui est analyse et historique va dans le cloud**."
+    }
+   ]
+  },
+  {
+   "id": "messages",
+   "title": "Concevoir topics et messages",
+   "emoji": "✉️",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Maintenant, le **langage** du système : les **topics MQTT** et le **format des messages**. Une mauvaise convention de nommage devient vite ingérable avec 24 capteurs."
+    },
+    {
+     "type": "code",
+     "sql": "ferme/{parcelle}/{capteur}/humidite     mesure d'un capteur\nferme/{parcelle}/vanne/commande       ordre d'ouverture/fermeture\nferme/{parcelle}/vanne/etat           état réel de la vanne\n\nExemples\n  ferme/p1/c2/humidite\n  ferme/p3/vanne/commande",
+     "lang": "Architecture",
+     "title": "Convention de topics"
+    },
+    {
+     "type": "say",
+     "text": "Les **jokers** : `+` remplace **un seul niveau**, `#` remplace **tous les niveaux suivants** (et se met à la fin)."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris le topic pour s'abonner à l'humidité de **tous les capteurs de la parcelle p1**.",
+     "hints": [
+      "Le nom du capteur change : un seul niveau → joker `+`."
+     ],
+     "accept": [
+      "ferme/p1/+/humidite"
+     ],
+     "solution": "ferme/p1/+/humidite",
+     "explain": "`+` remplace le niveau « capteur ».",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris le topic pour s'abonner à **tout ce qui concerne la parcelle p3**.",
+     "hints": [
+      "Plusieurs niveaux possibles derrière p3 : joker `#`."
+     ],
+     "accept": [
+      "ferme/p3/#"
+     ],
+     "solution": "ferme/p3/#",
+     "explain": "`#` couvre tous les niveaux suivants : `ferme/p3/c1/humidite`, `ferme/p3/vanne/etat`…",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel abonnement reçoit l'humidité de **toutes** les parcelles et capteurs ?",
+     "options": [
+      "ferme/#/humidite",
+      "ferme/+/humidite",
+      "ferme/+/+/humidite"
+     ],
+     "answer": 2,
+     "explain": "Deux niveaux variables (parcelle, capteur) → deux `+`. Le `#` n'est valable qu'**en dernière position**."
+    },
+    {
+     "type": "say",
+     "text": "Reste le **contenu** du message. Comparons **JSON** (lisible) et **binaire compact** (4 octets) :"
+    },
+    {
+     "type": "code",
+     "sql": "JSON  : {\"id\":\"P1C2\",\"h\":27.5,\"t\":1700000000}   → 37 octets\nJSON réduit : {\"p\":1,\"c\":2,\"h\":27.5}             → 22 octets\nBinaire : [parcelle 1 octet][capteur 1 octet][humidité×100 sur 2 octets] → 4 octets\n          exemple 27,5 % → 2750 → 0x0ABE   → octets : 01 02 0A BE",
+     "lang": "Réseau",
+     "title": "Deux formats du même message"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'octets fait le message binaire (parcelle + capteur + humidité sur 2 octets) ?",
+     "hints": [
+      "1 + 1 + 2."
+     ],
+     "accept": [
+      "4 octets"
+     ],
+     "solution": "4",
+     "explain": "1 + 1 + 2 = **4 octets** ; l'horodatage est ajouté par le serveur réseau.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle valeur entière transmet-on pour une humidité de 27,5 % (on multiplie par 100) ?",
+     "hints": [
+      "27,5 × 100."
+     ],
+     "accept": [
+      "2 750"
+     ],
+     "solution": "2750",
+     "explain": "27,5 × 100 = **2 750** (en hexadécimal `0ABE`) : on évite la virgule flottante.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pour LoRaWAN, quel format choisir ?",
+     "options": [
+      "JSON complet, plus lisible",
+      "XML",
+      "Binaire compact : chaque octet coûte du temps d'émission, donc de l'énergie"
+     ],
+     "answer": 2,
+     "explain": "Sur un LPWAN, **moins d'octets = moins de temps radio = plus d'autonomie**. Le décodage en JSON se fait côté serveur."
+    },
+    {
+     "type": "say",
+     "text": "Choisir le **QoS** : mesure périodique → **QoS 0 ou 1** (la suivante arrive dans 15 min). **Commande de vanne** → **QoS 1** minimum, car perdre l'ordre est grave."
+    },
+    {
+     "type": "choice",
+     "q": "Quel QoS pour la **commande d'ouverture de vanne** ?",
+     "options": [
+      "QoS 1 (au moins une fois) ou 2",
+      "QoS 0 (au plus une fois)",
+      "Aucun"
+     ],
+     "answer": 0,
+     "explain": "Un ordre ne doit pas se perdre : **QoS 1** (doublon sans gravité, ouvrir deux fois = ouvert) ; QoS 2 si on ne tolère aucun doublon."
+    }
+   ]
+  },
+  {
+   "id": "donnees",
+   "title": "Stocker et exploiter les données",
+   "emoji": "🗄️",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les messages arrivent au broker. Un **abonné** (petit programme) les lit et fait un `INSERT` en base. Voici le modèle."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE TABLE MESURES_IOT (\n  id          NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  parcelle    NUMBER(2)    NOT NULL,\n  capteur     NUMBER(2)    NOT NULL,\n  humidite    NUMBER(5,2),\n  date_mesure TIMESTAMP DEFAULT SYSTIMESTAMP\n);",
+     "lang": "SQL",
+     "title": "Table des mesures (Oracle)",
+     "note": "La colonne s'appelle date_mesure car DATE est un mot réservé en Oracle."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi la colonne s'appelle-t-elle `date_mesure` et non `DATE` ?",
+     "options": [
+      "Pour faire joli",
+      "DATE est un mot réservé Oracle",
+      "Oracle n'accepte pas les colonnes de type date"
+     ],
+     "answer": 1,
+     "explain": "On évite les **mots réservés** comme nom de colonne."
+    },
+    {
+     "type": "code",
+     "sql": "-- Dernière mesure de chaque parcelle (pour l'appli)\nSELECT parcelle, AVG(humidite) AS moyenne\nFROM MESURES_IOT\nWHERE date_mesure > SYSTIMESTAMP - INTERVAL '1' HOUR\nGROUP BY parcelle;\n\n-- Parcelles trop sèches\nSELECT parcelle\nFROM MESURES_IOT\nWHERE date_mesure > SYSTIMESTAMP - INTERVAL '1' HOUR\nGROUP BY parcelle\nHAVING AVG(humidite) < 30;",
+     "lang": "SQL",
+     "title": "Requêtes utiles"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle fonction d'agrégation calcule l'humidité **moyenne** d'une parcelle ?",
+     "hints": [
+      "Le mot anglais pour « average »."
+     ],
+     "accept": [
+      "avg()",
+      "avg(humidite)"
+     ],
+     "solution": "AVG",
+     "explain": "`AVG(humidite)` avec `GROUP BY parcelle`.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel mot-clé filtre sur le **résultat d'un agrégat** (après GROUP BY) ?",
+     "hints": [
+      "WHERE s'applique avant le regroupement."
+     ],
+     "accept": [
+      "having"
+     ],
+     "solution": "HAVING",
+     "explain": "`WHERE` filtre les lignes ; **`HAVING`** filtre les groupes (ex. `AVG(humidite) < 30`).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Volume** : on a 2 304 messages par jour (leçon 1). Chaque ligne en base prend environ **50 octets** (colonnes + index)."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de lignes par an (2 304 messages/jour × 365) ?",
+     "hints": [
+      "2 304 × 365."
+     ],
+     "accept": [
+      "840 960"
+     ],
+     "solution": "840960",
+     "explain": "2 304 × 365 = **840 960 lignes/an**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle taille en **Mo** par an (840 960 lignes × 50 octets, arrondi à l'entier) ?",
+     "hints": [
+      "840 960 × 50 = 42 048 000 octets.",
+      "Divise par 1 000 000."
+     ],
+     "accept": [
+      "42 mo",
+      "42mo"
+     ],
+     "solution": "42",
+     "explain": "42 048 000 octets ≈ **42 Mo/an** : c'est très peu, une base classique suffit.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Avec 42 Mo par an, faut-il une base « big data » ?",
+     "options": [
+      "Oui, c'est de l'IoT",
+      "Non : une base relationnelle classique suffit largement",
+      "Oui, pour 24 capteurs"
+     ],
+     "answer": 1,
+     "explain": "**Dimensionner avant de choisir la technologie** évite la sur-ingénierie."
+    }
+   ]
+  },
+  {
+   "id": "regles",
+   "title": "Les règles de décision à la périphérie",
+   "emoji": "⚙️",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "La règle de Kevin : *ouvrir la vanne si l'humidité < 30 %*. Problème : si l'humidité oscille autour de 30 %, la vanne s'ouvre et se ferme sans cesse (**battement**), ce qui use l'électrovanne. La solution s'appelle l'**hystérésis**."
+    },
+    {
+     "type": "code",
+     "sql": "OUVRIR  quand humidité < 30 %\nFERMER  quand humidité > 40 %\nENTRE 30 et 40 : ne rien changer (garder l'état précédent)",
+     "lang": "Architecture",
+     "title": "Règle avec hystérésis"
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert l'hystérésis ?",
+     "options": [
+      "Éviter les ouvertures/fermetures répétées autour du seuil",
+      "Économiser du réseau",
+      "Chiffrer la commande"
+     ],
+     "answer": 0,
+     "explain": "Deux seuils différents créent une **zone neutre** qui stabilise la commande."
+    },
+    {
+     "type": "say",
+     "text": "On simule. Mesures successives : **35, 31, 29, 33, 38, 41, 39, 36, 32, 29**. La vanne est fermée au départ. Règle : ouvrir si < 30, fermer si > 40."
+    },
+    {
+     "type": "exercise",
+     "q": "Après la mesure **29**, la vanne est-elle ouverte ou fermée ? (ouverte/fermée)",
+     "hints": [
+      "29 < 30 : la condition d'ouverture est remplie."
+     ],
+     "accept": [
+      "ouvert"
+     ],
+     "solution": "ouverte",
+     "explain": "29 < 30 → la vanne **s'ouvre**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Après la mesure **38**, la vanne est-elle ouverte ou fermée ?",
+     "hints": [
+      "38 n'est pas > 40 : aucune fermeture."
+     ],
+     "accept": [
+      "ouvert"
+     ],
+     "solution": "ouverte",
+     "explain": "38 est dans la zone neutre (30-40) : la vanne **garde son état**, donc reste ouverte.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "À quelle mesure la vanne se **ferme**-t-elle pour la première fois ? (donne la valeur)",
+     "hints": [
+      "Cherche la première valeur > 40."
+     ],
+     "accept": [
+      "41 %"
+     ],
+     "solution": "41",
+     "explain": "La première mesure > 40 est **41**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Après la dernière mesure (29), la vanne est-elle ouverte ou fermée ?",
+     "hints": [
+      "Après 41 elle est fermée ; 39, 36, 32 : zone neutre. Puis 29 < 30."
+     ],
+     "accept": [
+      "ouvert"
+     ],
+     "solution": "ouverte",
+     "explain": "29 < 30 → réouverture : la vanne est **ouverte**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Sans hystérésis (un seul seuil à 30), la même séquence aurait donné **autant de commutations que de franchissements du seuil**. Ici : une ouverture, une fermeture, une réouverture."
+    },
+    {
+     "type": "say",
+     "text": "Autre bonne pratique : **ne pas se fier à une seule mesure**. On prend la **moyenne des 4 capteurs d'une parcelle** (et on ignore une valeur aberrante)."
+    },
+    {
+     "type": "exercise",
+     "q": "Les 4 capteurs d'une parcelle donnent 28, 31, 29, 28. Quelle est la moyenne ?",
+     "hints": [
+      "Somme = 116."
+     ],
+     "accept": [
+      "29 %"
+     ],
+     "solution": "29",
+     "explain": "(28 + 31 + 29 + 28) / 4 = **29 %** < 30 → arrosage déclenché.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Où mettre cette règle : dans le cloud ou sur l'ESP32 ?",
+     "options": [
+      "Uniquement dans le cloud",
+      "Dans l'application mobile",
+      "Sur l'ESP32 (edge) : elle fonctionne même sans Internet ; le cloud sert à la supervision"
+     ],
+     "answer": 2,
+     "explain": "Décision critique et simple → **périphérie**. Le cloud peut **modifier les seuils** à distance."
+    }
+   ]
+  },
+  {
+   "id": "energie",
+   "title": "Dimensionner l'énergie",
+   "emoji": "🔋",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Exigence N1 : **3 ans d'autonomie**. Calculons si c'est tenable. Un capteur consomme peu en **veille**, beaucoup en **émission**. L'énergie se mesure en **mAh**."
+    },
+    {
+     "type": "code",
+     "sql": "Pile : 3 000 mAh  (on n'utilise que 80 % → 2 400 mAh utilisables)\nÉmission : 40 mA pendant 1 seconde par message\nVeille : 0,01 mA (10 µA) en permanence\nMessages : 96 par jour (un toutes les 15 minutes)",
+     "lang": "Architecture",
+     "title": "Hypothèses du capteur"
+    },
+    {
+     "type": "say",
+     "text": "**Étape 1 : coût d'un message.** 40 mA × 1 s = 40 mA·s. Pour passer en mAh on divise par 3 600 (secondes dans une heure)."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de mAh pour **96 messages** par jour ? (40 mA × 1 s × 96 ÷ 3600, arrondi à 2 décimales)",
+     "hints": [
+      "40 × 96 = 3 840 mA·s.",
+      "3 840 ÷ 3 600."
+     ],
+     "accept": [
+      "1,07",
+      "1.067",
+      "1,067"
+     ],
+     "solution": "1.07",
+     "explain": "3 840 / 3 600 = 1,0667 ≈ **1,07 mAh/jour** pour l'émission.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de mAh pour la **veille** sur 24 h ? (0,01 mA × 24)",
+     "hints": [
+      "0,01 × 24."
+     ],
+     "accept": [
+      "0,24"
+     ],
+     "solution": "0.24",
+     "explain": "0,01 × 24 = **0,24 mAh/jour**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Consommation totale par jour : 1,0667 + 0,24 = **1,3067 mAh/jour**."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de **jours** tient la pile ? (2 400 ÷ 1,3067, arrondi à l'entier)",
+     "hints": [
+      "2 400 ÷ 1,3067."
+     ],
+     "accept": [
+      "1 837",
+      "1837 jours"
+     ],
+     "solution": "1837",
+     "explain": "2 400 / 1,3067 ≈ **1 837 jours**, soit environ **5 ans**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "L'exigence de 3 ans est-elle respectée ?",
+     "options": [
+      "Non",
+      "On ne peut pas savoir",
+      "Oui, avec une marge (≈ 5 ans)"
+     ],
+     "answer": 2,
+     "explain": "1 837 jours ≈ 5 ans > 3 ans. Il y a de la **marge** (utile car la pile s'use et le froid/chaleur réduisent la capacité)."
+    },
+    {
+     "type": "say",
+     "text": "Que se passe-t-il si Kevin veut une mesure **toutes les 5 minutes** (288 messages par jour) ? Émission : 40 × 288 / 3 600 = 3,2 mAh ; veille 0,24 ; total **3,44 mAh/jour**."
+    },
+    {
+     "type": "exercise",
+     "q": "Autonomie avec 288 messages/jour (2 400 ÷ 3,44, en jours, arrondi à l'entier) ?",
+     "hints": [
+      "2 400 ÷ 3,44."
+     ],
+     "accept": [
+      "698 jours"
+     ],
+     "solution": "698",
+     "explain": "2 400 / 3,44 ≈ **698 jours**, soit moins de **2 ans** : l'exigence N1 n'est plus tenue.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **leçon** ?",
+     "options": [
+      "La fréquence d'émission est le levier principal de l'autonomie : chaque exigence a un coût énergétique",
+      "Il vaut mieux mesurer plus souvent",
+      "L'énergie ne dépend pas des messages"
+     ],
+     "answer": 0,
+     "explain": "La **veille** pèse peu ; ce sont les **émissions** qui épuisent la pile. On négocie la fréquence avec le besoin réel."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle astuce réduit encore la consommation en LoRaWAN ?",
+     "options": [
+      "Passer en classe C",
+      "Rester en classe A et envoyer des messages courts",
+      "Utiliser le Wi-Fi"
+     ],
+     "answer": 1,
+     "explain": "**Classe A** (la plus économe) + **payload court** = moins de temps radio."
+    }
+   ]
+  },
+  {
+   "id": "production",
+   "title": "Sécurité, exploitation et défi final",
+   "emoji": "🚀",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dernière étape : la **mise en production**. Un système qui marche en démonstration peut être piraté ou tomber en panne sans que personne ne le sache. Voici la **checklist** de Nimbo."
+    },
+    {
+     "type": "code",
+     "sql": "SÉCURITÉ\n  ☐ Un identifiant + mot de passe (ou certificat) PAR objet, jamais un mot de passe commun\n  ☐ TLS sur MQTT (port 8883), pas 1883\n  ☐ ACL : chaque capteur ne publie que sur SON topic\n  ☐ Clés LoRaWAN AES-128 uniques par objet (réseau et application)\n  ☐ Mises à jour du firmware signées (OTA)\n\nEXPLOITATION\n  ☐ Last Will MQTT : message automatique si un capteur disparaît\n  ☐ Alerte si aucune mesure reçue depuis 1 heure (heartbeat)\n  ☐ Sauvegarde de la base et test de restauration\n  ☐ Surveillance de la batterie (niveau envoyé avec la mesure)\n\nCOÛT\n  ☐ Coût sur tout le cycle de vie : passerelle, serveur, maintenance, remplacement des piles",
+     "lang": "Réseau",
+     "title": "Checklist de mise en production"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel port utilise MQTT avec TLS ?",
+     "hints": [
+      "Le 1883 est sans chiffrement."
+     ],
+     "accept": [
+      "8883"
+     ],
+     "solution": "8883",
+     "explain": "MQTT : **1883** (clair), **8883** (TLS).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi un mot de passe **différent par objet** ?",
+     "options": [
+      "Pour faire plus compliqué",
+      "Si un objet est volé ou piraté, on révoque seulement le sien sans toucher aux autres",
+      "C'est une obligation de MQTT"
+     ],
+     "answer": 1,
+     "explain": "Un secret commun compromis = **tout le parc compromis**."
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert le **Last Will** MQTT ?",
+     "options": [
+      "À publier automatiquement un message si l'objet se déconnecte anormalement",
+      "À chiffrer le message",
+      "À augmenter le QoS"
+     ],
+     "answer": 0,
+     "explain": "Le broker publie le message de testament : **détection de panne** sans attendre."
+    },
+    {
+     "type": "choice",
+     "q": "Aucune mesure reçue d'un capteur depuis 3 heures. Que fait le système ?",
+     "options": [
+      "Rien, ce n'est pas grave",
+      "Il ferme les vannes",
+      "Il déclenche une alerte : capteur en panne, pile vide ou brouillage"
+     ],
+     "answer": 2,
+     "explain": "Un silence est une **information** : on le surveille (heartbeat, Last Will, niveau de batterie)."
+    },
+    {
+     "type": "say",
+     "text": "**Défi final.** Même méthode, nouveau cas : **la mairie de Cotonou** veut surveiller le **niveau de remplissage de 500 poubelles** réparties en ville. Mesure toutes les **30 minutes**, alerte quand une poubelle dépasse **80 %**. L'opérateur mobile couvre toute la ville."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de messages **par jour** (500 poubelles, un message toutes les 30 minutes) ?",
+     "hints": [
+      "Une poubelle = 48 messages par jour.",
+      "500 × 48."
+     ],
+     "accept": [
+      "24 000"
+     ],
+     "solution": "24000",
+     "explain": "24 × 2 = 48 messages/jour par poubelle ; 500 × 48 = **24 000 messages/jour**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie réseau proposes-tu : LoRaWAN ou NB-IoT ? (la couverture mobile est bonne)",
+     "hints": [
+      "Pas besoin d'installer de passerelles privées dans toute la ville."
+     ],
+     "accept": [
+      "nb iot",
+      "nbiot"
+     ],
+     "solution": "NB-IoT",
+     "explain": "Couverture opérateur existante, objets dispersés dans toute la ville → **NB-IoT** évite de déployer des passerelles ; LoRaWAN resterait possible.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel capteur mesure le niveau de remplissage d'une poubelle ?",
+     "hints": [
+      "Il mesure la distance jusqu'aux déchets."
+     ],
+     "accept": [
+      "capteur à ultrasons",
+      "capteur ultrason",
+      "ultrason"
+     ],
+     "solution": "ultrasons",
+     "explain": "Un **capteur à ultrasons** mesure la distance entre le couvercle et les déchets.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le seuil d'alerte en pourcentage de remplissage ?",
+     "hints": [
+      "Dans l'énoncé."
+     ],
+     "accept": [
+      "80 %",
+      "80%"
+     ],
+     "solution": "80",
+     "explain": "**80 %** : une poubelle au-dessus doit être vidée aujourd'hui.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle règle éviterait des alertes à répétition quand le niveau oscille autour de 80 % ?",
+     "options": [
+      "Un seul seuil à 80 %",
+      "Désactiver les alertes",
+      "Une hystérésis (alerte à 80 %, fin d'alerte à 70 %)"
+     ],
+     "answer": 2,
+     "explain": "Comme pour la vanne, **deux seuils** évitent le battement."
+    },
+    {
+     "type": "say",
+     "text": "Bravo 🎉 ! Tu sais maintenant conduire un projet IoT **de la phrase du client à la mise en production** : exigences chiffrées → réseau → architecture → messages → données → règles → énergie → sécurité. C'est exactement la démarche attendue dans une étude de cas d'examen."
+    }
+   ]
+  }
+ ]
+}
