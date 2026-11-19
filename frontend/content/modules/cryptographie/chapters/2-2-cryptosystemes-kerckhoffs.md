@@ -92,7 +92,7 @@ La **force brute** est toujours possible en théorie : la parade est une **clé 
 
 Dans la pratique on **combine** les deux : on utilise l'asymétrique (lent) pour **transmettre une clé de session**, puis le symétrique (rapide) pour chiffrer les données. C'est le **chiffrement hybride**, utilisé par **HTTPS**, PGP, les VPN, et appelé **enveloppe numérique** (voir chapitre 6.3).
 
-## 2.2.7 Vocabulaire
+## 2.2.8 Vocabulaire
 
 | Terme | Sens |
 |---|---|
