@@ -3221,7 +3221,7 @@
  },
  {
   "id": "qcm039",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Que signifie MQTT ?",
   "options": [
@@ -3235,7 +3235,7 @@
  },
  {
   "id": "qcm040",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel modèle de communication utilise MQTT ?",
   "options": [
@@ -3249,7 +3249,7 @@
  },
  {
   "id": "qcm041",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel est le rôle du broker MQTT ?",
   "options": [
@@ -3263,7 +3263,7 @@
  },
  {
   "id": "qcm042",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Sur quel transport et quel port MQTT fonctionne-t-il par défaut (sans TLS) ?",
   "options": [
@@ -3277,7 +3277,7 @@
  },
  {
   "id": "qcm043",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel est le port MQTT sécurisé par TLS ?",
   "options": [
@@ -3291,7 +3291,7 @@
  },
  {
   "id": "qcm044",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle est la taille minimale de l'en-tête MQTT ?",
   "options": [
@@ -3305,7 +3305,7 @@
  },
  {
   "id": "qcm045",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans MQTT, quel est le rôle d'un topic ?",
   "options": [
@@ -3319,7 +3319,7 @@
  },
  {
   "id": "qcm046",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans MQTT, que signifie le joker « # » ?",
   "options": [
@@ -3333,7 +3333,7 @@
  },
  {
   "id": "qcm047",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle garantie offre MQTT QoS 0 ?",
   "options": [
@@ -3347,7 +3347,7 @@
  },
  {
   "id": "qcm048",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle garantie offre MQTT QoS 1 ?",
   "options": [
@@ -3361,7 +3361,7 @@
  },
  {
   "id": "qcm049",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle garantie offre MQTT QoS 2, et quel est son inconvénient ?",
   "options": [
@@ -3375,7 +3375,7 @@
  },
  {
   "id": "qcm050",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle est la principale limite de MQTT ?",
   "options": [
@@ -3389,7 +3389,7 @@
  },
  {
   "id": "qcm051",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Que signifie CoAP ?",
   "options": [
@@ -3403,7 +3403,7 @@
  },
  {
   "id": "qcm052",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel transport CoAP utilise-t-il ?",
   "options": [
@@ -3417,7 +3417,7 @@
  },
  {
   "id": "qcm053",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quels ports utilise CoAP ?",
   "options": [
@@ -3431,7 +3431,7 @@
  },
  {
   "id": "qcm054",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle est la taille de l'en-tête CoAP ?",
   "options": [
@@ -3445,7 +3445,7 @@
  },
  {
   "id": "qcm055",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelles sont les quatre méthodes CoAP ?",
   "options": [
@@ -3459,7 +3459,7 @@
  },
  {
   "id": "qcm056",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quels sont les quatre types de messages CoAP ?",
   "options": [
@@ -3473,7 +3473,7 @@
  },
  {
   "id": "qcm057",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Que fait un message CON en CoAP ?",
   "options": [
@@ -3487,7 +3487,7 @@
  },
  {
   "id": "qcm058",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Que fait l'option Observe de CoAP ?",
   "options": [
@@ -3501,7 +3501,7 @@
  },
  {
   "id": "qcm059",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Comment se désabonne-t-on d'une ressource avec CoAP Observe ?",
   "options": [
@@ -3515,7 +3515,7 @@
  },
  {
   "id": "qcm060",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle sécurité est associée à CoAP ?",
   "options": [
@@ -3529,7 +3529,7 @@
  },
  {
   "id": "qcm061",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel modèle CoAP adopte-t-il ?",
   "options": [
@@ -3543,7 +3543,7 @@
  },
  {
   "id": "qcm062",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Que signifie AMQP ?",
   "options": [
@@ -3557,7 +3557,7 @@
  },
  {
   "id": "qcm063",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quels sont les ports d'AMQP ?",
   "options": [
@@ -3571,7 +3571,7 @@
  },
  {
   "id": "qcm064",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans AMQP, quel est le trajet d'un message ?",
   "options": [
@@ -3585,7 +3585,7 @@
  },
  {
   "id": "qcm065",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quels sont les types d'exchange AMQP cités ?",
   "options": [
@@ -3599,7 +3599,7 @@
  },
  {
   "id": "qcm066",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel exchange AMQP duplique le message vers toutes les files (ex. alerte d'urgence) ?",
   "options": [
@@ -3613,7 +3613,7 @@
  },
  {
   "id": "qcm067",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle norme ISO correspond à AMQP 1.0 ?",
   "options": [
@@ -3627,7 +3627,7 @@
  },
  {
   "id": "qcm068",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel mécanisme d'authentification est associé à AMQP ?",
   "options": [
@@ -3641,7 +3641,7 @@
  },
  {
   "id": "qcm069",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Pourquoi AMQP n'est-il pas adapté aux petits capteurs ?",
   "options": [
@@ -3655,7 +3655,7 @@
  },
  {
   "id": "qcm070",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel est l'inconvénient majeur de HTTP pour l'IoT ?",
   "options": [
@@ -3669,7 +3669,7 @@
  },
  {
   "id": "qcm071",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quels ports utilise HTTP/HTTPS ?",
   "options": [
@@ -3683,7 +3683,7 @@
  },
  {
   "id": "qcm072",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quelle différence entre requête/réponse et publish/subscribe ?",
   "options": [
@@ -3697,7 +3697,7 @@
  },
  {
   "id": "qcm073",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel protocole est le plus adapté à un objet très contraint (arbre de décision du Groupe 3) ?",
   "options": [
@@ -3711,7 +3711,7 @@
  },
  {
   "id": "qcm074",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel protocole choisir quand aucune perte de message n'est tolérée ?",
   "options": [
@@ -3725,7 +3725,7 @@
  },
  {
   "id": "qcm075",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Quel protocole choisir pour un réseau instable avec plusieurs abonnés ?",
   "options": [
@@ -3739,7 +3739,7 @@
  },
  {
   "id": "qcm076",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Une architecture courante combine les protocoles ainsi :",
   "options": [
@@ -3753,7 +3753,7 @@
  },
  {
   "id": "qcm077",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Aucun de MQTT, CoAP et AMQP n'est sécurisé par défaut. Que faut-il faire ?",
   "options": [
@@ -3767,7 +3767,7 @@
  },
  {
   "id": "qcm078",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans le cas pratique « agriculture au Bénin », pourquoi le Wi-Fi est-il écarté ?",
   "options": [
@@ -3781,7 +3781,7 @@
  },
  {
   "id": "qcm079",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans ce cas pratique, quelle chaîne est retenue ?",
   "options": [
@@ -3795,7 +3795,7 @@
  },
  {
   "id": "qcm080",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans ce cas pratique, quand l'ESP32 commande-t-il l'électrovanne en edge ?",
   "options": [
@@ -3809,7 +3809,7 @@
  },
  {
   "id": "qcm081",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Pourquoi stocker les mesures dans une base Oracle en plus du broker MQTT ?",
   "options": [
@@ -3823,7 +3823,7 @@
  },
  {
   "id": "qcm082",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-5-protocoles-applicatifs",
   "difficulty": 2,
   "q": "Dans la table MESURES_IOT, pourquoi la colonne s'appelle-t-elle date_mesure et non DATE ?",
   "options": [
@@ -3837,7 +3837,7 @@
  },
  {
   "id": "qcm083",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Qu'est-ce qu'un protocole de réseau ?",
   "options": [
@@ -3851,7 +3851,7 @@
  },
  {
   "id": "qcm084",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Dans quelle bande de fréquence le Bluetooth fonctionne-t-il principalement ?",
   "options": [
@@ -3865,7 +3865,7 @@
  },
  {
   "id": "qcm085",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Que signifie BLE et pourquoi existe-t-il ?",
   "options": [
@@ -3879,7 +3879,7 @@
  },
  {
   "id": "qcm086",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Comment un réseau Wi-Fi est-il organisé en général ?",
   "options": [
@@ -3893,7 +3893,7 @@
  },
  {
   "id": "qcm087",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle norme IEEE sert de base à Zigbee pour les couches physique et MAC ?",
   "options": [
@@ -3907,7 +3907,7 @@
  },
  {
   "id": "qcm088",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels sont les trois types d'appareils d'un réseau Zigbee ?",
   "options": [
@@ -3921,7 +3921,7 @@
  },
  {
   "id": "qcm089",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle topologie particulière Zigbee permet-il ?",
   "options": [
@@ -3935,7 +3935,7 @@
  },
  {
   "id": "qcm090",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est le débit maximal de Zigbee à 2,4 GHz cité dans l'exposé ?",
   "options": [
@@ -3949,7 +3949,7 @@
  },
  {
   "id": "qcm091",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Parmi ces technologies, laquelle a la consommation la plus élevée ?",
   "options": [
@@ -3963,7 +3963,7 @@
  },
  {
   "id": "qcm092",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels usages typiques correspondent au BLE ?",
   "options": [
@@ -3977,7 +3977,7 @@
  },
  {
   "id": "qcm093",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels usages typiques correspondent au Wi-Fi ?",
   "options": [
@@ -3991,7 +3991,7 @@
  },
  {
   "id": "qcm094",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels usages typiques correspondent à Zigbee ?",
   "options": [
@@ -4005,7 +4005,7 @@
  },
  {
   "id": "qcm095",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Parmi les attaques radio, laquelle consiste à écouter passivement les communications ?",
   "options": [
@@ -4019,7 +4019,7 @@
  },
  {
   "id": "qcm096",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Qu'est-ce que le jamming ?",
   "options": [
@@ -4033,7 +4033,7 @@
  },
  {
   "id": "qcm097",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Qu'est-ce qu'une attaque par rejeu (replay) ?",
   "options": [
@@ -4047,7 +4047,7 @@
  },
  {
   "id": "qcm098",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Qu'est-ce que le spoofing ?",
   "options": [
@@ -4061,7 +4061,7 @@
  },
  {
   "id": "qcm099",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels critères aident à choisir un protocole selon le Groupe 1 ?",
   "options": [
@@ -4075,7 +4075,7 @@
  },
  {
   "id": "qcm100",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelles évolutions des protocoles sont citées ?",
   "options": [
@@ -4089,7 +4089,7 @@
  },
  {
   "id": "qcm101",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est l'apport de l'IPv6 à l'IoT ?",
   "options": [
@@ -4103,7 +4103,7 @@
  },
  {
   "id": "qcm102",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est l'apport de la 5G cité par le Groupe 1 ?",
   "options": [
@@ -4117,7 +4117,7 @@
  },
  {
   "id": "qcm103",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Selon le Groupe 3, quelle technologie fonctionne à 13,56 MHz sur quelques centimètres ?",
   "options": [
@@ -4131,7 +4131,7 @@
  },
  {
   "id": "qcm104",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Selon le tableau du Groupe 3, quelle portée est associée à LoRaWAN ?",
   "options": [
@@ -4145,7 +4145,7 @@
  },
  {
   "id": "qcm105",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelles sont les quatre familles de connectivité du Groupe 3 ?",
   "options": [
@@ -4159,7 +4159,7 @@
  },
  {
   "id": "qcm106",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pourquoi une passerelle est-elle utile quand plusieurs protocoles coexistent ?",
   "options": [
@@ -4173,7 +4173,7 @@
  },
  {
   "id": "qcm107",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Que signifie LPWAN ?",
   "options": [
@@ -4187,7 +4187,7 @@
  },
  {
   "id": "qcm108",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelles sont les trois priorités des LPWAN ?",
   "options": [
@@ -4201,7 +4201,7 @@
  },
  {
   "id": "qcm109",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Un LPWAN est-il adapté à la transmission de vidéo ?",
   "options": [
@@ -4215,7 +4215,7 @@
  },
  {
   "id": "qcm110",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle est la différence entre LoRa et LoRaWAN ?",
   "options": [
@@ -4229,7 +4229,7 @@
  },
  {
   "id": "qcm111",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Que signifie LoRaWAN ?",
   "options": [
@@ -4243,7 +4243,7 @@
  },
  {
   "id": "qcm112",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle topologie utilise un réseau LoRaWAN ?",
   "options": [
@@ -4257,7 +4257,7 @@
  },
  {
   "id": "qcm113",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quand plusieurs passerelles reçoivent le même message LoRaWAN, que fait le serveur réseau ?",
   "options": [
@@ -4271,7 +4271,7 @@
  },
  {
   "id": "qcm114",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle classe d'appareil LoRaWAN est la plus économe en énergie et obligatoire ?",
   "options": [
@@ -4285,7 +4285,7 @@
  },
  {
   "id": "qcm115",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle classe LoRaWAN écoute presque en continu et consomme davantage ?",
   "options": [
@@ -4299,7 +4299,7 @@
  },
  {
   "id": "qcm116",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle classe LoRaWAN ajoute des fenêtres de réception programmées grâce à une synchronisation avec le réseau ?",
   "options": [
@@ -4313,7 +4313,7 @@
  },
  {
   "id": "qcm117",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelles bandes LoRaWAN utilise-t-il généralement ?",
   "options": [
@@ -4327,7 +4327,7 @@
  },
  {
   "id": "qcm118",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est un avantage de LoRaWAN ?",
   "options": [
@@ -4341,7 +4341,7 @@
  },
  {
   "id": "qcm119",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle est une limite de LoRaWAN ?",
   "options": [
@@ -4355,7 +4355,7 @@
  },
  {
   "id": "qcm120",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Que signifie NB-IoT ?",
   "options": [
@@ -4369,7 +4369,7 @@
  },
  {
   "id": "qcm121",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "À partir de quelle release 3GPP NB-IoT est-il normalisé ?",
   "options": [
@@ -4383,7 +4383,7 @@
  },
  {
   "id": "qcm122",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quelle est la largeur de bande utilisée par NB-IoT ?",
   "options": [
@@ -4397,7 +4397,7 @@
  },
  {
   "id": "qcm123",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pourquoi une bande très étroite (180 kHz) est-elle utile ?",
   "options": [
@@ -4411,7 +4411,7 @@
  },
  {
   "id": "qcm124",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel spectre NB-IoT utilise-t-il ?",
   "options": [
@@ -4425,7 +4425,7 @@
  },
  {
   "id": "qcm125",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quels mécanismes réduisent la consommation de NB-IoT ?",
   "options": [
@@ -4439,7 +4439,7 @@
  },
  {
   "id": "qcm126",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est le compromis des modes de veille de NB-IoT ?",
   "options": [
@@ -4453,7 +4453,7 @@
  },
  {
   "id": "qcm127",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Comment un objet NB-IoT s'authentifie-t-il ?",
   "options": [
@@ -4467,7 +4467,7 @@
  },
  {
   "id": "qcm128",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel chiffrement est cité pour LoRaWAN ?",
   "options": [
@@ -4481,7 +4481,7 @@
  },
  {
   "id": "qcm129",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Qui gère généralement le réseau d'accès NB-IoT ?",
   "options": [
@@ -4495,7 +4495,7 @@
  },
  {
   "id": "qcm130",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Selon l'exposé, quelle est la situation de NB-IoT au Bénin ?",
   "options": [
@@ -4509,7 +4509,7 @@
  },
  {
   "id": "qcm131",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est le débit approximatif de LoRaWAN selon la comparaison du Groupe 5 ?",
   "options": [
@@ -4523,7 +4523,7 @@
  },
  {
   "id": "qcm132",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est le débit approximatif de NB-IoT selon le Groupe 5 ?",
   "options": [
@@ -4537,7 +4537,7 @@
  },
  {
   "id": "qcm133",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pour une exploitation agricole isolée, quel choix est présenté comme plutôt adapté ?",
   "options": [
@@ -4551,7 +4551,7 @@
  },
  {
   "id": "qcm134",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pour des compteurs d'eau répartis dans une ville, quel choix est présenté comme plutôt adapté ?",
   "options": [
@@ -4565,7 +4565,7 @@
  },
  {
   "id": "qcm135",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pour une entreprise industrielle avec petites mesures régulières, que conclut l'exposé ?",
   "options": [
@@ -4579,7 +4579,7 @@
  },
  {
   "id": "qcm136",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Pourquoi les LPWAN ne conviennent-ils pas à un contrôle industriel en temps réel avec délais stricts ?",
   "options": [
@@ -4593,7 +4593,7 @@
  },
  {
   "id": "qcm137",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Sur le coût, quelle affirmation est correcte ?",
   "options": [
@@ -4607,7 +4607,7 @@
  },
  {
   "id": "qcm138",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "« La 4G sur un téléphone prouve que NB-IoT est disponible au même endroit. » Cette affirmation est :",
   "options": [
@@ -4621,7 +4621,7 @@
  },
  {
   "id": "qcm139",
-  "chapter": "2-1-couches-protocoles",
+  "chapter": "2-6-liaisons-sans-fil-lpwan",
   "difficulty": 2,
   "q": "Quel est le principal défi résumé en conclusion du Groupe 5 ?",
   "options": [
