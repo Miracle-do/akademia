@@ -29,6 +29,7 @@ import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
 import InstallPwaModal from './InstallPwaModal';
 import UpdateBanner from './UpdateBanner';
+import VersionBadge from './VersionBadge';
 import PushPrompt from './PushPrompt';
 import { UnreadBadge } from './UnreadBadge';
 import { useUnreadMessages } from '@/state/useUnread';
@@ -287,6 +288,7 @@ export default function Layout() {
               <Logout size={18} />
             </button>
           </div>
+          <VersionBadge className="mt-2 block px-2" />
         </div>
       </aside>
 

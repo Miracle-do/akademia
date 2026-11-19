@@ -8,6 +8,7 @@ const CHECK_EVERY_MS = 10 * 60 * 1000;
  */
 export default function UpdateBanner() {
   const [available, setAvailable] = useState(false);
+  const [newVersion, setNewVersion] = useState('');
 
   useEffect(() => {
     if (import.meta.env.DEV) return;
@@ -17,8 +18,9 @@ export default function UpdateBanner() {
       try {
         const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) return;
-        const data = (await res.json()) as { id?: string };
+        const data = (await res.json()) as { id?: string; version?: string };
         if (data.id && data.id !== __BUILD_ID__) {
+          if (data.version) setNewVersion(data.version);
           setAvailable(true);
           void navigator.serviceWorker?.getRegistration().then((r) => r?.update());
         }
@@ -40,7 +42,7 @@ export default function UpdateBanner() {
   if (!available) return null;
   return (
     <div role="status" className="fixed inset-x-3 bottom-20 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg md:bottom-4">
-      <span className="flex-1">Une nouvelle version d'Akademia est disponible.</span>
+      <span className="flex-1">{newVersion && newVersion !== __APP_VERSION__ ? `Akademia v${newVersion} est disponible.` : "Une nouvelle version d'Akademia est disponible."}</span>
       <button type="button" onClick={() => window.location.reload()} className="rounded-xl bg-white px-3 py-1.5 font-semibold text-slate-900">Actualiser</button>
       <button type="button" aria-label="Plus tard" onClick={() => setAvailable(false)} className="px-1 text-white/70">✕</button>
     </div>

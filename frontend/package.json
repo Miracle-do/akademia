@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "validate": "node scripts/validate-content.mjs",
+    "release": "node scripts/release.mjs",
     "new-module": "node scripts/new-module.mjs",
     "predev": "node scripts/build-search-index.mjs",
     "prebuild": "node scripts/build-search-index.mjs"

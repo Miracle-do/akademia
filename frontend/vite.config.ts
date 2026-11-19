@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
+import fs from 'node:fs';
+
+const APP_VERSION: string = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')).version;
 
 const BUILD_ID = String(Date.now());
 
@@ -8,7 +11,7 @@ const BUILD_ID = String(Date.now());
 const versionFile = () => ({
   name: 'version-file',
   generateBundle() {
-    (this as unknown as { emitFile: (f: object) => void }).emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) });
+    (this as unknown as { emitFile: (f: object) => void }).emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID, version: APP_VERSION }) });
   },
 });
 
@@ -23,7 +26,7 @@ const assetManifest = () => ({
 
 export default defineConfig({
   plugins: [react(), assetManifest(), versionFile()],
-  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID), __APP_VERSION__: JSON.stringify(APP_VERSION) },
   envDir: path.resolve(__dirname, '..'),
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
   server: {

@@ -28,6 +28,7 @@ import { FlameBadgeIcon, TrophyBadgeIcon } from '@/components/Decor';
 import { CustomAvatar } from '@/components/CustomAvatar';
 import { isStandalone, triggerInstallPrompt } from '@/components/InstallPwaModal';
 import PushToggle from '@/components/PushToggle';
+import VersionBadge from '@/components/VersionBadge';
 import { Empty, PageTitle, Spinner, Stat } from '@/components/ui';
 
 export default function ProfilePage() {
@@ -452,6 +453,9 @@ export default function ProfilePage() {
           </div>
         </section>
       )}
+      <div className="pt-2 text-center">
+        <VersionBadge />
+      </div>
     </div>
   );
 }
