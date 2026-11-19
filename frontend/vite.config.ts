@@ -2,6 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
+const BUILD_ID = String(Date.now());
+
+// Publie l'identifiant de version : l'application installée le compare à sa propre version pour proposer la mise à jour.
+const versionFile = () => ({
+  name: 'version-file',
+  generateBundle() {
+    (this as unknown as { emitFile: (f: object) => void }).emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) });
+  },
+});
+
 // Liste de tous les fichiers générés (pages, chapitres, quiz… chargés à la demande) pour le précache hors ligne.
 const assetManifest = () => ({
   name: 'asset-manifest',
@@ -12,8 +22,8 @@ const assetManifest = () => ({
 });
 
 export default defineConfig({
-  plugins: [react(), assetManifest()],
-  define: { __BUILD_ID__: JSON.stringify(String(Date.now())) },
+  plugins: [react(), assetManifest(), versionFile()],
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   envDir: path.resolve(__dirname, '..'),
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
   server: {

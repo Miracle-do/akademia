@@ -28,6 +28,7 @@ import { ConfettiBackdrop, FlameBadgeIcon } from './Decor';
 import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
 import InstallPwaModal from './InstallPwaModal';
+import UpdateBanner from './UpdateBanner';
 import PushPrompt from './PushPrompt';
 import { UnreadBadge } from './UnreadBadge';
 import { useUnreadMessages } from '@/state/useUnread';
@@ -386,6 +387,7 @@ export default function Layout() {
       <WeeklyBattleWinnerModal battle={battle} />
       <FilierePromptModal />
       <InstallPwaModal />
+      <UpdateBanner />
       <PushPrompt />
       <Celebrations />
     </div>

@@ -49,8 +49,22 @@ export async function prepareOfflineContent(): Promise<void> {
       await idle();
     }
     if (failed > 0) return; // on réessaiera au prochain lancement
+    await purgeOldAssets(files);
   }
   try { localStorage.setItem(OFFLINE_KEY, __BUILD_ID__); } catch { /* ignoré */ }
+}
+
+/** Supprime du cache les fichiers /assets/ des anciennes versions (ils ne sont plus référencés) pour libérer l'espace du téléphone. */
+async function purgeOldAssets(current: string[]): Promise<void> {
+  try {
+    if (!('caches' in window)) return;
+    const keep = new Set(current);
+    const cache = await caches.open('akademia-assets-v1');
+    for (const req of await cache.keys()) {
+      const path = new URL(req.url).pathname;
+      if (path.startsWith('/assets/') && !keep.has(path)) await cache.delete(req);
+    }
+  } catch { /* nettoyage facultatif */ }
 }
 
 async function apiGet<T>(path: string): Promise<T> {
