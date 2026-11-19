@@ -1,0 +1,924 @@
+{
+ "id": "choisir-techno-reseau",
+ "order": 1,
+ "title": "Choisir une technologie réseau IoT",
+ "tagline": "Wi-Fi, BLE, Zigbee, LoRaWAN, NB-IoT : compare, calcule et justifie le bon choix.",
+ "emoji": "📡",
+ "color": "#0EA5E9",
+ "level": "Débutant → solide",
+ "minutes": 70,
+ "pitch": [
+  "Bonjour ! Aujourd'hui : **« Choisir une technologie réseau IoT »** 📡.",
+  "À l'examen, la question tombe presque toujours : *« Quelle technologie proposez-vous pour ce cas, et pourquoi ? »* Beaucoup de réponses se contentent de citer un nom. Une **bonne réponse justifie** avec des critères et des chiffres.",
+  "Tu apprends la **grille des 7 critères**, les technologies de courte portée (BLE, Zigbee, NFC), le Wi-Fi et la question du débit, puis **LoRaWAN** (facteur d'étalement, temps d'émission, duty cycle, classes A/B/C) et **NB-IoT**. Tu t'entraînes sur **six cas concrets**, puis tu découvres les attaques radio et un défi final.",
+  "Chaque leçon est interactive : indices, corrections et calculs vérifiés."
+ ],
+ "benefits": [
+  "Appliquer la grille des 7 critères pour justifier un choix",
+  "Distinguer courte portée, réseau local, LPWAN et cellulaire",
+  "Calculer un temps de transfert, un temps d'émission LoRa et un nombre de messages par heure sous duty cycle",
+  "Comparer LoRaWAN et NB-IoT, et reconnaître les attaques radio"
+ ],
+ "lessons": [
+  {
+   "id": "criteres",
+   "title": "Les 7 critères de choix",
+   "emoji": "🧭",
+   "minutes": 8,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Moi c'est **Nimbo** ☁️. Choisir une technologie réseau IoT, ce n'est pas choisir « la meilleure » : il n'y en a pas. C'est choisir **celle qui convient au besoin**. Et pour ça, on a une grille de **7 critères**."
+    },
+    {
+     "type": "code",
+     "sql": "1. Débit          quelle quantité de données par seconde ?\n2. Consommation   l'objet est-il sur pile, sur secteur ?\n3. Portée         quelques mètres, quelques centaines, plusieurs km ?\n4. Nombre d'appareils  quelques-uns ou des milliers ?\n5. Coût           matériel + abonnement + maintenance\n6. Sécurité       données sensibles ? chiffrement disponible ?\n7. Interopérabilité  compatible avec le reste du système ?",
+     "lang": "Réseau",
+     "title": "La grille de choix"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de critères comporte la grille de choix du cours ?",
+     "hints": [
+      "Débit, consommation, portée, nombre d'appareils, coût, sécurité, interopérabilité."
+     ],
+     "accept": [
+      "sept",
+      "7 critères"
+     ],
+     "solution": "7",
+     "explain": "Ces **7 critères** se posent avant tout choix de technologie.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Un capteur sur **pile** qui doit durer 5 ans. Quel critère devient prioritaire ?",
+     "options": [
+      "Le débit",
+      "La consommation d'énergie",
+      "Le nombre de couleurs"
+     ],
+     "answer": 1,
+     "explain": "Sur pile, la **consommation** décide : elle élimine d'emblée les technologies gourmandes comme le Wi-Fi."
+    },
+    {
+     "type": "say",
+     "text": "Il y a **4 familles** de connectivité. À connaître par cœur, avec leurs exemples :"
+    },
+    {
+     "type": "code",
+     "sql": "Courte portée   BLE, Zigbee, NFC          cm à dizaines de mètres\nRéseau local    Wi-Fi, Ethernet          dizaines de mètres\nLongue portée   LoRaWAN, Sigfox (LPWAN)   plusieurs km\nCellulaire      2G / 3G / 4G / 5G, NB-IoT  réseau de l'opérateur",
+     "lang": "Réseau",
+     "title": "Les 4 familles"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans quelle famille classe-t-on **Zigbee** ?",
+     "hints": [
+      "BLE, Zigbee et NFC forment la même famille."
+     ],
+     "accept": [
+      "courte portée",
+      "courte portee",
+      "la courte portée"
+     ],
+     "solution": "courte portée",
+     "explain": "Zigbee, BLE et NFC sont des technologies de **courte portée**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Dans quelle famille classe-t-on **NB-IoT** ?",
+     "hints": [
+      "Il utilise le réseau des opérateurs mobiles."
+     ],
+     "accept": [
+      "cellulaire",
+      "le cellulaire"
+     ],
+     "solution": "cellulaire",
+     "explain": "NB-IoT est une technologie **cellulaire** (normalisée par le 3GPP).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle affirmation est vraie ?",
+     "options": [
+      "Aucune technologie n'est la meilleure en général : tout dépend des critères du projet",
+      "Une technologie convient à tous les cas",
+      "Le Wi-Fi est toujours le meilleur choix"
+     ],
+     "answer": 0,
+     "explain": "Le choix est un **compromis** entre débit, portée, énergie, coût…"
+    },
+    {
+     "type": "say",
+     "text": "Retiens aussi : quand plusieurs protocoles coexistent dans un système, une **passerelle** fait le lien entre eux (interopérabilité)."
+    }
+   ]
+  },
+  {
+   "id": "courte-portee",
+   "title": "Courte portée : BLE, Zigbee, NFC",
+   "emoji": "🔵",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Commençons par la **courte portée**, la plus présente dans nos maisons et nos poches."
+    },
+    {
+     "type": "code",
+     "sql": "            BLE                  Zigbee                  NFC\nFréquence   2,4 GHz              2,4 GHz                 13,56 MHz\nTopologie   point à point/étoile  MAILLAGE (mesh)         contact (quelques cm)\nBase        Bluetooth 4.0+       IEEE 802.15.4           induction magnétique\nDébit       moyen                250 kb/s (2,4 GHz)      106 à 424 kbit/s\nUsages      montres, bracelets,  ampoules, capteurs      paiement sans contact,\n            balises, santé       d'ouverture, domotique  badges, appairage",
+     "lang": "Réseau",
+     "title": "BLE, Zigbee, NFC en un coup d'œil"
+    },
+    {
+     "type": "exercise",
+     "q": "Que signifie **BLE** ? (en français ou en anglais)",
+     "hints": [
+      "C'est une variante du Bluetooth conçue pour économiser l'énergie."
+     ],
+     "accept": [
+      "ble",
+      "bluetooth basse consommation",
+      "bluetooth à basse énergie",
+      "bluetooth low energy (ble)"
+     ],
+     "solution": "Bluetooth Low Energy",
+     "explain": "**BLE = Bluetooth Low Energy** : variante à faible consommation, pour bracelets et capteurs sur petite pile.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Sur quelle norme IEEE se base Zigbee pour les couches physique et MAC ?",
+     "hints": [
+      "802.15.quelque chose…"
+     ],
+     "accept": [
+      "802.15.4",
+      "ieee802.15.4"
+     ],
+     "solution": "IEEE 802.15.4",
+     "explain": "Zigbee s'appuie sur **IEEE 802.15.4**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quels sont les trois types d'appareils d'un réseau Zigbee ?",
+     "options": [
+      "Serveur, client, proxy",
+      "Maître, esclave, relais",
+      "Coordinateur, routeurs, appareils terminaux"
+     ],
+     "answer": 2,
+     "explain": "Le **coordinateur** crée le réseau, les **routeurs** relaient, les **terminaux** mesurent/agissent."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle topologie particulière permet Zigbee ?",
+     "options": [
+      "L'étoile uniquement",
+      "L'anneau",
+      "Le maillage (mesh) : des appareils relaient les données des autres"
+     ],
+     "answer": 2,
+     "explain": "Le **maillage** étend la portée en faisant relayer les messages par les appareils proches."
+    },
+    {
+     "type": "say",
+     "text": "Pourquoi le maillage est-il intéressant ? Imagine 30 ampoules dans une maison : même si l'une est loin du coordinateur, les ampoules voisines **relaient** ses messages. Si une ampoule tombe en panne, le réseau **trouve un autre chemin**."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle technologie convient à une montre qui envoie le rythme cardiaque au téléphone ?",
+     "options": [
+      "BLE",
+      "Zigbee",
+      "LoRaWAN"
+     ],
+     "answer": 0,
+     "explain": "BLE : **proximité** et **faible consommation**, pile minuscule."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle technologie convient à 30 ampoules et capteurs de porte dans un bâtiment ?",
+     "options": [
+      "BLE seul",
+      "Zigbee (maillage, faible consommation)",
+      "NB-IoT"
+     ],
+     "answer": 1,
+     "explain": "**Zigbee** : domotique, nombreux petits appareils, maillage."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie fonctionne à 13,56 MHz sur quelques centimètres, sans infrastructure ?",
+     "hints": [
+      "Paiement sans contact."
+     ],
+     "accept": [
+      "nfc"
+     ],
+     "solution": "NFC",
+     "explain": "**NFC** (champ proche) : induction magnétique, quelques centimètres, appairage rapide.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel est le débit maximal de Zigbee à 2,4 GHz ? (en kb/s, donne le nombre)",
+     "hints": [
+      "C'est un débit modeste, adapté à de petits messages."
+     ],
+     "accept": [
+      "250 kb/s",
+      "250kbit/s",
+      "250 kbit/s"
+     ],
+     "solution": "250",
+     "explain": "**250 kb/s** : suffisant pour de petits messages, pas pour de la vidéo.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "wifi-debit",
+   "title": "Wi-Fi et la question du débit",
+   "emoji": "📶",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le **Wi-Fi** est partout, mais il n'est pas toujours le bon choix. Voyons ce qu'il apporte et ce qu'il coûte."
+    },
+    {
+     "type": "code",
+     "sql": "FORCES    Débit élevé · infrastructure déjà présente (box, routeur) · IP natif\nFAIBLESSES Consommation la plus ÉLEVÉE de la famille · portée limitée (dizaines de m)\n          · organisation en étoile autour d'un point d'accès (le point d'accès est central)\nUSAGES    Caméras IP, téléviseurs connectés, objets qui envoient beaucoup de données",
+     "lang": "Réseau",
+     "title": "Wi-Fi : forces et faiblesses"
+    },
+    {
+     "type": "choice",
+     "q": "Parmi ces technologies, laquelle consomme le plus d'énergie ?",
+     "options": [
+      "BLE",
+      "Wi-Fi",
+      "Zigbee"
+     ],
+     "answer": 1,
+     "explain": "Le **Wi-Fi** consomme davantage, surtout pour de gros transferts."
+    },
+    {
+     "type": "choice",
+     "q": "Comment est organisé un réseau Wi-Fi ?",
+     "options": [
+      "En étoile autour d'un point d'accès ou d'un routeur",
+      "En maillage",
+      "En bus"
+     ],
+     "answer": 0,
+     "explain": "Les appareils se connectent à un **point d'accès**."
+    },
+    {
+     "type": "say",
+     "text": "Le **débit** détermine ce qu'on peut transférer. Calculons le **temps** pour envoyer une photo de **1 Mo** (soit 8 000 000 bits)."
+    },
+    {
+     "type": "code",
+     "sql": "temps (s) = nombre de bits ÷ débit (bit/s)\n\nExemple : 8 000 000 bits à 250 000 bit/s (Zigbee)  →  32 s",
+     "lang": "Réseau",
+     "title": "Formule"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de secondes pour envoyer 8 000 000 bits à 250 000 bit/s (Zigbee) ?",
+     "hints": [
+      "8 000 000 ÷ 250 000."
+     ],
+     "accept": [
+      "32 s",
+      "32 secondes"
+     ],
+     "solution": "32",
+     "explain": "8 000 000 / 250 000 = **32 s**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de secondes à **5 000 bit/s** (ordre de grandeur LoRaWAN en SF7) ?",
+     "hints": [
+      "8 000 000 ÷ 5 000."
+     ],
+     "accept": [
+      "1 600",
+      "1600 s",
+      "1600 secondes"
+     ],
+     "solution": "1600",
+     "explain": "8 000 000 / 5 000 = **1 600 s**, soit environ **27 minutes** (et en pratique impossible : taille maximale de message très limitée).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on envoyer une photo de 1 Mo par LoRaWAN ?",
+     "options": [
+      "Oui, sans problème",
+      "Oui avec la classe C",
+      "En pratique non : les messages sont de quelques dizaines à centaines d'octets maximum"
+     ],
+     "answer": 2,
+     "explain": "Un message LoRaWAN fait au plus **51 à 222 octets** utiles selon le facteur d'étalement. Un LPWAN transporte de **petites mesures**, pas des images."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle famille de technologies privilégier pour de la vidéo ? (réseau local ou LPWAN)",
+     "hints": [
+      "Il faut du débit élevé."
+     ],
+     "accept": [
+      "wifi",
+      "wi-fi",
+      "reseau local",
+      "réseau local (wi-fi)"
+     ],
+     "solution": "réseau local",
+     "explain": "La **vidéo** exige un haut débit : **Wi-Fi** (réseau local) ou cellulaire 4G/5G. Pas les LPWAN.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Règle d'or : **mesures légères et rares → LPWAN ou courte portée ; flux riches (images, vidéo, mises à jour) → Wi-Fi ou cellulaire.**"
+    }
+   ]
+  },
+  {
+   "id": "lorawan",
+   "title": "LoRaWAN : portée, facteur d'étalement, classes",
+   "emoji": "📻",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**LoRaWAN** est la star des réseaux **LPWAN** (*Low Power Wide Area Network*) : **longue portée, faible consommation, petits messages**."
+    },
+    {
+     "type": "exercise",
+     "q": "Que signifie LPWAN ? (une réponse courte suffit : les 4 mots anglais ou leur sens)",
+     "hints": [
+      "Réseau étendu à faible consommation."
+     ],
+     "accept": [
+      "lpwan",
+      "réseau étendu à faible consommation",
+      "reseau etendu a faible consommation"
+     ],
+     "solution": "Low Power Wide Area Network",
+     "explain": "**L**ow **P**ower **W**ide **A**rea **N**etwork.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la différence entre **LoRa** et **LoRaWAN** ?",
+     "options": [
+      "Aucune, c'est le même mot",
+      "LoRa est cellulaire, LoRaWAN non",
+      "LoRa = la modulation radio (couche physique) ; LoRaWAN = les règles de communication et l'organisation du réseau"
+     ],
+     "answer": 2,
+     "explain": "LoRa = **la radio**. LoRaWAN = **le protocole réseau** (spécifié par la LoRa Alliance)."
+    },
+    {
+     "type": "code",
+     "sql": "Capteurs ──► Passerelle(s) ──(IP)──► Serveur réseau ──► Serveur applicatif\n\nUn message reçu par plusieurs passerelles → le serveur réseau élimine les doublons.",
+     "lang": "Réseau",
+     "title": "Topologie en étoile"
+    },
+    {
+     "type": "say",
+     "text": "Le **facteur d'étalement** (*Spreading Factor*, **SF7 à SF12**) règle le compromis **portée ↔ débit**. SF élevé = portée plus grande, mais débit plus faible et temps d'émission plus long (donc plus d'énergie)."
+    },
+    {
+     "type": "code",
+     "sql": "SF7   ≈ 5 470 bit/s    jusqu'à 222 octets\nSF9   ≈ 1 760 bit/s    jusqu'à 115 octets\nSF12  ≈   250 bit/s    jusqu'à  51 octets",
+     "lang": "Réseau",
+     "title": "Débits LoRa (125 kHz) et taille maximale du message (Europe)"
+    },
+    {
+     "type": "choice",
+     "q": "Un capteur très loin de la passerelle doit-il utiliser SF7 ou SF12 ?",
+     "options": [
+      "SF12 : plus de portée, au prix du débit et de l'énergie",
+      "SF7",
+      "Cela ne change rien"
+     ],
+     "answer": 0,
+     "explain": "Plus le SF est élevé, plus la **portée** augmente, mais le message est plus **lent** et coûte plus d'énergie."
+    },
+    {
+     "type": "say",
+     "text": "Le **temps d'émission** d'un message de 17 octets (en-tête LoRaWAN compris) : environ **52 ms en SF7** et **1 319 ms en SF12** (calcul par la formule du fabricant Semtech)."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de fois SF12 est-il plus long que SF7 pour ce message ? (arrondi à l'entier : 1 319 ÷ 52)",
+     "hints": [
+      "1 319 ÷ 52 ≈ 25,4."
+     ],
+     "accept": [
+      "25 fois",
+      "26"
+     ],
+     "solution": "25",
+     "explain": "1 319 / 52 ≈ **25** : un message SF12 occupe la radio environ **25 fois plus longtemps**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Les bandes sans licence imposent souvent un **duty cycle** : par exemple **1 %** en Europe (règle ETSI à titre d'exemple ; la réglementation varie selon les pays). Avec 1 %, un objet n'a le droit d'émettre que **36 secondes par heure** (1 % de 3 600 s)."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de **secondes par heure** d'émission avec un duty cycle de 1 % ?",
+     "hints": [
+      "1 % de 3 600."
+     ],
+     "accept": [
+      "36 s",
+      "36 secondes"
+     ],
+     "solution": "36",
+     "explain": "3 600 × 0,01 = **36 s/heure**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "En SF12 (1,319 s par message), combien de messages au maximum par heure ? (36 ÷ 1,319, arrondi à l'entier inférieur)",
+     "hints": [
+      "36 ÷ 1,319 ≈ 27,3."
+     ],
+     "accept": [
+      "27 messages",
+      "27 par heure"
+     ],
+     "solution": "27",
+     "explain": "36 / 1,319 ≈ 27,3 → **27 messages/heure** au maximum (arrondi inférieur : on ne dépasse pas).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Un capteur veut envoyer **un message par minute** (60/heure) en SF12 sous 1 % de duty cycle. Est-ce possible ?",
+     "options": [
+      "Oui",
+      "Non : la limite est d'environ 27 messages/heure",
+      "Oui en classe C"
+     ],
+     "answer": 1,
+     "explain": "60 > 27 : on dépasse le duty cycle. Il faut **espacer les messages** ou utiliser un SF plus bas."
+    },
+    {
+     "type": "say",
+     "text": "Reste les **trois classes** d'appareils :"
+    },
+    {
+     "type": "code",
+     "sql": "Classe A  courtes fenêtres de réception APRÈS chaque émission     la plus économe · OBLIGATOIRE\nClasse B  fenêtres de réception PROGRAMMÉES (synchronisées)     intermédiaire\nClasse C  écoute quasi CONTINUE                                  la plus gourmande · commandes reçues vite",
+     "lang": "Réseau",
+     "title": "Classes LoRaWAN"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle classe pour une électrovanne qui doit recevoir des ordres rapidement (secteur disponible) ? (A, B ou C)",
+     "hints": [
+      "Elle écoute presque en permanence."
+     ],
+     "accept": [
+      "classe c",
+      "c"
+     ],
+     "solution": "C",
+     "explain": "**Classe C** : écoute continue, réaction rapide, mais consommation élevée (alimentation secteur recommandée).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel chiffrement protège les messages LoRaWAN ?",
+     "hints": [
+      "Clés distinctes pour le réseau et l'application."
+     ],
+     "accept": [
+      "aes 128",
+      "aes128"
+     ],
+     "solution": "AES-128",
+     "explain": "**AES-128**, avec des clés distinctes réseau/application.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "nbiot",
+   "title": "NB-IoT et la comparaison avec LoRaWAN",
+   "emoji": "📱",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**NB-IoT** (*Narrowband Internet of Things*) est l'autre grand LPWAN, mais **cellulaire** : il passe par le réseau d'un **opérateur**."
+    },
+    {
+     "type": "code",
+     "sql": "Normalisé par : 3GPP, Release 13 (2016)\nBande : 180 kHz (largeur d'un bloc de ressources LTE)\nSpectre : SOUS LICENCE (opérateur)\nDébit : environ 20 à 250 kbit/s\nÉconomie d'énergie : PSM et eDRX\nAuthentification : carte SIM",
+     "lang": "Réseau",
+     "title": "NB-IoT en chiffres"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle est la largeur de bande de NB-IoT ? (en kHz, le nombre seul)",
+     "hints": [
+      "Un bloc de ressources LTE."
+     ],
+     "accept": [
+      "180 khz",
+      "180khz"
+     ],
+     "solution": "180",
+     "explain": "**180 kHz**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi une bande très étroite est-elle utile ?",
+     "options": [
+      "Elle va plus vite",
+      "Elle capte moins de bruit : plus de portée et de pénétration, au prix d'un faible débit",
+      "Elle est gratuite"
+     ],
+     "answer": 1,
+     "explain": "Compromis **portée/débit** : bande étroite → peu de bruit → bonne portée, mais débit limité."
+    },
+    {
+     "type": "exercise",
+     "q": "Quels sont les deux mécanismes qui réduisent la consommation de NB-IoT ?",
+     "hints": [
+      "Deux sigles : un mode d'économie d'énergie et un cycle de réception étendu."
+     ],
+     "accept": [
+      "psm et edrx",
+      "edrx et psm",
+      "psm, edrx",
+      "psm/edrx"
+     ],
+     "solution": "PSM et eDRX",
+     "explain": "**PSM** (*Power Saving Mode*) et **eDRX** (*extended Discontinuous Reception*).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le **compromis** des modes de veille de NB-IoT ?",
+     "options": [
+      "Un objet en sommeil profond peut recevoir une commande avec retard",
+      "Aucun",
+      "Il perd ses données"
+     ],
+     "answer": 0,
+     "explain": "Énergie économisée **contre** délai de réception."
+    },
+    {
+     "type": "say",
+     "text": "Comparons enfin les deux LPWAN :"
+    },
+    {
+     "type": "code",
+     "sql": "                 LoRaWAN                NB-IoT\nSpectre          sans licence           sous licence (opérateur)\nRéseau           PRIVÉ possible         géré par l'opérateur\nDébit            ≈ 0,3 à 50 kbit/s      ≈ 20 à 250 kbit/s\nSécurité         AES-128                SIM / sécurité cellulaire\nInfrastructure   passerelles à installer pas de passerelle privée\nCoût             passerelles + serveur  modules + abonnement",
+     "lang": "Réseau",
+     "title": "LoRaWAN contre NB-IoT"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie a le débit le plus élevé ? (LoRaWAN ou NB-IoT)",
+     "hints": [
+      "20 à 250 kbit/s contre 0,3 à 50."
+     ],
+     "accept": [
+      "nb iot",
+      "nbiot"
+     ],
+     "solution": "NB-IoT",
+     "explain": "**NB-IoT** : 20 à 250 kbit/s contre 0,3 à 50 kbit/s.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pour une **exploitation agricole isolée**, que choisir ?",
+     "options": [
+      "NB-IoT d'office",
+      "Wi-Fi",
+      "LoRaWAN (réseau privé, pas de couverture cellulaire en zone rurale)"
+     ],
+     "answer": 2,
+     "explain": "En zone rurale la couverture NB-IoT est souvent **absente**."
+    },
+    {
+     "type": "choice",
+     "q": "« Mon téléphone capte la 4G ici, donc NB-IoT est disponible. » Cette affirmation est :",
+     "options": [
+      "Vraie",
+      "Vraie seulement en ville",
+      "Fausse : il faut une couverture NB-IoT compatible activée par l'opérateur"
+     ],
+     "answer": 2,
+     "explain": "La 4G d'un téléphone **ne prouve pas** qu'un réseau NB-IoT existe au même endroit."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle affirmation sur le coût est correcte ?",
+     "options": [
+      "Il faut évaluer le coût sur tout le cycle de vie : LoRaWAN privé = passerelles, serveurs, maintenance ; NB-IoT = modules et connectivité",
+      "Seul le prix du capteur compte",
+      "NB-IoT est toujours gratuit"
+     ],
+     "answer": 0,
+     "explain": "Le **coût complet** inclut infrastructure, abonnement, maintenance et remplacement des piles."
+    }
+   ]
+  },
+  {
+   "id": "decision",
+   "title": "La matrice de décision : 6 cas",
+   "emoji": "🧪",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Place à la pratique. Pour chaque cas, applique la **grille de 7 critères** et justifie. Rappelle-toi : une bonne réponse d'examen contient **la technologie + 2 raisons**."
+    },
+    {
+     "type": "code",
+     "sql": "Proximité, pile minuscule, téléphone      → BLE\nMaison/bâtiment, nombreux petits appareils    → Zigbee (maillage)\nHaut débit, secteur disponible               → Wi-Fi\nZone isolée, pile, petits messages           → LoRaWAN\nObjets dispersés, couverture opérateur       → NB-IoT\nPaiement, badge à quelques cm               → NFC",
+     "lang": "Réseau",
+     "title": "Aide-mémoire"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 1** : un bracelet de santé envoie le pouls à l'application du téléphone, sur une pile bouton."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie ?",
+     "hints": [
+      "Proximité et faible consommation."
+     ],
+     "accept": [
+      "bluetooth low energy",
+      "bluetooth"
+     ],
+     "solution": "BLE",
+     "explain": "**BLE** : le téléphone est à proximité, la consommation doit rester minime.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 2** : une caméra IP surveille un entrepôt, alimentée par le secteur."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie ?",
+     "hints": [
+      "Flux vidéo, secteur : pas de contrainte d'énergie."
+     ],
+     "accept": [
+      "wifi",
+      "wi fi",
+      "ethernet"
+     ],
+     "solution": "Wi-Fi",
+     "explain": "**Wi-Fi** (ou Ethernet) : le débit élevé est nécessaire, l'énergie n'est pas un problème.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 3** : 40 capteurs d'humidité sur 12 hectares, sans réseau ni électricité, pile de 5 ans, mesure toutes les 15 minutes."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie ?",
+     "hints": [
+      "Zone isolée, longue portée, pile."
+     ],
+     "accept": [
+      "lorawan"
+     ],
+     "solution": "LoRaWAN",
+     "explain": "**LoRaWAN** : longue portée, très faible consommation, réseau privé avec une passerelle sur site.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 4** : 10 000 compteurs d'eau dans une ville bien couverte par l'opérateur mobile, relevé quotidien."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie ?",
+     "hints": [
+      "Pas de passerelles privées à déployer."
+     ],
+     "accept": [
+      "nb iot",
+      "nbiot"
+     ],
+     "solution": "NB-IoT",
+     "explain": "**NB-IoT** : on utilise le réseau de l'opérateur, des milliers d'objets, relevés légers.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 5** : 25 ampoules et capteurs d'ouverture dans une maison, avec des murs épais."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technologie ?",
+     "hints": [
+      "Maillage pour franchir les obstacles."
+     ],
+     "accept": [
+      "zigbee (maillage)"
+     ],
+     "solution": "Zigbee",
+     "explain": "**Zigbee** : le maillage permet aux appareils de se relayer, faible consommation.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Cas 6** : contrôle d'un robot industriel avec des délais très stricts (temps réel)."
+    },
+    {
+     "type": "choice",
+     "q": "Un LPWAN (LoRaWAN ou NB-IoT) convient-il ?",
+     "options": [
+      "Oui, pour la longue portée",
+      "Non : faible débit et délais, il faut une autre technologie (filaire/5G)",
+      "Oui avec la classe A"
+     ],
+     "answer": 1,
+     "explain": "Les LPWAN conviennent à la **surveillance périodique et aux alertes**, pas au temps réel strict."
+    },
+    {
+     "type": "say",
+     "text": "Pour les évolutions à connaître : **Wi-Fi 6/6E/7**, **Bluetooth 5.x**, **Thread et Matter** (domotique interopérable), **IPv6** (adresses pour des milliards d'objets), **5G** (très faible latence, connexion massive : mMTC)."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel apport de l'IPv6 pour l'IoT ? (un mot : adresses ou débit)",
+     "hints": [
+      "Des milliards d'objets ont besoin d'être adressés."
+     ],
+     "accept": [
+      "adressage",
+      "les adresses"
+     ],
+     "solution": "adresses",
+     "explain": "IPv6 apporte des **adresses en nombre suffisant** pour des milliards d'objets.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "securite-radio",
+   "title": "Attaques radio et défi final",
+   "emoji": "🛡️",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Toutes ces technologies sont **sans fil** : n'importe qui à portée peut **écouter** ou **perturber**. Quatre attaques à connaître :"
+    },
+    {
+     "type": "code",
+     "sql": "Sniffing   écoute PASSIVE des communications\nJamming    BROUILLAGE du signal radio\nRejeu      renvoyer un message capturé (ex. « ouvrir la porte »)\nSpoofing   usurper l'identité d'un appareil ou d'un point d'accès",
+     "lang": "Réseau",
+     "title": "Les 4 attaques radio"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle l'écoute passive des communications ?",
+     "hints": [
+      "Elle ne modifie rien."
+     ],
+     "accept": [
+      "écoute passive",
+      "ecoute passive"
+     ],
+     "solution": "sniffing",
+     "explain": "Le **sniffing**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle le brouillage du signal radio ?",
+     "hints": [
+      "Rend un capteur muet."
+     ],
+     "accept": [
+      "brouillage"
+     ],
+     "solution": "jamming",
+     "explain": "Le **jamming**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Un attaquant capture « ouvrir la porte » et le renvoie plus tard. Quelle attaque ?",
+     "options": [
+      "Spoofing",
+      "Rejeu (replay)",
+      "Jamming"
+     ],
+     "answer": 1,
+     "explain": "**Rejeu** : le message est valide, mais ancien. Parade : compteur de trames / horodatage."
+    },
+    {
+     "type": "choice",
+     "q": "Un faux point d'accès Wi-Fi se fait passer pour le vrai. Quelle attaque ?",
+     "options": [
+      "Spoofing (usurpation)",
+      "Sniffing",
+      "Jamming"
+     ],
+     "answer": 0,
+     "explain": "**Spoofing** : usurper l'identité d'un appareil ou d'un point d'accès. Parade : authentification mutuelle."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle parade protège contre le sniffing ?",
+     "options": [
+      "Un pare-feu",
+      "Un câble plus long",
+      "Le chiffrement des communications"
+     ],
+     "answer": 2,
+     "explain": "Un message chiffré (AES-128 en LoRaWAN, WPA3 en Wi-Fi) reste illisible même s'il est capté."
+    },
+    {
+     "type": "say",
+     "text": "**Défi final.** Une université veut équiper son campus : (A) des badges d'accès aux salles, (B) des capteurs de qualité de l'air dans 15 bâtiments répartis sur 3 km, sur pile, une mesure par heure, (C) des caméras dans les couloirs. Choisis pour chaque besoin."
+    },
+    {
+     "type": "exercise",
+     "q": "Technologie pour les badges d'accès (A) ?",
+     "hints": [
+      "Quelques centimètres, contact."
+     ],
+     "accept": [
+      "rfid",
+      "nfc/rfid"
+     ],
+     "solution": "NFC",
+     "explain": "**NFC** (ou RFID) : contact à quelques centimètres, pas d'infrastructure.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Technologie pour les capteurs d'air répartis sur 3 km (B) ?",
+     "hints": [
+      "Pile, longue portée, petits messages."
+     ],
+     "accept": [
+      "lorawan"
+     ],
+     "solution": "LoRaWAN",
+     "explain": "**LoRaWAN** : portée de plusieurs km, pile, mesure horaire de quelques octets.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Technologie pour les caméras (C) ?",
+     "hints": [
+      "Vidéo : haut débit, secteur disponible."
+     ],
+     "accept": [
+      "wifi",
+      "ethernet"
+     ],
+     "solution": "Wi-Fi",
+     "explain": "**Wi-Fi** ou Ethernet (PoE) : la vidéo exige du débit.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pour les capteurs d'air, le **chiffrement** est assuré par…",
+     "options": [
+      "Rien",
+      "TLS sur le capteur uniquement",
+      "AES-128 de LoRaWAN, avec clés réseau et application distinctes"
+     ],
+     "answer": 2,
+     "explain": "Les messages LoRaWAN sont chiffrés en **AES-128**."
+    },
+    {
+     "type": "say",
+     "text": "Bravo 🎉 ! Tu sais maintenant **comparer, calculer et justifier** un choix de technologie réseau. La formation suivante, *Concevoir une solution IoT complète*, utilise ce réflexe à chaque étape."
+    }
+   ]
+  }
+ ]
+}

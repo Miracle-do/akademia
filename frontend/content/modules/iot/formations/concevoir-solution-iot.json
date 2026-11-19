@@ -1,6 +1,6 @@
 {
  "id": "concevoir-solution-iot",
- "order": 1,
+ "order": 2,
  "title": "Concevoir une solution IoT complète",
  "tagline": "Du besoin du client à la mise en production : réseau, architecture, messages, données, énergie, sécurité.",
  "emoji": "🏗️",
@@ -119,6 +119,11 @@
    "emoji": "📡",
    "minutes": 9,
    "steps": [
+    {
+     "type": "prereq",
+     "formation": "choisir-techno-reseau",
+     "why": "Cette leçon applique la grille des 7 critères et compare LoRaWAN, NB-IoT et Wi-Fi : révise-les si besoin."
+    },
     {
      "type": "say",
      "text": "Le réseau se choisit avec les **critères** du cours : **débit, consommation, portée, nombre d'appareils, coût, sécurité, interopérabilité**. On les confronte aux exigences de Kevin."
@@ -895,6 +900,12 @@
      "text": "Bravo 🎉 ! Tu sais maintenant conduire un projet IoT **de la phrase du client à la mise en production** : exigences chiffrées → réseau → architecture → messages → données → règles → énergie → sécurité. C'est exactement la démarche attendue dans une étude de cas d'examen."
     }
    ]
+  }
+ ],
+ "prerequisites": [
+  {
+   "formation": "choisir-techno-reseau",
+   "why": "Concevoir une solution complète commence par justifier le choix du réseau : si les critères LoRaWAN / NB-IoT / Wi-Fi sont flous, passe d'abord par cette formation."
   }
  ]
 }
