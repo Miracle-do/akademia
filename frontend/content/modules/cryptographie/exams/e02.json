@@ -1,0 +1,100 @@
+{
+ "n": 2,
+ "title": "Épreuve n° 2",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Première partie : Questions de cours",
+   "points": 6,
+   "intro": "Répondez de manière concise.",
+   "questions": [
+    {
+     "id": "e02p1q1",
+     "q": "Définissez confidentialité, intégrité, disponibilité et non-répudiation, en citant un mécanisme pour chacune.",
+     "a": "Confidentialité : seuls les autorisés lisent (chiffrement). Intégrité : pas de modification non détectée (hachage, MAC, signature). Disponibilité : service accessible (redondance, anti-DDoS). Non-répudiation : impossible de nier une action (signature numérique).",
+     "points": 2
+    },
+    {
+     "id": "e02p1q2",
+     "q": "Combien de clés faut-il pour que 20 personnes communiquent deux à deux en symétrique ? En asymétrique ?",
+     "a": "Symétrique : n(n−1)/2 = 20 × 19 / 2 = 190 clés. Asymétrique : 2n = 40 clés (une paire par personne).",
+     "points": 1.5
+    },
+    {
+     "id": "e02p1q3",
+     "q": "Décrivez le chiffrement hybride et l'enveloppe numérique (schéma).",
+     "a": "Le message est chiffré avec une clé de session symétrique (rapide) ; cette clé est chiffrée avec la clé publique du destinataire ; on envoie les deux. Le destinataire déchiffre la clé de session avec sa clé privée puis le message.",
+     "points": 1.5
+    },
+    {
+     "id": "e02p1q4",
+     "q": "Quelles propriétés doit avoir une fonction de hachage cryptographique ?",
+     "a": "Sortie de taille fixe, déterministe, sens unique (résistance à la préimage), résistance aux secondes préimages et aux collisions, effet d'avalanche.",
+     "points": 1
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Deuxième partie : Calculs",
+   "points": 8,
+   "intro": "Détaillez toutes les étapes.",
+   "questions": [
+    {
+     "id": "e02p2q1",
+     "q": "RSA : p = 5, q = 11, e = 3. Calculez n, φ(n), d ; chiffrez m = 8 et vérifiez par déchiffrement.",
+     "a": "n = 55 ; φ = 4 × 10 = 40 ; pgcd(3, 40) = 1 ; d = 27 (3 × 27 = 81 = 2 × 40 + 1). c = 8³ mod 55 = 512 mod 55 = 17. Déchiffrement : 17²⁷ mod 55 = 8 ✔.",
+     "points": 4
+    },
+    {
+     "id": "e02p2q2",
+     "q": "Diffie-Hellman : p = 11, g = 2, a = 5, b = 7. Calculez la clé commune.",
+     "a": "A = 2⁵ mod 11 = 10 ; B = 2⁷ mod 11 = 7 ; K = 7⁵ mod 11 = 10 (et 10⁷ mod 11 = 10 ✔).",
+     "points": 2
+    },
+    {
+     "id": "e02p2q3",
+     "q": "Résolvez par les restes chinois : x ≡ 2 (mod 3) et x ≡ 3 (mod 5).",
+     "a": "x ≡ 8 (mod 15) : 8 = 2×3+2 et 8 = 1×5+3. Solution unique modulo 15.",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Troisième partie : Hachage, MAC et signature",
+   "points": 3,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e02p3q1",
+     "q": "Expliquez pourquoi un haché seul ne protège pas l'authenticité d'un message, et comment HMAC y remédie.",
+     "a": "Un attaquant peut modifier le message et recalculer le haché, qui n'a pas de clé. HMAC mêle une clé secrète : HMAC = H((K⊕opad) ∥ H((K⊕ipad) ∥ M)), donc seul le détenteur de la clé peut produire un HMAC valide ; la double imbrication évite l'extension de longueur.",
+     "points": 1.5
+    },
+    {
+     "id": "e02p3q2",
+     "q": "Décrivez la création et la vérification d'une signature numérique.",
+     "a": "Création : calcul de l'empreinte h = H(M), puis signature de h avec la clé privée. Vérification : le destinataire recalcule H(M') et vérifie la signature avec la clé publique de l'émetteur ; si elles concordent, le document est intègre et authentique.",
+     "points": 1.5
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Quatrième partie : Cas pratique",
+   "points": 3,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e02p4q1",
+     "q": "Un site marchand stocke les mots de passe de ses clients hachés en MD5 sans sel. Quels risques ? Que proposez-vous ?",
+     "a": "Risques : tables arc-en-ciel et force brute très rapides ; hachés identiques révèlent les mots de passe identiques ; MD5 est cassé. Proposition : Argon2/bcrypt/scrypt avec sel aléatoire par utilisateur, éventuellement poivre, MFA, politique de mots de passe, imposer un changement.",
+     "points": 3
+    }
+   ]
+  }
+ ]
+}

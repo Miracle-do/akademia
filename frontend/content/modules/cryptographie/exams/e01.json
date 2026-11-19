@@ -1,0 +1,106 @@
+{
+ "n": 1,
+ "title": "Épreuve n° 1",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Première partie : Questions de cours",
+   "points": 6,
+   "intro": "Répondez de manière concise.",
+   "questions": [
+    {
+     "id": "e01p1q1",
+     "q": "Qu'est-ce que la cryptologie ? Distinguez cryptographie et cryptanalyse.",
+     "a": "La cryptologie est la science du secret. La cryptographie conçoit des procédés pour protéger l'information (chiffrement, signature, hachage) ; la cryptanalyse étudie comment les casser sans connaître la clé.",
+     "points": 1.5
+    },
+    {
+     "id": "e01p1q2",
+     "q": "Énoncez le principe de Kerckhoffs et expliquez pourquoi il est important.",
+     "a": "La sécurité d'un système doit reposer uniquement sur le secret de la clé et non sur celui de l'algorithme. Un algorithme public est soumis à l'examen de la communauté, donc plus fiable (cf. AES, choisi par concours public).",
+     "points": 1.5
+    },
+    {
+     "id": "e01p1q3",
+     "q": "Donnez les caractéristiques de DES et d'AES (taille de bloc, de clé, nombre de tours, structure).",
+     "a": "DES : bloc 64 bits, clé 56 bits effectifs (+8 de parité), 16 tours, réseau de Feistel, cassé par force brute. AES : bloc 128 bits, clés 128/192/256 bits, 10/12/14 tours, réseau substitution-permutation (SubBytes, ShiftRows, MixColumns, AddRoundKey).",
+     "points": 1.5
+    },
+    {
+     "id": "e01p1q4",
+     "q": "Pourquoi le mode ECB est-il à proscrire ? Quel mode recommandez-vous ?",
+     "a": "ECB chiffre chaque bloc indépendamment : deux blocs clairs identiques donnent deux chiffrés identiques, ce qui fuit la structure du message et permet de réordonner les blocs. On recommande un mode authentifié comme AES-GCM (ou CTR/CBC avec MAC).",
+     "points": 1.5
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Deuxième partie : Calculs",
+   "points": 8,
+   "intro": "Détaillez toutes les étapes.",
+   "questions": [
+    {
+     "id": "e01p2q1",
+     "q": "RSA : p = 7, q = 11, e = 7. Calculez n, φ(n), d. Chiffrez m = 5 puis déchiffrez le résultat.",
+     "a": "n = 77 ; φ(n) = 6 × 10 = 60 ; pgcd(7, 60) = 1 ; d = 7⁻¹ mod 60 = 43 (7 × 43 = 301 = 5 × 60 + 1). Chiffrement : c = 5⁷ mod 77 = 47. Déchiffrement : 47⁴³ mod 77 = 5 ✔.",
+     "points": 4
+    },
+    {
+     "id": "e01p2q2",
+     "q": "Diffie-Hellman : p = 23, g = 5, a = 4, b = 9. Calculez A, B et la clé commune.",
+     "a": "A = 5⁴ mod 23 = 4 ; B = 5⁹ mod 23 = 11 ; K = B^a = 11⁴ mod 23 = 13 ; vérification : A^b = 4⁹ mod 23 = 13 ✔.",
+     "points": 2
+    },
+    {
+     "id": "e01p2q3",
+     "q": "Calculez pgcd(84, 36), ppcm(84, 36), et l'inverse de 7 modulo 40.",
+     "a": "pgcd = 12 (84 = 2×36 + 12 ; 36 = 3×12) ; ppcm = 84 × 36 / 12 = 252 ; 7⁻¹ mod 40 = 23 car 7 × 23 = 161 = 4 × 40 + 1.",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Troisième partie : Chiffrements classiques et PKI",
+   "points": 3,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e01p3q1",
+     "q": "Chiffrez « ATTAQUE » avec Vigenère de clé CLE.",
+     "a": "Décalages (2, 11, 4) répétés : A+2=C, T+11=E, T+4=X, A+2=C, Q+11=B, U+4=Y, E+2=G → CEXCBYG.",
+     "points": 1
+    },
+    {
+     "id": "e01p3q2",
+     "q": "Qu'est-ce qu'un certificat à clé publique ? Illustrez la procédure de sa génération.",
+     "a": "Un certificat lie une clé publique à une identité et est signé par une AC (format X.509). Procédure : (1) le demandeur génère sa paire de clés ; (2) il envoie une CSR (clé publique + identité) ; (3) l'AE vérifie l'identité ; (4) l'AC construit et signe le certificat avec sa clé privée ; (5) le certificat est remis et publié ; il vit jusqu'à expiration ou révocation (CRL/OCSP).",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Quatrième partie : Commandes",
+   "points": 3,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e01p4q1",
+     "q": "Que fait la commande : echo -n \"ENEAM\" | openssl sha256 ?",
+     "a": "Elle calcule le haché SHA-256 de la chaîne ENEAM (sans retour à la ligne grâce à -n) et affiche une empreinte de 64 caractères hexadécimaux.",
+     "points": 1
+    },
+    {
+     "id": "e01p4q2",
+     "q": "A quoi sert nmap -sS 192.168.1.10 ? En quoi diffère-t-il de -sT ?",
+     "a": "Scan SYN (semi-ouvert) : envoie un SYN, lit la réponse SYN/ACK puis un RST sans terminer la connexion ; plus discret, nécessite les droits root. -sT effectue la connexion TCP complète (visible dans les journaux).",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}

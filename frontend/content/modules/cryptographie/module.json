@@ -1,0 +1,356 @@
+{
+  "id": "cryptographie",
+  "title": "Cryptographie et sécurité informatique",
+  "subtitle": "ENEAM · Licence 3 IG ARI/AIP",
+  "description": "Du chiffre de César à TLS et au post-quantique : mathématiques, chiffrement symétrique et asymétrique, hachage, signatures, PKI, sécurité des réseaux, cadre légal béninois et préparation aux examens.",
+  "emoji": "🔐",
+  "color": "#7C3AED",
+  "level": "Licence 3",
+  "estimatedHours": 22,
+  "parts": [
+    {
+      "id": "ch1",
+      "title": "Chapitre 1 · Sécurité de l'information et cadre légal",
+      "chapters": [
+        "1-1-securite-information",
+        "1-2-cadre-benin"
+      ]
+    },
+    {
+      "id": "ch2",
+      "title": "Chapitre 2 · Introduction à la cryptologie",
+      "chapters": [
+        "2-1-historique-definitions",
+        "2-2-cryptosystemes-kerckhoffs"
+      ]
+    },
+    {
+      "id": "ch3",
+      "title": "Chapitre 3 · Outils mathématiques",
+      "chapters": [
+        "3-1-fonctions-substitutions",
+        "3-2-arithmetique-modulaire",
+        "3-3-pgcd-euclide",
+        "3-4-fermat-euler-crt"
+      ]
+    },
+    {
+      "id": "ch4",
+      "title": "Chapitre 4 · Chiffrements classiques",
+      "chapters": [
+        "4-1-cesar-atbash-affine",
+        "4-2-vigenere-hill-vernam"
+      ]
+    },
+    {
+      "id": "ch5",
+      "title": "Chapitre 5 · Cryptographie symétrique moderne",
+      "chapters": [
+        "5-1-blocs-flux-des-aes",
+        "5-2-modes-attaques"
+      ]
+    },
+    {
+      "id": "ch6",
+      "title": "Chapitre 6 · Cryptographie asymétrique",
+      "chapters": [
+        "6-1-rsa",
+        "6-2-diffie-hellman-elgamal",
+        "6-3-ecc-hybride-enveloppe"
+      ]
+    },
+    {
+      "id": "ch7",
+      "title": "Chapitre 7 · Hachage, MAC et signature",
+      "chapters": [
+        "7-1-hachage",
+        "7-2-mac-hmac",
+        "7-3-mots-de-passe",
+        "7-4-signature-numerique"
+      ]
+    },
+    {
+      "id": "ch8",
+      "title": "Chapitre 8 · PKI et TLS",
+      "chapters": [
+        "8-1-pki-certificats",
+        "8-2-tls-ssl"
+      ]
+    },
+    {
+      "id": "ch9",
+      "title": "Chapitre 9 · Sécurisation des réseaux et des SI",
+      "chapters": [
+        "9-1-vpn-ipsec",
+        "9-2-wifi-wpa3",
+        "9-3-https-bases-donnees",
+        "9-4-attaques-defenses"
+      ]
+    },
+    {
+      "id": "ch10",
+      "title": "Chapitre 10 · Cryptographie moderne et éthique",
+      "chapters": [
+        "10-1-quantique-blockchain-zkp",
+        "10-2-anonymisation-ethique"
+      ]
+    },
+    {
+      "id": "ann",
+      "title": "Annexes · TP, méthode d'examen et glossaire",
+      "chapters": [
+        "a-tp-pratique",
+        "b-methode-corrige",
+        "c-glossaire"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "1-1-securite-information",
+      "number": "1.1",
+      "title": "Sécurité de l'information",
+      "summary": "Niveaux, menaces, triade CIA, AAA, modèles de Parker et McCumber.",
+      "minutes": 10,
+      "file": "1-1-securite-information.md"
+    },
+    {
+      "id": "1-2-cadre-benin",
+      "number": "1.2",
+      "title": "Cadre juridique et institutionnel au Bénin",
+      "summary": "Code du numérique, PSSIE, ANSSI, signature électronique, APDP.",
+      "minutes": 8,
+      "file": "1-2-cadre-benin.md"
+    },
+    {
+      "id": "2-1-historique-definitions",
+      "number": "2.1",
+      "title": "Historique et définitions",
+      "summary": "De Scytale à aujourd'hui ; cryptologie, cryptographie, cryptanalyse.",
+      "minutes": 8,
+      "file": "2-1-historique-definitions.md"
+    },
+    {
+      "id": "2-2-cryptosystemes-kerckhoffs",
+      "number": "2.2",
+      "title": "Cryptosystèmes et principe de Kerckhoffs",
+      "summary": "Quintuplet, symétrique vs asymétrique, attaques, chiffrement hybride.",
+      "minutes": 8,
+      "file": "2-2-cryptosystemes-kerckhoffs.md"
+    },
+    {
+      "id": "3-1-fonctions-substitutions",
+      "number": "3.1",
+      "title": "Fonctions et substitutions",
+      "summary": "Bases mathématiques : fonctions, bijections, permutations.",
+      "minutes": 8,
+      "file": "3-1-fonctions-substitutions.md"
+    },
+    {
+      "id": "3-2-arithmetique-modulaire",
+      "number": "3.2",
+      "title": "Arithmétique modulaire",
+      "summary": "Congruences, inverses modulaires, exponentiation rapide.",
+      "minutes": 8,
+      "file": "3-2-arithmetique-modulaire.md"
+    },
+    {
+      "id": "3-3-pgcd-euclide",
+      "number": "3.3",
+      "title": "PGCD et algorithme d'Euclide",
+      "summary": "PGCD, PPCM, Euclide étendu.",
+      "minutes": 8,
+      "file": "3-3-pgcd-euclide.md"
+    },
+    {
+      "id": "3-4-fermat-euler-crt",
+      "number": "3.4",
+      "title": "Fermat, Euler et restes chinois",
+      "summary": "Petit théorème de Fermat, indicatrice d'Euler, CRT, inverse de matrice mod 26.",
+      "minutes": 9,
+      "file": "3-4-fermat-euler-crt.md"
+    },
+    {
+      "id": "4-1-cesar-atbash-affine",
+      "number": "4.1",
+      "title": "César, Atbash et chiffre affine",
+      "summary": "Chiffrements par substitution monoalphabétique et analyse fréquentielle.",
+      "minutes": 9,
+      "file": "4-1-cesar-atbash-affine.md"
+    },
+    {
+      "id": "4-2-vigenere-hill-vernam",
+      "number": "4.2",
+      "title": "Vigenère, Hill et masque jetable",
+      "summary": "Polyalphabétique, matriciel, secret parfait de Shannon.",
+      "minutes": 10,
+      "file": "4-2-vigenere-hill-vernam.md"
+    },
+    {
+      "id": "5-1-blocs-flux-des-aes",
+      "number": "5.1",
+      "title": "Blocs, flux, DES et AES",
+      "summary": "Feistel, SPN, 3DES, AES : tours, clés, structure.",
+      "minutes": 9,
+      "file": "5-1-blocs-flux-des-aes.md"
+    },
+    {
+      "id": "5-2-modes-attaques",
+      "number": "5.2",
+      "title": "Modes opératoires et attaques",
+      "summary": "ECB, CBC, CTR, GCM, padding, bonnes pratiques.",
+      "minutes": 9,
+      "file": "5-2-modes-attaques.md"
+    },
+    {
+      "id": "6-1-rsa",
+      "number": "6.1",
+      "title": "RSA",
+      "summary": "Génération de clés, chiffrement, signature, tailles de clés.",
+      "minutes": 10,
+      "file": "6-1-rsa.md"
+    },
+    {
+      "id": "6-2-diffie-hellman-elgamal",
+      "number": "6.2",
+      "title": "Diffie-Hellman et ElGamal",
+      "summary": "Logarithme discret, échange de clés, MITM, PFS.",
+      "minutes": 8,
+      "file": "6-2-diffie-hellman-elgamal.md"
+    },
+    {
+      "id": "6-3-ecc-hybride-enveloppe",
+      "number": "6.3",
+      "title": "ECC, chiffrement hybride et enveloppe numérique",
+      "summary": "Courbes elliptiques, ECDH, enveloppe numérique.",
+      "minutes": 9,
+      "file": "6-3-ecc-hybride-enveloppe.md"
+    },
+    {
+      "id": "7-1-hachage",
+      "number": "7.1",
+      "title": "Fonctions de hachage",
+      "summary": "Propriétés, collisions, MD5, SHA, usages, commandes.",
+      "minutes": 9,
+      "file": "7-1-hachage.md"
+    },
+    {
+      "id": "7-2-mac-hmac",
+      "number": "7.2",
+      "title": "MAC et HMAC",
+      "summary": "Authentification de message, HMAC RFC 2104.",
+      "minutes": 10,
+      "file": "7-2-mac-hmac.md"
+    },
+    {
+      "id": "7-3-mots-de-passe",
+      "number": "7.3",
+      "title": "Stockage des mots de passe",
+      "summary": "Sel, poivre, rainbow tables, Argon2, bcrypt.",
+      "minutes": 8,
+      "file": "7-3-mots-de-passe.md"
+    },
+    {
+      "id": "7-4-signature-numerique",
+      "number": "7.4",
+      "title": "Signature numérique",
+      "summary": "Hacher puis signer, RSA-PSS, ECDSA, valeur légale.",
+      "minutes": 8,
+      "file": "7-4-signature-numerique.md"
+    },
+    {
+      "id": "8-1-pki-certificats",
+      "number": "8.1",
+      "title": "PKI et certificats X.509",
+      "summary": "Acteurs, génération, chaîne de confiance, révocation.",
+      "minutes": 12,
+      "file": "8-1-pki-certificats.md"
+    },
+    {
+      "id": "8-2-tls-ssl",
+      "number": "8.2",
+      "title": "SSL/TLS",
+      "summary": "Historique, sous-protocoles, handshake, TLS 1.3.",
+      "minutes": 8,
+      "file": "8-2-tls-ssl.md"
+    },
+    {
+      "id": "9-1-vpn-ipsec",
+      "number": "9.1",
+      "title": "VPN, IPsec et pare-feu",
+      "summary": "AH/ESP, modes, SSL VPN, limites des pare-feu, Zero Trust.",
+      "minutes": 7,
+      "file": "9-1-vpn-ipsec.md"
+    },
+    {
+      "id": "9-2-wifi-wpa3",
+      "number": "9.2",
+      "title": "Sécurité Wi-Fi : de WEP à WPA3",
+      "summary": "Évolution des protocoles, SAE, OWE.",
+      "minutes": 5,
+      "file": "9-2-wifi-wpa3.md"
+    },
+    {
+      "id": "9-3-https-bases-donnees",
+      "number": "9.3",
+      "title": "HTTPS et protection des bases de données",
+      "summary": "Migration HTTPS, niveaux de chiffrement, menaces.",
+      "minutes": 5,
+      "file": "9-3-https-bases-donnees.md"
+    },
+    {
+      "id": "9-4-attaques-defenses",
+      "number": "9.4",
+      "title": "Attaques et défenses",
+      "summary": "DoS, MITM, malwares, SQLi, XSS, nmap, stratégie NIST.",
+      "minutes": 10,
+      "file": "9-4-attaques-defenses.md"
+    },
+    {
+      "id": "10-1-quantique-blockchain-zkp",
+      "number": "10.1",
+      "title": "Quantique, homomorphe, ZKP et blockchain",
+      "summary": "Shor, Grover, PQC, chiffrement homomorphe, preuves ZK.",
+      "minutes": 7,
+      "file": "10-1-quantique-blockchain-zkp.md"
+    },
+    {
+      "id": "10-2-anonymisation-ethique",
+      "number": "10.2",
+      "title": "Anonymisation et éthique",
+      "summary": "Pseudonymisation, k-anonymat, critères CEPD.",
+      "minutes": 5,
+      "file": "10-2-anonymisation-ethique.md"
+    },
+    {
+      "id": "a-tp-pratique",
+      "number": "A",
+      "title": "Travaux pratiques",
+      "summary": "OpenSSL, GnuPG, SSH, nmap.",
+      "minutes": 15,
+      "file": "a-tp-pratique.md"
+    },
+    {
+      "id": "b-methode-corrige",
+      "number": "B",
+      "title": "Méthode d'examen et corrigé du rattrapage",
+      "summary": "Corrigé commenté du rattrapage 2022-23.",
+      "minutes": 8,
+      "file": "b-methode-corrige.md"
+    },
+    {
+      "id": "c-glossaire",
+      "number": "C",
+      "title": "Glossaire et corrections du cours",
+      "summary": "Termes clés et erreurs corrigées du support d'origine.",
+      "minutes": 5,
+      "file": "c-glossaire.md"
+    }
+  ],
+  "features": {
+    "quiz": true,
+    "blitz": true,
+    "exams": true,
+    "flashcards": true
+  }
+}

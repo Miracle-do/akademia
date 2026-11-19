@@ -1,0 +1,34 @@
+[
+ {
+  "n": 1,
+  "title": "Épreuve n° 1",
+  "scenario": "Théorie générale, RSA et Diffie-Hellman",
+  "cas": "Hachage, commandes et nmap",
+  "durationMinutes": 120,
+  "points": 20
+ },
+ {
+  "n": 2,
+  "title": "Épreuve n° 2",
+  "scenario": "Sécurité, MAC et signature",
+  "cas": "Mots de passe en e-commerce",
+  "durationMinutes": 120,
+  "points": 20
+ },
+ {
+  "n": 3,
+  "title": "Épreuve n° 3",
+  "scenario": "Cadre légal, TLS et PKI",
+  "cas": "Signature avec OpenSSL",
+  "durationMinutes": 120,
+  "points": 20
+ },
+ {
+  "n": 4,
+  "title": "Épreuve n° 4",
+  "scenario": "Menaces, quantique et attaques web",
+  "cas": "Anonymisation",
+  "durationMinutes": 120,
+  "points": 20
+ }
+]

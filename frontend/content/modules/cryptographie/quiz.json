@@ -1,0 +1,1682 @@
+[
+ {
+  "id": "11-q01",
+  "chapter": "1-1-securite-information",
+  "difficulty": 1,
+  "q": "Que signifie le sigle CIA en sécurité de l'information ?",
+  "options": [
+   "Confidentialité, Intégrité, Disponibilité",
+   "Contrôle, Identification, Authentification",
+   "Chiffrement, Intégrité, Accès",
+   "Confidentialité, Identité, Audit"
+  ],
+  "answer": 0,
+  "explain": "La triade CIA regroupe les trois propriétés fondamentales : confidentialité, intégrité, disponibilité."
+ },
+ {
+  "id": "11-q02",
+  "chapter": "1-1-securite-information",
+  "difficulty": 1,
+  "q": "Une attaque DoS vise principalement quelle propriété ?",
+  "options": [
+   "La confidentialité",
+   "La disponibilité",
+   "L'intégrité",
+   "La non-répudiation"
+  ],
+  "answer": 1,
+  "explain": "Le déni de service rend un service inaccessible : c'est une atteinte à la disponibilité."
+ },
+ {
+  "id": "11-q03",
+  "chapter": "1-1-securite-information",
+  "difficulty": 2,
+  "q": "Quelle est la différence entre une menace passive et une menace active ?",
+  "options": [
+   "La passive est interne, l'active est externe",
+   "La passive est involontaire, l'active est volontaire",
+   "La passive observe sans modifier ; l'active altère, fabrique ou interrompt",
+   "Il n'y en a pas, ce sont des synonymes"
+  ],
+  "answer": 2,
+  "explain": "L'écoute (interception) est passive ; modification, fabrication, interruption sont actives."
+ },
+ {
+  "id": "11-q04",
+  "chapter": "1-1-securite-information",
+  "difficulty": 2,
+  "q": "Que signifie AAA dans le contrôle d'accès ?",
+  "options": [
+   "Algorithme, Accès, Alerte",
+   "Authenticité, Anonymat, Archivage",
+   "Autorité, Annuaire, Accréditation",
+   "Authentification, Autorisation, Audit (traçabilité)"
+  ],
+  "answer": 3,
+  "explain": "AAA : prouver l'identité, accorder des droits, journaliser les actions."
+ },
+ {
+  "id": "11-q05",
+  "chapter": "1-1-securite-information",
+  "difficulty": 3,
+  "q": "Quelle propriété garantit qu'une personne ne peut pas nier avoir effectué une action ?",
+  "options": [
+   "La non-répudiation",
+   "La confidentialité",
+   "La disponibilité",
+   "L'anonymat"
+  ],
+  "answer": 0,
+  "explain": "La non-répudiation s'obtient notamment par la signature numérique."
+ },
+ {
+  "id": "11-q06",
+  "chapter": "1-1-securite-information",
+  "difficulty": 3,
+  "q": "Dans un système en série de composants de fiabilité 0,9 chacun, que devient la fiabilité globale avec 2 composants ?",
+  "options": [
+   "0,99",
+   "0,81",
+   "0,9",
+   "1,8"
+  ],
+  "answer": 1,
+  "explain": "En série, on multiplie : 0,9 × 0,9 = 0,81. En parallèle : 1 − 0,1² = 0,99."
+ },
+ {
+  "id": "12-q01",
+  "chapter": "1-2-cadre-benin",
+  "difficulty": 1,
+  "q": "Quel texte béninois constitue le Code du numérique ?",
+  "options": [
+   "La loi n° 2020-01",
+   "Le décret n° 2021-550",
+   "La loi n° 2017-20",
+   "La loi n° 2001-10"
+  ],
+  "answer": 2,
+  "explain": "Le Code du numérique est la loi 2017-20. Le décret 2021-550 porte sur la PSSIE."
+ },
+ {
+  "id": "12-q02",
+  "chapter": "1-2-cadre-benin",
+  "difficulty": 2,
+  "q": "Que désigne la PSSIE ?",
+  "options": [
+   "Une norme internationale ISO",
+   "Un protocole de chiffrement",
+   "Une autorité de certification",
+   "La Politique de sécurité des systèmes d'information de l'État"
+  ],
+  "answer": 3,
+  "explain": "La PSSIE fixe les règles de sécurité des SI de l'État (décret 2021-550)."
+ },
+ {
+  "id": "12-q03",
+  "chapter": "1-2-cadre-benin",
+  "difficulty": 1,
+  "q": "Quel est le rôle de l'APDP ?",
+  "options": [
+   "Protéger les données à caractère personnel",
+   "Délivrer les certificats SSL",
+   "Gérer les noms de domaine .bj",
+   "Vendre des services Cloud"
+  ],
+  "answer": 0,
+  "explain": "L'Autorité de protection des données personnelles contrôle les traitements de données personnelles."
+ },
+ {
+  "id": "12-q04",
+  "chapter": "1-2-cadre-benin",
+  "difficulty": 2,
+  "q": "Un horodatage électronique prouve…",
+  "options": [
+   "L'identité du signataire",
+   "L'existence d'une donnée à une date et heure précises",
+   "Le chiffrement du document",
+   "La suppression du document"
+  ],
+  "answer": 1,
+  "explain": "L'horodatage fixe la date ; la signature fixe l'auteur."
+ },
+ {
+  "id": "21-q01",
+  "chapter": "2-1-historique-definitions",
+  "difficulty": 1,
+  "q": "La cryptologie regroupe…",
+  "options": [
+   "Le chiffrement seulement",
+   "Le hachage et la compression",
+   "La cryptographie et la cryptanalyse",
+   "La stéganographie et le chiffrement"
+  ],
+  "answer": 2,
+  "explain": "Cryptologie = cryptographie (protéger) + cryptanalyse (casser)."
+ },
+ {
+  "id": "21-q02",
+  "chapter": "2-1-historique-definitions",
+  "difficulty": 1,
+  "q": "La cryptanalyse consiste à…",
+  "options": [
+   "Générer des clés",
+   "Signer des documents",
+   "Sauvegarder des données",
+   "Retrouver un message clair sans connaître la clé"
+  ],
+  "answer": 3,
+  "explain": "C'est l'étude des moyens de casser un procédé cryptographique."
+ },
+ {
+  "id": "21-q03",
+  "chapter": "2-1-historique-definitions",
+  "difficulty": 2,
+  "q": "Quel est l'objectif de la stéganographie ?",
+  "options": [
+   "Cacher l'existence même du message",
+   "Rendre le message illisible",
+   "Hacher le message",
+   "Signer le message"
+  ],
+  "answer": 0,
+  "explain": "Le chiffrement rend illisible ; la stéganographie dissimule l'existence du message."
+ },
+ {
+  "id": "22-q01",
+  "chapter": "2-2-cryptosystemes-kerckhoffs",
+  "difficulty": 1,
+  "q": "Selon le principe de Kerckhoffs, la sécurité d'un système doit reposer sur…",
+  "options": [
+   "Le secret de l'algorithme",
+   "Le secret de la clé seule",
+   "La complexité de l'algorithme",
+   "L'obscurité du protocole"
+  ],
+  "answer": 1,
+  "explain": "L'algorithme peut être public ; seule la clé est secrète."
+ },
+ {
+  "id": "22-q02",
+  "chapter": "2-2-cryptosystemes-kerckhoffs",
+  "difficulty": 2,
+  "q": "Combien de clés symétriques faut-il pour que n personnes communiquent deux à deux de façon sécurisée ?",
+  "options": [
+   "2n",
+   "n²",
+   "n(n−1)/2",
+   "n!"
+  ],
+  "answer": 2,
+  "explain": "Une clé par paire : n(n−1)/2. En asymétrique : 2n clés (une paire par personne)."
+ },
+ {
+  "id": "22-q03",
+  "chapter": "2-2-cryptosystemes-kerckhoffs",
+  "difficulty": 2,
+  "q": "Combien de clés faut-il pour 10 personnes en symétrique ?",
+  "options": [
+   "20",
+   "90",
+   "100",
+   "45"
+  ],
+  "answer": 3,
+  "explain": "10 × 9 / 2 = 45 clés."
+ },
+ {
+  "id": "22-q04",
+  "chapter": "2-2-cryptosystemes-kerckhoffs",
+  "difficulty": 2,
+  "q": "Une attaque à texte clair choisi signifie que l'attaquant…",
+  "options": [
+   "Peut faire chiffrer des messages de son choix",
+   "Connaît seulement les chiffrés",
+   "Connaît la clé",
+   "Ne peut qu'écouter"
+  ],
+  "answer": 0,
+  "explain": "Chosen-plaintext : il choisit les clairs et obtient les chiffrés."
+ },
+ {
+  "id": "22-q05",
+  "chapter": "2-2-cryptosystemes-kerckhoffs",
+  "difficulty": 3,
+  "q": "Pourquoi utilise-t-on un chiffrement hybride ?",
+  "options": [
+   "Parce que l'asymétrique est plus rapide",
+   "Allier la rapidité du symétrique et l'échange de clé du asymétrique",
+   "Pour éviter d'utiliser des clés",
+   "Pour supprimer la signature"
+  ],
+  "answer": 1,
+  "explain": "On chiffre les données en symétrique et la clé de session en asymétrique."
+ },
+ {
+  "id": "31-q01",
+  "chapter": "3-1-fonctions-substitutions",
+  "difficulty": 1,
+  "q": "Une fonction bijective est…",
+  "options": [
+   "Seulement injective",
+   "Seulement surjective",
+   "Injective et surjective",
+   "Ni l'une ni l'autre"
+  ],
+  "answer": 2,
+  "explain": "Elle admet une fonction réciproque : indispensable pour déchiffrer."
+ },
+ {
+  "id": "31-q02",
+  "chapter": "3-1-fonctions-substitutions",
+  "difficulty": 2,
+  "q": "Combien existe-t-il de permutations de l'alphabet de 26 lettres ?",
+  "options": [
+   "26²",
+   "2²⁶",
+   "26",
+   "26!"
+  ],
+  "answer": 3,
+  "explain": "26! ≈ 4 × 10²⁶ substitutions possibles."
+ },
+ {
+  "id": "32-q01",
+  "chapter": "3-2-arithmetique-modulaire",
+  "difficulty": 1,
+  "q": "Quel est le résultat de 17 mod 5 ?",
+  "options": [
+   "2",
+   "3",
+   "12",
+   "4"
+  ],
+  "answer": 0,
+  "explain": "17 = 3 × 5 + 2."
+ },
+ {
+  "id": "32-q02",
+  "chapter": "3-2-arithmetique-modulaire",
+  "difficulty": 2,
+  "q": "Quel est l'inverse de 3 modulo 7 ?",
+  "options": [
+   "4",
+   "5",
+   "3",
+   "2"
+  ],
+  "answer": 1,
+  "explain": "3 × 5 = 15 ≡ 1 (mod 7)."
+ },
+ {
+  "id": "32-q03",
+  "chapter": "3-2-arithmetique-modulaire",
+  "difficulty": 2,
+  "q": "Quel est le résultat de −3 mod 26 ?",
+  "options": [
+   "−3",
+   "3",
+   "23",
+   "29"
+  ],
+  "answer": 2,
+  "explain": "On ajoute 26 : −3 + 26 = 23."
+ },
+ {
+  "id": "32-q04",
+  "chapter": "3-2-arithmetique-modulaire",
+  "difficulty": 3,
+  "q": "Que vaut 2¹⁰ mod 11 ?",
+  "options": [
+   "10",
+   "2",
+   "1024",
+   "1"
+  ],
+  "answer": 3,
+  "explain": "D'après Fermat, 2¹⁰ ≡ 1 (mod 11) car 11 est premier."
+ },
+ {
+  "id": "33-q01",
+  "chapter": "3-3-pgcd-euclide",
+  "difficulty": 1,
+  "q": "Que vaut pgcd(48, 18) ?",
+  "options": [
+   "6",
+   "3",
+   "12",
+   "9"
+  ],
+  "answer": 0,
+  "explain": "48 = 2×18 + 12 ; 18 = 1×12 + 6 ; 12 = 2×6."
+ },
+ {
+  "id": "33-q02",
+  "chapter": "3-3-pgcd-euclide",
+  "difficulty": 2,
+  "q": "À quoi sert l'algorithme d'Euclide étendu ?",
+  "options": [
+   "Factoriser n",
+   "Calculer un inverse modulaire",
+   "Chiffrer en AES",
+   "Générer un nombre premier"
+  ],
+  "answer": 1,
+  "explain": "Il fournit les coefficients de Bézout : au + bn = 1 donne a⁻¹ mod n."
+ },
+ {
+  "id": "33-q03",
+  "chapter": "3-3-pgcd-euclide",
+  "difficulty": 2,
+  "q": "Quelle condition est nécessaire pour que a ait un inverse modulo n ?",
+  "options": [
+   "a est pair",
+   "a < n/2",
+   "pgcd(a, n) = 1",
+   "n est pair"
+  ],
+  "answer": 2,
+  "explain": "Seuls les éléments premiers avec n sont inversibles."
+ },
+ {
+  "id": "34-q01",
+  "chapter": "3-4-fermat-euler-crt",
+  "difficulty": 2,
+  "q": "Que vaut φ(15) (indicatrice d'Euler) ?",
+  "options": [
+   "14",
+   "15",
+   "4",
+   "8"
+  ],
+  "answer": 3,
+  "explain": "φ(15) = φ(3)φ(5) = 2 × 4 = 8."
+ },
+ {
+  "id": "34-q02",
+  "chapter": "3-4-fermat-euler-crt",
+  "difficulty": 2,
+  "q": "Le petit théorème de Fermat affirme que si p est premier et p ne divise pas a…",
+  "options": [
+   "aᵖ⁻¹ ≡ 1 (mod p)",
+   "aᵖ ≡ 1 (mod p)",
+   "aᵖ⁻¹ ≡ 0 (mod p)",
+   "a ≡ p (mod a)"
+  ],
+  "answer": 0,
+  "explain": "Cas particulier du théorème d'Euler."
+ },
+ {
+  "id": "34-q03",
+  "chapter": "3-4-fermat-euler-crt",
+  "difficulty": 3,
+  "q": "Le théorème des restes chinois sert à…",
+  "options": [
+   "Calculer un PGCD",
+   "Résoudre un système de congruences à modules premiers entre eux",
+   "Factoriser un entier",
+   "Inverser une matrice"
+  ],
+  "answer": 1,
+  "explain": "Il garantit une solution unique modulo le produit des modules."
+ },
+ {
+  "id": "41-q01",
+  "chapter": "4-1-cesar-atbash-affine",
+  "difficulty": 1,
+  "q": "Dans le chiffre de César de clé 3, A devient…",
+  "options": [
+   "C",
+   "X",
+   "D",
+   "B"
+  ],
+  "answer": 2,
+  "explain": "Décalage de 3 : A→D."
+ },
+ {
+  "id": "41-q02",
+  "chapter": "4-1-cesar-atbash-affine",
+  "difficulty": 1,
+  "q": "Combien de clés possibles pour le chiffre de César ?",
+  "options": [
+   "26!",
+   "312",
+   "2⁵⁶",
+   "25 (26 avec la clé nulle)"
+  ],
+  "answer": 3,
+  "explain": "Seulement 25 décalages utiles : force brute immédiate."
+ },
+ {
+  "id": "41-q03",
+  "chapter": "4-1-cesar-atbash-affine",
+  "difficulty": 2,
+  "q": "Combien de clés possède le chiffre affine sur 26 lettres ?",
+  "options": [
+   "312",
+   "26",
+   "676",
+   "25"
+  ],
+  "answer": 0,
+  "explain": "12 valeurs de a premières avec 26 × 26 valeurs de b = 312."
+ },
+ {
+  "id": "41-q04",
+  "chapter": "4-1-cesar-atbash-affine",
+  "difficulty": 2,
+  "q": "Dans le chiffre affine C = (aP + b) mod 26, a doit être…",
+  "options": [
+   "Pair",
+   "Premier avec 26",
+   "Inférieur à b",
+   "Un nombre premier supérieur à 26"
+  ],
+  "answer": 1,
+  "explain": "Sinon la fonction n'est pas bijective."
+ },
+ {
+  "id": "41-q05",
+  "chapter": "4-1-cesar-atbash-affine",
+  "difficulty": 1,
+  "q": "Quelle attaque casse une substitution monoalphabétique ?",
+  "options": [
+   "L'attaque par anniversaire",
+   "Le Meet-in-the-middle",
+   "L'analyse fréquentielle",
+   "Le SYN flood"
+  ],
+  "answer": 2,
+  "explain": "Les fréquences des lettres sont conservées."
+ },
+ {
+  "id": "42-q01",
+  "chapter": "4-2-vigenere-hill-vernam",
+  "difficulty": 1,
+  "q": "Quelle est la particularité du chiffre de Vigenère ?",
+  "options": [
+   "Il utilise une matrice",
+   "Il utilise un XOR",
+   "Il est asymétrique",
+   "Il est polyalphabétique : une lettre claire peut avoir plusieurs chiffrés"
+  ],
+  "answer": 3,
+  "explain": "La clé-mot répétée change le décalage."
+ },
+ {
+  "id": "42-q02",
+  "chapter": "4-2-vigenere-hill-vernam",
+  "difficulty": 3,
+  "q": "Que permet le test de Kasiski ?",
+  "options": [
+   "Retrouver la longueur de la clé de Vigenère",
+   "Retrouver la clé de César",
+   "Casser AES",
+   "Calculer un haché"
+  ],
+  "answer": 0,
+  "explain": "Les distances entre répétitions sont des multiples de la longueur de clé."
+ },
+ {
+  "id": "42-q03",
+  "chapter": "4-2-vigenere-hill-vernam",
+  "difficulty": 3,
+  "q": "Quelles sont les trois conditions du masque jetable ?",
+  "options": [
+   "Clé de 128 bits, rotation, XOR",
+   "Clé aléatoire, au moins aussi longue que le message, utilisée une seule fois",
+   "Clé publique, longue, secrète",
+   "Clé courte, réutilisable, aléatoire"
+  ],
+  "answer": 1,
+  "explain": "Théorème de Shannon : secret parfait à ces conditions."
+ },
+ {
+  "id": "42-q04",
+  "chapter": "4-2-vigenere-hill-vernam",
+  "difficulty": 2,
+  "q": "Pourquoi le chiffre de Hill est-il vulnérable à une attaque à clair connu ?",
+  "options": [
+   "Parce que la clé est courte",
+   "Parce qu'il est probabiliste",
+   "Parce qu'il est linéaire",
+   "Parce qu'il utilise un IV"
+  ],
+  "answer": 2,
+  "explain": "Avec n blocs connus on résout le système linéaire pour retrouver la clé."
+ },
+ {
+  "id": "51-q01",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 1,
+  "q": "Quelle est la taille de bloc d'AES ?",
+  "options": [
+   "64 bits",
+   "56 bits",
+   "256 bits",
+   "128 bits"
+  ],
+  "answer": 3,
+  "explain": "AES : bloc de 128 bits, clés 128/192/256."
+ },
+ {
+  "id": "51-q02",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 1,
+  "q": "Combien de tours comporte AES-128 ?",
+  "options": [
+   "10",
+   "12",
+   "14",
+   "16"
+  ],
+  "answer": 0,
+  "explain": "AES-128 : 10 tours ; AES-192 : 12 ; AES-256 : 14."
+ },
+ {
+  "id": "51-q03",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 1,
+  "q": "Quelle est la taille effective de la clé DES ?",
+  "options": [
+   "64 bits",
+   "56 bits",
+   "128 bits",
+   "168 bits"
+  ],
+  "answer": 1,
+  "explain": "64 bits dont 8 de parité."
+ },
+ {
+  "id": "51-q04",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 2,
+  "q": "Quelle structure utilise DES ?",
+  "options": [
+   "Un SPN à 10 tours",
+   "Une courbe elliptique",
+   "Un réseau de Feistel à 16 tours",
+   "Un XOR avec clé jetable"
+  ],
+  "answer": 2,
+  "explain": "AES, lui, est un réseau de substitution-permutation."
+ },
+ {
+  "id": "51-q05",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 2,
+  "q": "Quelle opération d'un tour d'AES est la seule non linéaire ?",
+  "options": [
+   "ShiftRows",
+   "MixColumns",
+   "AddRoundKey",
+   "SubBytes"
+  ],
+  "answer": 3,
+  "explain": "SubBytes (S-box) apporte la confusion non linéaire."
+ },
+ {
+  "id": "51-q06",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 2,
+  "q": "Pourquoi ne pas utiliser « 2DES » ?",
+  "options": [
+   "L'attaque meet-in-the-middle ramène l'effort à environ 2⁵⁷",
+   "Il est trop lent",
+   "Il n'existe pas de mode pour 2DES",
+   "La clé est de 224 bits"
+  ],
+  "answer": 0,
+  "explain": "D'où le 3DES (sécurité effective ≈ 112 bits)."
+ },
+ {
+  "id": "51-q07",
+  "chapter": "5-1-blocs-flux-des-aes",
+  "difficulty": 2,
+  "q": "Quel principe de Shannon vise à cacher le lien entre la clé et le chiffré ?",
+  "options": [
+   "La diffusion",
+   "La confusion",
+   "L'avalanche",
+   "La compression"
+  ],
+  "answer": 1,
+  "explain": "La diffusion répand l'influence de chaque bit du clair."
+ },
+ {
+  "id": "52-q01",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 1,
+  "q": "Quel mode opératoire est à proscrire ?",
+  "options": [
+   "CBC",
+   "CTR",
+   "ECB",
+   "GCM"
+  ],
+  "answer": 2,
+  "explain": "ECB est déterministe : blocs identiques → chiffrés identiques."
+ },
+ {
+  "id": "52-q02",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 2,
+  "q": "Quel mode offre confidentialité ET intégrité ?",
+  "options": [
+   "CBC",
+   "ECB",
+   "OFB",
+   "GCM"
+  ],
+  "answer": 3,
+  "explain": "GCM est un mode AEAD."
+ },
+ {
+  "id": "52-q03",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 2,
+  "q": "Quelles exigences pour l'IV en CBC ?",
+  "options": [
+   "Aléatoire (imprévisible), non secret",
+   "Secret et fixe",
+   "Toujours nul",
+   "Identique à la clé"
+  ],
+  "answer": 0,
+  "explain": "L'IV est transmis avec le chiffré."
+ },
+ {
+  "id": "52-q04",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 3,
+  "q": "Quelle est la règle d'or de CTR et GCM ?",
+  "options": [
+   "Toujours utiliser un IV nul",
+   "Ne jamais réutiliser un couple (clé, nonce)",
+   "Utiliser un bourrage PKCS#7",
+   "Chiffrer deux fois"
+  ],
+  "answer": 1,
+  "explain": "La réutilisation révèle le XOR des clairs."
+ },
+ {
+  "id": "52-q05",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 2,
+  "q": "Combien d'octets de bourrage PKCS#7 pour un dernier bloc de 13 octets (bloc de 16) ?",
+  "options": [
+   "13 octets",
+   "1 octet valant 01",
+   "3 octets valant 03",
+   "Aucun"
+  ],
+  "answer": 2,
+  "explain": "On ajoute n octets de valeur n."
+ },
+ {
+  "id": "52-q06",
+  "chapter": "5-2-modes-attaques",
+  "difficulty": 2,
+  "q": "Que faut-il utiliser pour dériver une clé depuis un mot de passe ?",
+  "options": [
+   "MD5",
+   "SHA-1 simple",
+   "ROT13",
+   "PBKDF2, scrypt ou Argon2"
+  ],
+  "answer": 3,
+  "explain": "Fonctions lentes avec sel."
+ },
+ {
+  "id": "61-q01",
+  "chapter": "6-1-rsa",
+  "difficulty": 1,
+  "q": "Quel problème difficile fonde la sécurité de RSA ?",
+  "options": [
+   "La factorisation de grands entiers",
+   "Le logarithme discret",
+   "La recherche exhaustive d'une clé de 128 bits",
+   "Le sac à dos"
+  ],
+  "answer": 0,
+  "explain": "Multiplier est facile, factoriser n = pq est difficile."
+ },
+ {
+  "id": "61-q02",
+  "chapter": "6-1-rsa",
+  "difficulty": 2,
+  "q": "Avec p = 11 et q = 13, que vaut φ(n) ?",
+  "options": [
+   "143",
+   "120",
+   "24",
+   "132"
+  ],
+  "answer": 1,
+  "explain": "φ = 10 × 12 = 120."
+ },
+ {
+  "id": "61-q03",
+  "chapter": "6-1-rsa",
+  "difficulty": 2,
+  "q": "Avec n = 143, e = 7, quelle est la clé privée d ?",
+  "options": [
+   "17",
+   "7",
+   "103",
+   "23"
+  ],
+  "answer": 2,
+  "explain": "7 × 103 = 721 = 6 × 120 + 1."
+ },
+ {
+  "id": "61-q04",
+  "chapter": "6-1-rsa",
+  "difficulty": 3,
+  "q": "Avec n = 143, e = 7, que vaut le chiffré de m = 9 ?",
+  "options": [
+   "63",
+   "9",
+   "81",
+   "48"
+  ],
+  "answer": 3,
+  "explain": "9⁷ mod 143 = 48."
+ },
+ {
+  "id": "61-q05",
+  "chapter": "6-1-rsa",
+  "difficulty": 2,
+  "q": "Quelle est la taille minimale actuelle recommandée pour une clé RSA ?",
+  "options": [
+   "2048 bits",
+   "512 bits",
+   "1024 bits",
+   "256 bits"
+  ],
+  "answer": 0,
+  "explain": "1024 est déconseillé ; 3072 pour 128 bits de sécurité."
+ },
+ {
+  "id": "61-q06",
+  "chapter": "6-1-rsa",
+  "difficulty": 3,
+  "q": "Pourquoi ne faut-il jamais utiliser le « RSA scolaire » ?",
+  "options": [
+   "Il est trop lent",
+   "Il est déterministe et malléable ; on utilise OAEP/PSS",
+   "Il n'est pas réversible",
+   "Il ne fonctionne qu'avec e = 3"
+  ],
+  "answer": 1,
+  "explain": "Le bourrage OAEP randomise le chiffrement."
+ },
+ {
+  "id": "62-q01",
+  "chapter": "6-2-diffie-hellman-elgamal",
+  "difficulty": 2,
+  "q": "Avec p = 23, g = 5, a = 6, que vaut A = gᵃ mod p ?",
+  "options": [
+   "5",
+   "6",
+   "8",
+   "19"
+  ],
+  "answer": 2,
+  "explain": "5⁶ = 15625 ≡ 8 (mod 23)."
+ },
+ {
+  "id": "62-q02",
+  "chapter": "6-2-diffie-hellman-elgamal",
+  "difficulty": 2,
+  "q": "Dans l'exemple p = 23, g = 5, a = 6, b = 15, quelle est la clé partagée ?",
+  "options": [
+   "8",
+   "19",
+   "15",
+   "2"
+  ],
+  "answer": 3,
+  "explain": "B = 19, K = 19⁶ mod 23 = 2 = 8¹⁵ mod 23."
+ },
+ {
+  "id": "62-q03",
+  "chapter": "6-2-diffie-hellman-elgamal",
+  "difficulty": 2,
+  "q": "Pourquoi Diffie-Hellman seul est-il vulnérable à l'homme du milieu ?",
+  "options": [
+   "Il n'authentifie pas les parties",
+   "Il utilise des clés trop courtes",
+   "Il est symétrique",
+   "Il révèle le secret a"
+  ],
+  "answer": 0,
+  "explain": "Il faut signer les valeurs échangées (certificats)."
+ },
+ {
+  "id": "62-q04",
+  "chapter": "6-2-diffie-hellman-elgamal",
+  "difficulty": 3,
+  "q": "Que garantit la confidentialité persistante (PFS) ?",
+  "options": [
+   "Que la clé ne change jamais",
+   "Un vol ultérieur de la clé privée ne permet pas de déchiffrer les anciennes sessions",
+   "Que les certificats n'expirent jamais",
+   "Que le MITM est impossible"
+  ],
+  "answer": 1,
+  "explain": "Grâce à des clés DH éphémères."
+ },
+ {
+  "id": "62-q05",
+  "chapter": "6-2-diffie-hellman-elgamal",
+  "difficulty": 2,
+  "q": "Le chiffré ElGamal est…",
+  "options": [
+   "De même taille que le clair et déterministe",
+   "Réservé à la signature",
+   "Deux fois plus long que le clair et probabiliste",
+   "Un simple XOR"
+  ],
+  "answer": 2,
+  "explain": "Couple (c₁, c₂) avec k aléatoire."
+ },
+ {
+  "id": "63-q01",
+  "chapter": "6-3-ecc-hybride-enveloppe",
+  "difficulty": 2,
+  "q": "Quel est l'intérêt principal de l'ECC ?",
+  "options": [
+   "Elle est immunisée contre les ordinateurs quantiques",
+   "Elle est symétrique",
+   "Elle ne nécessite pas de clé privée",
+   "Un même niveau de sécurité avec des clés beaucoup plus courtes"
+  ],
+  "answer": 3,
+  "explain": "ECC 256 bits ≈ RSA 3072 bits. Mais l'algorithme de Shor la casse."
+ },
+ {
+  "id": "63-q02",
+  "chapter": "6-3-ecc-hybride-enveloppe",
+  "difficulty": 2,
+  "q": "Que contient une enveloppe numérique ?",
+  "options": [
+   "Les données chiffrées en symétrique + la clé de session chiffrée avec la clé publique du destinataire",
+   "Les données chiffrées avec la clé privée de l'émetteur",
+   "Le haché du message seul",
+   "Deux clés privées"
+  ],
+  "answer": 0,
+  "explain": "Le destinataire déchiffre la clé de session avec sa clé privée."
+ },
+ {
+  "id": "63-q03",
+  "chapter": "6-3-ecc-hybride-enveloppe",
+  "difficulty": 3,
+  "q": "Les courbes elliptiques résistent-elles à un ordinateur quantique ?",
+  "options": [
+   "Oui, totalement",
+   "Non, l'algorithme de Shor résout aussi le log discret elliptique",
+   "Oui, à partir de 256 bits",
+   "Seulement ECDSA"
+  ],
+  "answer": 1,
+  "explain": "Correction du support de cours."
+ },
+ {
+  "id": "71-q01",
+  "chapter": "7-1-hachage",
+  "difficulty": 1,
+  "q": "Quelle est la taille de sortie de SHA-256 ?",
+  "options": [
+   "128 bits",
+   "160 bits",
+   "256 bits (64 caractères hexadécimaux)",
+   "512 bits"
+  ],
+  "answer": 2,
+  "explain": "Taille fixe quelle que soit l'entrée."
+ },
+ {
+  "id": "71-q02",
+  "chapter": "7-1-hachage",
+  "difficulty": 2,
+  "q": "Quelles propriétés doit avoir une fonction de hachage cryptographique ?",
+  "options": [
+   "Réversibilité, clé secrète, aléa",
+   "Chiffrement, compression, signature",
+   "Déterminisme inverse, clé publique",
+   "Sens unique, résistance aux collisions, effet d'avalanche"
+  ],
+  "answer": 3,
+  "explain": "Pas de clé et pas réversible."
+ },
+ {
+  "id": "71-q03",
+  "chapter": "7-1-hachage",
+  "difficulty": 2,
+  "q": "Que prédit le paradoxe des anniversaires ?",
+  "options": [
+   "Une collision sur n bits après environ 2^(n/2) essais",
+   "Une collision après 2ⁿ essais",
+   "L'inversion en 2^(n/2)",
+   "L'absence de collision"
+  ],
+  "answer": 0,
+  "explain": "Pour 128 bits (MD5) : ≈ 2⁶⁴."
+ },
+ {
+  "id": "71-q04",
+  "chapter": "7-1-hachage",
+  "difficulty": 1,
+  "q": "Quel algorithme de hachage est à proscrire pour la sécurité ?",
+  "options": [
+   "SHA-256",
+   "MD5",
+   "SHA-3",
+   "SHA-512"
+  ],
+  "answer": 1,
+  "explain": "MD5 et SHA-1 ont des collisions pratiques."
+ },
+ {
+  "id": "71-q05",
+  "chapter": "7-1-hachage",
+  "difficulty": 2,
+  "q": "Que fait la commande echo -n \"abc\" | openssl sha256 ?",
+  "options": [
+   "Chiffre abc en AES",
+   "Signe abc",
+   "Calcule le haché SHA-256 de la chaîne abc sans retour à la ligne",
+   "Génère une clé"
+  ],
+  "answer": 2,
+  "explain": "-n supprime le saut de ligne : le haché change sinon."
+ },
+ {
+  "id": "72-q01",
+  "chapter": "7-2-mac-hmac",
+  "difficulty": 1,
+  "q": "Que garantit un MAC ?",
+  "options": [
+   "La confidentialité",
+   "La non-répudiation",
+   "La disponibilité",
+   "L'intégrité et l'authenticité du message"
+  ],
+  "answer": 3,
+  "explain": "Clé secrète partagée : pas de non-répudiation."
+ },
+ {
+  "id": "72-q02",
+  "chapter": "7-2-mac-hmac",
+  "difficulty": 2,
+  "q": "Pourquoi H(clé ∥ message) est-il dangereux ?",
+  "options": [
+   "Attaque par extension de longueur sur Merkle-Damgård",
+   "Il est trop lent",
+   "Il révèle la clé directement",
+   "Il est réversible"
+  ],
+  "answer": 0,
+  "explain": "HMAC double le hachage pour s'en protéger."
+ },
+ {
+  "id": "72-q03",
+  "chapter": "7-2-mac-hmac",
+  "difficulty": 3,
+  "q": "Quelle est la formule de HMAC ?",
+  "options": [
+   "H(K ∥ M)",
+   "H((K⊕opad) ∥ H((K⊕ipad) ∥ M))",
+   "H(M) ⊕ K",
+   "E_K(H(M))"
+  ],
+  "answer": 1,
+  "explain": "ipad = 0x36 répété, opad = 0x5c répété."
+ },
+ {
+  "id": "72-q04",
+  "chapter": "7-2-mac-hmac",
+  "difficulty": 2,
+  "q": "Quelle clé secrète a-t-on avec -macopt hexkey:000102…1214 ?",
+  "options": [
+   "Une clé de 40 octets",
+   "Un mot de passe",
+   "Une clé de 20 octets donnée en hexadécimal",
+   "Une clé publique"
+  ],
+  "answer": 2,
+  "explain": "40 caractères hexadécimaux = 20 octets."
+ },
+ {
+  "id": "73-q01",
+  "chapter": "7-3-mots-de-passe",
+  "difficulty": 1,
+  "q": "À quoi sert le sel dans le stockage des mots de passe ?",
+  "options": [
+   "Chiffrer le mot de passe",
+   "Raccourcir le haché",
+   "Remplacer la clé",
+   "Éviter les attaques par tables précalculées et différencier les hachés identiques"
+  ],
+  "answer": 3,
+  "explain": "Le sel est aléatoire, unique par utilisateur, non secret."
+ },
+ {
+  "id": "73-q02",
+  "chapter": "7-3-mots-de-passe",
+  "difficulty": 2,
+  "q": "Quelle fonction est adaptée au stockage des mots de passe ?",
+  "options": [
+   "Argon2 / bcrypt / scrypt",
+   "MD5",
+   "SHA-1",
+   "CRC32"
+  ],
+  "answer": 0,
+  "explain": "Fonctions volontairement lentes."
+ },
+ {
+  "id": "73-q03",
+  "chapter": "7-3-mots-de-passe",
+  "difficulty": 3,
+  "q": "Qu'est-ce qu'une rainbow table ?",
+  "options": [
+   "Un algorithme de chiffrement",
+   "Une table précalculée de hachés pour inverser rapidement des mots de passe",
+   "Un type de certificat",
+   "Un protocole VPN"
+  ],
+  "answer": 1,
+  "explain": "Le sel la rend inutilisable."
+ },
+ {
+  "id": "74-q01",
+  "chapter": "7-4-signature-numerique",
+  "difficulty": 1,
+  "q": "Pour signer un document, on applique la clé…",
+  "options": [
+   "Publique du destinataire",
+   "Publique du signataire",
+   "Privée du signataire (sur l'empreinte)",
+   "Symétrique partagée"
+  ],
+  "answer": 2,
+  "explain": "La clé publique du signataire sert à vérifier."
+ },
+ {
+  "id": "74-q02",
+  "chapter": "7-4-signature-numerique",
+  "difficulty": 2,
+  "q": "Pourquoi signe-t-on l'empreinte plutôt que le document ?",
+  "options": [
+   "La signature est alors confidentielle",
+   "On ne peut pas signer sans hachage",
+   "C'est obligatoire légalement",
+   "C'est plus rapide et de taille fixe"
+  ],
+  "answer": 3,
+  "explain": "Et la collision-résistance protège contre la substitution."
+ },
+ {
+  "id": "74-q03",
+  "chapter": "7-4-signature-numerique",
+  "difficulty": 2,
+  "q": "Qu'apporte la signature en plus d'un MAC ?",
+  "options": [
+   "La non-répudiation",
+   "La confidentialité",
+   "La rapidité",
+   "Le chiffrement"
+  ],
+  "answer": 0,
+  "explain": "Seul le signataire détient la clé privée."
+ },
+ {
+  "id": "74-q04",
+  "chapter": "7-4-signature-numerique",
+  "difficulty": 3,
+  "q": "Quel est le risque avec ECDSA/DSA ?",
+  "options": [
+   "La signature est trop longue",
+   "Un nonce réutilisé ou prévisible révèle la clé privée",
+   "Il n'est pas standardisé",
+   "Il faut une clé symétrique"
+  ],
+  "answer": 1,
+  "explain": "Cas de la PlayStation 3."
+ },
+ {
+  "id": "81-q01",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 1,
+  "q": "Que lie un certificat numérique ?",
+  "options": [
+   "Une clé privée à un mot de passe",
+   "Un haché à un fichier",
+   "Une clé publique à une identité",
+   "Une IP à un MAC"
+  ],
+  "answer": 2,
+  "explain": "Signé par une autorité de certification."
+ },
+ {
+  "id": "81-q02",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 1,
+  "q": "Quel est le rôle d'une autorité d'enregistrement (AE) ?",
+  "options": [
+   "Signer les certificats",
+   "Publier les CRL uniquement",
+   "Chiffrer les données",
+   "Vérifier l'identité du demandeur"
+  ],
+  "answer": 3,
+  "explain": "L'AC signe, l'AE vérifie l'identité."
+ },
+ {
+  "id": "81-q03",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 2,
+  "q": "Quel est le format standard des certificats à clé publique ?",
+  "options": [
+   "X.509",
+   "PGP",
+   "PKCS#1 uniquement",
+   "IEEE 802.11"
+  ],
+  "answer": 0,
+  "explain": "Norme UIT."
+ },
+ {
+  "id": "81-q04",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 2,
+  "q": "Que contient une CSR ?",
+  "options": [
+   "La clé privée du serveur",
+   "La clé publique et l'identité du demandeur, signées par sa clé privée",
+   "Le certificat de l'AC",
+   "Une liste de révocation"
+  ],
+  "answer": 1,
+  "explain": "La clé privée ne quitte jamais son propriétaire."
+ },
+ {
+  "id": "81-q05",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 2,
+  "q": "Quelle différence entre CRL et OCSP ?",
+  "options": [
+   "Aucune",
+   "OCSP est une liste, CRL est une requête",
+   "CRL : liste signée périodique ; OCSP : interrogation en ligne d'un certificat",
+   "CRL chiffre, OCSP signe"
+  ],
+  "answer": 2,
+  "explain": "OCSP stapling limite l'atteinte à la vie privée."
+ },
+ {
+  "id": "81-q06",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 3,
+  "q": "Quel champ vérifie un navigateur pour le nom d'un site ?",
+  "options": [
+   "Serial Number",
+   "Not After",
+   "Issuer",
+   "Subject Alternative Name (SAN)"
+  ],
+  "answer": 3,
+  "explain": "Le domaine visité doit figurer dans le SAN."
+ },
+ {
+  "id": "81-q07",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 2,
+  "q": "Quel modèle de confiance utilise le web de confiance (PGP) ?",
+  "options": [
+   "Anarchique",
+   "Monopoliste",
+   "Hiérarchique",
+   "Oligarchique"
+  ],
+  "answer": 0,
+  "explain": "Chacun choisit en qui il a confiance."
+ },
+ {
+  "id": "81-q08",
+  "chapter": "8-1-pki-certificats",
+  "difficulty": 3,
+  "q": "Que signifie l'erreur « unable to get local issuer certificate » ?",
+  "options": [
+   "Le certificat est expiré",
+   "L'AC émettrice n'est pas dans le magasin de confiance",
+   "Le nom ne correspond pas",
+   "La clé est trop courte"
+  ],
+  "answer": 1,
+  "explain": "Typique d'un certificat auto-signé."
+ },
+ {
+  "id": "82-q01",
+  "chapter": "8-2-tls-ssl",
+  "difficulty": 1,
+  "q": "Entre quelles couches se situe TLS ?",
+  "options": [
+   "Physique et liaison",
+   "Réseau et transport",
+   "Transport (TCP) et application",
+   "Application et présentation uniquement"
+  ],
+  "answer": 2,
+  "explain": "HTTP + TLS = HTTPS."
+ },
+ {
+  "id": "82-q02",
+  "chapter": "8-2-tls-ssl",
+  "difficulty": 2,
+  "q": "Combien d'octets fait le pre-master secret en TLS 1.2 ?",
+  "options": [
+   "16 octets",
+   "32 octets",
+   "128 octets",
+   "48 octets"
+  ],
+  "answer": 3,
+  "explain": "Il sert à dériver le master secret."
+ },
+ {
+  "id": "82-q03",
+  "chapter": "8-2-tls-ssl",
+  "difficulty": 2,
+  "q": "Que garantit TLS 1.3 par rapport à TLS 1.2 RSA ?",
+  "options": [
+   "Confidentialité persistante obligatoire (ECDHE)",
+   "Le retour à SSL 3.0",
+   "L'usage de RC4",
+   "La compression"
+  ],
+  "answer": 0,
+  "explain": "Les anciennes sessions restent protégées."
+ },
+ {
+  "id": "82-q04",
+  "chapter": "8-2-tls-ssl",
+  "difficulty": 3,
+  "q": "Dans TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, que fait RSA ?",
+  "options": [
+   "Chiffre les données",
+   "Authentifie le serveur (signature)",
+   "Échange la clé",
+   "Hache les messages"
+  ],
+  "answer": 1,
+  "explain": "ECDHE échange la clé, AES-GCM chiffre."
+ },
+ {
+  "id": "82-q05",
+  "chapter": "8-2-tls-ssl",
+  "difficulty": 1,
+  "q": "Quelle version de SSL/TLS est recommandée aujourd'hui ?",
+  "options": [
+   "SSL 2.0",
+   "SSL 3.0",
+   "TLS 1.3",
+   "TLS 1.0"
+  ],
+  "answer": 2,
+  "explain": "TLS 1.2 minimum."
+ },
+ {
+  "id": "91-q01",
+  "chapter": "9-1-vpn-ipsec",
+  "difficulty": 2,
+  "q": "Quel protocole IPsec chiffre les données ?",
+  "options": [
+   "AH",
+   "IKE uniquement",
+   "ARP",
+   "ESP"
+  ],
+  "answer": 3,
+  "explain": "AH n'assure qu'intégrité et authentification."
+ },
+ {
+  "id": "91-q02",
+  "chapter": "9-1-vpn-ipsec",
+  "difficulty": 2,
+  "q": "En mode tunnel d'IPsec…",
+  "options": [
+   "Le paquet IP d'origine est entièrement encapsulé",
+   "Seule la charge utile est protégée",
+   "Seul AH est utilisable",
+   "Aucun nouvel en-tête n'est ajouté"
+  ],
+  "answer": 0,
+  "explain": "Mode utilisé entre passerelles."
+ },
+ {
+  "id": "91-q03",
+  "chapter": "9-1-vpn-ipsec",
+  "difficulty": 2,
+  "q": "Quelle est une limite d'un pare-feu ?",
+  "options": [
+   "Il bloque tout le trafic légitime",
+   "Il ne protège pas contre les menaces internes",
+   "Il chiffre les paquets",
+   "Il remplace l'antivirus"
+  ],
+  "answer": 1,
+  "explain": "Il ne voit pas non plus les attaques via ports ouverts."
+ },
+ {
+  "id": "91-q04",
+  "chapter": "9-1-vpn-ipsec",
+  "difficulty": 2,
+  "q": "Que signifie Zero Trust ?",
+  "options": [
+   "Faire confiance au réseau interne",
+   "Désactiver l'authentification",
+   "Ne jamais faire confiance, toujours vérifier",
+   "Chiffrer uniquement le périmètre"
+  ],
+  "answer": 2,
+  "explain": "MFA, moindre privilège, micro-segmentation."
+ },
+ {
+  "id": "92-q01",
+  "chapter": "9-2-wifi-wpa3",
+  "difficulty": 1,
+  "q": "Quel protocole Wi-Fi est cassé en quelques minutes ?",
+  "options": [
+   "WPA2",
+   "WPA3",
+   "802.1X",
+   "WEP"
+  ],
+  "answer": 3,
+  "explain": "IV de 24 bits et RC4."
+ },
+ {
+  "id": "92-q02",
+  "chapter": "9-2-wifi-wpa3",
+  "difficulty": 2,
+  "q": "Quel mécanisme WPA3 remplace la PSK de WPA2 ?",
+  "options": [
+   "SAE (Dragonfly)",
+   "TKIP",
+   "WEP",
+   "CCMP"
+  ],
+  "answer": 0,
+  "explain": "Pas d'attaque par dictionnaire hors ligne."
+ },
+ {
+  "id": "92-q03",
+  "chapter": "9-2-wifi-wpa3",
+  "difficulty": 3,
+  "q": "À quoi sert OWE ?",
+  "options": [
+   "Authentifier avec RADIUS",
+   "Chiffrer un réseau Wi-Fi ouvert sans mot de passe",
+   "Remplacer AES",
+   "Désactiver le WPS"
+  ],
+  "answer": 1,
+  "explain": "Opportunistic Wireless Encryption."
+ },
+ {
+  "id": "93-q01",
+  "chapter": "9-3-https-bases-donnees",
+  "difficulty": 2,
+  "q": "Que protège le chiffrement TDE d'une base de données ?",
+  "options": [
+   "Le trafic réseau",
+   "Les mots de passe applicatifs",
+   "Les fichiers de données et sauvegardes (au repos)",
+   "Les requêtes SQL"
+  ],
+  "answer": 2,
+  "explain": "Il ne protège pas contre un administrateur autorisé."
+ },
+ {
+  "id": "93-q02",
+  "chapter": "9-3-https-bases-donnees",
+  "difficulty": 2,
+  "q": "Quelle mesure force l'usage de HTTPS par le navigateur ?",
+  "options": [
+   "CORS",
+   "CSRF",
+   "DNSSEC",
+   "HSTS"
+  ],
+  "answer": 3,
+  "explain": "HTTP Strict Transport Security."
+ },
+ {
+  "id": "94-q01",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 1,
+  "q": "Quel est l'effet d'un SYN flood ?",
+  "options": [
+   "Saturer un serveur de connexions TCP non terminées",
+   "Voler des mots de passe",
+   "Chiffrer des fichiers",
+   "Casser du WPA2"
+  ],
+  "answer": 0,
+  "explain": "Attaque DoS protocolaire."
+ },
+ {
+  "id": "94-q02",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Comment fonctionne l'ARP spoofing ?",
+  "options": [
+   "En chiffrant le trafic",
+   "En associant l'adresse MAC de l'attaquant à l'IP de la passerelle",
+   "En injectant du SQL",
+   "En saturant la bande passante"
+  ],
+  "answer": 1,
+  "explain": "Il permet un MITM sur le réseau local."
+ },
+ {
+  "id": "94-q03",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Quelles sont les phases d'un virus ?",
+  "options": [
+   "Scan, exploit, pivot, exfiltration",
+   "Reconnaissance, armement, livraison, installation",
+   "Dormante, propagation, déclenchement, action",
+   "Chiffrement, rançon, paiement, déchiffrement"
+  ],
+  "answer": 2,
+  "explain": "Réponse du cours."
+ },
+ {
+  "id": "94-q04",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Quelle parade est la plus efficace contre un ransomware ?",
+  "options": [
+   "Payer la rançon",
+   "Un fond d'écran",
+   "Un pare-feu seul",
+   "Des sauvegardes hors ligne testées"
+  ],
+  "answer": 3,
+  "explain": "Le paiement ne garantit rien."
+ },
+ {
+  "id": "94-q05",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Quelle est la parade principale contre l'injection SQL ?",
+  "options": [
+   "Les requêtes paramétrées",
+   "Un pare-feu réseau",
+   "Le chiffrement TLS",
+   "Un antivirus"
+  ],
+  "answer": 0,
+  "explain": "On sépare le code SQL des données."
+ },
+ {
+  "id": "94-q06",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Quel test manuel révèle une possible faille XSS ?",
+  "options": [
+   "Saisir une apostrophe pour voir une erreur SQL",
+   "Saisir <script>alert(1)</script> et vérifier s'il s'exécute",
+   "Envoyer un ping",
+   "Scanner avec -sS"
+  ],
+  "answer": 1,
+  "explain": "L'apostrophe teste la SQLi."
+ },
+ {
+  "id": "94-q07",
+  "chapter": "9-4-attaques-defenses",
+  "difficulty": 2,
+  "q": "Quelle différence entre nmap -sT et -sS ?",
+  "options": [
+   "-sT utilise UDP",
+   "-sS est un scan applicatif",
+   "-sT établit la connexion TCP complète ; -sS est semi-ouvert (SYN)",
+   "Aucune"
+  ],
+  "answer": 2,
+  "explain": "-sS exige les droits root."
+ },
+ {
+  "id": "101-q01",
+  "chapter": "10-1-quantique-blockchain-zkp",
+  "difficulty": 2,
+  "q": "Quel algorithme quantique casse RSA ?",
+  "options": [
+   "L'algorithme de Grover",
+   "L'algorithme de Dijkstra",
+   "L'algorithme d'Euclide",
+   "L'algorithme de Shor"
+  ],
+  "answer": 3,
+  "explain": "Grover divise seulement par 2 la sécurité symétrique."
+ },
+ {
+  "id": "101-q02",
+  "chapter": "10-1-quantique-blockchain-zkp",
+  "difficulty": 3,
+  "q": "Quelle clé AES résiste le mieux à Grover ?",
+  "options": [
+   "AES-256",
+   "AES-64",
+   "AES-128 suffit sans réserve",
+   "DES"
+  ],
+  "answer": 0,
+  "explain": "Grover : 2¹²⁸ opérations pour AES-256."
+ },
+ {
+  "id": "101-q03",
+  "chapter": "10-1-quantique-blockchain-zkp",
+  "difficulty": 2,
+  "q": "Le chiffrement homomorphe permet de…",
+  "options": [
+   "Chiffrer plus vite",
+   "Calculer sur des données chiffrées sans les déchiffrer",
+   "Signer sans clé",
+   "Hacher en sens inverse"
+  ],
+  "answer": 1,
+  "explain": "Exemple : RSA scolaire est multiplicativement homomorphe."
+ },
+ {
+  "id": "101-q04",
+  "chapter": "10-1-quantique-blockchain-zkp",
+  "difficulty": 2,
+  "q": "Que prouve une preuve à divulgation nulle ?",
+  "options": [
+   "Qu'un fichier est intact",
+   "Qu'une clé est assez longue",
+   "Qu'on connaît un secret sans le révéler",
+   "Qu'un certificat est valide"
+  ],
+  "answer": 2,
+  "explain": "Complétude, robustesse, zéro-connaissance."
+ },
+ {
+  "id": "101-q05",
+  "chapter": "10-1-quantique-blockchain-zkp",
+  "difficulty": 2,
+  "q": "Qu'est-ce qui chaîne les blocs d'une blockchain ?",
+  "options": [
+   "Un certificat X.509",
+   "Un mot de passe",
+   "Une clé AES",
+   "Le haché du bloc précédent"
+  ],
+  "answer": 3,
+  "explain": "Modifier un bloc invalide tous les suivants."
+ },
+ {
+  "id": "102-q01",
+  "chapter": "10-2-anonymisation-ethique",
+  "difficulty": 2,
+  "q": "Quelle différence entre pseudonymisation et anonymisation ?",
+  "options": [
+   "La pseudonymisation est réversible ; l'anonymisation ne l'est pas",
+   "Aucune",
+   "L'anonymisation est réversible",
+   "La pseudonymisation supprime les données"
+  ],
+  "answer": 0,
+  "explain": "Les données pseudonymisées restent personnelles."
+ },
+ {
+  "id": "102-q02",
+  "chapter": "10-2-anonymisation-ethique",
+  "difficulty": 3,
+  "q": "Que garantit le k-anonymat ?",
+  "options": [
+   "Aucun attribut n'est publié",
+   "Chaque combinaison de quasi-identifiants est partagée par au moins k personnes",
+   "Les valeurs sont chiffrées",
+   "Les données sont sans bruit"
+  ],
+  "answer": 1,
+  "explain": "Limite : l'homogénéité des valeurs sensibles."
+ },
+ {
+  "id": "102-q03",
+  "chapter": "10-2-anonymisation-ethique",
+  "difficulty": 3,
+  "q": "Quels critères du CEPD valident l'anonymisation ?",
+  "options": [
+   "Chiffrement, hachage, signature",
+   "Authenticité, intégrité, disponibilité",
+   "Pas d'individualisation, de corrélation ni d'inférence",
+   "Sel, poivre, itérations"
+  ],
+  "answer": 2,
+  "explain": "Trois critères."
+ },
+ {
+  "id": "B-q01",
+  "chapter": "b-methode-corrige",
+  "difficulty": 1,
+  "q": "Quelle commande calcule un HMAC avec OpenSSL ?",
+  "options": [
+   "openssl enc -aes-256-cbc",
+   "openssl genpkey",
+   "openssl x509 -text",
+   "openssl mac -digest SHA256 -macopt hexkey:… -in fichier HMAC"
+  ],
+  "answer": 3,
+  "explain": "La clé est fournie en hexadécimal."
+ }
+]

@@ -1,0 +1,602 @@
+[
+ {
+  "id": "c001",
+  "front": "Cryptologie",
+  "back": "Science du secret : cryptographie (protéger) + cryptanalyse (casser).",
+  "tag": "Définition"
+ },
+ {
+  "id": "c002",
+  "front": "Cryptographie",
+  "back": "Techniques pour protéger l'information (chiffrement, signature, hachage).",
+  "tag": "Définition"
+ },
+ {
+  "id": "c003",
+  "front": "Principe de Kerckhoffs",
+  "back": "La sécurité repose uniquement sur le secret de la clé, pas de l'algorithme.",
+  "tag": "Définition"
+ },
+ {
+  "id": "c004",
+  "front": "Triade CIA",
+  "back": "Confidentialité, Intégrité, Disponibilité.",
+  "tag": "Définition"
+ },
+ {
+  "id": "c005",
+  "front": "AAA",
+  "back": "Authentification, Autorisation, Audit (traçabilité).",
+  "tag": "Définition"
+ },
+ {
+  "id": "c006",
+  "front": "Non-répudiation",
+  "back": "Impossibilité de nier avoir effectué une action (signature numérique).",
+  "tag": "Définition"
+ },
+ {
+  "id": "c007",
+  "front": "Cryptosystème",
+  "back": "Quintuplet (M, C, K, E, D) avec d_k(e_k(m)) = m.",
+  "tag": "Définition"
+ },
+ {
+  "id": "c008",
+  "front": "Chiffrement hybride",
+  "back": "Données chiffrées en symétrique, clé de session chiffrée en asymétrique.",
+  "tag": "Définition"
+ },
+ {
+  "id": "c009",
+  "front": "Enveloppe numérique",
+  "back": "Message chiffré en AES + clé AES chiffrée avec la clé publique du destinataire.",
+  "tag": "Définition"
+ },
+ {
+  "id": "c010",
+  "front": "Nombre de clés symétriques pour n personnes",
+  "back": "n(n−1)/2 (contre 2n clés en asymétrique).",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c011",
+  "front": "Clés de César",
+  "back": "25 décalages utiles.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c012",
+  "front": "Clés du chiffre affine",
+  "back": "312 = 12 × 26.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c013",
+  "front": "Bloc et clé de DES",
+  "back": "Bloc 64 bits, clé 56 bits (+8 de parité), 16 tours, Feistel.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c014",
+  "front": "AES : bloc, clés, tours",
+  "back": "Bloc 128 bits ; clés 128/192/256 ; 10/12/14 tours ; SPN.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c015",
+  "front": "Les 4 opérations d'un tour AES",
+  "back": "SubBytes, ShiftRows, MixColumns, AddRoundKey.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c016",
+  "front": "Taille de sortie de SHA-256",
+  "back": "256 bits (64 caractères hexadécimaux).",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c017",
+  "front": "Taille de sortie MD5 / SHA-1",
+  "back": "128 bits / 160 bits (tous deux cassés).",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c018",
+  "front": "Taille minimale RSA",
+  "back": "2048 bits ; 3072 pour 128 bits de sécurité.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c019",
+  "front": "Pre-master secret TLS 1.2",
+  "back": "48 octets.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c020",
+  "front": "ipad / opad de HMAC",
+  "back": "0x36 / 0x5c répétés.",
+  "tag": "Chiffres"
+ },
+ {
+  "id": "c021",
+  "front": "Congruence",
+  "back": "a ≡ b (mod n) ssi n divise a − b.",
+  "tag": "Maths"
+ },
+ {
+  "id": "c022",
+  "front": "Inverse modulaire",
+  "back": "a⁻¹ existe ssi pgcd(a, n) = 1 ; calcul par Euclide étendu.",
+  "tag": "Maths"
+ },
+ {
+  "id": "c023",
+  "front": "Petit théorème de Fermat",
+  "back": "p premier, p ∤ a ⇒ aᵖ⁻¹ ≡ 1 (mod p).",
+  "tag": "Maths"
+ },
+ {
+  "id": "c024",
+  "front": "Indicatrice d'Euler",
+  "back": "φ(n) = nombre d'entiers de 1 à n premiers avec n ; φ(pq) = (p−1)(q−1).",
+  "tag": "Maths"
+ },
+ {
+  "id": "c025",
+  "front": "Théorème d'Euler",
+  "back": "pgcd(a, n) = 1 ⇒ a^φ(n) ≡ 1 (mod n).",
+  "tag": "Maths"
+ },
+ {
+  "id": "c026",
+  "front": "Restes chinois",
+  "back": "Système de congruences à modules premiers entre eux : solution unique modulo le produit.",
+  "tag": "Maths"
+ },
+ {
+  "id": "c027",
+  "front": "Exponentiation rapide",
+  "back": "Carrés successifs : calcul de aᵉ mod n en O(log e) multiplications.",
+  "tag": "Maths"
+ },
+ {
+  "id": "c028",
+  "front": "Chiffre de César",
+  "back": "C = (P + k) mod 26.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c029",
+  "front": "Chiffre affine",
+  "back": "C = (aP + b) mod 26, pgcd(a, 26) = 1.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c030",
+  "front": "Atbash",
+  "back": "Substitution inversant l'alphabet (A↔Z).",
+  "tag": "Classique"
+ },
+ {
+  "id": "c031",
+  "front": "Vigenère",
+  "back": "Polyalphabétique ; cassé par Kasiski et l'indice de coïncidence.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c032",
+  "front": "Chiffre de Hill",
+  "back": "C = K·P mod 26 ; linéaire, vulnérable au clair connu.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c033",
+  "front": "Masque jetable (Vernam)",
+  "back": "C = P ⊕ K ; secret parfait si clé aléatoire, aussi longue que le message, à usage unique.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c034",
+  "front": "Analyse fréquentielle",
+  "back": "Attaque des substitutions monoalphabétiques via les fréquences des lettres.",
+  "tag": "Classique"
+ },
+ {
+  "id": "c035",
+  "front": "Réseau de Feistel",
+  "back": "L' = R ; R' = L ⊕ F(R, K) ; inversible quelle que soit F.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c036",
+  "front": "Confusion et diffusion",
+  "back": "Shannon : confusion = relation clé/chiffré complexe ; diffusion = étaler l'influence du clair.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c037",
+  "front": "3DES",
+  "back": "E-D-E avec 2 ou 3 clés ; sécurité effective ≈ 112 bits ; déprécié.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c038",
+  "front": "Mode ECB",
+  "back": "Blocs chiffrés indépendamment : déterministe, à proscrire.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c039",
+  "front": "Mode CBC",
+  "back": "Cᵢ = E(Pᵢ ⊕ Cᵢ₋₁) ; IV aléatoire.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c040",
+  "front": "Mode CTR",
+  "back": "Chiffre un compteur pour produire un flux ; nonce jamais réutilisé.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c041",
+  "front": "Mode GCM",
+  "back": "CTR + authentification (AEAD) : confidentialité et intégrité.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c042",
+  "front": "Padding PKCS#7",
+  "back": "Ajoute n octets de valeur n.",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c043",
+  "front": "Chiffrement par flux",
+  "back": "Flux pseudo-aléatoire XORé avec le message (ChaCha20, RC4).",
+  "tag": "Symétrique"
+ },
+ {
+  "id": "c044",
+  "front": "RSA : clés",
+  "back": "n = pq ; φ = (p−1)(q−1) ; e·d ≡ 1 (mod φ) ; public (e, n), privé (d, n).",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c045",
+  "front": "RSA : chiffrement",
+  "back": "c = mᵉ mod n ; m = cᵈ mod n.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c046",
+  "front": "RSA 11, 13, e = 7",
+  "back": "n = 143 ; φ = 120 ; d = 103 ; m = 9 → c = 48.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c047",
+  "front": "Diffie-Hellman",
+  "back": "A = gᵃ mod p, B = gᵇ mod p ; K = gᵃᵇ mod p ; ne protège pas du MITM.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c048",
+  "front": "DH p = 23, g = 5, a = 6, b = 15",
+  "back": "A = 8, B = 19, K = 2.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c049",
+  "front": "ElGamal",
+  "back": "c₁ = gᵏ, c₂ = m·hᵏ ; chiffré 2× plus long, probabiliste.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c050",
+  "front": "PFS",
+  "back": "Confidentialité persistante : clés DH éphémères.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c051",
+  "front": "ECC",
+  "back": "Courbes elliptiques : clés courtes (256 bits ≈ RSA 3072) ; cassée par Shor.",
+  "tag": "Asymétrique"
+ },
+ {
+  "id": "c052",
+  "front": "Propriétés d'un haché",
+  "back": "Sens unique, résistance aux collisions, effet d'avalanche, taille fixe.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c053",
+  "front": "Paradoxe des anniversaires",
+  "back": "Collision après ≈ 2^(n/2) essais.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c054",
+  "front": "MAC",
+  "back": "Code d'authentification à clé secrète partagée : intégrité + authenticité.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c055",
+  "front": "HMAC",
+  "back": "H((K⊕opad) ∥ H((K⊕ipad) ∥ M)) — RFC 2104.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c056",
+  "front": "Attaque par extension de longueur",
+  "back": "Vise H(K ∥ M) pour MD5/SHA-1/SHA-2 ; évitée par HMAC.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c057",
+  "front": "Sel (salt)",
+  "back": "Valeur aléatoire par utilisateur, non secrète, ajoutée avant hachage.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c058",
+  "front": "Poivre (pepper)",
+  "back": "Secret global stocké hors base de données.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c059",
+  "front": "Fonctions pour mots de passe",
+  "back": "PBKDF2, bcrypt, scrypt, Argon2 (lentes).",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c060",
+  "front": "Signature numérique",
+  "back": "Hacher le document puis appliquer la clé privée à l'empreinte ; vérifiée avec la clé publique.",
+  "tag": "Hachage"
+ },
+ {
+  "id": "c061",
+  "front": "PKI",
+  "back": "Infrastructure de gestion de clés : gère le cycle de vie des certificats.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c062",
+  "front": "AC (CA)",
+  "back": "Autorité de certification : signe les certificats.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c063",
+  "front": "AE (RA)",
+  "back": "Autorité d'enregistrement : vérifie l'identité du demandeur.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c064",
+  "front": "Autorité de validation",
+  "back": "Vérifie la validité d'un certificat (OCSP).",
+  "tag": "PKI"
+ },
+ {
+  "id": "c065",
+  "front": "X.509",
+  "back": "Norme de format des certificats (UIT, 1988).",
+  "tag": "PKI"
+ },
+ {
+  "id": "c066",
+  "front": "CSR",
+  "back": "Demande de signature de certificat : clé publique + identité.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c067",
+  "front": "CRL",
+  "back": "Liste signée des certificats révoqués.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c068",
+  "front": "OCSP",
+  "back": "Protocole de statut de révocation en ligne ; le stapling évite la fuite de vie privée.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c069",
+  "front": "SAN",
+  "back": "Subject Alternative Name : noms de domaine couverts par le certificat.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c070",
+  "front": "Chaîne de confiance",
+  "back": "Certificat serveur → AC intermédiaire → AC racine du magasin de confiance.",
+  "tag": "PKI"
+ },
+ {
+  "id": "c071",
+  "front": "Modèles de confiance",
+  "back": "Monopoliste, délégation, oligarchique (web), anarchique (PGP).",
+  "tag": "PKI"
+ },
+ {
+  "id": "c072",
+  "front": "Sous-protocoles TLS",
+  "back": "Handshake, Change Cipher Spec, Alert, Record.",
+  "tag": "TLS"
+ },
+ {
+  "id": "c073",
+  "front": "TLS 1.3",
+  "back": "1 aller-retour, ECDHE obligatoire, AEAD seulement, plus d'algorithmes faibles.",
+  "tag": "TLS"
+ },
+ {
+  "id": "c074",
+  "front": "HSTS",
+  "back": "Force le navigateur à n'utiliser que HTTPS.",
+  "tag": "TLS"
+ },
+ {
+  "id": "c075",
+  "front": "IPsec AH / ESP",
+  "back": "AH : intégrité + authentification ; ESP : + chiffrement.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c076",
+  "front": "IPsec transport / tunnel",
+  "back": "Transport : en-tête IP conservé ; tunnel : paquet entièrement encapsulé.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c077",
+  "front": "Pare-feu stateful",
+  "back": "Suit l'état des connexions TCP.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c078",
+  "front": "Zero Trust",
+  "back": "Ne jamais faire confiance, toujours vérifier : MFA, moindre privilège, micro-segmentation.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c079",
+  "front": "WEP",
+  "back": "RC4 + IV 24 bits : cassé.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c080",
+  "front": "WPA3",
+  "back": "SAE (Dragonfly), OWE, PMF, mode 192 bits.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "c081",
+  "front": "DoS / DDoS",
+  "back": "Saturation d'un service (DDoS : botnet) — atteinte à la disponibilité.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c082",
+  "front": "SYN flood",
+  "back": "Connexions TCP non terminées qui saturent le serveur.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c083",
+  "front": "ARP spoofing",
+  "back": "Fausses réponses ARP pour s'interposer (MITM) sur le LAN.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c084",
+  "front": "Phases d'un virus",
+  "back": "Dormante, propagation, déclenchement, action.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c085",
+  "front": "Ransomware",
+  "back": "Chiffre les fichiers et exige une rançon ; parade : sauvegardes hors ligne.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c086",
+  "front": "Injection SQL",
+  "back": "Saisie interprétée comme du SQL ; parade : requêtes paramétrées.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c087",
+  "front": "XSS",
+  "back": "Injection de script exécuté dans le navigateur d'autrui ; parade : échappement, CSP.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c088",
+  "front": "nmap -sT / -sS",
+  "back": "-sT : connexion TCP complète ; -sS : scan SYN semi-ouvert (root).",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c089",
+  "front": "Stratégie NIST CSF",
+  "back": "Identifier, Protéger, Détecter, Répondre, Récupérer.",
+  "tag": "Attaques"
+ },
+ {
+  "id": "c090",
+  "front": "Algorithme de Shor",
+  "back": "Factorisation et log discret en temps polynomial : casse RSA, DH, ECC.",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c091",
+  "front": "Algorithme de Grover",
+  "back": "Recherche en √N : divise par 2 la sécurité symétrique ; AES-256 suffit.",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c092",
+  "front": "Post-quantique NIST",
+  "back": "ML-KEM (échange de clé), ML-DSA et SLH-DSA (signature).",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c093",
+  "front": "Chiffrement homomorphe",
+  "back": "Calcul sur des données chiffrées sans les déchiffrer.",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c094",
+  "front": "Preuve à divulgation nulle",
+  "back": "Prouver qu'on connaît un secret sans le révéler.",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c095",
+  "front": "Blockchain",
+  "back": "Registre distribué dont les blocs sont chaînés par hachage.",
+  "tag": "Moderne"
+ },
+ {
+  "id": "c096",
+  "front": "Pseudonymisation vs anonymisation",
+  "back": "Réversible (donnée personnelle) vs irréversible (hors loi).",
+  "tag": "Données"
+ },
+ {
+  "id": "c097",
+  "front": "k-anonymat",
+  "back": "Chaque combinaison de quasi-identifiants partagée par au moins k personnes.",
+  "tag": "Données"
+ },
+ {
+  "id": "c098",
+  "front": "Critères CEPD",
+  "back": "Pas d'individualisation, de corrélation ni d'inférence.",
+  "tag": "Données"
+ },
+ {
+  "id": "c099",
+  "front": "Code du numérique",
+  "back": "Loi n° 2017-20 ; PSSIE : décret 2021-550.",
+  "tag": "Bénin"
+ },
+ {
+  "id": "c100",
+  "front": "APDP",
+  "back": "Autorité de protection des données personnelles.",
+  "tag": "Bénin"
+ }
+]

@@ -1,0 +1,106 @@
+{
+ "n": 4,
+ "title": "Épreuve n° 4",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Première partie : Questions de cours",
+   "points": 6,
+   "intro": "Répondez de manière concise.",
+   "questions": [
+    {
+     "id": "e04p1q1",
+     "q": "Qu'est-ce qu'un virus ? Donnez ses phases.",
+     "a": "Programme malveillant qui se réplique en s'attachant à un hôte. Phases : dormante, propagation, déclenchement, action.",
+     "points": 1.5
+    },
+    {
+     "id": "e04p1q2",
+     "q": "Donnez 4 limites d'un pare-feu.",
+     "a": "Ne protège pas des menaces internes ; ne contrôle pas le trafic qui le contourne (Wi-Fi, USB) ; ne voit pas le contenu chiffré/malveillant (sauf NGFW) ; inefficace contre les attaques applicatives sur ports ouverts (SQLi, XSS) ; dépend de sa configuration.",
+     "points": 1.5
+    },
+    {
+     "id": "e04p1q3",
+     "q": "Énoncez les 5 fonctions de la stratégie de sécurisation des données (cadre NIST CSF).",
+     "a": "Identifier, Protéger, Détecter, Répondre, Récupérer.",
+     "points": 1.5
+    },
+    {
+     "id": "e04p1q4",
+     "q": "Qu'est-ce que l'architecture Zero Trust ? Pourquoi est-elle nécessaire ?",
+     "a": "Principe « ne jamais faire confiance, toujours vérifier » : MFA, moindre privilège, micro-segmentation, vérification continue. Nécessaire car le périmètre n'existe plus (cloud, télétravail, menaces internes).",
+     "points": 1.5
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Deuxième partie : Menaces quantiques et nouvelles techniques",
+   "points": 6,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e04p2q1",
+     "q": "Quelles sont les menaces de l'ordinateur quantique sur la cryptographie ? Quelles parades ?",
+     "a": "Shor casse RSA, Diffie-Hellman, ElGamal et ECC (factorisation et log discret) ; Grover divise par 2 la sécurité des clés symétriques et des hachés. Parades : AES-256, SHA-384/512, cryptographie post-quantique (ML-KEM, ML-DSA, SLH-DSA), migration hybride.",
+     "points": 2
+    },
+    {
+     "id": "e04p2q2",
+     "q": "Quels sont les avantages du chiffrement homomorphe par rapport au chiffrement à clé publique ? Deux applications.",
+     "a": "Il permet de calculer sur les données chiffrées sans les déchiffrer (confidentialité pendant le traitement). Applications : analyses statistiques de dossiers médicaux dans le cloud ; vote électronique ; analyse financière externalisée.",
+     "points": 2
+    },
+    {
+     "id": "e04p2q3",
+     "q": "Qu'est-ce qu'une preuve à divulgation nulle de connaissance ? Donnez un usage.",
+     "a": "Protocole prouvant la connaissance d'un secret sans le révéler (complétude, robustesse, zéro-connaissance). Usage : authentification sans transmettre de mot de passe, preuve d'âge, blockchains (zk-SNARK).",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Troisième partie : Attaques web",
+   "points": 5,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e04p3q1",
+     "q": "Qu'est-ce qu'une faille XSS ? Comment la détecter manuellement ?",
+     "a": "Injection de script dans une page vue par d'autres utilisateurs (réfléchi, stocké, DOM). Test : saisir <script>alert(1)</script> ou \"><img src=x onerror=alert(1)> dans les champs et vérifier s'il s'exécute ou s'affiche tel quel. Parades : échappement, CSP, cookies HttpOnly.",
+     "points": 2.5
+    },
+    {
+     "id": "e04p3q2",
+     "q": "Qu'est-ce qu'une injection SQL ? Comment la détecter manuellement ?",
+     "a": "La saisie est concaténée dans une requête et interprétée comme du SQL. Test : saisir ' pour provoquer une erreur, ' OR '1'='1, comparer 1 AND 1=1 et 1 AND 1=2. Parade : requêtes paramétrées, moindre privilège.",
+     "points": 2.5
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Quatrième partie : Anonymisation",
+   "points": 3,
+   "intro": "Répondez de manière concise et justifiée.",
+   "questions": [
+    {
+     "id": "e04p4q1",
+     "q": "Distinguez pseudonymisation et anonymisation. Citez deux techniques d'anonymisation.",
+     "a": "Pseudonymisation : réversible (table de correspondance), les données restent personnelles. Anonymisation : irréversible, hors du champ de la loi. Techniques : bruit, permutation, généralisation, k-anonymat.",
+     "points": 1.5
+    },
+    {
+     "id": "e04p4q2",
+     "q": "Quels sont les trois critères du CEPD ?",
+     "a": "Impossibilité d'individualiser, de corréler et d'inférer.",
+     "points": 1.5
+    }
+   ]
+  }
+ ]
+}
