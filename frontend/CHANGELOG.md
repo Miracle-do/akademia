@@ -5,6 +5,9 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+### Nouveautés
+- IoT : formation « Sécurité IoT » (8 leçons).
+
 ## [1.0.0] — 2026-11-20
 
 Première version numérotée : état de la plateforme au 20 novembre 2026.

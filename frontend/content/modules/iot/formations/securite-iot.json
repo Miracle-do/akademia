@@ -1,0 +1,1112 @@
+{
+ "id": "securite-iot",
+ "order": 3,
+ "title": "Sécurité IoT : attaquer pour mieux défendre",
+ "tagline": "Surface d'attaque, Mirai, identités, chiffrement, mises à jour, réseau et droit béninois.",
+ "emoji": "🛡️",
+ "color": "#DC2626",
+ "level": "Intermédiaire",
+ "minutes": 85,
+ "pitch": [
+  "Bonjour ! Aujourd'hui : **« Sécurité IoT »** 🛡️.",
+  "Un objet connecté piraté, c'est une caméra qui espionne, une vanne qui s'ouvre, ou un maillon d'un **botnet** comme Mirai qui a fait tomber une partie d'Internet en 2016.",
+  "Tu apprends à **cartographier la surface d'attaque** couche par couche, à calculer la puissance d'un botnet et la solidité d'un mot de passe, à choisir **l'authentification** et le **chiffrement** adaptés à de petits objets, à sécuriser **mises à jour** et **réseau**, puis à respecter la **loi béninoise** sur les données personnelles. Un **audit express** final te fait appliquer tout cela.",
+  "Chaque leçon est interactive : indices, corrections et calculs vérifiés."
+ ],
+ "benefits": [
+  "Identifier les risques par couche (perception, réseau, traitement, application)",
+  "Comprendre Mirai, les botnets et le DDoS, avec les calculs associés",
+  "Choisir authentification, chiffrement et mises à jour signées adaptés aux objets",
+  "Appliquer le Code du numérique béninois et auditer un déploiement réel"
+ ],
+ "lessons": [
+  {
+   "id": "surface",
+   "title": "Objectifs et surface d'attaque",
+   "emoji": "🎯",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Salut ! Moi c'est **Nimbo** ☁️. En IoT, un objet piraté n'est pas qu'un appareil qui plante : c'est une **caméra qui espionne**, une **vanne qui s'ouvre** ou un **soldat dans une armée de zombies**. On va apprendre à penser comme un attaquant… pour mieux défendre."
+    },
+    {
+     "type": "say",
+     "text": "Les **trois objectifs** de la sécurité IoT : **Confidentialité** (seuls les autorisés lisent), **Intégrité** (rien n'est modifié en cachette), **Disponibilité** (le service répond). On les appelle la triade **CIA** (ou **DIC** en français)."
+    },
+    {
+     "type": "choice",
+     "q": "Un attaquant sature un serveur pour le rendre inaccessible. Quel objectif est attaqué ?",
+     "options": [
+      "La confidentialité",
+      "La disponibilité",
+      "L'intégrité"
+     ],
+     "answer": 1,
+     "explain": "La saturation (DoS/DDoS) vise la **disponibilité**."
+    },
+    {
+     "type": "choice",
+     "q": "Un pirate modifie la température envoyée par un capteur pour tromper le système. Quel objectif est attaqué ?",
+     "options": [
+      "L'intégrité",
+      "La disponibilité",
+      "La confidentialité"
+     ],
+     "answer": 0,
+     "explain": "La donnée est **altérée** : c'est l'**intégrité**."
+    },
+    {
+     "type": "say",
+     "text": "La **surface d'attaque** est l'ensemble des **points par lesquels un attaquant peut tenter d'entrer**. En IoT, on l'étudie **couche par couche** :"
+    },
+    {
+     "type": "code",
+     "sql": "PERCEPTION   vol ou falsification de capteurs · accès physique · ports de debug (UART, JTAG) · firmware\nRÉSEAU       interception · usurpation d'identité · brouillage\nTRAITEMENT   fuites de données dans le cloud · API mal protégées · comptes d'administration · bases de données\nAPPLICATION  mots de passe faibles · interfaces web et mobiles non sécurisées",
+     "lang": "Sécurité",
+     "title": "Risques par couche"
+    },
+    {
+     "type": "exercise",
+     "q": "Un attaquant branche un câble sur le port UART d'un capteur pour lire son firmware. Quelle couche est concernée ?",
+     "hints": [
+      "Il touche directement l'objet physique."
+     ],
+     "accept": [
+      "la perception",
+      "couche perception"
+     ],
+     "solution": "perception",
+     "explain": "**Perception** : accès physique, ports de debug (UART, JTAG), firmware.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Une API cloud sans authentification expose des mesures. Quelle couche ?",
+     "hints": [
+      "Cloud, API, bases de données."
+     ],
+     "accept": [
+      "la couche traitement",
+      "couche traitement"
+     ],
+     "solution": "traitement",
+     "explain": "**Traitement** : API et bases de données mal protégées.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Un brouillage radio rend un capteur muet. Quelle couche ?",
+     "hints": [
+      "Il agit sur la communication."
+     ],
+     "accept": [
+      "reseau",
+      "la couche réseau",
+      "couche réseau"
+     ],
+     "solution": "réseau",
+     "explain": "**Réseau** : interception, usurpation, brouillage.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Pourquoi l'IoT est-il si vulnérable ? **Ressources limitées** (donc protections allégées), objets à **longue durée de vie** jamais mis à jour, **pression sur les coûts**, manque d'expertise, **interfaces de gestion exposées** (Telnet, SSH, web)."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle idée résume le principe « Security by Design » ?",
+     "options": [
+      "Ajouter un antivirus à la fin du projet",
+      "Cacher le fonctionnement du produit",
+      "Intégrer la sécurité dès la conception, pas après coup"
+     ],
+     "answer": 2,
+     "explain": "La sécurité se **conçoit dès le départ** ; la rajouter après coup coûte cher et reste incomplète."
+    }
+   ]
+  },
+  {
+   "id": "botnets",
+   "title": "Mirai, botnets et DDoS",
+   "emoji": "🤖",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Le 21 octobre 2016, une grande partie d'Internet est devenue inaccessible aux États-Unis : Twitter, Netflix, Spotify… La cible : **Dyn**, un fournisseur **DNS**. L'arme : **Mirai**, un logiciel qui avait infecté des **caméras et routeurs** domestiques."
+    },
+    {
+     "type": "code",
+     "sql": "1. INFECTION     scan d'Internet, essai des mots de passe d'usine (admin/admin…)\n2. ORDRES        l'attaquant commande les objets infectés à distance\n3. TRAFIC MASSIF tous les objets envoient des requêtes à la cible en même temps\n4. INDISPONIBILITÉ la cible est saturée et ne répond plus",
+     "lang": "Sécurité",
+     "title": "Les 4 étapes d'une attaque par botnet"
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appelle l'ensemble d'objets infectés commandés à distance ?",
+     "hints": [
+      "Mot anglais : robot + network."
+     ],
+     "accept": [
+      "un botnet",
+      "réseau de zombies"
+     ],
+     "solution": "botnet",
+     "explain": "Un **botnet**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'étapes compte une attaque par botnet dans le cours ?",
+     "hints": [
+      "Infection, ordres, trafic massif, indisponibilité."
+     ],
+     "accept": [
+      "quatre",
+      "4 étapes"
+     ],
+     "solution": "4",
+     "explain": "**4 étapes**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi les objets connectés sont-ils des cibles idéales pour un botnet ?",
+     "options": [
+      "Ils sont très puissants",
+      "Ils n'ont pas de connexion",
+      "Ils sont allumés en permanence, peu surveillés, souvent avec des mots de passe d'usine"
+     ],
+     "answer": 2,
+     "explain": "Toujours allumés, rarement surveillés, mots de passe par défaut : parfait pour un attaquant."
+    },
+    {
+     "type": "say",
+     "text": "Un **DDoS** (*Distributed Denial of Service*) additionne la force de milliers d'objets faibles. Calculons : **50 000 caméras** envoient chacune **2 Mb/s** vers la même cible."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel débit total en **Gb/s** ? (50 000 × 2 Mb/s ÷ 1 000)",
+     "hints": [
+      "50 000 × 2 = 100 000 Mb/s.",
+      "1 Gb = 1 000 Mb."
+     ],
+     "accept": [
+      "100 gb/s",
+      "100gb/s"
+     ],
+     "solution": "100",
+     "explain": "50 000 × 2 = 100 000 Mb/s = **100 Gb/s** : de quoi saturer bien des infrastructures.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "En novembre 2016, des attaques intermittentes (jusqu'à **500 Gbps**) ont visé un opérateur du **Liberia**, avec une variante de Mirai. L'opérateur desservait 10 à 15 % du pays par **un seul point d'entrée** : un point unique de défaillance."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle leçon tire-t-on du cas du Liberia ?",
+     "options": [
+      "Un point d'entrée unique est un point de défaillance : il faut de la redondance",
+      "Un petit pays ne peut pas être attaqué",
+      "Il faut débrancher Internet"
+     ],
+     "answer": 0,
+     "explain": "**Redondance** : plusieurs liaisons, répartition de charge, protection anti-DDoS."
+    },
+    {
+     "type": "say",
+     "text": "Et le **mot de passe** ? Calculons le temps pour un attaquant qui essaie **1 milliard de mots de passe par seconde**."
+    },
+    {
+     "type": "exercise",
+     "q": "Mot de passe de **8 lettres minuscules** : 26⁸ possibilités = 208 827 064 576. Combien de secondes pour tout essayer ? (÷ 10⁹, arrondi à l'entier)",
+     "hints": [
+      "208 827 064 576 ÷ 1 000 000 000 ≈ 208,8."
+     ],
+     "accept": [
+      "209 s",
+      "209 secondes",
+      "208"
+     ],
+     "solution": "209",
+     "explain": "≈ **209 secondes**, soit **moins de 4 minutes** : trop faible.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Mot de passe de **12 caractères alphanumériques** (62¹² ≈ 3,2 × 10²¹) à 10⁹ essais/s : environ combien d'années ? (ordre de grandeur : 100 000)",
+     "hints": [
+      "3,2 × 10²¹ ÷ 10⁹ = 3,2 × 10¹² secondes.",
+      "Une année ≈ 3,15 × 10⁷ s."
+     ],
+     "accept": [
+      "100 000",
+      "100000 ans",
+      "100 000 ans",
+      "102 304",
+      "102304"
+     ],
+     "solution": "100000",
+     "explain": "3,2 × 10¹² s ÷ 3,15 × 10⁷ ≈ **100 000 ans** : la longueur est la meilleure défense contre la force brute.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle longueur minimale de mot de passe est recommandée pour un objet ?",
+     "options": [
+      "4 caractères",
+      "12 caractères et plus, unique pour chaque objet",
+      "8 caractères"
+     ],
+     "answer": 1,
+     "explain": "**12 caractères et plus**, et **unique par objet** : un mot de passe volé ne doit pas ouvrir tout le parc."
+    }
+   ]
+  },
+  {
+   "id": "identite",
+   "title": "Identité et authentification des objets",
+   "emoji": "🪪",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Avant de protéger quoi que ce soit, il faut savoir **qui parle**. L'**identité numérique** d'un objet est faite de trois choses :"
+    },
+    {
+     "type": "code",
+     "sql": "IDENTIFIANT   numéro de série, adresse MAC, UUID, IMEI\nSECRET/PREUVE mot de passe, clé, certificat\nATTRIBUTS     modèle, propriétaire, droits",
+     "lang": "Sécurité",
+     "title": "Identité d'un objet"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi un identifiant seul ne prouve-t-il rien ?",
+     "options": [
+      "Il est trop long",
+      "Une adresse MAC se copie facilement : il faut un secret en plus",
+      "Il n'existe pas"
+     ],
+     "answer": 1,
+     "explain": "N'importe qui peut **copier** une adresse MAC ou un numéro de série."
+    },
+    {
+     "type": "say",
+     "text": "Trois notions à ne pas confondre : **identification** (j'annonce qui je suis), **authentification** (je le **prouve**), **autorisation** (le système décide ce que j'ai le **droit** de faire). Le modèle **AAA** ajoute la **traçabilité** (*accounting*)."
+    },
+    {
+     "type": "exercise",
+     "q": "Que signifient les trois A du modèle AAA ? (en français, les trois mots)",
+     "hints": [
+      "Prouver qui, décider des droits, garder les traces."
+     ],
+     "accept": [
+      "authentification autorisation traçabilité",
+      "authentification, autorisation, accounting",
+      "authentification, autorisation, audit"
+     ],
+     "solution": "Authentification, Autorisation, Traçabilité",
+     "explain": "**A**uthentification, **A**utorisation, **A**ccounting (traçabilité).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Les **méthodes d'authentification** et leurs limites :"
+    },
+    {
+     "type": "code",
+     "sql": "Mot de passe          simple, mais souvent faible ou d'usine, vulnérable à la force brute\nClé pré-partagée PSK  rapide, mais si elle fuit, TOUT est compromis (même clé partout)\nClés asymétriques     la clé privée ne quitte jamais l'objet\nCertificat X.509      très sûr, authentification mutuelle, mais demande une PKI\nJetons OAuth2/JWT     accès temporaire et révocable\nMFA                   fort, mais peu adapté aux objets sans écran ni clavier",
+     "lang": "Sécurité",
+     "title": "Comparaison"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle méthode compromet TOUS les appareils si elle fuit parce qu'elle est partagée ? (sigle)",
+     "hints": [
+      "Clé pré-partagée."
+     ],
+     "accept": [
+      "clé pré-partagée",
+      "cle pre-partagee",
+      "psk (clé pré-partagée)"
+     ],
+     "solution": "PSK",
+     "explain": "La **PSK** (*Pre-Shared Key*) : une seule clé pour tout le parc.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'atout majeur des **clés asymétriques** pour authentifier un objet ?",
+     "options": [
+      "La clé privée ne quitte jamais l'objet : on ne la transmet jamais",
+      "Elles sont plus rapides que l'AES",
+      "Elles n'ont pas besoin d'être générées"
+     ],
+     "answer": 0,
+     "explain": "On prouve la possession de la clé privée **sans la révéler**."
+    },
+    {
+     "type": "say",
+     "text": "**Authentification mutuelle** : l'objet vérifie le serveur **et** le serveur vérifie l'objet (certificats des deux côtés). Cela bloque le faux serveur *et* l'objet cloné."
+    },
+    {
+     "type": "choice",
+     "q": "Un objet est cloné (identifiant copié, mais pas sa clé privée). Que se passe-t-il à la connexion TLS ?",
+     "options": [
+      "Il est accepté",
+      "Le serveur plante",
+      "La poignée de main échoue : il ne peut pas prouver sa clé"
+     ],
+     "answer": 2,
+     "explain": "Sans la clé privée stockée dans le **Secure Element**, le clone échoue."
+    },
+    {
+     "type": "exercise",
+     "q": "Comment s'appellent les puces qui protègent les clés d'un objet ? (deux noms acceptés : Secure Element ou TPM)",
+     "hints": [
+      "Une puce matérielle dédiée."
+     ],
+     "accept": [
+      "tpm",
+      "secure element ou tpm",
+      "se"
+     ],
+     "solution": "Secure Element",
+     "explain": "**Secure Element** (SE) ou **TPM** : les clés restent dans une puce inviolable.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Le **moindre privilège** : un capteur n'a besoin de publier que sur **son** topic. Si un attaquant le compromet, les dégâts restent limités."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle règle applique le principe du moindre privilège ?",
+     "options": [
+      "Tous les objets lisent tous les topics",
+      "L'administrateur partage son compte",
+      "Chaque objet n'a que les droits strictement nécessaires (ex. publier sur son seul topic)"
+     ],
+     "answer": 2,
+     "explain": "**Minimum de droits nécessaires**, pas plus."
+    },
+    {
+     "type": "say",
+     "text": "Cycle de vie d'une identité : **création → enrôlement → stockage → accès → renouvellement → révocation**. À la **révocation**, un objet volé ne peut plus se connecter."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle étape rattache un nouvel objet à son propriétaire ?",
+     "hints": [
+      "Il « s'inscrit »."
+     ],
+     "accept": [
+      "enrolement",
+      "l'enrôlement"
+     ],
+     "solution": "enrôlement",
+     "explain": "L'**enrôlement**.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "crypto",
+   "title": "Chiffrer sans épuiser l'objet",
+   "emoji": "🔐",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "La cryptographie protège la **confidentialité**, l'**intégrité**, l'**authenticité** et la **non-répudiation**. Mais un petit capteur a **peu de mémoire, peu de calcul, peu d'énergie**. Il faut choisir intelligemment."
+    },
+    {
+     "type": "code",
+     "sql": "SYMÉTRIQUE   une seule clé secrète · rapide · AES (avec GCM : + intégrité) · limite : partager la clé\nASYMÉTRIQUE  clé publique/privée · RSA, ECC, ECDH · plus coûteux · résout l'échange de clés\nHACHAGE      empreinte non réversible · SHA-256 · MD5 et SHA-1 déconseillés · HMAC = authentifier un message",
+     "lang": "Sécurité",
+     "title": "Les trois familles"
+    },
+    {
+     "type": "exercise",
+     "q": "Pour envoyer un message confidentiel à Bob en asymétrique, avec quelle clé chiffre-t-on ? (publique ou privée)",
+     "hints": [
+      "Seul Bob peut ensuite déchiffrer."
+     ],
+     "accept": [
+      "la clé publique de bob",
+      "clé publique",
+      "cle publique"
+     ],
+     "solution": "publique",
+     "explain": "Avec la clé **publique de Bob** ; seule sa clé privée déchiffre.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Le hachage est-il du chiffrement ?",
+     "options": [
+      "Non : on ne peut pas retrouver le message à partir de l'empreinte",
+      "Oui",
+      "Oui, mais seulement avec MD5"
+     ],
+     "answer": 0,
+     "explain": "Le hachage est **à sens unique**, pas de clé de déchiffrement."
+    },
+    {
+     "type": "say",
+     "text": "La **cryptographie hybride** (celle de TLS) : l'asymétrique établit une **clé de session**, puis le symétrique chiffre les données (rapide). Pour les objets sur **UDP**, on utilise **DTLS**."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle version de TLS est adaptée aux datagrammes UDP ?",
+     "hints": [
+      "Le D vient de « Datagram »."
+     ],
+     "accept": [
+      "dtls"
+     ],
+     "solution": "DTLS",
+     "explain": "**DTLS** (*Datagram TLS*), utilisé avec CoAP sur UDP.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi les objets ne peuvent-ils pas toujours utiliser un RSA de grande taille ?",
+     "options": [
+      "RSA est interdit",
+      "Mémoire, processeur et énergie limités : on préfère la cryptographie légère (ECC, Ascon)",
+      "RSA ne chiffre pas"
+     ],
+     "answer": 1,
+     "explain": "**ECC** offre la même sécurité avec des clés bien plus courtes ; **Ascon** a été retenu par le NIST pour la cryptographie légère."
+    },
+    {
+     "type": "say",
+     "text": "Compter les clés : avec des clés **symétriques**, chaque paire d'objets qui doit communiquer a besoin de sa clé : **n(n−1)/2**. En asymétrique : **2n** clés (une paire par objet)."
+    },
+    {
+     "type": "exercise",
+     "q": "20 objets doivent communiquer deux à deux en symétrique : combien de clés ?",
+     "hints": [
+      "20 × 19 ÷ 2."
+     ],
+     "accept": [
+      "190 clés"
+     ],
+     "solution": "190",
+     "explain": "20 × 19 / 2 = **190 clés**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Et en asymétrique pour 20 objets (2n) ?",
+     "hints": [
+      "Une paire par objet."
+     ],
+     "accept": [
+      "40 clés"
+     ],
+     "solution": "40",
+     "explain": "2 × 20 = **40 clés**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Avec **1 000 objets** en symétrique, combien de clés ? (1 000 × 999 ÷ 2)",
+     "hints": [
+      "999 000 ÷ 2."
+     ],
+     "accept": [
+      "499 500",
+      "499500 clés"
+     ],
+     "solution": "499500",
+     "explain": "**499 500 clés** : ingérable. Voilà pourquoi on utilise une PKI et des certificats.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quel mode d'AES ajoute la vérification d'intégrité ?",
+     "options": [
+      "AES-ECB",
+      "AES-GCM",
+      "AES-128 sans mode"
+     ],
+     "answer": 1,
+     "explain": "**GCM** est un mode authentifié (AEAD) : confidentialité **et** intégrité."
+    },
+    {
+     "type": "say",
+     "text": "**Quantique** : l'algorithme de **Shor** menace RSA et ECC. **AES-256** reste solide. Les standards post-quantiques du NIST : **ML-KEM, ML-DSA, SLH-DSA**. Et le danger **« stocker aujourd'hui, déchiffrer plus tard »** concerne les données qui doivent rester secrètes longtemps."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel algorithme quantique menace RSA et ECC ?",
+     "hints": [
+      "Un nom de mathématicien américain, 1994."
+     ],
+     "accept": [
+      "algorithme de shor",
+      "shor's algorithm"
+     ],
+     "solution": "Shor",
+     "explain": "L'algorithme de **Shor**.",
+     "placeholder": "Écris ta réponse ici…"
+    }
+   ]
+  },
+  {
+   "id": "attaques",
+   "title": "Reconnaître les attaques",
+   "emoji": "🕵️",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Voyons les attaques fréquentes sous forme de **scénarios**. À toi de les reconnaître, comme à l'examen."
+    },
+    {
+     "type": "code",
+     "sql": "MITM            un intrus s'insère entre l'objet et le serveur (écoute, modifie)\nRejeu           renvoyer un ordre capturé\nRançongiciel    chiffre/bloque données ou équipements contre rançon\nChaîne d'approvisionnement  composant compromis dès la fabrication\nInjection       données malveillantes envoyées à une interface (commande, requête)\nClonage         copie d'une clé/certificat pour fabriquer des copies de l'appareil\nCompromission physique  extraction de clés d'un capteur capturé",
+     "lang": "Sécurité",
+     "title": "Aide-mémoire"
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 1** : une montre connectée envoie ses données en **clair** sur le Wi-Fi d'un café. Un client avec un logiciel d'écoute les lit."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle attaque ?",
+     "hints": [
+      "Écoute passive sur le réseau."
+     ],
+     "accept": [
+      "écoute",
+      "sniffing",
+      "man in the middle",
+      "mitm",
+      "ecoute"
+     ],
+     "solution": "interception",
+     "explain": "Interception (écoute, sniffing) : possible parce que la donnée n'est **pas chiffrée**. Parade : TLS.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 2** : un attaquant capture l'ordre « ouvrir la porte » et le renvoie le lendemain."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle attaque ?",
+     "hints": [
+      "Renvoyer un message valide."
+     ],
+     "accept": [
+      "replay",
+      "attaque par rejeu"
+     ],
+     "solution": "rejeu",
+     "explain": "**Rejeu**. Parade : jeton à durée limitée, compteur, horodatage : l'ordre rejoué est refusé.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 3** : un thermostat connecté affiche « payez pour retrouver le contrôle »."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle attaque ?",
+     "hints": [
+      "Il bloque l'équipement contre de l'argent."
+     ],
+     "accept": [
+      "ransomware",
+      "rancongiciel",
+      "rançongiciel (ransomware)"
+     ],
+     "solution": "rançongiciel",
+     "explain": "**Rançongiciel** (ransomware). Exemple cité : WannaCry (2017) a perturbé des hôpitaux britanniques.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 4** : des caméras sortent d'usine avec une bibliothèque piégée."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle attaque ?",
+     "hints": [
+      "Le composant est compromis avant même d'arriver chez toi."
+     ],
+     "accept": [
+      "supply chain",
+      "chaine d'approvisionnement",
+      "attaque sur la chaîne d'approvisionnement"
+     ],
+     "solution": "chaîne d'approvisionnement",
+     "explain": "Attaque sur la **chaîne d'approvisionnement** (*supply chain*).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "**Scénario 5** : un attaquant extrait la clé privée d'un capteur volé, puis fabrique de faux capteurs."
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle menace décrit la fabrication de copies à partir d'une clé copiée ?",
+     "hints": [
+      "Il fabrique des « jumeaux »."
+     ],
+     "accept": [
+      "le clonage"
+     ],
+     "solution": "clonage",
+     "explain": "Le **clonage**. Parade : clés dans un Secure Element, révocation du certificat de l'appareil volé.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Une caméra volée est révoquée. Que se passe-t-il ?",
+     "options": [
+      "Son certificat est révoqué et elle ne peut plus se connecter",
+      "Rien",
+      "Elle continue de fonctionner mais sans vidéo"
+     ],
+     "answer": 0,
+     "explain": "La **révocation** coupe l'accès du seul appareil volé."
+    },
+    {
+     "type": "choice",
+     "q": "Le mot de passe de l'utilisateur est volé, mais pas son code MFA. Que se passe-t-il ?",
+     "options": [
+      "La connexion est acceptée",
+      "Le compte est supprimé",
+      "La connexion est refusée et une alerte peut être envoyée"
+     ],
+     "answer": 2,
+     "explain": "Le **MFA** (deux facteurs) bloque l'attaquant même avec le mot de passe."
+    }
+   ]
+  },
+  {
+   "id": "ota",
+   "title": "Mises à jour et démarrage sécurisés",
+   "emoji": "🔄",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une faille est toujours découverte **après** la mise en service. La question n'est pas *« si »* mais *« comment corriger »*. Réponse : la **mise à jour OTA** (*Over The Air*), **signée** et **vérifiée**."
+    },
+    {
+     "type": "code",
+     "sql": "1. Le fabricant SIGNE le firmware avec sa clé privée\n2. L'objet reçoit la mise à jour (HTTPS/TLS)\n3. L'objet VÉRIFIE la signature avec la clé publique du fabricant (stockée dans l'objet)\n4. Signature valide → installation ; sinon → rejet\n5. Au démarrage, le SECURE BOOT revérifie l'intégrité du firmware\n6. En cas d'échec, retour à l'ancienne version (rollback protégé)",
+     "lang": "Sécurité",
+     "title": "Mise à jour sécurisée"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi signer le firmware ?",
+     "options": [
+      "Pour le compresser",
+      "Pour le chiffrer",
+      "Pour que l'objet refuse toute mise à jour qui ne vient pas du fabricant ou qui a été modifiée"
+     ],
+     "answer": 2,
+     "explain": "Sans signature, un attaquant pourrait **installer un firmware piégé**."
+    },
+    {
+     "type": "exercise",
+     "q": "Que fait le Secure Boot au démarrage ?",
+     "hints": [
+      "Il contrôle avant d'exécuter."
+     ],
+     "accept": [
+      "vérifie le firmware",
+      "verifie l'integrite du firmware",
+      "vérifie l'intégrité"
+     ],
+     "solution": "vérifie l'intégrité du firmware",
+     "explain": "Il **vérifie l'intégrité (la signature) du firmware** avant de l'exécuter.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle clé stocke-t-on dans l'objet pour vérifier une mise à jour : la clé publique ou la clé privée du fabricant ?",
+     "hints": [
+      "La privée ne doit jamais quitter le fabricant."
+     ],
+     "accept": [
+      "la clé publique",
+      "clé publique"
+     ],
+     "solution": "publique",
+     "explain": "La **publique** : elle permet de vérifier, jamais de signer.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Attention à la **taille** : mettre à jour un objet LoRaWAN est difficile. Un firmware de **512 Ko** (524 288 octets) découpé en messages de **51 octets** utiles…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de messages ? (524 288 ÷ 51, arrondi à l'entier supérieur)",
+     "hints": [
+      "524 288 ÷ 51 ≈ 10 280,2 : il en faut un de plus pour le reste."
+     ],
+     "accept": [
+      "10 281",
+      "10281 messages",
+      "10280"
+     ],
+     "solution": "10281",
+     "explain": "≈ **10 281 messages**, soit des jours d'émission avec un duty cycle de 1 % : l'OTA par LPWAN est lourde, donc on prévoit des **mises à jour différentielles** (seulement les différences) ou un autre canal.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle approche réduit le volume d'une mise à jour sur LoRaWAN ?",
+     "options": [
+      "Une mise à jour différentielle (seulement les parties modifiées)",
+      "Envoyer le firmware complet à chaque fois",
+      "Désactiver les mises à jour"
+     ],
+     "answer": 0,
+     "explain": "On n'envoie que le **delta** entre ancienne et nouvelle version."
+    },
+    {
+     "type": "say",
+     "text": "Le **cycle de vie sécurisé** d'un objet : **concevoir → déployer → surveiller → corriger (OTA) → retirer**."
+    },
+    {
+     "type": "exercise",
+     "q": "Que faut-il faire à la phase « Retirer » ?",
+     "hints": [
+      "Avant la mise au rebut."
+     ],
+     "accept": [
+      "effacer les données avant la mise au rebut",
+      "effacer",
+      "supprimer les données"
+     ],
+     "solution": "effacer les données",
+     "explain": "**Effacer les données** (et révoquer l'identité) avant la mise au rebut : sinon, on revend ses secrets avec l'appareil.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de phases compte le cycle de vie sécurisé ?",
+     "hints": [
+      "Concevoir, déployer, surveiller, corriger, retirer."
+     ],
+     "accept": [
+      "cinq",
+      "5 phases"
+     ],
+     "solution": "5",
+     "explain": "**5 phases**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle norme est citée pour choisir un produit IoT fiable ?",
+     "options": [
+      "ISO 9001",
+      "ETSI EN 303 645",
+      "HTML5"
+     ],
+     "answer": 1,
+     "explain": "**ETSI EN 303 645** : exigences de base pour la cybersécurité des objets grand public. Le **Cyber Resilience Act** impose aussi la sécurité dès la conception."
+    }
+   ]
+  },
+  {
+   "id": "reseau",
+   "title": "Protéger le réseau de l'entreprise",
+   "emoji": "🧱",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un objet n'est jamais seul : il vit dans un réseau. Si un seul est piraté, l'attaquant peut **rebondir** vers le reste (propagation latérale). La défense repose sur **quatre étapes** :"
+    },
+    {
+     "type": "code",
+     "sql": "1. INVENTORIER  savoir quels objets existent (fini le « shadow IoT »)\n2. SEGMENTER    isoler les objets (VLAN, DMZ, réseau invité)\n3. SURVEILLER   IDS/IPS pour détecter et bloquer, SIEM pour centraliser les journaux\n4. ENCADRER     politique, mots de passe, formation, audits",
+     "lang": "Sécurité",
+     "title": "Les 4 étapes pour une entreprise"
+    },
+    {
+     "type": "exercise",
+     "q": "Que désigne le « shadow IoT » ?",
+     "hints": [
+      "Des objets « dans l'ombre »."
+     ],
+     "accept": [
+      "objets non déclarés",
+      "objets non inventoriés",
+      "des objets installés sans prévenir le service informatique"
+     ],
+     "solution": "objets installés sans prévenir le service informatique",
+     "explain": "Des objets installés **à l'insu du service informatique** : non inventoriés, donc non protégés.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle technique isole les objets du reste du réseau ? (un mot ou sigle parmi VLAN, DMZ)",
+     "hints": [
+      "Un réseau virtuel dédié."
+     ],
+     "accept": [
+      "dmz",
+      "segmentation",
+      "vlan ou dmz"
+     ],
+     "solution": "VLAN",
+     "explain": "La **segmentation** : **VLAN** ou **DMZ**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la règle d'or du schéma entreprise ?",
+     "options": [
+      "Tous les objets peuvent joindre tout le réseau",
+      "L'IoT ne joint que les serveurs utiles",
+      "Les objets sont sur le réseau des employés"
+     ],
+     "answer": 1,
+     "explain": "**Seuls les serveurs nécessaires** sont joignables depuis le VLAN IoT."
+    },
+    {
+     "type": "choice",
+     "q": "À quoi sert un IDS/IPS ?",
+     "options": [
+      "À détecter (IDS) et bloquer (IPS) les intrusions",
+      "À chiffrer les données",
+      "À sauvegarder les fichiers"
+     ],
+     "answer": 0,
+     "explain": "IDS = **détecte**, IPS = **détecte et bloque**. Il traite botnets et DDoS."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel outil centralise les journaux pour repérer un objet infecté ? (sigle)",
+     "hints": [
+      "Security Information and Event Management."
+     ],
+     "accept": [
+      "un siem"
+     ],
+     "solution": "SIEM",
+     "explain": "Le **SIEM** corrèle les journaux de tous les équipements.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "say",
+     "text": "Côté **MQTT** : **TLS sur le port 8883**, un identifiant (ou certificat) **par objet**, des **ACL** limitant chaque objet à son topic, et un **Last Will** pour détecter une disparition."
+    },
+    {
+     "type": "exercise",
+     "q": "Sur quel port MQTT avec TLS ?",
+     "hints": [
+      "1883 est le port en clair."
+     ],
+     "accept": [
+      "8883"
+     ],
+     "solution": "8883",
+     "explain": "MQTT : **1883** clair, **8883** TLS.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Pour la maison : comment isoler ses objets connectés ?",
+     "options": [
+      "Les brancher au Wi-Fi principal avec les ordinateurs",
+      "Les débrancher",
+      "Avec un réseau invité ou un VLAN dédié"
+     ],
+     "answer": 2,
+     "explain": "Un **réseau invité** limite les dégâts si une caméra est piratée."
+    },
+    {
+     "type": "choice",
+     "q": "Quels protocoles Wi-Fi sont recommandés ?",
+     "options": [
+      "WEP",
+      "Réseau ouvert",
+      "WPA2 ou WPA3, WPS désactivé"
+     ],
+     "answer": 2,
+     "explain": "**WPA2/WPA3**, et le **WPS désactivé** (point faible connu)."
+    }
+   ]
+  },
+  {
+   "id": "privacy",
+   "title": "Vie privée, droit béninois et défi final",
+   "emoji": "⚖️",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un objet connecté collecte des données **sur des personnes**. La sécurité ne suffit pas : il faut respecter leur **vie privée** et la **loi**."
+    },
+    {
+     "type": "code",
+     "sql": "DONNÉE PERSONNELLE  permet d'identifier une personne (directement : nom, téléphone, photo ; indirectement)\nDONNÉES SENSIBLES    santé, religion… protection renforcée\nVIE PRIVÉE           le droit (le but)\nPROTECTION DES DONNÉES  les règles et moyens pour le garantir\n3 TYPES DE DONNÉES IoT  techniques · de localisation · personnelles",
+     "lang": "Sécurité",
+     "title": "Notions clés"
+    },
+    {
+     "type": "choice",
+     "q": "La consommation d'électricité d'un foyer est une donnée technique. Peut-elle devenir personnelle ?",
+     "options": [
+      "Oui : elle révèle quand les personnes sont présentes ou absentes",
+      "Non, jamais",
+      "Seulement si elle est chiffrée"
+     ],
+     "answer": 0,
+     "explain": "Une donnée technique peut **révéler des habitudes** : elle devient personnelle."
+    },
+    {
+     "type": "say",
+     "text": "La **minimisation** repose sur trois idées : **nécessité** (la donnée est-elle utile ?), **proportionnalité** (pas plus que nécessaire), **limitation de la durée de conservation**. Exemple de **collecte excessive** : une lampe torche qui demande l'accès aux contacts."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien d'idées composent la minimisation ?",
+     "hints": [
+      "Nécessité, proportionnalité, durée."
+     ],
+     "accept": [
+      "trois",
+      "3 idées"
+     ],
+     "solution": "3",
+     "explain": "**3** : nécessité, proportionnalité, limitation de la durée de conservation.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Comment l'edge computing aide-t-il la vie privée ?",
+     "options": [
+      "Il envoie tout au cloud",
+      "Il traite les données sensibles près de l'objet et n'envoie que le nécessaire",
+      "Il supprime les données"
+     ],
+     "answer": 1,
+     "explain": "Moins de données qui voyagent, moins de risques."
+    },
+    {
+     "type": "say",
+     "text": "Au **Bénin** : la **loi n° 2017-20** portant **Code du numérique**, **Livre V** pour la protection des données à caractère personnel. L'**APDP** veille à son respect ; l'**ANSSI-Bénin** s'occupe de la sécurité des systèmes d'information."
+    },
+    {
+     "type": "exercise",
+     "q": "Quel Livre du Code du numérique traite des données à caractère personnel ?",
+     "hints": [
+      "Chiffre romain."
+     ],
+     "accept": [
+      "livre 5",
+      "v",
+      "le livre v"
+     ],
+     "solution": "Livre V",
+     "explain": "Le **Livre V**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle autorité béninoise veille à la protection des données personnelles ? (sigle)",
+     "hints": [
+      "Autorité de protection des données personnelles."
+     ],
+     "accept": [
+      "l'apdp"
+     ],
+     "solution": "APDP",
+     "explain": "L'**APDP**.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quels droits ont les personnes sur leurs données ?",
+     "options": [
+      "Aucun",
+      "Être informées, accéder, corriger, s'opposer, effacer, portabilité",
+      "Seulement les consulter"
+     ],
+     "answer": 1,
+     "explain": "Information, accès, rectification, opposition, effacement, portabilité."
+    },
+    {
+     "type": "say",
+     "text": "**Défi final : audit express.** Une entreprise de Cotonou déploie **200 caméras** de quartier. On te donne son installation : mot de passe **admin/admin** identique partout · interface web exposée sur Internet · caméras sur le **même réseau que les ordinateurs des employés** · jamais de mise à jour · vidéos envoyées en **HTTP** (clair) · aucune déclaration à l'APDP."
+    },
+    {
+     "type": "exercise",
+     "q": "Combien de **failles distinctes** vois-tu dans cette description ? (compte-les)",
+     "hints": [
+      "Un point par élément de la liste."
+     ],
+     "accept": [
+      "six",
+      "6 failles"
+     ],
+     "solution": "6",
+     "explain": "**6** : mot de passe d'usine commun, interface exposée, absence de segmentation, pas de mise à jour, flux en clair, absence de déclaration/conformité légale.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quel protocole remplace le HTTP en clair pour chiffrer les vidéos ?",
+     "hints": [
+      "HTTP au-dessus de TLS."
+     ],
+     "accept": [
+      "tls",
+      "https/tls"
+     ],
+     "solution": "HTTPS",
+     "explain": "**HTTPS** (HTTP + TLS).",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "exercise",
+     "q": "Quelle mesure supprime le risque du mot de passe commun ? (un mot : unique ou identique)",
+     "hints": [
+      "Chaque caméra doit avoir le sien."
+     ],
+     "accept": [
+      "un mot de passe unique",
+      "unique par objet",
+      "différent"
+     ],
+     "solution": "unique",
+     "explain": "Un mot de passe **unique par caméra** (12 caractères et plus), ou mieux un certificat par appareil.",
+     "placeholder": "Écris ta réponse ici…"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la **première** mesure à prendre ?",
+     "options": [
+      "Retirer l'interface de gestion d'Internet, changer les mots de passe et isoler les caméras (VLAN)",
+      "Acheter de nouvelles caméras",
+      "Attendre la prochaine attaque"
+     ],
+     "answer": 0,
+     "explain": "On **réduit d'abord la surface d'attaque** : plus d'exposition directe, identifiants changés, isolation réseau. Ensuite mises à jour, chiffrement et conformité."
+    },
+    {
+     "type": "say",
+     "text": "Bravo 🎉 ! Tu sais **analyser un système IoT**, repérer ses failles couche par couche et proposer des corrections, du mot de passe à la loi. Rappelle-toi la phrase de conclusion du cours : **le maillon faible reste souvent l'humain**."
+    }
+   ]
+  }
+ ]
+}
