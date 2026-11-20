@@ -5,8 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.1.0] — 2026-11-20
+
 ### Nouveautés
-- IoT : formation « Sécurité IoT » (8 leçons).
+- Réseaux avancés : nouvelle « Partie 5 · Réseaux sans fil » (7 chapitres : radio et dBm, architecture Wi-Fi, normes 802.11 Wi-Fi 4 à 7, sous-couche MAC, conception WLAN, sécurité WPA3/802.1X, liaisons longue distance), 168 QCM, 56 cartes mémoire et 3 épreuves corrigées.
+- IoT : formations « Choisir une technologie réseau », « Concevoir une solution IoT complète » et « Sécurité IoT ».
 
 ## [1.0.0] — 2026-11-20
 
