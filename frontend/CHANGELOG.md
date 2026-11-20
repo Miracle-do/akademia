@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.2.0] — 2026-11-20
+
+### Nouveautés
+- Réseaux avancés : formation « Bilan de liaison et calculs radio » (5 leçons : dBm, FSPL, bilan de liaison, Fresnel, pointage).
+
 ## [1.1.0] — 2026-11-20
 
 ### Nouveautés
