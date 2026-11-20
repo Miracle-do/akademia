@@ -1,0 +1,86 @@
+{
+  "n": 25,
+  "title": "Épreuve n° 25 · Radio, dBm et normes Wi-Fi (1 h)",
+  "durationMinutes": 60,
+  "points": 20,
+  "parts": [
+    {
+      "id": "p1",
+      "title": "Exercice 1 : unités radio",
+      "points": 8,
+      "intro": "Un émetteur Wi-Fi délivre 100 mW ; câble de 2 dB, antenne de 8 dBi.",
+      "questions": [
+        {
+          "id": "e25p1q1",
+          "q": "Convertissez 100 mW en dBm.",
+          "points": 2,
+          "a": "10 log10(100) = **20 dBm**."
+        },
+        {
+          "id": "e25p1q2",
+          "q": "Calculez la PIRE en dBm puis en mW approximatifs.",
+          "points": 3,
+          "a": "PIRE = 20 − 2 + 8 = **26 dBm** ≈ 400 mW (23 dBm = 200 mW, +3 dB = ×2)."
+        },
+        {
+          "id": "e25p1q3",
+          "q": "Le récepteur mesure RSSI −70 dBm pour un bruit de −92 dBm. Donnez le SNR et le niveau de qualité.",
+          "points": 3,
+          "a": "SNR = −70 + 92 = **22 dB**. Qualité « moyenne » (−67 à −75 dBm) : jusqu'au 64-QAM."
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Exercice 2 : canaux",
+      "points": 6,
+      "intro": "Plan de canaux d'un bâtiment.",
+      "questions": [
+        {
+          "id": "e25p2q1",
+          "q": "Quels canaux 2,4 GHz choisir pour 3 AP voisins ? Justifiez.",
+          "points": 2,
+          "a": "**1, 6 et 11** : seuls canaux non chevauchants (espacement 5 MHz, largeur ~20 MHz)."
+        },
+        {
+          "id": "e25p2q2",
+          "q": "Calculez la fréquence centrale du canal 11 (2,4 GHz) et du canal 100 (5 GHz).",
+          "points": 2,
+          "a": "2407 + 55 = **2462 MHz** ; 5000 + 500 = **5500 MHz**."
+        },
+        {
+          "id": "e25p2q3",
+          "q": "Pourquoi éviter les canaux de 160 MHz dans un amphithéâtre ?",
+          "points": 2,
+          "a": "Peu de canaux disponibles, réutilisation impossible, SNR réduit de 3 dB par doublement : préférer 20/40 MHz en forte densité."
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Exercice 3 : débit et normes",
+      "points": 6,
+      "intro": "On compare Wi-Fi 5 et Wi-Fi 6.",
+      "questions": [
+        {
+          "id": "e25p3q1",
+          "q": "Calculez le débit PHY d'un flux 802.11ac 80 MHz 256-QAM 5/6, GI 0,4 µs (234 sous-porteuses, symbole 3,6 µs).",
+          "points": 3,
+          "a": "234 × 8 × 5/6 / 3,6 µs = **433 Mbit/s**."
+        },
+        {
+          "id": "e25p3q2",
+          "q": "Que vaut-il pour 2 flux ? Quel débit TCP réaliste ?",
+          "points": 1,
+          "a": "**867 Mbit/s** ; TCP réel ≈ 50–70 % soit environ 430–600 Mbit/s, partagé."
+        },
+        {
+          "id": "e25p3q3",
+          "q": "Citez deux apports de 802.11ax pour les environnements denses.",
+          "points": 2,
+          "a": "**OFDMA** et **BSS Coloring** (ainsi que TWT, MU-MIMO montant)."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "n": 27,
+  "title": "Épreuve n° 27 · Liaison longue distance (1 h 30)",
+  "durationMinutes": 90,
+  "points": 20,
+  "parts": [
+    {
+      "id": "p1",
+      "title": "Exercice 1 : bilan de liaison",
+      "points": 10,
+      "intro": "Liaison PtP à 5,8 GHz sur 15 km. Tx 24 dBm, câbles 1 dB à chaque bout, antennes 27 dBi, sensibilité −78 dBm.",
+      "questions": [
+        {
+          "id": "e27p1q1",
+          "q": "Calculez la FSPL.",
+          "points": 3,
+          "a": "20 log 15 + 20 log 5800 + 32,45 = 23,52 + 75,27 + 32,45 = **131,24 dB**."
+        },
+        {
+          "id": "e27p1q2",
+          "q": "Calculez le niveau reçu.",
+          "points": 3,
+          "a": "Pr = 24 − 1 + 27 − 131,24 + 27 − 1 = **−55,24 dBm**."
+        },
+        {
+          "id": "e27p1q3",
+          "q": "Calculez la marge et concluez.",
+          "points": 2,
+          "a": "−55,24 + 78 = **22,76 dB** ≥ 10–15 dB : liaison viable."
+        },
+        {
+          "id": "e27p1q4",
+          "q": "Que devient la marge si la distance double ?",
+          "points": 2,
+          "a": "+6,02 dB de perte : marge ≈ **16,7 dB**, encore acceptable."
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Exercice 2 : Fresnel et installation",
+      "points": 5,
+      "intro": "Les antennes sont montées sur des mâts.",
+      "questions": [
+        {
+          "id": "e27p2q1",
+          "q": "Calculez le rayon de la 1re zone de Fresnel au milieu de la liaison.",
+          "points": 2,
+          "a": "17,32 √(15 / (4 × 5,8)) = **13,9 m** ; 60 % = **8,4 m** à dégager."
+        },
+        {
+          "id": "e27p2q2",
+          "q": "Citez trois obstacles possibles et une parade.",
+          "points": 2,
+          "a": "Végétation, bâtiments, courbure terrestre ; parade : **rehausser les mâts** ou relais."
+        },
+        {
+          "id": "e27p2q3",
+          "q": "Quel équipement de protection est indispensable ?",
+          "points": 1,
+          "a": "**Parafoudre** et **mise à la terre**."
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Exercice 3 : pointage",
+      "points": 5,
+      "intro": "Site A à 20 m d'altitude, site B à 60 m, distance 11,05 km.",
+      "questions": [
+        {
+          "id": "e27p3q1",
+          "q": "Calculez l'élévation approximative de l'antenne.",
+          "points": 2,
+          "a": "atan(40 / 11050) ≈ **0,21°**."
+        },
+        {
+          "id": "e27p3q2",
+          "q": "Décrivez la procédure de pointage.",
+          "points": 2,
+          "a": "Pré-pointage (azimut corrigé de la déclinaison, élévation), puis pointage fin sur RSSI/SNR avec un opérateur à chaque extrémité."
+        },
+        {
+          "id": "e27p3q3",
+          "q": "Quel piège surveiller ?",
+          "points": 1,
+          "a": "Les **lobes secondaires** : vérifier en balayant au-delà du maximum trouvé."
+        }
+      ]
+    }
+  ]
+}

@@ -1,380 +1,716 @@
 [
- {
-  "id": "rx-f001",
-  "front": "Les 7 couches OSI (7 à 1)",
-  "back": "Application, Présentation, Session, Transport, Réseau, Liaison, Physique.",
-  "tag": "OSI/TCP-IP"
- },
- {
-  "id": "rx-f002",
-  "front": "Unités de données par couche",
-  "back": "L2 trame ; L3 paquet ; L4 segment (TCP) / datagramme (UDP).",
-  "tag": "OSI/TCP-IP"
- },
- {
-  "id": "rx-f003",
-  "front": "Ce qui change / ne change pas pendant le routage",
-  "back": "MAC : change à chaque saut. IP source et destination : inchangées (hors NAT). TTL : −1 par routeur.",
-  "tag": "OSI/TCP-IP"
- },
- {
-  "id": "rx-f004",
-  "front": "Domaines de collision et de diffusion",
-  "back": "Switch : sépare les collisions (1 par port). Routeur ou VLAN : sépare la diffusion.",
-  "tag": "OSI/TCP-IP"
- },
- {
-  "id": "rx-f005",
-  "front": "Adresse MAC",
-  "back": "48 bits, 6 octets en hexadécimal ; diffusion FF:FF:FF:FF:FF:FF.",
-  "tag": "Ethernet/ARP"
- },
- {
-  "id": "rx-f006",
-  "front": "EtherType à connaître",
-  "back": "0x0800 IPv4 ; 0x0806 ARP ; 0x86DD IPv6 ; 0x8100 VLAN 802.1Q.",
-  "tag": "Ethernet/ARP"
- },
- {
-  "id": "rx-f007",
-  "front": "Table d'un switch",
-  "back": "Apprend par la MAC source, décide par la MAC destination, inonde si inconnue ou diffusion.",
-  "tag": "Ethernet/ARP"
- },
- {
-  "id": "rx-f008",
-  "front": "ARP : déroulement",
-  "back": "Requête en diffusion (« qui a X ? »), réponse en unicast, cache ; hors réseau, on résout la passerelle.",
-  "tag": "Ethernet/ARP"
- },
- {
-  "id": "rx-f009",
-  "front": "Commandes ARP Linux",
-  "back": "`ip neigh` ; `arp -a` ; `ip neigh flush all`.",
-  "tag": "Ethernet/ARP"
- },
- {
-  "id": "rx-f010",
-  "front": "Poids d'un octet",
-  "back": "128, 64, 32, 16, 8, 4, 2, 1.",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f011",
-  "front": "Valeurs d'un octet de masque",
-  "back": "0, 128, 192, 224, 240, 248, 252, 254, 255.",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f012",
-  "front": "Formules d'hôtes",
-  "back": "Total 2^(32−n) ; utilisables 2^(32−n) − 2 ; pas = 256 − octet du masque.",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f013",
-  "front": "Réseau et diffusion",
-  "back": "Réseau = adresse ET masque ; diffusion = bits hôte à 1 (dernière adresse du bloc).",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f014",
-  "front": "Adresses privées RFC 1918",
-  "back": "10.0.0.0/8 ; 172.16.0.0/12 ; 192.168.0.0/16.",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f015",
-  "front": "Adresses spéciales",
-  "back": "127/8 bouclage ; 169.254/16 APIPA ; 0.0.0.0/0 défaut ; 224/4 multicast ; 255.255.255.255 diffusion limitée.",
-  "tag": "IPv4"
- },
- {
-  "id": "rx-f016",
-  "front": "En-tête IPv4",
-  "back": "20 octets minimum (IHL 5) ; TTL, Protocole (1 ICMP, 6 TCP, 17 UDP), adresses source et destination.",
-  "tag": "IP/ICMP"
- },
- {
-  "id": "rx-f017",
-  "front": "TTL à 0",
-  "back": "Le paquet est jeté, ICMP Time Exceeded (type 11) envoyé à la source.",
-  "tag": "IP/ICMP"
- },
- {
-  "id": "rx-f018",
-  "front": "Fragmentation",
-  "back": "Données par fragment multiple de 8 ; décalage en blocs de 8 ; réassemblage à la destination ; DF=1 → ICMP type 3 code 4.",
-  "tag": "IP/ICMP"
- },
- {
-  "id": "rx-f019",
-  "front": "Lire un ping",
-  "back": "Unreachable : un routeur sans route. Timed out : retour manquant, filtrage ou éteint. TTL expired : boucle.",
-  "tag": "IP/ICMP"
- },
- {
-  "id": "rx-f020",
-  "front": "Poignée de main TCP",
-  "back": "SYN → SYN+ACK → ACK (3 temps) ; fermeture par FIN/ACK.",
-  "tag": "TCP/UDP"
- },
- {
-  "id": "rx-f021",
-  "front": "TCP vs UDP",
-  "back": "TCP : connexion, fiable, 20 octets. UDP : sans connexion, 8 octets, rapide (DNS, DHCP, voix).",
-  "tag": "TCP/UDP"
- },
- {
-  "id": "rx-f022",
-  "front": "Plages de ports",
-  "back": "0-1023 connus ; 1024-49151 enregistrés ; 49152-65535 éphémères.",
-  "tag": "TCP/UDP"
- },
- {
-  "id": "rx-f023",
-  "front": "Ports par cœur (1)",
-  "back": "FTP 20/21 · SSH 22 · Telnet 23 · SMTP 25 · DNS 53 · DHCP 67/68 · TFTP 69 · HTTP 80.",
-  "tag": "TCP/UDP"
- },
- {
-  "id": "rx-f024",
-  "front": "Ports par cœur (2)",
-  "back": "NTP 123 · SNMP 161/162 · LDAP 389 · HTTPS 443 · LDAPS 636 · Syslog 514 · MySQL 3306 · PostgreSQL 5432 · RDP 3389.",
-  "tag": "TCP/UDP"
- },
- {
-  "id": "rx-f025",
-  "front": "Méthode universelle",
-  "back": "Bloc → besoin → bits (2^s ou 2^h−2) → masque et pas → liste des sous-réseaux.",
-  "tag": "Subnetting"
- },
- {
-  "id": "rx-f026",
-  "front": "Sous-réseaux et hôtes",
-  "back": "s bits empruntés → 2^s sous-réseaux ; h bits restants → 2^h − 2 hôtes.",
-  "tag": "Subnetting"
- },
- {
-  "id": "rx-f027",
-  "front": "Pas dans l'octet critique",
-  "back": "256 − valeur du masque ; réseau = plus grand multiple du pas ≤ valeur de l'octet.",
-  "tag": "Subnetting"
- },
- {
-  "id": "rx-f028",
-  "front": "Règles du VLSM",
-  "back": "Trier du plus grand au plus petit, aligner chaque bloc sur un multiple de sa taille, /30 pour les liaisons.",
-  "tag": "VLSM"
- },
- {
-  "id": "rx-f029",
-  "front": "Plan classique /24",
-  "back": "/25 en .0 · /26 en .128 · /27 en .192 · /28 en .224 · /30 en .240 et .244.",
-  "tag": "VLSM"
- },
- {
-  "id": "rx-f030",
-  "front": "Résumé de routes",
-  "back": "Préfixe binaire commun ; N réseaux alignés de taille T → bloc N × T ; vérifier la couverture exacte.",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f031",
-  "front": "Résumés de l'examen",
-  "back": "192.168.0.0-.63.255 → /18 ; 10.0.0.0-10.3.255.255 → /14 ; 192.168.0.0-.0.63 → /26 ; 1.0.0.0-1.0.7.255 → /21.",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f032",
-  "front": "Choix de la route",
-  "back": "1) préfixe le plus long, 2) AD la plus basse, 3) métrique la plus basse (sinon équilibrage).",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f033",
-  "front": "Distances administratives",
-  "back": "Connecté 0 · statique 1 · eBGP 20 · EIGRP 90 · OSPF 110 · IS-IS 115 · RIP 120 · iBGP 200.",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f034",
-  "front": "Codes de la table Cisco",
-  "back": "C connecté · L local · S statique · O OSPF · S* candidate à la route par défaut.",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f035",
-  "front": "Une route C existe si…",
-  "back": "L'interface est up/up et possède une adresse IP.",
-  "tag": "Routage"
- },
- {
-  "id": "rx-f036",
-  "front": "Route statique Cisco",
-  "back": "`ip route RÉSEAU MASQUE SAUT [AD]` ; défaut `ip route 0.0.0.0 0.0.0.0 SAUT`.",
-  "tag": "Statique"
- },
- {
-  "id": "rx-f037",
-  "front": "Route flottante",
-  "back": "Même destination, AD plus élevée (ex. 200) : secours qui n'apparaît qu'en cas de panne.",
-  "tag": "Statique"
- },
- {
-  "id": "rx-f038",
-  "front": "Méthode en 6 étapes",
-  "back": "Lister les réseaux, repérer les connectés, trouver les inconnus, saut suivant voisin, écrire, vérifier le retour.",
-  "tag": "Statique"
- },
- {
-  "id": "rx-f039",
-  "front": "Null0 avec résumé",
-  "back": "`ip route R M Null0` jette les paquets pour adresses inexistantes du résumé.",
-  "tag": "Statique"
- },
- {
-  "id": "rx-f040",
-  "front": "Linux : routes",
-  "back": "`ip route add R/n via SAUT` ; `ip route add default via SAUT` ; `sysctl net.ipv4.ip_forward=1`.",
-  "tag": "Statique"
- },
- {
-  "id": "rx-f041",
-  "front": "Masque générique",
-  "back": "255 moins chaque octet du masque : /23 → 0.0.1.255 ; /30 → 0.0.0.3.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f042",
-  "front": "Configuration OSPF",
-  "back": "`router ospf N` + `network A W area 0` (ou `ip ospf N area 0` sur l'interface) + `passive-interface` sur les LAN.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f043",
-  "front": "Faits OSPF",
-  "back": "AD 110 · protocole IP 89 · 224.0.0.5/6 · Hello 10 s / Dead 40 s · zone 0 backbone.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f044",
-  "front": "Voisinage OSPF",
-  "back": "Même masque sur le lien, même zone, mêmes Hello/Dead, interface non passive.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f045",
-  "front": "Sortie Internet dans OSPF",
-  "back": "Route statique par défaut + `default-information originate`.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f046",
-  "front": "Coût OSPF",
-  "back": "100 Mb/s ÷ bande passante ; Gigabit = 1 → `auto-cost reference-bandwidth 10000`.",
-  "tag": "OSPF"
- },
- {
-  "id": "rx-f047",
-  "front": "Écriture IPv6",
-  "back": "8 groupes de 16 bits ; zéros de tête supprimés ; `::` une seule fois.",
-  "tag": "IPv6"
- },
- {
-  "id": "rx-f048",
-  "front": "Types d'adresses IPv6",
-  "back": "fe80::/10 lien-local · 2000::/3 global · fc00::/7 ULA · ff00::/8 multicast · ::1 loopback.",
-  "tag": "IPv6"
- },
- {
-  "id": "rx-f049",
-  "front": "NDP",
-  "back": "Remplace ARP : NS/NA (voisins), RS/RA (routeurs), via ICMPv6.",
-  "tag": "IPv6"
- },
- {
-  "id": "rx-f050",
-  "front": "Routage IPv6 Cisco",
-  "back": "`ipv6 unicast-routing` ; `ipv6 route PRÉFIXE SAUT` ; `ipv6 route ::/0 SAUT`.",
-  "tag": "IPv6"
- },
- {
-  "id": "rx-f051",
-  "front": "Access et trunk",
-  "back": "Access : un VLAN sans étiquette. Trunk : plusieurs VLAN, 802.1Q ; 4 094 VLAN utilisables.",
-  "tag": "VLAN"
- },
- {
-  "id": "rx-f052",
-  "front": "Routage inter-VLAN",
-  "back": "Sous-interfaces `encapsulation dot1Q ID` (router-on-a-stick) ou SVI sur commutateur L3.",
-  "tag": "VLAN"
- },
- {
-  "id": "rx-f053",
-  "front": "STP",
-  "back": "Évite les boucles de couche 2 en bloquant des ports redondants.",
-  "tag": "VLAN"
- },
- {
-  "id": "rx-f054",
-  "front": "DHCP DORA",
-  "back": "Discover, Offer, Request, Ack ; UDP 67/68 ; relais : `ip helper-address`.",
-  "tag": "DHCP/DNS"
- },
- {
-  "id": "rx-f055",
-  "front": "Enregistrements DNS",
-  "back": "A IPv4 · AAAA IPv6 · CNAME alias · MX messagerie · NS serveurs · PTR inverse · TXT texte.",
-  "tag": "DHCP/DNS"
- },
- {
-  "id": "rx-f056",
-  "front": "Types de NAT",
-  "back": "Statique 1:1 ; dynamique (pool) ; PAT/overload : une IP publique, ports distincts.",
-  "tag": "NAT"
- },
- {
-  "id": "rx-f057",
-  "front": "PAT Cisco",
-  "back": "`ip nat inside` / `outside` + ACL + `ip nat inside source list 1 interface g0/1 overload`.",
-  "tag": "NAT"
- },
- {
-  "id": "rx-f058",
-  "front": "Règles d'une ACL",
-  "back": "Haut en bas, première correspondance, deny implicite final, à appliquer avec `ip access-group in|out`.",
-  "tag": "ACL"
- },
- {
-  "id": "rx-f059",
-  "front": "Placement des ACL",
-  "back": "Standard : près de la destination. Étendue : près de la source.",
-  "tag": "ACL"
- },
- {
-  "id": "rx-f060",
-  "front": "Publier un port Docker",
-  "back": "`docker run -d -p 8080:80 nginx:latest` (hôte:conteneur) ; `-p 127.0.0.1:...` pour le local seul.",
-  "tag": "Linux/Docker"
- },
- {
-  "id": "rx-f061",
-  "front": "Commandes réseau Linux",
-  "back": "`ip -br a` · `ip r` · `ip neigh` · `ss -tulnp` · `ip route get IP` · `tcpdump -i eth0 -n`.",
-  "tag": "Linux/Docker"
- },
- {
-  "id": "rx-f062",
-  "front": "Diagnostic couche par couche",
-  "back": "Lien → IP → passerelle → Internet par IP → DNS → service.",
-  "tag": "Dépannage"
- },
- {
-  "id": "rx-f063",
-  "front": "Ping étendu",
-  "back": "`ping DEST source INTERFACE-LAN` : teste vraiment le retour.",
-  "tag": "Dépannage"
- }
+  {
+    "id": "rx-f001",
+    "front": "Les 7 couches OSI (7 à 1)",
+    "back": "Application, Présentation, Session, Transport, Réseau, Liaison, Physique.",
+    "tag": "OSI/TCP-IP"
+  },
+  {
+    "id": "rx-f002",
+    "front": "Unités de données par couche",
+    "back": "L2 trame ; L3 paquet ; L4 segment (TCP) / datagramme (UDP).",
+    "tag": "OSI/TCP-IP"
+  },
+  {
+    "id": "rx-f003",
+    "front": "Ce qui change / ne change pas pendant le routage",
+    "back": "MAC : change à chaque saut. IP source et destination : inchangées (hors NAT). TTL : −1 par routeur.",
+    "tag": "OSI/TCP-IP"
+  },
+  {
+    "id": "rx-f004",
+    "front": "Domaines de collision et de diffusion",
+    "back": "Switch : sépare les collisions (1 par port). Routeur ou VLAN : sépare la diffusion.",
+    "tag": "OSI/TCP-IP"
+  },
+  {
+    "id": "rx-f005",
+    "front": "Adresse MAC",
+    "back": "48 bits, 6 octets en hexadécimal ; diffusion FF:FF:FF:FF:FF:FF.",
+    "tag": "Ethernet/ARP"
+  },
+  {
+    "id": "rx-f006",
+    "front": "EtherType à connaître",
+    "back": "0x0800 IPv4 ; 0x0806 ARP ; 0x86DD IPv6 ; 0x8100 VLAN 802.1Q.",
+    "tag": "Ethernet/ARP"
+  },
+  {
+    "id": "rx-f007",
+    "front": "Table d'un switch",
+    "back": "Apprend par la MAC source, décide par la MAC destination, inonde si inconnue ou diffusion.",
+    "tag": "Ethernet/ARP"
+  },
+  {
+    "id": "rx-f008",
+    "front": "ARP : déroulement",
+    "back": "Requête en diffusion (« qui a X ? »), réponse en unicast, cache ; hors réseau, on résout la passerelle.",
+    "tag": "Ethernet/ARP"
+  },
+  {
+    "id": "rx-f009",
+    "front": "Commandes ARP Linux",
+    "back": "`ip neigh` ; `arp -a` ; `ip neigh flush all`.",
+    "tag": "Ethernet/ARP"
+  },
+  {
+    "id": "rx-f010",
+    "front": "Poids d'un octet",
+    "back": "128, 64, 32, 16, 8, 4, 2, 1.",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f011",
+    "front": "Valeurs d'un octet de masque",
+    "back": "0, 128, 192, 224, 240, 248, 252, 254, 255.",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f012",
+    "front": "Formules d'hôtes",
+    "back": "Total 2^(32−n) ; utilisables 2^(32−n) − 2 ; pas = 256 − octet du masque.",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f013",
+    "front": "Réseau et diffusion",
+    "back": "Réseau = adresse ET masque ; diffusion = bits hôte à 1 (dernière adresse du bloc).",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f014",
+    "front": "Adresses privées RFC 1918",
+    "back": "10.0.0.0/8 ; 172.16.0.0/12 ; 192.168.0.0/16.",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f015",
+    "front": "Adresses spéciales",
+    "back": "127/8 bouclage ; 169.254/16 APIPA ; 0.0.0.0/0 défaut ; 224/4 multicast ; 255.255.255.255 diffusion limitée.",
+    "tag": "IPv4"
+  },
+  {
+    "id": "rx-f016",
+    "front": "En-tête IPv4",
+    "back": "20 octets minimum (IHL 5) ; TTL, Protocole (1 ICMP, 6 TCP, 17 UDP), adresses source et destination.",
+    "tag": "IP/ICMP"
+  },
+  {
+    "id": "rx-f017",
+    "front": "TTL à 0",
+    "back": "Le paquet est jeté, ICMP Time Exceeded (type 11) envoyé à la source.",
+    "tag": "IP/ICMP"
+  },
+  {
+    "id": "rx-f018",
+    "front": "Fragmentation",
+    "back": "Données par fragment multiple de 8 ; décalage en blocs de 8 ; réassemblage à la destination ; DF=1 → ICMP type 3 code 4.",
+    "tag": "IP/ICMP"
+  },
+  {
+    "id": "rx-f019",
+    "front": "Lire un ping",
+    "back": "Unreachable : un routeur sans route. Timed out : retour manquant, filtrage ou éteint. TTL expired : boucle.",
+    "tag": "IP/ICMP"
+  },
+  {
+    "id": "rx-f020",
+    "front": "Poignée de main TCP",
+    "back": "SYN → SYN+ACK → ACK (3 temps) ; fermeture par FIN/ACK.",
+    "tag": "TCP/UDP"
+  },
+  {
+    "id": "rx-f021",
+    "front": "TCP vs UDP",
+    "back": "TCP : connexion, fiable, 20 octets. UDP : sans connexion, 8 octets, rapide (DNS, DHCP, voix).",
+    "tag": "TCP/UDP"
+  },
+  {
+    "id": "rx-f022",
+    "front": "Plages de ports",
+    "back": "0-1023 connus ; 1024-49151 enregistrés ; 49152-65535 éphémères.",
+    "tag": "TCP/UDP"
+  },
+  {
+    "id": "rx-f023",
+    "front": "Ports par cœur (1)",
+    "back": "FTP 20/21 · SSH 22 · Telnet 23 · SMTP 25 · DNS 53 · DHCP 67/68 · TFTP 69 · HTTP 80.",
+    "tag": "TCP/UDP"
+  },
+  {
+    "id": "rx-f024",
+    "front": "Ports par cœur (2)",
+    "back": "NTP 123 · SNMP 161/162 · LDAP 389 · HTTPS 443 · LDAPS 636 · Syslog 514 · MySQL 3306 · PostgreSQL 5432 · RDP 3389.",
+    "tag": "TCP/UDP"
+  },
+  {
+    "id": "rx-f025",
+    "front": "Méthode universelle",
+    "back": "Bloc → besoin → bits (2^s ou 2^h−2) → masque et pas → liste des sous-réseaux.",
+    "tag": "Subnetting"
+  },
+  {
+    "id": "rx-f026",
+    "front": "Sous-réseaux et hôtes",
+    "back": "s bits empruntés → 2^s sous-réseaux ; h bits restants → 2^h − 2 hôtes.",
+    "tag": "Subnetting"
+  },
+  {
+    "id": "rx-f027",
+    "front": "Pas dans l'octet critique",
+    "back": "256 − valeur du masque ; réseau = plus grand multiple du pas ≤ valeur de l'octet.",
+    "tag": "Subnetting"
+  },
+  {
+    "id": "rx-f028",
+    "front": "Règles du VLSM",
+    "back": "Trier du plus grand au plus petit, aligner chaque bloc sur un multiple de sa taille, /30 pour les liaisons.",
+    "tag": "VLSM"
+  },
+  {
+    "id": "rx-f029",
+    "front": "Plan classique /24",
+    "back": "/25 en .0 · /26 en .128 · /27 en .192 · /28 en .224 · /30 en .240 et .244.",
+    "tag": "VLSM"
+  },
+  {
+    "id": "rx-f030",
+    "front": "Résumé de routes",
+    "back": "Préfixe binaire commun ; N réseaux alignés de taille T → bloc N × T ; vérifier la couverture exacte.",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f031",
+    "front": "Résumés de l'examen",
+    "back": "192.168.0.0-.63.255 → /18 ; 10.0.0.0-10.3.255.255 → /14 ; 192.168.0.0-.0.63 → /26 ; 1.0.0.0-1.0.7.255 → /21.",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f032",
+    "front": "Choix de la route",
+    "back": "1) préfixe le plus long, 2) AD la plus basse, 3) métrique la plus basse (sinon équilibrage).",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f033",
+    "front": "Distances administratives",
+    "back": "Connecté 0 · statique 1 · eBGP 20 · EIGRP 90 · OSPF 110 · IS-IS 115 · RIP 120 · iBGP 200.",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f034",
+    "front": "Codes de la table Cisco",
+    "back": "C connecté · L local · S statique · O OSPF · S* candidate à la route par défaut.",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f035",
+    "front": "Une route C existe si…",
+    "back": "L'interface est up/up et possède une adresse IP.",
+    "tag": "Routage"
+  },
+  {
+    "id": "rx-f036",
+    "front": "Route statique Cisco",
+    "back": "`ip route RÉSEAU MASQUE SAUT [AD]` ; défaut `ip route 0.0.0.0 0.0.0.0 SAUT`.",
+    "tag": "Statique"
+  },
+  {
+    "id": "rx-f037",
+    "front": "Route flottante",
+    "back": "Même destination, AD plus élevée (ex. 200) : secours qui n'apparaît qu'en cas de panne.",
+    "tag": "Statique"
+  },
+  {
+    "id": "rx-f038",
+    "front": "Méthode en 6 étapes",
+    "back": "Lister les réseaux, repérer les connectés, trouver les inconnus, saut suivant voisin, écrire, vérifier le retour.",
+    "tag": "Statique"
+  },
+  {
+    "id": "rx-f039",
+    "front": "Null0 avec résumé",
+    "back": "`ip route R M Null0` jette les paquets pour adresses inexistantes du résumé.",
+    "tag": "Statique"
+  },
+  {
+    "id": "rx-f040",
+    "front": "Linux : routes",
+    "back": "`ip route add R/n via SAUT` ; `ip route add default via SAUT` ; `sysctl net.ipv4.ip_forward=1`.",
+    "tag": "Statique"
+  },
+  {
+    "id": "rx-f041",
+    "front": "Masque générique",
+    "back": "255 moins chaque octet du masque : /23 → 0.0.1.255 ; /30 → 0.0.0.3.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f042",
+    "front": "Configuration OSPF",
+    "back": "`router ospf N` + `network A W area 0` (ou `ip ospf N area 0` sur l'interface) + `passive-interface` sur les LAN.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f043",
+    "front": "Faits OSPF",
+    "back": "AD 110 · protocole IP 89 · 224.0.0.5/6 · Hello 10 s / Dead 40 s · zone 0 backbone.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f044",
+    "front": "Voisinage OSPF",
+    "back": "Même masque sur le lien, même zone, mêmes Hello/Dead, interface non passive.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f045",
+    "front": "Sortie Internet dans OSPF",
+    "back": "Route statique par défaut + `default-information originate`.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f046",
+    "front": "Coût OSPF",
+    "back": "100 Mb/s ÷ bande passante ; Gigabit = 1 → `auto-cost reference-bandwidth 10000`.",
+    "tag": "OSPF"
+  },
+  {
+    "id": "rx-f047",
+    "front": "Écriture IPv6",
+    "back": "8 groupes de 16 bits ; zéros de tête supprimés ; `::` une seule fois.",
+    "tag": "IPv6"
+  },
+  {
+    "id": "rx-f048",
+    "front": "Types d'adresses IPv6",
+    "back": "fe80::/10 lien-local · 2000::/3 global · fc00::/7 ULA · ff00::/8 multicast · ::1 loopback.",
+    "tag": "IPv6"
+  },
+  {
+    "id": "rx-f049",
+    "front": "NDP",
+    "back": "Remplace ARP : NS/NA (voisins), RS/RA (routeurs), via ICMPv6.",
+    "tag": "IPv6"
+  },
+  {
+    "id": "rx-f050",
+    "front": "Routage IPv6 Cisco",
+    "back": "`ipv6 unicast-routing` ; `ipv6 route PRÉFIXE SAUT` ; `ipv6 route ::/0 SAUT`.",
+    "tag": "IPv6"
+  },
+  {
+    "id": "rx-f051",
+    "front": "Access et trunk",
+    "back": "Access : un VLAN sans étiquette. Trunk : plusieurs VLAN, 802.1Q ; 4 094 VLAN utilisables.",
+    "tag": "VLAN"
+  },
+  {
+    "id": "rx-f052",
+    "front": "Routage inter-VLAN",
+    "back": "Sous-interfaces `encapsulation dot1Q ID` (router-on-a-stick) ou SVI sur commutateur L3.",
+    "tag": "VLAN"
+  },
+  {
+    "id": "rx-f053",
+    "front": "STP",
+    "back": "Évite les boucles de couche 2 en bloquant des ports redondants.",
+    "tag": "VLAN"
+  },
+  {
+    "id": "rx-f054",
+    "front": "DHCP DORA",
+    "back": "Discover, Offer, Request, Ack ; UDP 67/68 ; relais : `ip helper-address`.",
+    "tag": "DHCP/DNS"
+  },
+  {
+    "id": "rx-f055",
+    "front": "Enregistrements DNS",
+    "back": "A IPv4 · AAAA IPv6 · CNAME alias · MX messagerie · NS serveurs · PTR inverse · TXT texte.",
+    "tag": "DHCP/DNS"
+  },
+  {
+    "id": "rx-f056",
+    "front": "Types de NAT",
+    "back": "Statique 1:1 ; dynamique (pool) ; PAT/overload : une IP publique, ports distincts.",
+    "tag": "NAT"
+  },
+  {
+    "id": "rx-f057",
+    "front": "PAT Cisco",
+    "back": "`ip nat inside` / `outside` + ACL + `ip nat inside source list 1 interface g0/1 overload`.",
+    "tag": "NAT"
+  },
+  {
+    "id": "rx-f058",
+    "front": "Règles d'une ACL",
+    "back": "Haut en bas, première correspondance, deny implicite final, à appliquer avec `ip access-group in|out`.",
+    "tag": "ACL"
+  },
+  {
+    "id": "rx-f059",
+    "front": "Placement des ACL",
+    "back": "Standard : près de la destination. Étendue : près de la source.",
+    "tag": "ACL"
+  },
+  {
+    "id": "rx-f060",
+    "front": "Publier un port Docker",
+    "back": "`docker run -d -p 8080:80 nginx:latest` (hôte:conteneur) ; `-p 127.0.0.1:...` pour le local seul.",
+    "tag": "Linux/Docker"
+  },
+  {
+    "id": "rx-f061",
+    "front": "Commandes réseau Linux",
+    "back": "`ip -br a` · `ip r` · `ip neigh` · `ss -tulnp` · `ip route get IP` · `tcpdump -i eth0 -n`.",
+    "tag": "Linux/Docker"
+  },
+  {
+    "id": "rx-f062",
+    "front": "Diagnostic couche par couche",
+    "back": "Lien → IP → passerelle → Internet par IP → DNS → service.",
+    "tag": "Dépannage"
+  },
+  {
+    "id": "rx-f063",
+    "front": "Ping étendu",
+    "back": "`ping DEST source INTERFACE-LAN` : teste vraiment le retour.",
+    "tag": "Dépannage"
+  },
+  {
+    "id": "rx-f064",
+    "front": "Wi-Fi vs 802.11",
+    "back": "Wi-Fi = marque de la Wi-Fi Alliance ; 802.11 = norme IEEE.",
+    "tag": "Bases"
+  },
+  {
+    "id": "rx-f065",
+    "front": "λ = c / f",
+    "back": "2,4 GHz → 12,5 cm ; 5,5 GHz → 5,5 cm ; 60 GHz → 5 mm.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f066",
+    "front": "dBm",
+    "back": "10 log10(P/1 mW). 1 W = 30 dBm ; 100 mW = 20 ; 1 mW = 0 ; 0,001 mW = −30.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f067",
+    "front": "Règles 3 dB / 10 dB",
+    "back": "+3 dB = ×2 ; +10 dB = ×10.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f068",
+    "front": "PIRE",
+    "back": "P émetteur − pertes câble + gain antenne (dBm). Limitée par la réglementation.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f069",
+    "front": "SNR",
+    "back": "RSSI − plancher de bruit (dB). Il détermine la modulation utilisable.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f070",
+    "front": "Cible RSSI voix/vidéo",
+    "back": "≥ −67 dBm. Excellent > −55 ; faible < −80.",
+    "tag": "Radio"
+  },
+  {
+    "id": "rx-f071",
+    "front": "WPAN / WLAN / WMAN / WWAN",
+    "back": "Personnel (BT, Zigbee) / local (Wi-Fi) / métropolitain (BLR, PtP) / étendu (cellulaire). LPWAN : LoRaWAN, NB-IoT…",
+    "tag": "Catégories"
+  },
+  {
+    "id": "rx-f072",
+    "front": "BSS / ESS",
+    "back": "BSS = 1 AP + ses stations ; ESS = plusieurs BSS même SSID reliés par un DS.",
+    "tag": "Architecture"
+  },
+  {
+    "id": "rx-f073",
+    "front": "BSSID vs SSID",
+    "back": "BSSID = MAC de la radio de l'AP ; SSID = nom (32 octets max).",
+    "tag": "Architecture"
+  },
+  {
+    "id": "rx-f074",
+    "front": "Modes 802.11",
+    "back": "Infrastructure, ad hoc (IBSS), mesh (802.11s), WDS/pont, moniteur.",
+    "tag": "Architecture"
+  },
+  {
+    "id": "rx-f075",
+    "front": "Couches 802.11",
+    "back": "LLC / MAC / PLCP / PMD.",
+    "tag": "Architecture"
+  },
+  {
+    "id": "rx-f076",
+    "front": "Canaux 2,4 GHz",
+    "back": "13 canaux espacés de 5 MHz ; non chevauchants : 1, 6, 11. f = 2407 + 5n.",
+    "tag": "Canaux"
+  },
+  {
+    "id": "rx-f077",
+    "front": "Fréquence canal 5 GHz",
+    "back": "f = 5000 + 5n MHz ; canal 36 = 5180 MHz.",
+    "tag": "Canaux"
+  },
+  {
+    "id": "rx-f078",
+    "front": "DFS / TPC",
+    "back": "DFS : quitter le canal si radar (CAC 60 s). TPC : réduire la puissance.",
+    "tag": "Canaux"
+  },
+  {
+    "id": "rx-f079",
+    "front": "Bande 6 GHz",
+    "back": "5925–7125 MHz ; 59/29/14/7/3 canaux de 20/40/80/160/320 MHz ; WPA3 + PMF obligatoires ; OWE pour l'ouvert.",
+    "tag": "Canaux"
+  },
+  {
+    "id": "rx-f080",
+    "front": "OFDM vs OFDMA",
+    "back": "OFDM : sous-porteuses orthogonales. OFDMA : sous-porteuses réparties en RU entre utilisateurs (Wi-Fi 6/7).",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f081",
+    "front": "Modulations",
+    "back": "BPSK 1 bit … 64-QAM 6 … 256-QAM 8 … 1024-QAM 10 … 4096-QAM 12 bits.",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f082",
+    "front": "Gains de modulation",
+    "back": "256→1024-QAM : +25 % ; 1024→4096-QAM : +20 %.",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f083",
+    "front": "MCS",
+    "back": "Modulation + taux de codage ; adapté au SNR.",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f084",
+    "front": "MIMO T×R:S",
+    "back": "4×4:4 = 4 émetteurs, 4 récepteurs, 4 flux spatiaux.",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f085",
+    "front": "MU-MIMO",
+    "back": "Servir plusieurs clients simultanément : DL en 11ac Wave 2 (4), UL+DL en 11ax (8).",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f086",
+    "front": "Beamforming",
+    "back": "Concentrer l'énergie vers le client en réglant la phase des antennes.",
+    "tag": "PHY"
+  },
+  {
+    "id": "rx-f087",
+    "front": "Formule du débit PHY",
+    "back": "N_SD × N_BPSCS × R × N_SS / (T_sym + T_GI).",
+    "tag": "Débit"
+  },
+  {
+    "id": "rx-f088",
+    "front": "802.11ac 80 MHz 256-QAM 5/6",
+    "back": "433 Mbit/s par flux (867 pour 2 flux).",
+    "tag": "Débit"
+  },
+  {
+    "id": "rx-f089",
+    "front": "802.11ax 80 MHz 1024-QAM",
+    "back": "600 Mbit/s par flux (1201 pour 2).",
+    "tag": "Débit"
+  },
+  {
+    "id": "rx-f090",
+    "front": "Débit réel",
+    "back": "Souvent 50 à 70 % du débit PHY, et partagé.",
+    "tag": "Débit"
+  },
+  {
+    "id": "rx-f091",
+    "front": "Wi-Fi 4 / 5 / 6 / 7",
+    "back": "802.11n / ac / ax / be.",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f092",
+    "front": "Wi-Fi 4 (n)",
+    "back": "MIMO, 40 MHz, 600 Mbit/s, 2,4 + 5 GHz.",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f093",
+    "front": "Wi-Fi 5 (ac)",
+    "back": "5 GHz, 256-QAM, 160 MHz, MU-MIMO DL (Wave 2).",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f094",
+    "front": "Wi-Fi 6 (ax)",
+    "back": "OFDMA, 1024-QAM, BSS Coloring, TWT, MU-MIMO UL/DL ; 6E = en 6 GHz.",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f095",
+    "front": "Wi-Fi 7 (be)",
+    "back": "320 MHz, 4096-QAM, MLO, multi-RU, preamble puncturing.",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f096",
+    "front": "Amendements clés",
+    "back": "e = QoS ; i = WPA2 ; k/v/r = roaming ; w = PMF ; s = mesh ; ah = HaLow ; ad/ay = 60 GHz ; bb = Li-Fi.",
+    "tag": "Normes"
+  },
+  {
+    "id": "rx-f097",
+    "front": "CSMA/CA",
+    "back": "Écouter, attendre DIFS + backoff, émettre, attendre l'ACK. Pas de détection de collision.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f098",
+    "front": "Nœud caché",
+    "back": "Deux stations qui ne s'entendent pas ; remède : RTS/CTS.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f099",
+    "front": "Temporisations OFDM",
+    "back": "SIFS 16 µs ; slot 9 µs ; DIFS = 34 µs.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f100",
+    "front": "Fenêtre de contention",
+    "back": "CWmin 15, CWmax 1023 : 15, 31, 63, 127, 255, 511, 1023.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f101",
+    "front": "NAV",
+    "back": "Réservation virtuelle du canal copiée depuis le champ durée des trames.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f102",
+    "front": "EDCA / WMM",
+    "back": "AC_VO (AIFSN 2, CW 3) > AC_VI (2, 7) > AC_BE (3, 15) > AC_BK (7, 15).",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f103",
+    "front": "Connexion Wi-Fi",
+    "back": "Scan → authentification → association (AID) → 802.1X/PSK → 4-way handshake (PTK, GTK) → DHCP.",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f104",
+    "front": "Roaming",
+    "back": "Le client décide ; aides : 802.11k (voisins), v (suggestion), r (réauthentification rapide).",
+    "tag": "MAC"
+  },
+  {
+    "id": "rx-f105",
+    "front": "PoE",
+    "back": "af 15,4 W ; at 30 W ; bt 60/90 W.",
+    "tag": "Conception"
+  },
+  {
+    "id": "rx-f106",
+    "front": "Règles de conception",
+    "back": "RSSI ≥ −67 dBm, recouvrement 15–20 %, 25–50 clients/radio, désactiver les bas débits, puissance modérée.",
+    "tag": "Conception"
+  },
+  {
+    "id": "rx-f107",
+    "front": "Atténuation des murs",
+    "back": "Plâtre ≈ 3 dB ; brique 6–10 dB ; béton 12–20 dB.",
+    "tag": "Conception"
+  },
+  {
+    "id": "rx-f108",
+    "front": "Commandes Wi-Fi Linux",
+    "back": "iw dev, iw list, iw dev wlan0 scan, nmcli device wifi list, iw dev wlan0 link, iw reg set BJ.",
+    "tag": "Conception"
+  },
+  {
+    "id": "rx-f109",
+    "front": "WEP",
+    "back": "RC4, IV 24 bits, CRC-32 : cassé en minutes.",
+    "tag": "Sécurité"
+  },
+  {
+    "id": "rx-f110",
+    "front": "WPA vs WPA2",
+    "back": "WPA : RC4 + TKIP (48 bits, Michael). WPA2 : AES-CCMP, PBKDF2 4096, PSK 8–63 caractères.",
+    "tag": "Sécurité"
+  },
+  {
+    "id": "rx-f111",
+    "front": "WPA3",
+    "back": "SAE (Dragonfly), PMF obligatoire, OWE, DPP, mode 192 bits ; mode transition à éviter.",
+    "tag": "Sécurité"
+  },
+  {
+    "id": "rx-f112",
+    "front": "802.1X",
+    "back": "Supplicant – authenticator (AP) – RADIUS (UDP 1812). EAP-TLS, PEAP-MSCHAPv2, EAP-TTLS.",
+    "tag": "Sécurité"
+  },
+  {
+    "id": "rx-f113",
+    "front": "Evil twin",
+    "back": "Faux AP au même SSID ; contrer en validant le certificat du serveur RADIUS.",
+    "tag": "Sécurité"
+  },
+  {
+    "id": "rx-f114",
+    "front": "FSPL",
+    "back": "20 log d(km) + 20 log f(MHz) + 32,45 ; doubler d ou f = +6 dB.",
+    "tag": "Liaisons"
+  },
+  {
+    "id": "rx-f115",
+    "front": "Bilan de liaison",
+    "back": "Pr = PTx − Lc + GTx − FSPL + GRx − Lc ; marge = Pr − sensibilité ≥ 10–15 dB.",
+    "tag": "Liaisons"
+  },
+  {
+    "id": "rx-f116",
+    "front": "Exemple 5 GHz / 10 km",
+    "back": "FSPL 126,4 dB ; Pr −57,4 dBm ; marge +17,6 dB (sensibilité −75).",
+    "tag": "Liaisons"
+  },
+  {
+    "id": "rx-f117",
+    "front": "Zone de Fresnel",
+    "back": "r = 17,32 √(d_km/(4 f_GHz)) ; dégager ≥ 60 % (≈ 12,2 m à 5 GHz/10 km).",
+    "tag": "Liaisons"
+  },
+  {
+    "id": "rx-f118",
+    "front": "Pointage d'antenne",
+    "back": "Pré-pointage (azimut, élévation, déclinaison) puis pointage fin sur RSSI/SNR ; attention aux lobes secondaires.",
+    "tag": "Liaisons"
+  },
+  {
+    "id": "rx-f119",
+    "front": "Radio Mobile",
+    "back": "Longley-Rice (ITM) + SRTM : profil de terrain, Fresnel, marge.",
+    "tag": "Liaisons"
+  }
 ]

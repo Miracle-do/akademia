@@ -1,0 +1,86 @@
+{
+  "n": 26,
+  "title": "Épreuve n° 26 · MAC, conception et sécurité Wi-Fi (1 h 30)",
+  "durationMinutes": 90,
+  "points": 20,
+  "parts": [
+    {
+      "id": "p1",
+      "title": "Exercice 1 : accès au support",
+      "points": 7,
+      "intro": "Plusieurs stations partagent un canal 5 GHz.",
+      "questions": [
+        {
+          "id": "e26p1q1",
+          "q": "Calculez le DIFS (SIFS 16 µs, slot 9 µs).",
+          "points": 1,
+          "a": "16 + 2 × 9 = **34 µs**."
+        },
+        {
+          "id": "e26p1q2",
+          "q": "Donnez l'évolution de la fenêtre de contention après des collisions successives.",
+          "points": 2,
+          "a": "15 → 31 → 63 → 127 → 255 → 511 → **1023** (CWmax)."
+        },
+        {
+          "id": "e26p1q3",
+          "q": "Expliquez le problème du nœud caché et sa solution.",
+          "points": 4,
+          "a": "A et C voient l'AP B mais pas l'un l'autre : leurs trames entrent en collision en B. **RTS/CTS** : le CTS émis par B est entendu de tous, ils règlent leur **NAV** et se taisent."
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Exercice 2 : conception d'un WLAN de campus",
+      "points": 7,
+      "intro": "Un amphithéâtre de 300 étudiants, un bâtiment en béton.",
+      "questions": [
+        {
+          "id": "e26p2q1",
+          "q": "Estimez le nombre minimal d'AP (50 clients actifs max. par radio).",
+          "points": 2,
+          "a": "300 / 50 = **6 radios** au minimum, soit au moins 3 AP bi-bandes, davantage avec marge."
+        },
+        {
+          "id": "e26p2q2",
+          "q": "Quels réglages recommandez-vous (canaux, débits, puissance) ?",
+          "points": 3,
+          "a": "Canaux 20 MHz en 5/6 GHz, plan sans co-canal ; désactiver 1/2/5,5 Mbit/s ; puissance modérée équilibrée sur celle des clients ; RSSI ≥ −67 dBm."
+        },
+        {
+          "id": "e26p2q3",
+          "q": "Quel PoE choisir pour des AP Wi-Fi 6E ?",
+          "points": 2,
+          "a": "**802.3bt** (60 W) ; 802.3at (30 W) peut limiter les radios."
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Exercice 3 : sécurité",
+      "points": 6,
+      "intro": "Le réseau « UAC-Wifi » utilise WPA2-PSK.",
+      "questions": [
+        {
+          "id": "e26p3q1",
+          "q": "Citez deux faiblesses du WPA2-PSK.",
+          "points": 2,
+          "a": "Pas de forward secrecy ; handshake capturable puis **dictionnaire hors ligne**."
+        },
+        {
+          "id": "e26p3q2",
+          "q": "Quelle architecture recommandez-vous pour le personnel ?",
+          "points": 2,
+          "a": "**WPA3/WPA2-Entreprise** avec 802.1X, RADIUS, **EAP-TLS** ou PEAP, validation du certificat serveur."
+        },
+        {
+          "id": "e26p3q3",
+          "q": "Quelles mesures pour le Wi-Fi invité ?",
+          "points": 2,
+          "a": "SSID/VLAN séparé, isolation des clients, OWE ou portail captif, pas d'accès au réseau interne."
+        }
+      ]
+    }
+  ]
+}
