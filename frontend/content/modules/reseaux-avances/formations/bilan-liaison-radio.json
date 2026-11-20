@@ -1,0 +1,519 @@
+{
+  "id": "bilan-liaison-radio",
+  "order": 10,
+  "title": "Bilan de liaison et calculs radio",
+  "tagline": "dBm, FSPL, marge, Fresnel, pointage : valide une liaison Wi-Fi longue distance avant de monter sur le mât.",
+  "emoji": "📡",
+  "color": "#0891B2",
+  "level": "Intermédiaire",
+  "minutes": 46,
+  "pitch": [
+    "Bonjour ! Aujourd'hui : **« Bilan de liaison et calculs radio »** 📡.",
+    "Relier deux bâtiments à 10 km avec du Wi-Fi, c'est possible… si les calculs sont bons. Une erreur de 6 dB, et la liaison ne passe pas.",
+    "Tu apprends à **convertir en dBm**, calculer la **perte en espace libre**, établir un **bilan de liaison**, vérifier la **zone de Fresnel** et préparer le **pointage**, avec des exercices corrigés."
+  ],
+  "benefits": [
+    "Convertir mW ↔ dBm de tête (règles du 3 et du 10)",
+    "Calculer la FSPL et la marge d'une liaison PtP",
+    "Vérifier le dégagement de la zone de Fresnel",
+    "Préparer le pointage des antennes"
+  ],
+  "lessons": [
+    {
+      "id": "dbm",
+      "title": "dB et dBm sans calculatrice",
+      "emoji": "🔢",
+      "minutes": 9,
+      "steps": [
+        {
+          "type": "say",
+          "text": "Salut ! C'est **Nimbo** ☁️. En radio, les puissances vont de **1 W** à des **milliardièmes de milliwatt**. Pour ne pas écrire 0,000000001, on passe en **décibels**. Bonne nouvelle : avec deux règles, tu convertis presque tout de tête."
+        },
+        {
+          "type": "code",
+          "title": "Les deux règles",
+          "sql": "+3 dB  =  ×2        −3 dB  =  ÷2\n+10 dB =  ×10       −10 dB =  ÷10\n\n0 dBm = 1 mW   10 dBm = 10 mW   20 dBm = 100 mW   30 dBm = 1 W",
+          "lang": "Calcul"
+        },
+        {
+          "type": "say",
+          "text": "**dBm** est une puissance **absolue** (par rapport à 1 mW). **dB** est un **rapport** : un gain ou une perte. On additionne des dB, on ne multiplie plus."
+        },
+        {
+          "type": "choice",
+          "q": "Un signal passe de 10 mW à 20 mW. De combien de dB a-t-il augmenté ?",
+          "options": [
+            "+10 dB",
+            "+3 dB",
+            "+2 dB"
+          ],
+          "answer": 1,
+          "explain": "Doubler la puissance = **+3 dB**."
+        },
+        {
+          "type": "exercise",
+          "q": "Convertis **100 mW** en dBm (écris le nombre).",
+          "hints": [
+            "100 mW = 10 × 10 mW, et 10 mW = 10 dBm.",
+            "Chaque ×10 ajoute 10 dB à partir de 0 dBm (1 mW)."
+          ],
+          "accept": [
+            "20",
+            "20 dBm",
+            "20dBm",
+            "20 dBm"
+          ],
+          "solution": "20",
+          "explain": "10·log₁₀(100) = **20 dBm**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Convertis **200 mW** en dBm.",
+          "hints": [
+            "200 = 100 × 2.",
+            "20 dBm + 3 dB."
+          ],
+          "accept": [
+            "23",
+            "23 dBm",
+            "23dBm",
+            "23 dBm"
+          ],
+          "solution": "23",
+          "explain": "100 mW = 20 dBm ; ×2 = +3 dB → **23 dBm**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "choice",
+          "q": "Combien vaut 0,001 mW en dBm ?",
+          "options": [
+            "−30 dBm",
+            "−3 dBm",
+            "−10 dBm"
+          ],
+          "answer": 0,
+          "explain": "0,001 = 10⁻³ → 10·log₁₀(10⁻³) = **−30 dBm**."
+        },
+        {
+          "type": "say",
+          "text": "Maintenant la **PIRE** : la puissance réellement rayonnée dans l'axe de l'antenne. **PIRE = P émetteur − pertes de câble + gain d'antenne**. C'est elle que la réglementation limite."
+        },
+        {
+          "type": "exercise",
+          "q": "Émetteur **20 dBm**, câble **2 dB**, antenne **6 dBi**. Donne la PIRE en dBm.",
+          "hints": [
+            "Soustrais les pertes, ajoute le gain.",
+            "20 − 2 + 6"
+          ],
+          "accept": [
+            "24",
+            "24 dBm",
+            "24dBm",
+            "24 dBm"
+          ],
+          "solution": "24",
+          "explain": "20 − 2 + 6 = **24 dBm** (≈ 250 mW).",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "RSSI **−67 dBm**, bruit **−92 dBm**. Quel SNR en dB ?",
+          "hints": [
+            "SNR = RSSI − bruit",
+            "−67 − (−92)"
+          ],
+          "accept": [
+            "25",
+            "25 dB",
+            "25dB",
+            "25 dB"
+          ],
+          "solution": "25",
+          "explain": "−67 + 92 = **25 dB**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        }
+      ]
+    },
+    {
+      "id": "fspl",
+      "title": "La perte en espace libre (FSPL)",
+      "emoji": "📉",
+      "minutes": 9,
+      "steps": [
+        {
+          "type": "say",
+          "text": "Une onde qui s'éloigne **s'étale** : l'énergie se dilue. Cette perte, même sans obstacle, s'appelle la **FSPL** (*Free Space Path Loss*). Elle augmente avec la **distance** et la **fréquence**."
+        },
+        {
+          "type": "code",
+          "title": "Formule (d en km, f en MHz)",
+          "sql": "FSPL(dB) = 20·log₁₀(d) + 20·log₁₀(f) + 32,45\n\nExemples :\n 2,4 GHz,  1 km  → 100,05 dB\n 5 GHz,  100 m   →  86,43 dB\n 5 GHz,   10 km  → 126,43 dB\n 5,8 GHz, 15 km  → 131,24 dB",
+          "lang": "Calcul"
+        },
+        {
+          "type": "say",
+          "text": "Attention aux unités : **d en kilomètres** et **f en mégahertz** (5 GHz = 5000 MHz). 100 m = 0,1 km."
+        },
+        {
+          "type": "choice",
+          "q": "On **double la distance** de la liaison. La FSPL…",
+          "options": [
+            "augmente de 3 dB",
+            "double",
+            "augmente de 6 dB"
+          ],
+          "answer": 2,
+          "explain": "20·log₁₀(2) = **6,02 dB**."
+        },
+        {
+          "type": "choice",
+          "q": "On passe de 2,4 GHz à 4,8 GHz (fréquence doublée). La FSPL…",
+          "options": [
+            "diminue de 6 dB",
+            "ne change pas",
+            "augmente de 6 dB"
+          ],
+          "answer": 2,
+          "explain": "20·log₁₀(2) = 6,02 dB : plus la fréquence monte, plus la perte est forte."
+        },
+        {
+          "type": "exercise",
+          "q": "Calcule la **FSPL** à **2,4 GHz** sur **1 km** (arrondie à l'entier, en dB).",
+          "hints": [
+            "f = 2400 MHz, d = 1 km → log₁₀(1) = 0.",
+            "20·log₁₀(2400) = 67,6 ; + 32,45"
+          ],
+          "accept": [
+            "100",
+            "100 dB",
+            "100dB",
+            "100 dB",
+            "100,05",
+            "100.05"
+          ],
+          "solution": "100",
+          "explain": "0 + 67,60 + 32,45 = **100,05 dB**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Calcule la **FSPL** à **5 GHz** sur **10 km** (arrondie au dixième).",
+          "hints": [
+            "20·log₁₀(10) = 20",
+            "20·log₁₀(5000) = 73,98 ; + 32,45"
+          ],
+          "accept": [
+            "126,4",
+            "126.43",
+            "126,43",
+            "126,4 dB",
+            "126.4 dB"
+          ],
+          "solution": "126.4",
+          "explain": "20 + 73,98 + 32,45 = **126,43 dB**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Un lien fait 126,4 dB de FSPL sur 10 km. Quelle sera la FSPL sur **20 km** (même fréquence), arrondie au dixième ?",
+          "hints": [
+            "Doubler la distance ajoute 6 dB.",
+            "126,4 + 6"
+          ],
+          "accept": [
+            "132,4",
+            "132.43",
+            "132,43",
+            "132,4 dB"
+          ],
+          "solution": "132.4",
+          "explain": "126,4 + 6,02 = **132,4 dB**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        }
+      ]
+    },
+    {
+      "id": "bilan",
+      "title": "Le bilan de liaison",
+      "emoji": "📡",
+      "minutes": 11,
+      "steps": [
+        {
+          "type": "say",
+          "text": "Le **bilan de liaison** répond à la question : *« le signal arrivera-t-il assez fort pour être décodé ? »* On suit la puissance de l'émetteur jusqu'au récepteur, en ajoutant les **gains** et en retranchant les **pertes**."
+        },
+        {
+          "type": "code",
+          "title": "Les formules",
+          "sql": "Pr = P_Tx − L_câble_Tx + G_Tx − FSPL + G_Rx − L_câble_Rx\nMarge = Pr − Sensibilité du récepteur\n\nObjectif : Marge ≥ 10 à 15 dB",
+          "lang": "Calcul"
+        },
+        {
+          "type": "say",
+          "text": "Pourquoi 10–15 dB de marge ? Pour absorber la **pluie**, un léger **désalignement** d'antenne, les **interférences** et le **vieillissement** du matériel."
+        },
+        {
+          "type": "choice",
+          "q": "Une liaison a une marge de 2 dB. Que conclure ?",
+          "options": [
+            "Trop juste : elle risque de couper",
+            "Elle est parfaite",
+            "Elle est impossible"
+          ],
+          "answer": 0,
+          "explain": "Moins de 10 dB : aucune réserve face aux aléas."
+        },
+        {
+          "type": "say",
+          "text": "Exemple du cours : 5 GHz, 10 km, PIRE 46 dBm, FSPL 126,4 dB, gain de réception 27 dBi, sensibilité −75 dBm. On a Pr = −57,4 dBm, marge = **+17,6 dB** ✓."
+        },
+        {
+          "type": "exercise",
+          "q": "Liaison **15 km à 5,8 GHz** : FSPL = **131,24 dB**. Tx **24 dBm**, câbles **1 dB** chacun, antennes **27 dBi** chacune. Calcule **Pr** (dBm).",
+          "hints": [
+            "Pr = 24 − 1 + 27 − 131,24 + 27 − 1",
+            "Additionne d'abord les gains et soustrais les pertes."
+          ],
+          "accept": [
+            "−55,24",
+            "-55,24",
+            "-55.24 dBm",
+            "−55.24",
+            "-55,24 dBm",
+            "−55,24 dBm"
+          ],
+          "solution": "-55.24",
+          "explain": "24 − 1 + 27 − 131,24 + 27 − 1 = **−55,24 dBm**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Sensibilité du récepteur : **−78 dBm**. Quelle est la **marge** (dB) ?",
+          "hints": [
+            "Marge = Pr − sensibilité",
+            "−55,24 − (−78)"
+          ],
+          "accept": [
+            "22,76",
+            "22,76 dB",
+            "22.76 dB"
+          ],
+          "solution": "22.76",
+          "explain": "−55,24 + 78 = **22,76 dB** : liaison viable.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Même liaison portée à **30 km** (distance doublée). Quelle marge reste-t-il (arrondie à l'entier) ?",
+          "hints": [
+            "Doubler la distance coûte 6,02 dB.",
+            "22,76 − 6,02"
+          ],
+          "accept": [
+            "16,7",
+            "16.7",
+            "17 dB",
+            "16,74",
+            "16.74"
+          ],
+          "solution": "17",
+          "explain": "22,76 − 6,02 = **16,74 dB ≈ 17 dB** : encore acceptable.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "choice",
+          "q": "Quel levier est le plus efficace pour regagner 6 dB de marge ?",
+          "options": [
+            "Raccourcir le câble de 0,1 dB",
+            "Remplacer les antennes par des antennes de +3 dBi chacune",
+            "Changer le SSID"
+          ],
+          "answer": 1,
+          "explain": "+3 dBi à chaque bout = +6 dB (un gain à l'émission **et** à la réception)."
+        }
+      ]
+    },
+    {
+      "id": "fresnel",
+      "title": "Fresnel et ligne de vue",
+      "emoji": "🛰️",
+      "minutes": 8,
+      "steps": [
+        {
+          "type": "say",
+          "text": "Même avec une ligne de vue, un obstacle **près du trajet** peut dégrader le signal : l'onde ne voyage pas sur une ligne mais dans un **ellipsoïde**, la **zone de Fresnel**."
+        },
+        {
+          "type": "code",
+          "title": "Rayon de la 1ʳᵉ zone de Fresnel (au milieu)",
+          "sql": "r (m) = 17,32 × √( d(km) / (4 × f(GHz)) )\n\n 5 GHz,   10 km → 12,2 m\n 5,8 GHz, 15 km → 13,9 m (60 % = 8,4 m)\n\nRègle : ≥ 60 % de r dégagé",
+          "lang": "Calcul"
+        },
+        {
+          "type": "say",
+          "text": "Plus la fréquence est **haute**, plus la zone est **étroite**. Plus la liaison est **longue**, plus elle est **large**. Et il ne faut pas oublier la **courbure terrestre** ni les arbres qui poussent."
+        },
+        {
+          "type": "choice",
+          "q": "Quelle proportion minimale de la zone de Fresnel faut-il dégager ?",
+          "options": [
+            "10 %",
+            "60 %",
+            "100 % exactement"
+          ],
+          "answer": 1,
+          "explain": "On vise au moins 60 %."
+        },
+        {
+          "type": "exercise",
+          "q": "Calcule le rayon de Fresnel (mètres, arrondi au dixième) pour **5 GHz** et **10 km**.",
+          "hints": [
+            "d/(4f) = 10/20 = 0,5",
+            "17,32 × √0,5"
+          ],
+          "accept": [
+            "12,2",
+            "12,2 m",
+            "12.2 m",
+            "12,25",
+            "12.25"
+          ],
+          "solution": "12.2",
+          "explain": "17,32 × 0,707 = **12,2 m**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Pour 5,8 GHz et 15 km, quelle hauteur (m, au dixième) doit rester dégagée à 60 % ? (r = 13,9 m)",
+          "hints": [
+            "60 % de 13,9",
+            "0,6 × 13,9"
+          ],
+          "accept": [
+            "8,4",
+            "8,4 m",
+            "8.4 m",
+            "8,3",
+            "8.3",
+            "8,34",
+            "8.34"
+          ],
+          "solution": "8.4",
+          "explain": "0,6 × 13,93 = **8,4 m** à dégager.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "choice",
+          "q": "Une liaison tombe en panne à la saison des pluies, après avoir bien fonctionné. Cause plausible ?",
+          "options": [
+            "Le SSID a changé",
+            "Le DHCP est plein",
+            "Végétation qui a poussé dans la zone de Fresnel"
+          ],
+          "answer": 2,
+          "explain": "Les obstacles dans la zone de Fresnel dégradent le signal ; la végétation grandit."
+        }
+      ]
+    },
+    {
+      "id": "pointage",
+      "title": "Pointage et défi final",
+      "emoji": "🎯",
+      "minutes": 9,
+      "steps": [
+        {
+          "type": "say",
+          "text": "Dernière étape : **orienter** les antennes. D'abord on calcule (pré-pointage), puis on affine sur le terrain. Sur de longues distances, **0,2° d'erreur** se paie cher."
+        },
+        {
+          "type": "code",
+          "title": "Les trois valeurs",
+          "sql": "Azimut     : cap vers l'autre site (corrigé de la déclinaison magnétique)\nÉlévation  : atan( Δaltitude / distance )\nPointage fin : on bouge lentement en lisant le RSSI/SNR",
+          "lang": "Calcul"
+        },
+        {
+          "type": "exercise",
+          "q": "A est à **20 m** d'altitude, B à **60 m**, distance **11,05 km**. Élévation d'antenne (degrés, 2 décimales) ?",
+          "hints": [
+            "Δaltitude = 40 m = 0,040 km",
+            "atan(40/11050)"
+          ],
+          "accept": [
+            "0,21",
+            "0,21°",
+            "0.21°",
+            "0,2",
+            "0.2",
+            "0,207",
+            "0.207"
+          ],
+          "solution": "0.21",
+          "explain": "atan(40/11050) = **0,207° ≈ 0,21°**.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "choice",
+          "q": "Pourquoi vérifier en balayant au-delà du maximum de signal trouvé ?",
+          "options": [
+            "Pour éviter de se caler sur un lobe secondaire",
+            "Pour chiffrer le lien",
+            "Pour changer de canal"
+          ],
+          "answer": 0,
+          "explain": "Un lobe secondaire donne un maximum local, plus faible que le lobe principal."
+        },
+        {
+          "type": "choice",
+          "q": "Que faut-il installer pour protéger la radio sur un mât ?",
+          "options": [
+            "Un second SSID",
+            "Un parafoudre et une mise à la terre",
+            "Un répéteur"
+          ],
+          "answer": 1,
+          "explain": "La foudre est un risque majeur en extérieur."
+        },
+        {
+          "type": "say",
+          "text": "**Défi final** 🏁 : lien PtP à **5,8 GHz** sur **5 km**. Tx **20 dBm**, câbles **1 dB** chacun, antennes **23 dBi** chacune, sensibilité **−80 dBm**. FSPL = **121,70 dB**."
+        },
+        {
+          "type": "exercise",
+          "q": "Calcule **Pr** (dBm, au dixième).",
+          "hints": [
+            "Gains : 23 + 23 + 20 = 66",
+            "Pertes : 1 + 1 + 121,70 = 123,70"
+          ],
+          "accept": [
+            "−57,7",
+            "-57,7",
+            "-57.7 dBm",
+            "−57.7",
+            "-57,7 dBm",
+            "−57,7 dBm"
+          ],
+          "solution": "-57.7",
+          "explain": "66 − 123,70 = **−57,7 dBm**. Marge = −57,7 + 80 = **22,3 dB** : liaison viable ✓.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        },
+        {
+          "type": "exercise",
+          "q": "Quelle est alors la **marge** (dB, au dixième) ?",
+          "hints": [
+            "Marge = Pr − sensibilité",
+            "−57,7 − (−80)"
+          ],
+          "accept": [
+            "22,3",
+            "22,3 dB",
+            "22.3 dB"
+          ],
+          "solution": "22.3",
+          "explain": "−57,7 + 80 = **22,3 dB** ≥ 10–15 dB : on peut lancer l'installation.",
+          "placeholder": "Écris ta réponse (nombre)…"
+        }
+      ]
+    }
+  ]
+}
