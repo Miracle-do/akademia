@@ -42,5 +42,5 @@ if (!noGit) {
   run('git add frontend/package.json frontend/CHANGELOG.md package-lock.json');
   run(`git commit -m "release: v${next}"`);
   run(`git tag -a v${next} -m "Akademia v${next}"`);
-  console.log(`\nÀ pousser : git push origin main --follow-tags`);
+  console.log(`\nÀ pousser : git push origin main, puis git push origin v${next} (le tag peut être refusé depuis l'environnement de Claude : le pousser alors depuis ton poste)`);
 }
