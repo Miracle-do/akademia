@@ -1,0 +1,137 @@
+{
+ "n": 4,
+ "title": "Épreuve n° 4 · Deuxième devoir SQL : cabinet de médecin",
+ "durationMinutes": 180,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Requêtes SQL sur le cabinet de médecin",
+   "points": 20,
+   "intro": "Le modèle logique (3FN) est le suivant. Traduisez en SQL les 20 requêtes. Les dates se notent `'AAAA-MM-JJ'`.",
+   "context": "PATIENT (**CodPat**, Nom, Prénom, DatNais, Sexe, Profession, Contact)\nACTE (**CodAct**, LibelAct, Tarif)\nCONSULTATION (**NumCons**, DatCons, #CodPat)\nAFFECTION (**CodAf**, NomAf, SymptAfPrinc, SymptAfSec)\nMEDICAMENT (**CodMedi**, NomMedi, Fabricant, PosoInit, DatPerempt, PrixUnit)\nCOMPOSER (**#NumCons, #CodAct**) · CONSULTER (**#NumCons, #CodAf**) · CONCERNER (**#CodAct, #CodAf**)\nPRESCRIRE (**#NumCons, #CodMedi**, Quantité, PosoMed)\nPAYER (**#NumCons, DatePaie**, Montant)\nDECEDER (**#CodPat**, DateDeces)\n\n*Dans les corrections, les colonnes sont écrites sans accent ni mot réservé (`Prenom`, `Quantite`, `DatePaie`, `DateDeces`) pour que les requêtes s'exécutent telles quelles.*",
+   "questions": [
+    {
+     "id": "e04p1q1",
+     "q": "1. Lister nom et prénom des patients de moins de 5 ans au 1er mars 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT Nom, Prenom FROM PATIENT\nWHERE DatNais > '2014-03-01' AND DatNais <= '2019-03-01';\n```"
+    },
+    {
+     "id": "e04p1q2",
+     "q": "2. Lister les libellés des actes de plus de 5 000 F.",
+     "points": 1,
+     "a": "```sql\nSELECT LibelAct FROM ACTE WHERE Tarif > 5000;\n```"
+    },
+    {
+     "id": "e04p1q3",
+     "q": "3. Lister nom et prénom des patients consultés depuis le 1er septembre 2018.",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT p.Nom, p.Prenom\nFROM PATIENT p JOIN CONSULTATION c ON c.CodPat = p.CodPat\nWHERE c.DatCons >= '2018-09-01';\n```"
+    },
+    {
+     "id": "e04p1q4",
+     "q": "4. Lister par patient (nom et prénom) les actes subis.",
+     "points": 1,
+     "a": "```sql\nSELECT p.Nom, p.Prenom, a.LibelAct\nFROM PATIENT p\nJOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN COMPOSER co ON co.NumCons = c.NumCons\nJOIN ACTE a ON a.CodAct = co.CodAct\nORDER BY p.Nom, p.Prenom;\n```"
+    },
+    {
+     "id": "e04p1q5",
+     "q": "5. Quelle est l'affection la plus souffrante (celle qui touche le plus de consultations) ?",
+     "points": 1,
+     "a": "```sql\nSELECT a.NomAf, COUNT(*) AS nb\nFROM AFFECTION a JOIN CONSULTER cr ON cr.CodAf = a.CodAf\nGROUP BY a.CodAf, a.NomAf\nHAVING COUNT(*) = (SELECT MAX(t.nb) FROM (SELECT COUNT(*) AS nb FROM CONSULTER GROUP BY CodAf) t);\n```"
+    },
+    {
+     "id": "e04p1q6",
+     "q": "6. Quel est l'acte le plus pratiqué ?",
+     "points": 1,
+     "a": "```sql\nSELECT a.LibelAct, COUNT(*) AS nb\nFROM ACTE a JOIN COMPOSER co ON co.CodAct = a.CodAct\nGROUP BY a.CodAct, a.LibelAct\nHAVING COUNT(*) = (SELECT MAX(t.nb) FROM (SELECT COUNT(*) AS nb FROM COMPOSER GROUP BY CodAct) t);\n```"
+    },
+    {
+     "id": "e04p1q7",
+     "q": "7. Quels sont les médicaments qui traitent le paludisme (prescrits lors des consultations pour paludisme) ?",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT m.NomMedi\nFROM MEDICAMENT m\nJOIN PRESCRIRE pr ON pr.CodMedi = m.CodMedi\nJOIN CONSULTER cr ON cr.NumCons = pr.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nWHERE af.NomAf = 'Paludisme';\n```\n\n*Un médicament « traite » une affection s'il est prescrit lors d'une consultation pour cette affection (il n'y a pas de lien direct médicament–affection dans le modèle).*"
+    },
+    {
+     "id": "e04p1q8",
+     "q": "8. Quels sont les actes du paludisme ?",
+     "points": 1,
+     "a": "```sql\nSELECT a.LibelAct\nFROM ACTE a JOIN CONCERNER cn ON cn.CodAct = a.CodAct\nJOIN AFFECTION af ON af.CodAf = cn.CodAf\nWHERE af.NomAf = 'Paludisme';\n```"
+    },
+    {
+     "id": "e04p1q9",
+     "q": "9. Quel est l'acte le plus cher traitant le paludisme ?",
+     "points": 1,
+     "a": "```sql\nSELECT a.LibelAct, a.Tarif\nFROM ACTE a JOIN CONCERNER cn ON cn.CodAct = a.CodAct\nJOIN AFFECTION af ON af.CodAf = cn.CodAf\nWHERE af.NomAf = 'Paludisme'\n  AND a.Tarif = (SELECT MAX(a2.Tarif) FROM ACTE a2\n                 JOIN CONCERNER cn2 ON cn2.CodAct = a2.CodAct\n                 JOIN AFFECTION af2 ON af2.CodAf = cn2.CodAf\n                 WHERE af2.NomAf = 'Paludisme');\n```"
+    },
+    {
+     "id": "e04p1q10",
+     "q": "10. Quel est le chiffre d'affaires réalisé sur chaque patient (somme des tarifs des actes) ?",
+     "points": 1,
+     "a": "```sql\nSELECT p.Nom, p.Prenom, SUM(a.Tarif) AS CA\nFROM PATIENT p\nJOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN COMPOSER co ON co.NumCons = c.NumCons\nJOIN ACTE a ON a.CodAct = co.CodAct\nGROUP BY p.CodPat, p.Nom, p.Prenom;\n```\n\n*Chiffre d'affaires = somme des tarifs des actes pratiqués.*"
+    },
+    {
+     "id": "e04p1q11",
+     "q": "11. Quels sont les patients décédés souffrant du paludisme ?",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT p.Nom, p.Prenom\nFROM PATIENT p\nJOIN DECEDER d ON d.CodPat = p.CodPat\nJOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN CONSULTER cr ON cr.NumCons = c.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nWHERE af.NomAf = 'Paludisme';\n```"
+    },
+    {
+     "id": "e04p1q12",
+     "q": "12. Quels sont les médicaments prescrits à Jules Orou ?",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT m.NomMedi\nFROM PATIENT p JOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN PRESCRIRE pr ON pr.NumCons = c.NumCons\nJOIN MEDICAMENT m ON m.CodMedi = pr.CodMedi\nWHERE p.Nom = 'Orou' AND p.Prenom = 'Jules';\n```"
+    },
+    {
+     "id": "e04p1q13",
+     "q": "13. Quelles sont les affections dont souffre Jules Orou ?",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT af.NomAf\nFROM PATIENT p JOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN CONSULTER cr ON cr.NumCons = c.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nWHERE p.Nom = 'Orou' AND p.Prenom = 'Jules';\n```"
+    },
+    {
+     "id": "e04p1q14",
+     "q": "14. Lister, par affection de Jules Orou, les actes et les médicaments (de la même consultation).",
+     "points": 1,
+     "a": "```sql\nSELECT af.NomAf, a.LibelAct, m.NomMedi\nFROM PATIENT p\nJOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN CONSULTER cr ON cr.NumCons = c.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nJOIN CONCERNER cn ON cn.CodAf = af.CodAf\nJOIN COMPOSER co ON co.NumCons = c.NumCons AND co.CodAct = cn.CodAct\nJOIN ACTE a ON a.CodAct = co.CodAct\nLEFT JOIN PRESCRIRE pr ON pr.NumCons = c.NumCons\nLEFT JOIN MEDICAMENT m ON m.CodMedi = pr.CodMedi\nWHERE p.Nom = 'Orou' AND p.Prenom = 'Jules'\nORDER BY af.NomAf;\n```\n\n*Les médicaments d'une consultation sont croisés avec ses actes : on obtient toutes les combinaisons.*"
+    },
+    {
+     "id": "e04p1q15",
+     "q": "15. Combien Jules Orou a-t-il dépensé par affection (actes pratiqués au titre de l'affection) ?",
+     "points": 1,
+     "a": "```sql\nSELECT af.NomAf, SUM(a.Tarif) AS Depense\nFROM PATIENT p\nJOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN CONSULTER cr ON cr.NumCons = c.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nJOIN CONCERNER cn ON cn.CodAf = af.CodAf\nJOIN COMPOSER co ON co.NumCons = c.NumCons AND co.CodAct = cn.CodAct\nJOIN ACTE a ON a.CodAct = co.CodAct\nWHERE p.Nom = 'Orou' AND p.Prenom = 'Jules'\nGROUP BY af.CodAf, af.NomAf;\n```\n\n*Dépense par affection = tarifs des actes pratiqués au titre de l'affection (table CONCERNER).*"
+    },
+    {
+     "id": "e04p1q16",
+     "q": "16. Combien Jules Orou a-t-il dépensé au total (actes + médicaments) ?",
+     "points": 1,
+     "a": "```sql\nSELECT (SELECT COALESCE(SUM(a.Tarif),0)\n        FROM CONSULTATION c JOIN COMPOSER co ON co.NumCons = c.NumCons\n        JOIN ACTE a ON a.CodAct = co.CodAct\n        WHERE c.CodPat = p.CodPat)\n     + (SELECT COALESCE(SUM(pr.Quantite * m.PrixUnit),0)\n        FROM CONSULTATION c JOIN PRESCRIRE pr ON pr.NumCons = c.NumCons\n        JOIN MEDICAMENT m ON m.CodMedi = pr.CodMedi\n        WHERE c.CodPat = p.CodPat) AS Total\nFROM PATIENT p\nWHERE p.Nom = 'Orou' AND p.Prenom = 'Jules';\n```\n\n*Total = tarifs des actes + quantité × prix unitaire des médicaments prescrits ; deux sous-requêtes évitent de multiplier les lignes.*"
+    },
+    {
+     "id": "e04p1q17",
+     "q": "17. Quel est le patient le plus consulté ?",
+     "points": 1,
+     "a": "```sql\nSELECT p.Nom, p.Prenom, COUNT(*) AS nb\nFROM PATIENT p JOIN CONSULTATION c ON c.CodPat = p.CodPat\nGROUP BY p.CodPat, p.Nom, p.Prenom\nHAVING COUNT(*) = (SELECT MAX(t.nb) FROM (SELECT COUNT(*) AS nb FROM CONSULTATION GROUP BY CodPat) t);\n```\n\n*En cas d'ex æquo, la requête renvoie tous les patients à égalité.*"
+    },
+    {
+     "id": "e04p1q18",
+     "q": "18. Quelle est l'affection qui a le plus tué ?",
+     "points": 1,
+     "a": "```sql\nSELECT af.NomAf, COUNT(DISTINCT d.CodPat) AS nb\nFROM AFFECTION af\nJOIN CONSULTER cr ON cr.CodAf = af.CodAf\nJOIN CONSULTATION c ON c.NumCons = cr.NumCons\nJOIN DECEDER d ON d.CodPat = c.CodPat\nGROUP BY af.CodAf, af.NomAf\nHAVING COUNT(DISTINCT d.CodPat) = (SELECT MAX(t.nb) FROM (\n   SELECT COUNT(DISTINCT d2.CodPat) AS nb\n   FROM CONSULTER cr2 JOIN CONSULTATION c2 ON c2.NumCons = cr2.NumCons\n   JOIN DECEDER d2 ON d2.CodPat = c2.CodPat GROUP BY cr2.CodAf) t);\n```"
+    },
+    {
+     "id": "e04p1q19",
+     "q": "19. Quel est le médicament le plus prescrit ?",
+     "points": 1,
+     "a": "```sql\nSELECT m.NomMedi, COUNT(*) AS nb\nFROM MEDICAMENT m JOIN PRESCRIRE pr ON pr.CodMedi = m.CodMedi\nGROUP BY m.CodMedi, m.NomMedi\nHAVING COUNT(*) = (SELECT MAX(t.nb) FROM (SELECT COUNT(*) AS nb FROM PRESCRIRE GROUP BY CodMedi) t);\n```"
+    },
+    {
+     "id": "e04p1q20",
+     "q": "20. Quelles sont les affections des patients de moins d'un an (au 1er mars 2019) ?",
+     "points": 1,
+     "a": "```sql\nSELECT DISTINCT af.NomAf\nFROM PATIENT p JOIN CONSULTATION c ON c.CodPat = p.CodPat\nJOIN CONSULTER cr ON cr.NumCons = c.NumCons\nJOIN AFFECTION af ON af.CodAf = cr.CodAf\nWHERE p.DatNais > '2018-03-01' AND p.DatNais <= '2019-03-01';\n```\n\n*On se place au 1er mars 2019, comme à la question 1.*"
+    }
+   ]
+  }
+ ]
+}

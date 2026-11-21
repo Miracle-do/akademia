@@ -1,0 +1,74 @@
+{
+ "n": 3,
+ "title": "Épreuve n° 3 · Premier devoir : budget et cabinet de médecin",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Exercice 1 : gestion budgétaire (10 points)",
+   "points": 10,
+   "intro": "Travail à faire : liste des attributs, règles de gestion, dépendances fonctionnelles, modèle logique en 3FN.",
+   "context": "Une entreprise est constituée de départements. Son budget est décomposé en postes de natures distinctes (petit matériel, déplacements, biens d'équipement, logiciels, frais de personnel…). Chaque département reçoit une part propre de chacun de ces postes. Toute demande de dépense suit la procédure : le département fait une **demande d'engagement** d'un montant pour une nature de dépense de son budget ; cette demande est vérifiée puis, si elle est acceptée, fait l'objet d'une **commande** auprès du fournisseur ; à ce moment le montant engagé est soustrait du poste budgétaire du département ; à la réception du bien ou du service, la **facture** est vérifiée puis **payée**. Une commande peut être annulée : le montant engagé redevient alors disponible.",
+   "questions": [
+    {
+     "id": "e03p1q1",
+     "q": "Liste des attributs et leurs symboles.",
+     "points": 2,
+     "a": "| Symbole | Désignation | Nature | Type |\n|---|---|---|---|\n| CodDep | code du département | E | C |\n| NomDep | nom du département | E | C |\n| CodNat | code de la nature de dépense | E | C |\n| LibNat | libellé de la nature | E | C |\n| MontPoste | montant alloué à un département pour une nature | E | N |\n| NumDem | numéro de demande d'engagement | E | N |\n| DateDem | date de la demande | E | D |\n| MontDem | montant demandé (engagé) | E | N |\n| EtatDem | état de la demande (acceptée / refusée) | E | C |\n| NumCmd | numéro de commande | E | N |\n| DateCmd | date de commande | E | D |\n| EtatCmd | état de la commande (valide / annulée) | E | C |\n| CodFour, NomFour, AdrFour | fournisseur | E | C |\n| NumRec, DateRec | réception | E | N, D |\n| NumFac, DateFac, MontFac, DatePaie | facture et date de paiement | E | N, D |\n\n**Attribut calculé non retenu :** le *disponible du poste* = MontPoste − Σ des montants engagés (commandes non annulées)."
+    },
+    {
+     "id": "e03p1q2",
+     "q": "Règles de gestion.",
+     "points": 2,
+     "a": "- Un département reçoit un poste pour chaque nature de dépense ; un poste est propre à **un** département et **une** nature.\n- Un département fait plusieurs demandes ; une demande émane d'**un** département et porte sur **une** nature.\n- Une demande acceptée donne lieu à **une** commande ; une demande refusée n'en génère aucune.\n- Une commande est passée auprès d'**un** fournisseur ; un fournisseur reçoit plusieurs commandes.\n- Une commande peut être annulée (EtatCmd) : le montant engagé est alors restitué au poste.\n- Une commande donne lieu à une ou plusieurs réceptions et à une facture, qui est vérifiée puis payée."
+    },
+    {
+     "id": "e03p1q3",
+     "q": "Études des dépendances fonctionnelles (DFED).",
+     "points": 3,
+     "a": "- `CodDep → NomDep`\n- `CodNat → LibNat`\n- `CodDep, CodNat → MontPoste`\n- `NumDem → DateDem, MontDem, EtatDem, CodDep, CodNat`\n- `NumCmd → DateCmd, EtatCmd, NumDem, CodFour`\n- `CodFour → NomFour, AdrFour`\n- `NumRec → DateRec, NumCmd`\n- `NumFac → DateFac, MontFac, DatePaie, NumCmd`\n\nPas de transitivité : le département de la commande se retrouve par `NumCmd → NumDem → CodDep`, on ne le répète donc pas dans COMMANDE."
+    },
+    {
+     "id": "e03p1q4",
+     "q": "Modèle logique en 3FN.",
+     "points": 3,
+     "a": "- DEPARTEMENT(**CodDep**, NomDep)\n- NATURE(**CodNat**, LibNat)\n- POSTE(**#CodDep, #CodNat**, MontPoste)\n- DEMANDE(**NumDem**, DateDem, MontDem, EtatDem, #CodDep, #CodNat) — le couple (#CodDep, #CodNat) référence POSTE\n- FOURNISSEUR(**CodFour**, NomFour, AdrFour)\n- COMMANDE(**NumCmd**, DateCmd, EtatCmd, #NumDem, #CodFour)\n- RECEPTION(**NumRec**, DateRec, #NumCmd)\n- FACTURE(**NumFac**, DateFac, MontFac, DatePaie, #NumCmd)"
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Exercice 2 : cabinet de médecin (10 points)",
+   "points": 10,
+   "intro": "Mêmes questions pour le cabinet de médecin.",
+   "context": "Chaque médecin reçoit des patients en consultation. Lors de chaque consultation, des **actes médicaux** sont effectués ; chaque acte figure dans une liste standard qui donne son tarif, ce qui permet de calculer le prix de la visite. Le patient paie lors de la visite ou plus tard ; toute consultation non payée au bout d'un mois fait l'objet d'un rappel. Les sommes perçues chaque mois constituent le revenu du médecin. Le médecin connaît la date de naissance, le sexe et la profession de chaque patient, ainsi que les **affections** dont il souffre (réparties en classes standards). Lors de chaque visite il inscrit la date, les prestations et les **médicaments prescrits**. Si un patient est décédé, il note la date du décès.",
+   "questions": [
+    {
+     "id": "e03p2q1",
+     "q": "Liste des attributs et leurs symboles.",
+     "points": 2,
+     "a": "| Symbole | Désignation | Nature | Type |\n|---|---|---|---|\n| CodPat, Nom, Prénom, DatNais, Sexe, Profession, Contact | patient | E | C, D |\n| CodAct, LibelAct, Tarif | acte médical | E | C, N |\n| NumCons, DatCons | consultation | E | N, D |\n| CodAf, NomAf, SymptAfPrinc, SymptAfSec | affection | E | C |\n| CodMedi, NomMedi, Fabricant, PosoInit, DatPerempt, PrixUnit | médicament | E | C, D, N |\n| Quantité, PosoMed | prescription | E | N, C |\n| DatePaie, Montant | paiement | E | D, N |\n| DateDeces | date de décès | E | D |\n\n**Calculés non retenus :** prix de la visite (somme des tarifs), revenu mensuel, âge du patient."
+    },
+    {
+     "id": "e03p2q2",
+     "q": "Règles de gestion.",
+     "points": 2,
+     "a": "- Un patient a plusieurs consultations ; une consultation concerne **un** patient.\n- Une consultation comprend plusieurs actes ; un acte peut être pratiqué dans plusieurs consultations.\n- Un patient peut souffrir de plusieurs affections ; une consultation peut relever de plusieurs affections.\n- Un acte peut concerner plusieurs affections et une affection plusieurs actes.\n- Lors d'une consultation, plusieurs médicaments peuvent être prescrits (avec quantité et posologie).\n- Une consultation peut être payée en plusieurs versements, à des dates différentes.\n- Un patient décédé a **une** date de décès."
+    },
+    {
+     "id": "e03p2q3",
+     "q": "Études des dépendances fonctionnelles.",
+     "points": 3,
+     "a": "- `CodPat → Nom, Prénom, DatNais, Sexe, Profession, Contact`\n- `CodAct → LibelAct, Tarif`\n- `NumCons → DatCons, CodPat`\n- `CodAf → NomAf, SymptAfPrinc, SymptAfSec`\n- `CodMedi → NomMedi, Fabricant, PosoInit, DatPerempt, PrixUnit`\n- `NumCons, CodMedi → Quantité, PosoMed`\n- `NumCons, DatePaie → Montant`\n- `CodPat → DateDeces`\n- Associations plusieurs-à-plusieurs sans attribut : (NumCons, CodAct), (NumCons, CodAf), (CodAct, CodAf)."
+    },
+    {
+     "id": "e03p2q4",
+     "q": "Modèle logique en 3FN.",
+     "points": 3,
+     "a": "- PATIENT(**CodPat**, Nom, Prénom, DatNais, Sexe, Profession, Contact)\n- ACTE(**CodAct**, LibelAct, Tarif)\n- CONSULTATION(**NumCons**, DatCons, #CodPat)\n- AFFECTION(**CodAf**, NomAf, SymptAfPrinc, SymptAfSec)\n- MEDICAMENT(**CodMedi**, NomMedi, Fabricant, PosoInit, DatPerempt, PrixUnit)\n- COMPOSER(**#NumCons, #CodAct**)\n- CONSULTER(**#NumCons, #CodAf**)\n- CONCERNER(**#CodAct, #CodAf**)\n- PRESCRIRE(**#NumCons, #CodMedi**, Quantité, PosoMed)\n- PAYER(**#NumCons, DatePaie**, Montant)\n- DECEDER(**#CodPat**, DateDeces)"
+    }
+   ]
+  }
+ ]
+}

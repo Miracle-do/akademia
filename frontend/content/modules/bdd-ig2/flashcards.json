@@ -1,0 +1,422 @@
+[
+ {
+  "id": "bd2-f001",
+  "front": "Les 4 qualités d'une base de données",
+  "back": "Exhaustive · non redondante · structurée · persistante",
+  "tag": "Généralités"
+ },
+ {
+  "id": "bd2-f002",
+  "front": "Les 3 niveaux de l'architecture ANSI/SPARC",
+  "back": "Externe (vues) · conceptuel/logique (global) · interne/physique (stockage)",
+  "tag": "Généralités"
+ },
+ {
+  "id": "bd2-f003",
+  "front": "Qui a inventé le modèle relationnel ?",
+  "back": "E. F. Codd, 1970 (IBM)",
+  "tag": "Généralités"
+ },
+ {
+  "id": "bd2-f004",
+  "front": "Hiérarchique vs réseau vs relationnel",
+  "back": "Arbre (un parent) · graphe (plusieurs parents) · tables liées par des valeurs",
+  "tag": "Généralités"
+ },
+ {
+  "id": "bd2-f005",
+  "front": "Donnée, information, connaissance",
+  "back": "Fait brut · donnée interprétée · information utilisée pour décider",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f006",
+  "front": "Attribut atomique",
+  "back": "Non décomposable sans perdre son sens (nom et prénom séparés)",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f007",
+  "front": "Synonyme vs polysème",
+  "back": "Synonymes : deux noms, une donnée · polysème : un nom, deux données",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f008",
+  "front": "Condition pour qu'un objet soit une entité",
+  "back": "Au moins deux occurrences et plusieurs attributs",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f009",
+  "front": "Identifiant",
+  "back": "Unique, non nul, stable ; souligné dans le MCD",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f010",
+  "front": "Cardinalité (0,1)",
+  "back": "Au plus une, parfois aucune",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f011",
+  "front": "Cardinalité (1,1)",
+  "back": "Exactement une",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f012",
+  "front": "Cardinalité (0,N)",
+  "back": "Aucune ou plusieurs",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f013",
+  "front": "Cardinalité (1,N)",
+  "back": "Au moins une, éventuellement plusieurs",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f014",
+  "front": "Dimension d'une association",
+  "back": "Nombre d'entités reliées : binaire, ternaire, réflexive",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f015",
+  "front": "CIF",
+  "back": "Contrainte d'Intégrité Fonctionnelle : au moins un maximum à 1. Pas de table : l'identifiant migre (clé étrangère).",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f016",
+  "front": "CIM",
+  "back": "Contrainte d'Intégrité Multiple : tous les maximums à N. Devient une table à clé concaténée.",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f017",
+  "front": "Natures d'attribut (dictionnaire)",
+  "back": "E élémentaire · Co concaténé · Ca calculé",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f018",
+  "front": "Types d'attribut (dictionnaire)",
+  "back": "N numérique · C caractère · L logique · D date",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f019",
+  "front": "Définition d'une DF",
+  "back": "A → B : à une valeur de A correspond une seule valeur de B",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f020",
+  "front": "Axiomes d'Armstrong",
+  "back": "Réflexivité · augmentation · addition (union) · transitivité",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f021",
+  "front": "DF élémentaire",
+  "back": "Source minimale : on ne peut retirer aucun attribut de la source",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f022",
+  "front": "DF directe",
+  "back": "Non déductible par transitivité d'autres DF",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f023",
+  "front": "Les 3 catégories de la couverture minimale",
+  "back": "1) identifiant simple → attributs · 2) identifiant composé → attributs · 3) identifiant → identifiant",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f024",
+  "front": "Méthode pour passer des DF au MCD",
+  "back": "Source simple → entité · source composée → association CIM · identifiant → identifiant → CIF",
+  "tag": "Dépendances"
+ },
+ {
+  "id": "bd2-f025",
+  "front": "Entité faible",
+  "back": "Sans identifiant propre : dépend d'une entité forte ; cardinalité (1,1) entre parenthèses",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f026",
+  "front": "Clé primaire d'une entité faible",
+  "back": "Identifiant de l'entité forte + numéro local : (numHotel, numChambre)",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f027",
+  "front": "Association réflexive",
+  "back": "Relie une entité à elle-même ; pattes nommées par des rôles",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f028",
+  "front": "Contraintes de spécialisation",
+  "back": "X exclusion · T totalité · XT partition",
+  "tag": "Merise"
+ },
+ {
+  "id": "bd2-f029",
+  "front": "Clé primaire",
+  "back": "Ensemble minimal d'attributs identifiant un n-uplet ; unique, non nulle",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f030",
+  "front": "Clé étrangère",
+  "back": "Attribut qui est clé primaire d'une autre relation ; notée #",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f031",
+  "front": "Intégrité référentielle",
+  "back": "Toute valeur de clé étrangère existe dans la table référencée (ou est NULL)",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f032",
+  "front": "Règle MCD → MLDR : entité",
+  "back": "Devient une relation ; identifiant = clé primaire",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f033",
+  "front": "Règle MCD → MLDR : CIF",
+  "back": "Pas de table ; l'identifiant du côté N migre vers le côté (1,1) en clé étrangère",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f034",
+  "front": "Règle MCD → MLDR : CIM",
+  "back": "Table à clé concaténée portant les attributs de l'association",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f035",
+  "front": "CIF sortante d'une CIM",
+  "back": "Ajoute seulement une clé étrangère : elle n'entre pas dans la clé primaire",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f036",
+  "front": "3 méthodes pour la généralisation",
+  "back": "Ascendante (une table) · descendante (une par sous-entité) · par distinction (mère + filles)",
+  "tag": "Relationnel"
+ },
+ {
+  "id": "bd2-f037",
+  "front": "Anomalies d'une relation mal conçue",
+  "back": "Mise à jour · insertion · suppression",
+  "tag": "Normalisation"
+ },
+ {
+  "id": "bd2-f038",
+  "front": "1FN",
+  "back": "Clé primaire + attributs atomiques",
+  "tag": "Normalisation"
+ },
+ {
+  "id": "bd2-f039",
+  "front": "2FN",
+  "back": "1FN + tout attribut non clé dépend de toute la clé",
+  "tag": "Normalisation"
+ },
+ {
+  "id": "bd2-f040",
+  "front": "3FN",
+  "back": "2FN + aucun attribut non clé ne dépend d'un autre non clé",
+  "tag": "Normalisation"
+ },
+ {
+  "id": "bd2-f041",
+  "front": "Formule pour la 3FN",
+  "back": "Dépend de la clé, de toute la clé, et rien que de la clé",
+  "tag": "Normalisation"
+ },
+ {
+  "id": "bd2-f042",
+  "front": "Projection",
+  "back": "Choisit des colonnes (SELECT)",
+  "tag": "Algèbre"
+ },
+ {
+  "id": "bd2-f043",
+  "front": "Sélection",
+  "back": "Choisit des lignes (WHERE)",
+  "tag": "Algèbre"
+ },
+ {
+  "id": "bd2-f044",
+  "front": "Union / intersection / différence",
+  "back": "Exigent le même schéma ; R − S ≠ S − R",
+  "tag": "Algèbre"
+ },
+ {
+  "id": "bd2-f045",
+  "front": "Produit cartésien",
+  "back": "m × n lignes ; jointure = produit + sélection",
+  "tag": "Algèbre"
+ },
+ {
+  "id": "bd2-f046",
+  "front": "Division relationnelle",
+  "back": "Questions en « tous »",
+  "tag": "Algèbre"
+ },
+ {
+  "id": "bd2-f047",
+  "front": "Famille DDL / DML / DQL / DCL / TCL",
+  "back": "DDL structure · DML données · DQL SELECT · DCL droits · TCL transactions",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f048",
+  "front": "Contraintes SQL",
+  "back": "NOT NULL · UNIQUE · PRIMARY KEY · FOREIGN KEY · DEFAULT · CHECK",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f049",
+  "front": "Actions référentielles",
+  "back": "CASCADE · RESTRICT · SET NULL · SET DEFAULT",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f050",
+  "front": "DROP vs DELETE vs TRUNCATE",
+  "back": "DROP supprime la table · DELETE des lignes · TRUNCATE vide la table",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f051",
+  "front": "Ordre d'exécution d'un SELECT",
+  "back": "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f052",
+  "front": "WHERE vs HAVING",
+  "back": "WHERE filtre les lignes avant le regroupement ; HAVING filtre les groupes après",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f053",
+  "front": "Règle du GROUP BY",
+  "back": "Tout attribut non agrégé du SELECT figure dans le GROUP BY",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f054",
+  "front": "LIKE",
+  "back": "% remplace 0 à n caractères · _ remplace un caractère",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f055",
+  "front": "Tester une valeur absente",
+  "back": "IS NULL / IS NOT NULL (jamais = NULL)",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f056",
+  "front": "INNER vs LEFT vs RIGHT vs FULL",
+  "back": "Correspondance seule · tout le gauche · tout le droit · les deux côtés",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f057",
+  "front": "Jointure de n tables",
+  "back": "n − 1 conditions ; sinon produit cartésien",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f058",
+  "front": "IN / ANY / ALL / EXISTS",
+  "back": "Appartient · au moins un · tous · au moins une ligne",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f059",
+  "front": "NOT IN et NULL",
+  "back": "Un NULL dans la sous-requête rend le résultat vide ; préférer NOT EXISTS",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f060",
+  "front": "Remplacer NULL",
+  "back": "MySQL IFNULL · SQL Server ISNULL · Oracle NVL · standard COALESCE",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f061",
+  "front": "Limiter les lignes",
+  "back": "MySQL LIMIT · SQL Server TOP · Oracle FETCH FIRST / ROWNUM",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f062",
+  "front": "Index",
+  "back": "Accélère les lectures, ralentit les écritures",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f063",
+  "front": "Vue",
+  "back": "Requête nommée, sans stockage de données",
+  "tag": "SQL"
+ },
+ {
+  "id": "bd2-f064",
+  "front": "Les 3 attaques d'injection SQL",
+  "back": "Condition toujours vraie (' OR '1'='1) · commentaire (admin'--) · requêtes par lots (; DROP TABLE)",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f065",
+  "front": "Parade n°1 contre l'injection",
+  "back": "Requêtes paramétrées (préparées), puis validation des entrées et moindre privilège",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f066",
+  "front": "GRANT / REVOKE / DENY",
+  "back": "Accorder · retirer · interdire (SQL Server)",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f067",
+  "front": "Privilège système vs objet",
+  "back": "Système : CREATE USER, CREATE TABLE · objet : SELECT sur une table",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f068",
+  "front": "WITH GRANT OPTION / WITH ADMIN OPTION",
+  "back": "Permet de retransmettre le droit (objet / système)",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f069",
+  "front": "Règle de sauvegarde 3-2-1",
+  "back": "3 copies, 2 supports, 1 hors site ; tester la restauration",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "bd2-f070",
+  "front": "Erreurs les plus pénalisées en SQL",
+  "back": "Produit cartésien · GROUP BY incomplet · agrégat dans WHERE · = NULL · clé étrangère dans la clé primaire",
+  "tag": "Examen"
+ }
+]

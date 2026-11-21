@@ -1,0 +1,42 @@
+[
+ {
+  "n": 1,
+  "title": "Épreuve n° 1 · Devoir de base de données 2025-2026 (IG2 A et B)",
+  "scenario": "Merise, DF, MLD et SQL (QCM)",
+  "cas": "QCM sur CIF/CIM, MCD→MLD, DFED, requêtes SQL",
+  "durationMinutes": 120,
+  "points": 22
+ },
+ {
+  "n": 2,
+  "title": "Épreuve n° 2 · SQL janvier 2020 : distribution de produits alimentaires",
+  "scenario": "Distribution alimentaire aux restaurateurs",
+  "cas": "3FN + 18 requêtes SQL (agrégats, « le plus », sous-requêtes)",
+  "durationMinutes": 180,
+  "points": 20
+ },
+ {
+  "n": 3,
+  "title": "Épreuve n° 3 · Premier devoir : budget et cabinet de médecin",
+  "scenario": "Gestion budgétaire et cabinet médical",
+  "cas": "Attributs, règles de gestion, DF et MLD en 3FN",
+  "durationMinutes": 120,
+  "points": 20
+ },
+ {
+  "n": 4,
+  "title": "Épreuve n° 4 · Deuxième devoir SQL : cabinet de médecin",
+  "scenario": "Cabinet de médecin (MLD fourni)",
+  "cas": "20 requêtes SQL : jointures, agrégats, « le plus », sous-requêtes",
+  "durationMinutes": 180,
+  "points": 20
+ },
+ {
+  "n": 5,
+  "title": "Épreuve n° 5 · Auto-entrepreneur et QCM de SQL",
+  "scenario": "Dépannage informatique à son compte",
+  "cas": "Dictionnaire, MCD et 12 QCM de SQL",
+  "durationMinutes": 120,
+  "points": 20
+ }
+]

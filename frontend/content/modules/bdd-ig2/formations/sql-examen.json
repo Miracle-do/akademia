@@ -1,0 +1,235 @@
+{
+ "id": "sql-examen",
+ "order": 1,
+ "title": "Réussir les requêtes SQL d'examen",
+ "tagline": "La méthode en 4 temps, puis projection, regroupement, jointure et sous-requête sur une petite base.",
+ "emoji": "🎯",
+ "color": "#0B7285",
+ "level": "Débutant",
+ "minutes": 28,
+ "pitch": [
+  "Bonjour ! Je te propose **« Réussir les requêtes SQL d'examen »** 🎯.",
+  "Les sujets ENEAM de base de données alignent 15 à 20 requêtes. Avec une méthode fixe et une base de deux tables, on les traite une à une, sans oublier le `GROUP BY` ni la condition de jointure.",
+  "Chaque exercice se corrige à l'écran, avec des indices si tu bloques."
+ ],
+ "benefits": [
+  "Appliquer la méthode SELECT → FROM → conditions → regroupement",
+  "Choisir entre WHERE et HAVING sans hésiter",
+  "Écrire une jointure et une jointure externe correctes",
+  "Utiliser une sous-requête pour comparer à une moyenne ou chercher « aucun »"
+ ],
+ "lessons": [
+  {
+   "id": "methode",
+   "title": "La méthode en 4 temps",
+   "emoji": "🧭",
+   "minutes": 8,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Les sujets d'examen de BDD se ressemblent : une base de quelques tables et 15 à 20 requêtes. Une **méthode fixe** évite de se perdre."
+    },
+    {
+     "type": "code",
+     "title": "Méthode en 4 temps",
+     "sql": "1. Que faut-il AFFICHER ?        -> SELECT\n2. Dans quelles TABLES ?         -> FROM (+ tables « pont »)\n3. Quelles CONDITIONS ?          -> JOIN ... ON, WHERE\n4. Faut-il REGROUPER ?           -> GROUP BY / HAVING",
+     "lang": "sql"
+    },
+    {
+     "type": "say",
+     "text": "Nous travaillons sur deux tables : `FILIERE(CodFil, LibFil, Cout)` et `ETUDIANT(Matricule, Nom, Prenom, Sexe, #CodFil, Age)`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle table contient la clé étrangère ?",
+     "options": [
+      "FILIERE",
+      "ETUDIANT",
+      "Aucune"
+     ],
+     "answer": 1,
+     "explain": "`CodFil` est clé primaire de FILIERE et apparaît dans ETUDIANT comme clé étrangère (#CodFil)."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les noms et prénoms de tous les étudiants.",
+     "hints": [
+      "SELECT colonnes FROM table"
+     ],
+     "accept": [
+      "SELECT nom, prenom FROM etudiant;"
+     ],
+     "solution": "SELECT Nom, Prenom FROM Etudiant;",
+     "explain": "Projection de deux colonnes : 6 lignes.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les noms des étudiants de plus de 20 ans.",
+     "hints": [
+      "Ajoute un WHERE."
+     ],
+     "accept": [
+      "SELECT nom FROM etudiant WHERE age > 20;"
+     ],
+     "solution": "SELECT Nom FROM Etudiant WHERE Age > 20;",
+     "explain": "Condition sur une colonne : on obtient Dossou, Yao, Soglo et Sy.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "choice",
+     "q": "Que renvoie `SELECT DISTINCT CodFil FROM Etudiant` ?",
+     "options": [
+      "6 lignes",
+      "3 lignes : 1, 2 et 3",
+      "2 lignes : 1 et 2"
+     ],
+     "answer": 2,
+     "explain": "Seules les filières 1 et 2 ont des étudiants ; DISTINCT supprime les doublons."
+    }
+   ]
+  },
+  {
+   "id": "regroupement",
+   "title": "Regrouper et compter",
+   "emoji": "📊",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dès que l'énoncé dit **« par »** ou **« pour chaque »**, pensez `GROUP BY`. Et rappelez-vous : tout attribut non agrégé du SELECT est dans le GROUP BY."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nombre d'étudiants par filière (code de la filière et nombre).",
+     "hints": [
+      "COUNT(*) et GROUP BY CodFil."
+     ],
+     "accept": [
+      "SELECT codfil, COUNT(*) FROM etudiant GROUP BY codfil;"
+     ],
+     "solution": "SELECT CodFil, COUNT(*) FROM Etudiant GROUP BY CodFil;",
+     "explain": "Filière 1 : 3 ; filière 2 : 3.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche l'âge moyen des étudiants de sexe féminin.",
+     "hints": [
+      "WHERE avant l'agrégat."
+     ],
+     "accept": [
+      "SELECT AVG(age) FROM etudiant WHERE sexe = 'F';"
+     ],
+     "solution": "SELECT AVG(Age) FROM Etudiant WHERE Sexe = 'F';",
+     "explain": "(20 + 19 + 23) / 3 ≈ 20,67.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "choice",
+     "q": "Pour garder les filières de plus de 2 étudiants, on écrit :",
+     "options": [
+      "WHERE COUNT(*) > 2",
+      "HAVING COUNT(*) > 2",
+      "GROUP BY COUNT(*) > 2"
+     ],
+     "answer": 1,
+     "explain": "`HAVING` filtre les groupes après regroupement ; `WHERE` n'accepte pas d'agrégat."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les codes des filières ayant plus de 2 étudiants.",
+     "hints": [
+      "GROUP BY puis HAVING."
+     ],
+     "accept": [
+      "SELECT codfil FROM etudiant GROUP BY codfil HAVING COUNT(*) > 2;"
+     ],
+     "solution": "SELECT CodFil FROM Etudiant GROUP BY CodFil HAVING COUNT(*) > 2;",
+     "explain": "Les filières 1 et 2 ont chacune 3 étudiants.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    }
+   ]
+  },
+  {
+   "id": "jointures",
+   "title": "Joindre et imbriquer",
+   "emoji": "🔗",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Pour afficher le **libellé** de la filière avec le nom de l'étudiant, il faut joindre les deux tables sur `CodFil`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nom de chaque étudiant avec le libellé de sa filière.",
+     "hints": [
+      "JOIN Filiere ON ... = ..."
+     ],
+     "accept": [
+      "SELECT nom, libfil FROM etudiant INNER JOIN filiere ON etudiant.codfil = filiere.codfil;",
+      "SELECT nom, libfil FROM etudiant, filiere WHERE etudiant.codfil = filiere.codfil;",
+      "SELECT Nom, LibFil FROM Etudiant, Filiere WHERE Etudiant.CodFil = Filiere.CodFil;"
+     ],
+     "solution": "SELECT Nom, LibFil FROM Etudiant JOIN Filiere ON Etudiant.CodFil = Filiere.CodFil;",
+     "explain": "Jointure sur la clé étrangère : 6 lignes.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le libellé de chaque filière avec le nombre de ses étudiants (les filières vides comptent 0).",
+     "hints": [
+      "LEFT JOIN puis COUNT(Matricule).",
+      "COUNT(*) compterait 1 pour une filière vide : comptez une colonne de ETUDIANT."
+     ],
+     "accept": [
+      "SELECT libfil, COUNT(matricule) FROM filiere LEFT JOIN etudiant ON filiere.codfil = etudiant.codfil GROUP BY filiere.codfil, libfil;"
+     ],
+     "solution": "SELECT LibFil, COUNT(Matricule) FROM Filiere LEFT JOIN Etudiant ON Filiere.CodFil = Etudiant.CodFil GROUP BY Filiere.CodFil, LibFil;",
+     "explain": "Informatique 3, Gestion 3, Statistique 0 : le LEFT JOIN garde la filière vide.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche les noms des étudiants plus âgés que la moyenne (sous-requête).",
+     "hints": [
+      "WHERE Age > (SELECT ...)"
+     ],
+     "accept": [
+      "SELECT nom FROM etudiant WHERE age > (SELECT AVG(age) FROM etudiant);"
+     ],
+     "solution": "SELECT Nom FROM Etudiant WHERE Age > (SELECT AVG(Age) FROM Etudiant);",
+     "explain": "La moyenne vaut 21,5 : Dossou (22), Soglo (24) et Sy (23).",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le libellé des filières sans aucun étudiant.",
+     "hints": [
+      "NOT IN ou NOT EXISTS."
+     ],
+     "accept": [
+      "SELECT libfil FROM filiere WHERE codfil NOT IN (SELECT codfil FROM etudiant);"
+     ],
+     "solution": "SELECT LibFil FROM Filiere WHERE CodFil NOT IN (SELECT CodFil FROM Etudiant);",
+     "explain": "Seule Statistique n'a aucun étudiant.",
+     "placeholder": "SELECT ...",
+     "table": "FILIERE\nCodFil | LibFil       | Cout\n1       | Informatique | 600000\n2       | Gestion      | 450000\n3       | Statistique  | 500000\n\nETUDIANT\nMatricule | Nom    | Prenom | Sexe | CodFil | Age\n1         | Koffi  | Ama    | F    | 1      | 20\n2         | Dossou | Marc   | M    | 1      | 22\n3         | Agbo   | Rose   | F    | 2      | 19\n4         | Soglo  | Paul   | M    | 2      | 24\n5         | Yao    | Ali    | M    | 1      | 21\n6         | Sy     | Awa    | F    | 2      | 23"
+    },
+    {
+     "type": "say",
+     "text": "Bravo ! Vous maîtrisez les quatre réflexes : projeter, joindre, regrouper, imbriquer."
+    }
+   ]
+  }
+ ]
+}

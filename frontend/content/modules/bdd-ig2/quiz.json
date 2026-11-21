@@ -1,0 +1,1906 @@
+[
+ {
+  "id": "bd2-q001",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 1,
+  "q": "Parmi ces propositions, laquelle n'est PAS un inconvénient du stockage dans des fichiers séparés ?",
+  "options": [
+   "La garantie d'une parfaite cohérence des données",
+   "La redondance des informations",
+   "La dépendance entre programmes et structure des fichiers",
+   "Le partage difficile entre utilisateurs"
+  ],
+  "answer": 0,
+  "explain": "Les fichiers séparés entraînent redondance, incohérences, dépendance programme/données et partage difficile. La cohérence garantie est un avantage des bases de données, pas des fichiers."
+ },
+ {
+  "id": "bd2-q002",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 1,
+  "q": "Une base de données est dite « persistante » lorsque :",
+  "options": [
+   "elle ne contient aucune redondance",
+   "ses données survivent à l'arrêt des programmes",
+   "elle est consultable par plusieurs utilisateurs",
+   "elle couvre tout le domaine à gérer"
+  ],
+  "answer": 1,
+  "explain": "La persistance est la conservation durable des données, indépendamment des applications. Les autres propositions décrivent la non-redondance, le partage et l'exhaustivité."
+ },
+ {
+  "id": "bd2-q003",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 1,
+  "q": "Que signifie SGBD ?",
+  "options": [
+   "Système Global de Bases Documentaires",
+   "Serveur Gérant les Bases de Données",
+   "Système de Gestion de Bases de Données",
+   "Schéma Général de Base de Données"
+  ],
+  "answer": 2,
+  "explain": "Un SGBD est le logiciel qui crée, interroge et protège les bases (Oracle, MySQL, PostgreSQL…)."
+ },
+ {
+  "id": "bd2-q004",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 2,
+  "q": "Dans l'architecture à trois niveaux, les vues utilisateur appartiennent au niveau :",
+  "options": [
+   "externe",
+   "conceptuel",
+   "interne",
+   "physique"
+  ],
+  "answer": 0,
+  "explain": "Le niveau externe regroupe les vues propres à chaque groupe d'utilisateurs ; le conceptuel est la description globale ; l'interne (physique) décrit le stockage."
+ },
+ {
+  "id": "bd2-q005",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 2,
+  "q": "L'indépendance physique signifie que l'on peut :",
+  "options": [
+   "ajouter des utilisateurs sans mot de passe",
+   "changer de SGBD sans réécrire les données",
+   "supprimer le niveau conceptuel",
+   "changer l'organisation des fichiers sans modifier les applications"
+  ],
+  "answer": 3,
+  "explain": "L'indépendance physique isole les programmes de la façon dont les données sont stockées sur disque."
+ },
+ {
+  "id": "bd2-q006",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 1,
+  "q": "Quel modèle de données organise les données sous forme de tables ?",
+  "options": [
+   "Le modèle hiérarchique",
+   "Le modèle réseau",
+   "Le modèle objet-arbre",
+   "Le modèle relationnel"
+  ],
+  "answer": 3,
+  "explain": "Le modèle relationnel (Codd, 1970) range les données dans des relations (tables) liées par des valeurs communes."
+ },
+ {
+  "id": "bd2-q007",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 2,
+  "q": "Le modèle hiérarchique représente les données sous forme :",
+  "options": [
+   "de graphe où un enregistrement a plusieurs parents",
+   "de tables reliées par clés étrangères",
+   "de fichiers plats sans lien",
+   "d'arbre, chaque enregistrement ayant un seul parent"
+  ],
+  "answer": 3,
+  "explain": "Le hiérarchique est un arbre ; le réseau est un graphe (plusieurs parents possibles) ; le relationnel utilise des tables."
+ },
+ {
+  "id": "bd2-q008",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 2,
+  "q": "Qui a proposé le modèle relationnel ?",
+  "options": [
+   "Peter Chen, en 1976",
+   "Michael Stonebraker, en 1990",
+   "E. F. Codd, en 1970",
+   "Larry Ellison, en 1979"
+  ],
+  "answer": 2,
+  "explain": "Edgar F. Codd (IBM) a publié le modèle relationnel en 1970."
+ },
+ {
+  "id": "bd2-q009",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 2,
+  "q": "Dans le modèle relationnel, les liens entre tables passent par :",
+  "options": [
+   "des pointeurs physiques",
+   "des numéros de blocs disque",
+   "des valeurs communes (clés étrangères)",
+   "des fichiers d'index uniquement"
+  ],
+  "answer": 2,
+  "explain": "Le relationnel relie les tables par des valeurs (clé étrangère = clé primaire), jamais par des pointeurs."
+ },
+ {
+  "id": "bd2-q010",
+  "chapter": "1-1-generalites-sgbd",
+  "difficulty": 1,
+  "q": "Laquelle de ces fonctions n'est PAS un objectif du SGBD ?",
+  "options": [
+   "Imposer à chaque application son propre format de fichier",
+   "Assurer la sécurité des accès",
+   "Gérer les accès concurrents",
+   "Garantir la cohérence des données"
+  ],
+  "answer": 0,
+  "explain": "Un SGBD centralise la gestion des données ; il ne multiplie pas les formats propres à chaque application."
+ },
+ {
+  "id": "bd2-q011",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "Une donnée devient une information lorsque :",
+  "options": [
+   "elle est stockée dans une table",
+   "elle est interprétée dans un contexte",
+   "elle est saisie par un utilisateur",
+   "elle est chiffrée"
+  ],
+  "answer": 1,
+  "explain": "Une donnée brute (15000) n'a pas de sens ; interprétée (« salaire de Koffi : 15 000 F ») elle devient information."
+ },
+ {
+  "id": "bd2-q012",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "Un attribut est dit atomique lorsque :",
+  "options": [
+   "il est unique dans la base",
+   "on ne peut pas le décomposer sans perdre son sens",
+   "il sert d'identifiant",
+   "il est calculé à partir d'autres"
+  ],
+  "answer": 1,
+  "explain": "On sépare `nom` et `prénom` plutôt que de garder `nom_prénom`."
+ },
+ {
+  "id": "bd2-q013",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "Deux noms différents pour la même donnée sont des :",
+  "options": [
+   "synonymes",
+   "polysèmes",
+   "homonymes d'entité",
+   "identifiants"
+  ],
+  "answer": 0,
+  "explain": "Synonymes : plusieurs noms pour une donnée ; polysèmes : un nom pour plusieurs données."
+ },
+ {
+  "id": "bd2-q014",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "L'attribut « date » utilisé à la fois pour la date de commande et la date de livraison est un :",
+  "options": [
+   "synonyme",
+   "polysème",
+   "attribut calculé",
+   "identifiant concaténé"
+  ],
+  "answer": 1,
+  "explain": "Un même nom désigne deux données différentes : c'est un polysème, à lever en nommant `DateCom` et `DateLiv`."
+ },
+ {
+  "id": "bd2-q015",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "Une entité doit avoir au moins :",
+  "options": [
+   "une occurrence",
+   "dix occurrences",
+   "deux occurrences",
+   "aucune occurrence"
+  ],
+  "answer": 2,
+  "explain": "Un objet qui n'a qu'une seule occurrence n'est pas une entité mais une constante."
+ },
+ {
+  "id": "bd2-q016",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "L'identifiant d'une entité est :",
+  "options": [
+   "unique et non nul pour chaque occurrence",
+   "toujours un nom",
+   "toujours calculé",
+   "répété pour chaque occurrence"
+  ],
+  "answer": 0,
+  "explain": "L'identifiant distingue chaque occurrence : unique et jamais nul. Dans le MCD il est souligné."
+ },
+ {
+  "id": "bd2-q017",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "Une cardinalité (0,N) signifie :",
+  "options": [
+   "exactement une occurrence",
+   "au moins une occurrence",
+   "au plus une occurrence",
+   "aucune ou plusieurs occurrences"
+  ],
+  "answer": 3,
+  "explain": "0 = minimum, N = maximum."
+ },
+ {
+  "id": "bd2-q018",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "La cardinalité (1,1) signifie :",
+  "options": [
+   "aucune ou une",
+   "une ou plusieurs",
+   "aucune ou plusieurs",
+   "exactement une occurrence"
+  ],
+  "answer": 3,
+  "explain": "Au moins une et au plus une."
+ },
+ {
+  "id": "bd2-q019",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "La cardinalité (1,N) signifie :",
+  "options": [
+   "aucune ou plusieurs",
+   "exactement une",
+   "au plus une",
+   "au moins une, éventuellement plusieurs"
+  ],
+  "answer": 3,
+  "explain": "Minimum 1, maximum N."
+ },
+ {
+  "id": "bd2-q020",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "Une association est une CIF lorsque :",
+  "options": [
+   "toutes ses pattes ont la cardinalité maximale N",
+   "elle relie plus de deux entités",
+   "au moins une de ses pattes a la cardinalité maximale 1",
+   "elle porte au moins un attribut"
+  ],
+  "answer": 2,
+  "explain": "CIF : au moins un maximum à 1. CIM : tous les maximums à N."
+ },
+ {
+  "id": "bd2-q021",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "Une association est une CIM lorsque :",
+  "options": [
+   "une de ses pattes est (1,1)",
+   "elle ne porte pas d'attribut",
+   "toutes ses pattes ont la cardinalité maximale N",
+   "elle est réflexive"
+  ],
+  "answer": 2,
+  "explain": "Une CIM (par exemple 0,N — 1,N) devient une relation au passage au MLD."
+ },
+ {
+  "id": "bd2-q022",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "Qu'est-ce que la dimension d'une association ?",
+  "options": [
+   "Le nombre d'entités qu'elle relie",
+   "Le nombre de ses attributs",
+   "La valeur maximale de ses cardinalités",
+   "Le nombre d'occurrences de ses entités"
+  ],
+  "answer": 0,
+  "explain": "Binaire = 2 entités, ternaire = 3, réflexive = une entité avec elle-même."
+ },
+ {
+  "id": "bd2-q023",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 2,
+  "q": "Dans un MCD, un attribut calculé (comme le montant total) :",
+  "options": [
+   "doit être souligné",
+   "ne doit pas figurer, car il se recalcule",
+   "devient l'identifiant",
+   "doit être placé sur l'association"
+  ],
+  "answer": 1,
+  "explain": "Un attribut calculé est redondant ; on le laisse hors du MCD."
+ },
+ {
+  "id": "bd2-q024",
+  "chapter": "1-2-concepts-mcd",
+  "difficulty": 1,
+  "q": "Les cardinalités du MCD se justifient par :",
+  "options": [
+   "le choix du SGBD",
+   "les règles de gestion",
+   "la taille de la base",
+   "les droits des utilisateurs"
+  ],
+  "answer": 1,
+  "explain": "Chaque cardinalité traduit une phrase de l'énoncé (règle de gestion)."
+ },
+ {
+  "id": "bd2-q025",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 1,
+  "q": "Que signifie A → B ?",
+  "options": [
+   "À une valeur de A correspond une seule valeur de B",
+   "À une valeur de B correspond une seule valeur de A",
+   "A et B ont le même domaine",
+   "A est calculé à partir de B"
+  ],
+  "answer": 0,
+  "explain": "C'est la définition d'une dépendance fonctionnelle."
+ },
+ {
+  "id": "bd2-q026",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Si NumCli → NomCli, alors :",
+  "options": [
+   "le nom permet de retrouver le numéro",
+   "le numéro du client permet de retrouver son nom",
+   "deux clients ne peuvent pas avoir le même nom",
+   "le nom est un identifiant"
+  ],
+  "answer": 1,
+  "explain": "La DF n'est pas symétrique : plusieurs clients peuvent porter le même nom."
+ },
+ {
+  "id": "bd2-q027",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "La transitivité énonce que si A → B et B → C alors :",
+  "options": [
+   "C → A",
+   "B → A",
+   "A → C",
+   "A → A,B,C obligatoirement unique"
+  ],
+  "answer": 2,
+  "explain": "A → C est déduite ; c'est une DF transitive, donc non directe."
+ },
+ {
+  "id": "bd2-q028",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Une DF élémentaire est une DF dont :",
+  "options": [
+   "la source est minimale",
+   "la cible est un seul attribut",
+   "la source est un identifiant simple",
+   "la cible est calculée"
+  ],
+  "answer": 0,
+  "explain": "On ne peut retirer aucun attribut de la source sans perdre la dépendance."
+ },
+ {
+  "id": "bd2-q029",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Une DFED est :",
+  "options": [
+   "une dépendance de forme étendue décomposée",
+   "une donnée fonctionnelle éliminée directement",
+   "une dépendance fonctionnelle entre données",
+   "une dépendance fonctionnelle élémentaire directe"
+  ],
+  "answer": 3,
+  "explain": "Elémentaire (source minimale) et directe (non transitive)."
+ },
+ {
+  "id": "bd2-q030",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 3,
+  "q": "NumCom → NumCli et NumCli → NomCli. Que dire de NumCom → NomCli ?",
+  "options": [
+   "C'est une DFED à garder",
+   "Elle est fausse",
+   "Elle est élémentaire donc à garder",
+   "Elle est transitive : elle doit être éliminée de la couverture minimale"
+  ],
+  "answer": 3,
+  "explain": "On la retrouve par transitivité, donc elle n'est pas directe."
+ },
+ {
+  "id": "bd2-q031",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Dans le dictionnaire des données, la nature « Ca » désigne :",
+  "options": [
+   "un attribut caractère",
+   "un attribut concaténé",
+   "un attribut constant",
+   "un attribut calculé"
+  ],
+  "answer": 3,
+  "explain": "E = élémentaire, Co = concaténé, Ca = calculé."
+ },
+ {
+  "id": "bd2-q032",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Dans le dictionnaire, le type « D » désigne :",
+  "options": [
+   "un décimal",
+   "une donnée dérivée",
+   "une date",
+   "une durée"
+  ],
+  "answer": 2,
+  "explain": "Types : N numérique, C caractère, L logique, D date."
+ },
+ {
+  "id": "bd2-q033",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 3,
+  "q": "Un contrat de location peut porter sur plusieurs véhicules ; on enregistre le kilométrage de chaque véhicule. Quelle DF est juste ?",
+  "options": [
+   "NumLoc → KmDeb, KmFin",
+   "NumVeh → KmDeb, KmFin",
+   "NumLoc, NumVeh → KmDeb, KmFin",
+   "KmDeb → NumLoc"
+  ],
+  "answer": 2,
+  "explain": "Le kilométrage dépend du couple contrat-véhicule : un contrat a plusieurs véhicules et un véhicule plusieurs locations."
+ },
+ {
+  "id": "bd2-q034",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 3,
+  "q": "Le coût d'une réparation varie d'une réparation à l'autre pour une même pièce. Quelle DF ?",
+  "options": [
+   "NumRep, CodPièce → CoûtRep",
+   "CodPièce → CoûtRep",
+   "NumRep → CoûtRep",
+   "CoûtRep → CodPièce"
+  ],
+  "answer": 0,
+  "explain": "Le coût dépend de la réparation et de la pièce réparée."
+ },
+ {
+  "id": "bd2-q035",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "La couverture minimale contient :",
+  "options": [
+   "toutes les DF possibles",
+   "les DFED permettant de retrouver toutes les autres",
+   "uniquement les DF à source composée",
+   "les attributs calculés"
+  ],
+  "answer": 1,
+  "explain": "Ensemble minimal sans redondance."
+ },
+ {
+  "id": "bd2-q036",
+  "chapter": "1-3-dependances-fonctionnelles",
+  "difficulty": 2,
+  "q": "Un contrat est signé par un seul client à une date. Quelle DF ?",
+  "options": [
+   "NumCli → NumLoc",
+   "NumLoc → NumCli, DateLoc",
+   "DateLoc → NumLoc, NumCli",
+   "NumCli, DateLoc → NumLoc uniquement"
+  ],
+  "answer": 1,
+  "explain": "Le numéro de contrat détermine le client et la date."
+ },
+ {
+  "id": "bd2-q037",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 1,
+  "q": "Une entité faible est une entité qui :",
+  "options": [
+   "n'a pas d'identifiant propre et dépend d'une entité forte",
+   "n'a pas d'attributs",
+   "n'a qu'une occurrence",
+   "n'est reliée à aucune association"
+  ],
+  "answer": 0,
+  "explain": "Exemple : une chambre n'existe que dans un hôtel."
+ },
+ {
+  "id": "bd2-q038",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Comment note-t-on une entité faible dans le MCD (Merise 2) ?",
+  "options": [
+   "Cardinalité 0,N en gras",
+   "Cardinalité (1,1) entre parenthèses",
+   "Identifiant doublement souligné sans cardinalité",
+   "Association réflexive"
+  ],
+  "answer": 1,
+  "explain": "La cardinalité (1,1) entre parenthèses indique l'identification relative."
+ },
+ {
+  "id": "bd2-q039",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "La clé primaire d'une chambre (entité faible d'un hôtel) est :",
+  "options": [
+   "numChambre seul",
+   "numHotel seul",
+   "(numHotel, numChambre)",
+   "nbLits"
+  ],
+  "answer": 2,
+  "explain": "Identifiant relatif : identifiant de l'entité forte + numéro local."
+ },
+ {
+  "id": "bd2-q040",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Une association réflexive relie :",
+  "options": [
+   "une entité à elle-même",
+   "deux entités différentes",
+   "trois entités",
+   "une entité et un attribut"
+  ],
+  "answer": 0,
+  "explain": "Les pattes sont nommées par des rôles (parrain, filleul…)."
+ },
+ {
+  "id": "bd2-q041",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Parrainage : un étudiant a au plus un parrain et peut avoir plusieurs filleuls. Au niveau relationnel :",
+  "options": [
+   "une table PARRAINAGE à clé concaténée obligatoire",
+   "aucune trace du parrainage",
+   "deux tables ETUDIANT",
+   "une clé étrangère numParrain dans ETUDIANT"
+  ],
+  "answer": 3,
+  "explain": "C'est une CIF réflexive (0,1 — 0,N) : la clé migre dans la même table, renommée."
+ },
+ {
+  "id": "bd2-q042",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Médicaments incompatibles entre eux : l'association réflexive est une :",
+  "options": [
+   "CIF, qui devient une clé étrangère",
+   "pseudo-entité sans table",
+   "association ternaire",
+   "CIM, qui devient une table à deux clés étrangères renommées"
+  ],
+  "answer": 3,
+  "explain": "Un médicament est incompatible avec 0..N autres : (0,N — 0,N), donc table INCOMPATIBLE(#med1, #med2)."
+ },
+ {
+  "id": "bd2-q043",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Dans une spécialisation, la contrainte XT signifie :",
+  "options": [
+   "exclusion seulement",
+   "totalité seulement",
+   "aucune contrainte",
+   "exclusion et totalité (partition)"
+  ],
+  "answer": 3,
+  "explain": "X : une seule sous-entité ; T : toute occurrence est dans une sous-entité."
+ },
+ {
+  "id": "bd2-q044",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 3,
+  "q": "Une spécialisation Client → Particulier / Entreprise avec contrainte X seule signifie que :",
+  "options": [
+   "tout client est exactement l'un des deux",
+   "un client est toujours les deux",
+   "un client ne peut pas être à la fois particulier et entreprise, mais peut n'être ni l'un ni l'autre",
+   "aucun client n'est particulier"
+  ],
+  "answer": 2,
+  "explain": "X = exclusion (pas de chevauchement) ; la totalité (T) manque, donc un client peut n'appartenir à aucune sous-entité."
+ },
+ {
+  "id": "bd2-q045",
+  "chapter": "1-4-construire-mcd",
+  "difficulty": 2,
+  "q": "Une ternaire se justifie quand :",
+  "options": [
+   "on a trois attributs",
+   "l'entité est faible",
+   "la donnée dépend des trois entités à la fois",
+   "l'association est facultative"
+  ],
+  "answer": 2,
+  "explain": "Si l'information ne dépend que de deux entités, on reste en binaire."
+ },
+ {
+  "id": "bd2-q046",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 1,
+  "q": "Dans le modèle relationnel, une ligne d'une table s'appelle :",
+  "options": [
+   "un n-uplet (tuple)",
+   "un attribut",
+   "un domaine",
+   "un schéma"
+  ],
+  "answer": 0,
+  "explain": "Colonnes = attributs, lignes = n-uplets."
+ },
+ {
+  "id": "bd2-q047",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 1,
+  "q": "La clé primaire est :",
+  "options": [
+   "toujours composée de deux attributs",
+   "l'ensemble minimal d'attributs choisi pour identifier un n-uplet",
+   "un attribut qui peut être nul",
+   "la clé étrangère d'une autre table"
+  ],
+  "answer": 1,
+  "explain": "Elle est unique et jamais nulle."
+ },
+ {
+  "id": "bd2-q048",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 1,
+  "q": "Une clé étrangère est :",
+  "options": [
+   "la clé primaire de sa propre relation",
+   "un attribut qui est clé primaire d'une autre relation",
+   "un attribut calculé",
+   "un attribut qui ne peut prendre que M ou F"
+  ],
+  "answer": 1,
+  "explain": "Elle sert à relier deux tables (précédée de # dans le schéma)."
+ },
+ {
+  "id": "bd2-q049",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 2,
+  "q": "L'intégrité référentielle garantit que :",
+  "options": [
+   "toute valeur de clé étrangère existe dans la table référencée (ou est NULL)",
+   "toute colonne est NOT NULL",
+   "deux lignes ne sont jamais égales",
+   "les types sont compatibles"
+  ],
+  "answer": 0,
+  "explain": "Pas de commande pour un client inexistant."
+ },
+ {
+  "id": "bd2-q050",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 1,
+  "q": "Une CIF au passage en relationnel :",
+  "options": [
+   "devient toujours une table",
+   "ne devient pas une table : l'identifiant migre comme clé étrangère",
+   "disparaît sans laisser de trace",
+   "double l'entité"
+  ],
+  "answer": 1,
+  "explain": "L'identifiant du côté 0,N/1,N est copié dans la relation du côté (1,1)."
+ },
+ {
+  "id": "bd2-q051",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 1,
+  "q": "Une CIM au passage en relationnel :",
+  "options": [
+   "devient une clé étrangère",
+   "est ignorée",
+   "devient une table dont la clé est la concaténation des identifiants",
+   "fusionne deux entités"
+  ],
+  "answer": 2,
+  "explain": "Les attributs de l'association deviennent des colonnes de cette table."
+ },
+ {
+  "id": "bd2-q052",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 2,
+  "q": "CLIENT (0,N) — passer — (1,1) COMMANDE. Le résultat relationnel est :",
+  "options": [
+   "COMMANDE(numCom, dateCom, #numCli)",
+   "CLIENT(numCli, nom, #numCom)",
+   "PASSER(#numCli, #numCom)",
+   "COMMANDE(numCom, numCli) avec clé (numCli)"
+  ],
+  "answer": 0,
+  "explain": "CIF : l'identifiant du client migre dans COMMANDE."
+ },
+ {
+  "id": "bd2-q053",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 2,
+  "q": "COMMANDE (0,N) — contenir — (1,N) PRODUIT avec quantité. Résultat :",
+  "options": [
+   "PRODUIT(numPro, #numCom, quantité)",
+   "COMMANDE(numCom, #numPro)",
+   "CONTENIR(numCom, quantité)",
+   "CONTENIR(#numCom, #numPro, quantité)"
+  ],
+  "answer": 3,
+  "explain": "CIM : table à clé concaténée portant l'attribut quantité."
+ },
+ {
+  "id": "bd2-q054",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 3,
+  "q": "Une CIM entre ECHEANCE et REGLEMENT, plus une CIF vers MODE_REGLEMENT. Dans la table REGLER :",
+  "options": [
+   "Id_Mode fait partie de la clé primaire",
+   "Id_Mode disparaît",
+   "Id_Mode est la seule clé primaire",
+   "Id_Mode est clé étrangère mais n'appartient pas à la clé primaire"
+  ],
+  "answer": 3,
+  "explain": "La clé primaire est la concaténation des entités reliées par la CIM ; la CIF sortante ajoute seulement une clé étrangère."
+ },
+ {
+  "id": "bd2-q055",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 3,
+  "q": "Pour traduire une entité faible, sa clé primaire est :",
+  "options": [
+   "son numéro local seul",
+   "l'identifiant de l'entité forte seul",
+   "un nombre aléatoire",
+   "l'identifiant de l'entité forte plus son numéro local"
+  ],
+  "answer": 3,
+  "explain": "CHAMBRE(#numHotel, numChambre)."
+ },
+ {
+  "id": "bd2-q056",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 2,
+  "q": "Parmi les méthodes de traduction d'une généralisation, celle qui crée une seule table avec un attribut « type » est :",
+  "options": [
+   "la méthode descendante",
+   "la méthode par distinction",
+   "la méthode ascendante (une table pour tout)",
+   "la méthode relationnelle pure"
+  ],
+  "answer": 2,
+  "explain": "Une seule table CLIENT, beaucoup de valeurs NULL."
+ },
+ {
+  "id": "bd2-q057",
+  "chapter": "2-1-relationnel-mldr",
+  "difficulty": 2,
+  "q": "Une association (0,1) — (0,N) devient une clé étrangère :",
+  "options": [
+   "obligatoire NOT NULL",
+   "absente",
+   "facultative, donc pouvant être NULL",
+   "double"
+  ],
+  "answer": 2,
+  "explain": "Comme le minimum est 0, la valeur peut manquer."
+ },
+ {
+  "id": "bd2-q058",
+  "chapter": "2-2-normalisation",
+  "difficulty": 1,
+  "q": "La 1FN exige :",
+  "options": [
+   "une clé primaire et des attributs atomiques",
+   "l'absence de dépendance transitive",
+   "l'absence de dépendance partielle",
+   "l'absence de clé étrangère"
+  ],
+  "answer": 0,
+  "explain": "Pas de liste ni de groupe répétitif dans une case."
+ },
+ {
+  "id": "bd2-q059",
+  "chapter": "2-2-normalisation",
+  "difficulty": 2,
+  "q": "Une relation est en 2FN si elle est en 1FN et si :",
+  "options": [
+   "aucun attribut ne dépend d'un autre non clé",
+   "tout attribut non clé dépend de toute la clé",
+   "toutes les clés sont simples",
+   "il n'y a aucun attribut calculé"
+  ],
+  "answer": 1,
+  "explain": "La 2FN supprime les dépendances partielles."
+ },
+ {
+  "id": "bd2-q060",
+  "chapter": "2-2-normalisation",
+  "difficulty": 2,
+  "q": "La 3FN supprime :",
+  "options": [
+   "les dépendances partielles",
+   "les dépendances transitives",
+   "les clés étrangères",
+   "les valeurs NULL"
+  ],
+  "answer": 1,
+  "explain": "Aucun attribut non clé ne dépend d'un autre attribut non clé."
+ },
+ {
+  "id": "bd2-q061",
+  "chapter": "2-2-normalisation",
+  "difficulty": 3,
+  "q": "DETAIL(numCom, numPro, libellé, quantité) avec clé (numCom, numPro). Quel défaut ?",
+  "options": [
+   "libellé dépend de numPro seul : violation de la 2FN",
+   "libellé est transitif : violation de la 3FN",
+   "quantité n'est pas atomique : violation de la 1FN",
+   "aucun défaut"
+  ],
+  "answer": 0,
+  "explain": "Dépendance partielle de libellé vis-à-vis d'une partie de la clé."
+ },
+ {
+  "id": "bd2-q062",
+  "chapter": "2-2-normalisation",
+  "difficulty": 3,
+  "q": "EMPLOYE(matricule, nom, numServ, nomServ). Quel défaut ?",
+  "options": [
+   "violation de la 1FN",
+   "nomServ dépend de numServ, lui-même non clé : violation de la 3FN",
+   "violation de la 2FN : clé composée",
+   "aucun défaut"
+  ],
+  "answer": 1,
+  "explain": "matricule → numServ → nomServ est transitive."
+ },
+ {
+  "id": "bd2-q063",
+  "chapter": "2-2-normalisation",
+  "difficulty": 2,
+  "q": "Quelle anomalie apparaît quand on ne peut pas ajouter un produit tant qu'il n'est dans aucune commande ?",
+  "options": [
+   "anomalie de suppression",
+   "anomalie de mise à jour",
+   "anomalie d'insertion",
+   "anomalie de lecture"
+  ],
+  "answer": 2,
+  "explain": "Cause : produit et commande mélangés dans une même relation."
+ },
+ {
+  "id": "bd2-q064",
+  "chapter": "2-2-normalisation",
+  "difficulty": 2,
+  "q": "Pour une relation à clé simple en 1FN, elle est automatiquement en :",
+  "options": [
+   "2FN",
+   "3FN",
+   "BCNF",
+   "aucune autre forme"
+  ],
+  "answer": 0,
+  "explain": "Sans clé composée, aucune dépendance partielle n'est possible."
+ },
+ {
+  "id": "bd2-q065",
+  "chapter": "2-2-normalisation",
+  "difficulty": 2,
+  "q": "La relation COMMANDER(numBon, dateBon, numCli, nomCli, numPro, libPro, quantité) se décompose en :",
+  "options": [
+   "une seule table plus grande",
+   "CLIENT et PRODUIT uniquement",
+   "BON_COMMANDE et PRODUIT uniquement",
+   "BON_COMMANDE, CLIENT, PRODUIT, DETAIL_COMMANDE"
+  ],
+  "answer": 3,
+  "explain": "Chaque source de DF forme une relation."
+ },
+ {
+  "id": "bd2-q066",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 1,
+  "q": "La projection permet de :",
+  "options": [
+   "choisir des lignes",
+   "fusionner deux tables",
+   "trier le résultat",
+   "choisir des colonnes"
+  ],
+  "answer": 3,
+  "explain": "En SQL : la liste du SELECT (avec DISTINCT pour éliminer les doublons)."
+ },
+ {
+  "id": "bd2-q067",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 1,
+  "q": "La sélection permet de :",
+  "options": [
+   "choisir des colonnes",
+   "joindre deux tables",
+   "regrouper les lignes",
+   "choisir des lignes selon une condition"
+  ],
+  "answer": 3,
+  "explain": "En SQL : la clause WHERE."
+ },
+ {
+  "id": "bd2-q068",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 2,
+  "q": "Le produit cartésien de R (4 lignes) et S (5 lignes) contient :",
+  "options": [
+   "9 lignes",
+   "5 lignes",
+   "20 lignes",
+   "1 ligne"
+  ],
+  "answer": 2,
+  "explain": "m × n combinaisons."
+ },
+ {
+  "id": "bd2-q069",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 2,
+  "q": "La jointure est équivalente à :",
+  "options": [
+   "une projection suivie d'un tri",
+   "une union suivie d'une différence",
+   "un produit cartésien suivi d'une sélection",
+   "une division"
+  ],
+  "answer": 2,
+  "explain": "R ⋈ S = σ(R.a = S.a)(R × S)."
+ },
+ {
+  "id": "bd2-q070",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 2,
+  "q": "L'union exige que les deux relations :",
+  "options": [
+   "aient le même schéma",
+   "aient la même clé étrangère",
+   "aient le même nombre de lignes",
+   "aient un attribut calculé"
+  ],
+  "answer": 0,
+  "explain": "Même nombre d'attributs, domaines compatibles."
+ },
+ {
+  "id": "bd2-q071",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 3,
+  "q": "La division relationnelle répond à des questions de type :",
+  "options": [
+   "« aucun »",
+   "« tous »",
+   "« combien »",
+   "« le plus récent »"
+  ],
+  "answer": 1,
+  "explain": "Exemple : les étudiants inscrits à tous les cours."
+ },
+ {
+  "id": "bd2-q072",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 2,
+  "q": "La différence R − S renvoie :",
+  "options": [
+   "les n-uplets de S absents de R",
+   "les n-uplets de R absents de S",
+   "les n-uplets communs",
+   "tous les n-uplets"
+  ],
+  "answer": 1,
+  "explain": "L'ordre compte : R − S ≠ S − R."
+ },
+ {
+  "id": "bd2-q073",
+  "chapter": "3-1-algebre-relationnelle",
+  "difficulty": 1,
+  "q": "Quel agrégat calcule la moyenne ?",
+  "options": [
+   "AVG",
+   "SUM",
+   "COUNT",
+   "MOY"
+  ],
+  "answer": 0,
+  "explain": "SQL : AVG(col)."
+ },
+ {
+  "id": "bd2-q074",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 1,
+  "q": "Quelle commande crée une table ?",
+  "options": [
+   "NEW TABLE",
+   "CREATE TABLE",
+   "MAKE TABLE",
+   "ADD TABLE"
+  ],
+  "answer": 1,
+  "explain": "DDL : CREATE, ALTER, DROP."
+ },
+ {
+  "id": "bd2-q075",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 1,
+  "q": "Quelle contrainte impose la présence d'une valeur ?",
+  "options": [
+   "UNIQUE",
+   "CHECK",
+   "NOT NULL",
+   "DEFAULT"
+  ],
+  "answer": 2,
+  "explain": "UNIQUE interdit les doublons, CHECK impose une condition, DEFAULT donne une valeur par défaut."
+ },
+ {
+  "id": "bd2-q076",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "PRIMARY KEY équivaut à :",
+  "options": [
+   "UNIQUE + NOT NULL",
+   "UNIQUE seul",
+   "NOT NULL seul",
+   "FOREIGN KEY"
+  ],
+  "answer": 0,
+  "explain": "Une seule clé primaire par table."
+ },
+ {
+  "id": "bd2-q077",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "Comment déclarer une clé primaire composée de (Matricule, Mois, Annee) ?",
+  "options": [
+   "PRIMARY KEY sur chaque colonne séparément",
+   "UNIQUE sur la première colonne",
+   "FOREIGN KEY (Matricule, Mois, Annee)",
+   "PRIMARY KEY (Matricule, Mois, Annee) au niveau de la table"
+  ],
+  "answer": 3,
+  "explain": "Plusieurs PRIMARY KEY dans une même table sont interdites."
+ },
+ {
+  "id": "bd2-q078",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "Quelle déclaration impose que Sexe ne vaille que M ou F ?",
+  "options": [
+   "Sexe CHAR(1) UNIQUE('M','F')",
+   "Sexe CHAR(1) DEFAULT 'M' OR 'F'",
+   "Sexe CHAR(1) NOT NULL('M','F')",
+   "Sexe CHAR(1) CHECK (Sexe IN ('M','F'))"
+  ],
+  "answer": 3,
+  "explain": "CHECK exprime une condition sur les valeurs."
+ },
+ {
+  "id": "bd2-q079",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "ON DELETE CASCADE signifie que :",
+  "options": [
+   "la suppression est refusée",
+   "les clés étrangères deviennent NULL",
+   "les lignes filles sont archivées",
+   "la suppression d'une ligne parent supprime les lignes filles"
+  ],
+  "answer": 3,
+  "explain": "CASCADE répercute ; RESTRICT refuse ; SET NULL met à NULL."
+ },
+ {
+  "id": "bd2-q080",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "ON DELETE SET NULL signifie que :",
+  "options": [
+   "les lignes filles sont supprimées",
+   "la suppression est refusée",
+   "les clés étrangères des lignes filles deviennent NULL",
+   "la clé primaire est remise à zéro"
+  ],
+  "answer": 2,
+  "explain": "Utile quand le lien est facultatif."
+ },
+ {
+  "id": "bd2-q081",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "Quelle commande ajoute une colonne ?",
+  "options": [
+   "UPDATE t ADD col",
+   "INSERT INTO t col",
+   "ALTER TABLE t ADD col type",
+   "CREATE COLUMN col"
+  ],
+  "answer": 2,
+  "explain": "ALTER TABLE ADD / MODIFY / DROP COLUMN."
+ },
+ {
+  "id": "bd2-q082",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 2,
+  "q": "DROP TABLE Etudiant :",
+  "options": [
+   "supprime la table, structure et données",
+   "supprime seulement les lignes",
+   "vide la table mais garde la structure",
+   "modifie la table"
+  ],
+  "answer": 0,
+  "explain": "Pour supprimer les lignes seulement : DELETE ou TRUNCATE."
+ },
+ {
+  "id": "bd2-q083",
+  "chapter": "4-1-sql-ddl",
+  "difficulty": 3,
+  "q": "Quelle différence entre CHAR(10) et VARCHAR(10) ?",
+  "options": [
+   "CHAR est numérique",
+   "CHAR a une longueur fixe, VARCHAR une longueur variable",
+   "VARCHAR est limité à 1 caractère",
+   "Aucune"
+  ],
+  "answer": 1,
+  "explain": "CHAR complète avec des espaces ; VARCHAR stocke la longueur réelle."
+ },
+ {
+  "id": "bd2-q084",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 1,
+  "q": "Quelle commande ajoute une ligne ?",
+  "options": [
+   "UPDATE",
+   "INSERT INTO",
+   "ADD ROW",
+   "CREATE ROW"
+  ],
+  "answer": 1,
+  "explain": "DML : INSERT, UPDATE, DELETE."
+ },
+ {
+  "id": "bd2-q085",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "UPDATE Etudiant SET Age = 20; sans WHERE :",
+  "options": [
+   "modifie toutes les lignes de la table",
+   "ne modifie aucune ligne",
+   "modifie la première ligne",
+   "provoque une erreur"
+  ],
+  "answer": 0,
+  "explain": "Un UPDATE ou un DELETE sans WHERE touche toute la table."
+ },
+ {
+  "id": "bd2-q086",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 1,
+  "q": "Pour supprimer l'étudiant de matricule 204 :",
+  "options": [
+   "DROP Etudiant WHERE Matricule = 204;",
+   "DELETE FROM Etudiant WHERE Matricule = 204;",
+   "DELETE Etudiant = 204;",
+   "REMOVE FROM Etudiant 204;"
+  ],
+  "answer": 1,
+  "explain": "DELETE avec WHERE supprime des lignes précises."
+ },
+ {
+  "id": "bd2-q087",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "Que renvoie SELECT DISTINCT CodFil FROM Etudiant ?",
+  "options": [
+   "tous les codes filière avec doublons",
+   "le nombre d'étudiants",
+   "les codes filière sans doublon",
+   "les filières vides"
+  ],
+  "answer": 2,
+  "explain": "DISTINCT élimine les lignes en double."
+ },
+ {
+  "id": "bd2-q088",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "BETWEEN 18 AND 25 :",
+  "options": [
+   "inclut les bornes 18 et 25",
+   "exclut les bornes",
+   "inclut seulement 18",
+   "exclut seulement 25"
+  ],
+  "answer": 0,
+  "explain": "Équivalent à >= 18 AND <= 25."
+ },
+ {
+  "id": "bd2-q089",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "LIKE 'K%' sélectionne :",
+  "options": [
+   "les valeurs finissant par K",
+   "les valeurs de 2 caractères",
+   "les valeurs contenant K",
+   "les valeurs commençant par K"
+  ],
+  "answer": 3,
+  "explain": "% remplace 0 à n caractères."
+ },
+ {
+  "id": "bd2-q090",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "LIKE '_a%' sélectionne :",
+  "options": [
+   "les valeurs commençant par a",
+   "les valeurs finissant par a",
+   "les valeurs de longueur 2",
+   "les valeurs dont la deuxième lettre est a"
+  ],
+  "answer": 3,
+  "explain": "_ remplace un caractère exactement."
+ },
+ {
+  "id": "bd2-q091",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "Pour tester une valeur absente :",
+  "options": [
+   "WHERE col = NULL",
+   "WHERE col = ''",
+   "WHERE col == 0",
+   "WHERE col IS NULL"
+  ],
+  "answer": 3,
+  "explain": "NULL ne se compare pas avec = ."
+ },
+ {
+  "id": "bd2-q092",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "COUNT(*) et COUNT(col) :",
+  "options": [
+   "sont toujours identiques",
+   "COUNT(*) ignore les NULL",
+   "COUNT(*) compte toutes les lignes, COUNT(col) ignore les NULL",
+   "COUNT(col) compte toutes les lignes"
+  ],
+  "answer": 2,
+  "explain": "COUNT(col) ne compte que les valeurs non nulles."
+ },
+ {
+  "id": "bd2-q093",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 3,
+  "q": "WHERE ou HAVING pour filtrer COUNT(*) > 10 ?",
+  "options": [
+   "WHERE, car il est plus rapide",
+   "Les deux sont possibles sans différence",
+   "HAVING, car le filtre porte sur des groupes",
+   "Aucun des deux"
+  ],
+  "answer": 2,
+  "explain": "WHERE filtre les lignes avant regroupement et n'accepte pas d'agrégat."
+ },
+ {
+  "id": "bd2-q094",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 2,
+  "q": "Dans un SELECT avec GROUP BY, les attributs non agrégés doivent :",
+  "options": [
+   "figurer dans le GROUP BY",
+   "figurer dans le WHERE",
+   "figurer dans le HAVING seul",
+   "être triés"
+  ],
+  "answer": 0,
+  "explain": "Règle de base : tout attribut non agrégé du SELECT est dans le GROUP BY."
+ },
+ {
+  "id": "bd2-q095",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 3,
+  "q": "Quel est l'ordre logique d'exécution d'un SELECT ?",
+  "options": [
+   "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY",
+   "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY",
+   "WHERE, FROM, SELECT, GROUP BY, HAVING, ORDER BY",
+   "FROM, SELECT, WHERE, HAVING, GROUP BY, ORDER BY"
+  ],
+  "answer": 1,
+  "explain": "C'est pourquoi un alias du SELECT n'est pas utilisable dans le WHERE."
+ },
+ {
+  "id": "bd2-q096",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 1,
+  "q": "ORDER BY age DESC trie :",
+  "options": [
+   "du plus petit au plus grand",
+   "du plus grand au plus petit",
+   "par ordre alphabétique",
+   "au hasard"
+  ],
+  "answer": 1,
+  "explain": "ASC (défaut) = croissant."
+ },
+ {
+  "id": "bd2-q097",
+  "chapter": "4-2-sql-dml-select",
+  "difficulty": 3,
+  "q": "Pourquoi `DELETE FROM Salaire WHERE Matricule = 204` ne supprime-t-il pas l'employé ?",
+  "options": [
+   "Il supprime seulement les lignes de la table Salaire",
+   "Il est refusé par SQL",
+   "Il supprime aussi l'employé par CASCADE implicite",
+   "Il modifie le salaire"
+  ],
+  "answer": 0,
+  "explain": "La table visée par FROM est Salaire ; l'employé est dans une autre table."
+ },
+ {
+  "id": "bd2-q098",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 1,
+  "q": "Quelle jointure garde toutes les lignes de la table de gauche ?",
+  "options": [
+   "INNER JOIN",
+   "LEFT JOIN",
+   "RIGHT JOIN",
+   "CROSS JOIN"
+  ],
+  "answer": 1,
+  "explain": "Les colonnes de droite valent NULL s'il n'y a pas de correspondance."
+ },
+ {
+  "id": "bd2-q099",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "INNER JOIN renvoie :",
+  "options": [
+   "toutes les lignes de gauche",
+   "toutes les lignes de droite",
+   "les lignes avec correspondance des deux côtés",
+   "le produit cartésien"
+  ],
+  "answer": 2,
+  "explain": "Les lignes sans correspondance disparaissent."
+ },
+ {
+  "id": "bd2-q100",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "Pour joindre 4 tables, il faut au moins :",
+  "options": [
+   "3 conditions de jointure",
+   "4 conditions de jointure",
+   "2 conditions de jointure",
+   "1 condition de jointure"
+  ],
+  "answer": 0,
+  "explain": "n tables, n−1 conditions."
+ },
+ {
+  "id": "bd2-q101",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "Que se passe-t-il si l'on oublie la condition de jointure ?",
+  "options": [
+   "La requête est refusée",
+   "On obtient une jointure externe",
+   "On obtient un résultat vide",
+   "On obtient un produit cartésien"
+  ],
+  "answer": 3,
+  "explain": "Chaque ligne de A est combinée avec chaque ligne de B."
+ },
+ {
+  "id": "bd2-q102",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 3,
+  "q": "Comment afficher les étudiants sans filière ?",
+  "options": [
+   "INNER JOIN puis WHERE CodFil = NULL",
+   "RIGHT JOIN sans condition",
+   "CROSS JOIN puis GROUP BY",
+   "LEFT JOIN Filiere puis WHERE Filiere.CodFil IS NULL"
+  ],
+  "answer": 3,
+  "explain": "Les lignes sans correspondance apparaissent avec des NULL à droite."
+ },
+ {
+  "id": "bd2-q103",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "Une auto-jointure se fait en :",
+  "options": [
+   "utilisant UNION",
+   "utilisant GROUP BY",
+   "créant une copie physique de la table",
+   "donnant deux alias différents à la même table"
+  ],
+  "answer": 3,
+  "explain": "Exemple : employé et chef sont deux lignes de la même table."
+ },
+ {
+  "id": "bd2-q104",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "Quelle condition renvoie les étudiants plus âgés que la moyenne ?",
+  "options": [
+   "WHERE Age > AVG(Age)",
+   "WHERE Age > ALL AVG(Age)",
+   "WHERE Age > (SELECT AVG(Age) FROM Etudiant)",
+   "HAVING Age > AVG(Age)"
+  ],
+  "answer": 2,
+  "explain": "Un agrégat ne s'emploie pas directement dans WHERE : on passe par une sous-requête."
+ },
+ {
+  "id": "bd2-q105",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 3,
+  "q": "NOT IN avec une sous-requête qui renvoie un NULL :",
+  "options": [
+   "renvoie toutes les lignes",
+   "provoque une erreur de syntaxe",
+   "ne renvoie aucune ligne",
+   "ignore le NULL"
+  ],
+  "answer": 2,
+  "explain": "La comparaison avec NULL est inconnue : préférer NOT EXISTS."
+ },
+ {
+  "id": "bd2-q106",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "> ALL (sous-requête) signifie :",
+  "options": [
+   "supérieur à toutes les valeurs",
+   "supérieur à au moins une valeur",
+   "égal à une des valeurs",
+   "différent de toutes les valeurs"
+  ],
+  "answer": 0,
+  "explain": "= ANY équivaut à IN ; > ANY : supérieur à au moins une valeur."
+ },
+ {
+  "id": "bd2-q107",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "EXISTS est vrai si :",
+  "options": [
+   "la sous-requête renvoie NULL",
+   "la sous-requête renvoie au moins une ligne",
+   "la sous-requête renvoie une seule ligne",
+   "la table existe"
+  ],
+  "answer": 1,
+  "explain": "Utile pour les tests de présence ou d'absence (NOT EXISTS)."
+ },
+ {
+  "id": "bd2-q108",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "UNION ALL diffère de UNION car il :",
+  "options": [
+   "supprime les doublons",
+   "conserve les doublons",
+   "trie le résultat",
+   "exige des colonnes différentes"
+  ],
+  "answer": 1,
+  "explain": "UNION élimine les doublons ; UNION ALL non."
+ },
+ {
+  "id": "bd2-q109",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 3,
+  "q": "Pour trouver les étudiants inscrits à tous les cours :",
+  "options": [
+   "comparer COUNT(DISTINCT cours) au nombre total de cours dans un HAVING",
+   "utiliser UNION",
+   "utiliser LEFT JOIN seul",
+   "utiliser LIKE"
+  ],
+  "answer": 0,
+  "explain": "C'est la traduction SQL de la division relationnelle."
+ },
+ {
+  "id": "bd2-q110",
+  "chapter": "4-3-jointures-sous-requetes",
+  "difficulty": 2,
+  "q": "Une sous-requête placée dans le FROM doit :",
+  "options": [
+   "être triée",
+   "avoir un alias",
+   "utiliser DISTINCT",
+   "contenir un GROUP BY"
+  ],
+  "answer": 1,
+  "explain": "La table dérivée doit être nommée."
+ },
+ {
+  "id": "bd2-q111",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "CASE WHEN … THEN … ELSE … END sert à :",
+  "options": [
+   "créer une table",
+   "supprimer des lignes",
+   "exprimer une condition dans une requête",
+   "joindre deux tables"
+  ],
+  "answer": 2,
+  "explain": "On l'emploie dans SELECT, WHERE, ORDER BY…"
+ },
+ {
+  "id": "bd2-q112",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "Quelle fonction remplace NULL par 0 en MySQL ?",
+  "options": [
+   "IFNULL(col, 0)",
+   "NVL(col, 0)",
+   "ISNULL(col)",
+   "NULLIF(col, 0)"
+  ],
+  "answer": 0,
+  "explain": "NVL est Oracle, ISNULL(col, 0) est SQL Server, COALESCE est standard."
+ },
+ {
+  "id": "bd2-q113",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "Limiter à 5 lignes en MySQL :",
+  "options": [
+   "TOP 5",
+   "FETCH FIRST",
+   "ROWNUM",
+   "LIMIT 5"
+  ],
+  "answer": 3,
+  "explain": "SQL Server : TOP 5 ; Oracle : FETCH FIRST ou ROWNUM."
+ },
+ {
+  "id": "bd2-q114",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "Un index sert surtout à :",
+  "options": [
+   "accélérer les écritures",
+   "protéger les données",
+   "remplacer la clé primaire",
+   "accélérer les recherches"
+  ],
+  "answer": 3,
+  "explain": "Il ralentit un peu les écritures et occupe de la place."
+ },
+ {
+  "id": "bd2-q115",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "AUTO_INCREMENT (MySQL) sert à :",
+  "options": [
+   "chiffrer une colonne",
+   "répéter une valeur",
+   "contrôler les droits",
+   "générer automatiquement un numéro croissant"
+  ],
+  "answer": 3,
+  "explain": "Fréquemment appliqué à une clé primaire numérique."
+ },
+ {
+  "id": "bd2-q116",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 2,
+  "q": "Une vue :",
+  "options": [
+   "est une copie physique d'une table",
+   "est un index",
+   "est une requête nommée qui ne stocke pas de données",
+   "est une sauvegarde"
+  ],
+  "answer": 2,
+  "explain": "Elle simplifie les requêtes et restreint l'accès."
+ },
+ {
+  "id": "bd2-q117",
+  "chapter": "4-4-sql-avance",
+  "difficulty": 3,
+  "q": "Quelle différence entre DELETE, TRUNCATE et DROP ?",
+  "options": [
+   "Aucune",
+   "DROP supprime des lignes, DELETE supprime la table",
+   "DELETE supprime des lignes, TRUNCATE vide la table, DROP supprime la table",
+   "TRUNCATE supprime la base"
+  ],
+  "answer": 2,
+  "explain": "DROP emporte la structure ; TRUNCATE la garde."
+ },
+ {
+  "id": "bd2-q118",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 1,
+  "q": "Une injection SQL consiste à :",
+  "options": [
+   "faire exécuter du SQL non prévu via une saisie utilisateur",
+   "installer un virus sur le serveur",
+   "voler un disque dur",
+   "saturer le réseau"
+  ],
+  "answer": 0,
+  "explain": "Elle exploite la concaténation de texte saisi dans une requête."
+ },
+ {
+  "id": "bd2-q119",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 2,
+  "q": "La saisie ' OR '1'='1 dans un champ de login vise à :",
+  "options": [
+   "supprimer la table",
+   "rendre la condition toujours vraie",
+   "chiffrer le mot de passe",
+   "fermer la connexion"
+  ],
+  "answer": 1,
+  "explain": "La condition '1'='1' est toujours vraie : l'attaquant contourne l'authentification."
+ },
+ {
+  "id": "bd2-q120",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 2,
+  "q": "Que fait la saisie x'; DROP TABLE users; -- ?",
+  "options": [
+   "Elle affiche les utilisateurs",
+   "Elle tente de supprimer la table users par requête par lots",
+   "Elle crée un utilisateur",
+   "Elle chiffre la base"
+  ],
+  "answer": 1,
+  "explain": "Le point-virgule ouvre une 2e instruction, -- commente la suite."
+ },
+ {
+  "id": "bd2-q121",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 1,
+  "q": "La principale protection contre l'injection SQL est :",
+  "options": [
+   "les requêtes paramétrées (préparées)",
+   "l'augmentation du débit réseau",
+   "le changement du nom des tables",
+   "le chiffrement des disques seul"
+  ],
+  "answer": 0,
+  "explain": "Les valeurs sont transmises séparément et jamais interprétées comme du SQL."
+ },
+ {
+  "id": "bd2-q122",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 2,
+  "q": "Pourquoi ne pas afficher les erreurs SQL à l'utilisateur ?",
+  "options": [
+   "Elles ralentissent la page",
+   "Elles révèlent la structure de la base",
+   "Elles sont illisibles",
+   "Elles consomment de la mémoire"
+  ],
+  "answer": 1,
+  "explain": "Un attaquant s'en sert pour affiner son injection."
+ },
+ {
+  "id": "bd2-q123",
+  "chapter": "5-1-injection-sql",
+  "difficulty": 2,
+  "q": "Le principe du moindre privilège consiste à :",
+  "options": [
+   "donner tous les droits à l'administrateur applicatif",
+   "interdire toute connexion",
+   "ne donner au compte applicatif que les droits nécessaires",
+   "supprimer les mots de passe"
+  ],
+  "answer": 2,
+  "explain": "Même si une injection réussit, elle ne peut pas faire de DROP."
+ },
+ {
+  "id": "bd2-q124",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 1,
+  "q": "Quelle commande accorde un privilège ?",
+  "options": [
+   "GRANT",
+   "REVOKE",
+   "ALLOW",
+   "GIVE"
+  ],
+  "answer": 0,
+  "explain": "REVOKE retire, DENY (SQL Server) interdit."
+ },
+ {
+  "id": "bd2-q125",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 1,
+  "q": "Quelle commande retire un privilège accordé ?",
+  "options": [
+   "DENY",
+   "DROP",
+   "CANCEL",
+   "REVOKE"
+  ],
+  "answer": 3,
+  "explain": "REVOKE retire le droit donné par GRANT."
+ },
+ {
+  "id": "bd2-q126",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 2,
+  "q": "WITH GRANT OPTION permet au bénéficiaire de :",
+  "options": [
+   "supprimer l'objet",
+   "créer un utilisateur",
+   "changer son mot de passe",
+   "transmettre à d'autres le privilège reçu"
+  ],
+  "answer": 3,
+  "explain": "WITH ADMIN OPTION est l'équivalent pour les privilèges système (Oracle)."
+ },
+ {
+  "id": "bd2-q127",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 2,
+  "q": "Un rôle est :",
+  "options": [
+   "un type de table",
+   "une sauvegarde",
+   "un index",
+   "un ensemble de privilèges attribuable à des utilisateurs"
+  ],
+  "answer": 3,
+  "explain": "On gère les droits par fonction (caissier, directeur)."
+ },
+ {
+  "id": "bd2-q128",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 2,
+  "q": "DENY (SQL Server) :",
+  "options": [
+   "accorde un droit",
+   "supprime un utilisateur",
+   "interdit un droit, même s'il est accordé par un rôle",
+   "sauvegarde la base"
+  ],
+  "answer": 2,
+  "explain": "DENY l'emporte sur GRANT ; REVOKE se contente de retirer."
+ },
+ {
+  "id": "bd2-q129",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 3,
+  "q": "Quelle différence entre privilège système et privilège objet ?",
+  "options": [
+   "Aucune",
+   "Le système ne concerne que les tables",
+   "Le système agit sur le serveur (CREATE USER), l'objet sur une table précise (SELECT sur Etudiant)",
+   "L'objet ne concerne que les utilisateurs"
+  ],
+  "answer": 2,
+  "explain": "Les deux se donnent avec GRANT."
+ },
+ {
+  "id": "bd2-q130",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 1,
+  "q": "Quelle commande supprime un utilisateur ?",
+  "options": [
+   "DROP USER",
+   "DELETE USER",
+   "REMOVE USER",
+   "REVOKE USER"
+  ],
+  "answer": 0,
+  "explain": "Syntaxe commune à MySQL et Oracle."
+ },
+ {
+  "id": "bd2-q131",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 2,
+  "q": "La règle de sauvegarde 3-2-1 signifie :",
+  "options": [
+   "3 jours, 2 mois, 1 an",
+   "3 copies, sur 2 supports, dont 1 hors site",
+   "3 serveurs, 2 réseaux, 1 pare-feu",
+   "3 mots de passe, 2 rôles, 1 index"
+  ],
+  "answer": 1,
+  "explain": "Et on teste régulièrement la restauration."
+ },
+ {
+  "id": "bd2-q132",
+  "chapter": "5-2-dcl-securite",
+  "difficulty": 2,
+  "q": "Laquelle n'est PAS une bonne pratique de sécurité d'une base ?",
+  "options": [
+   "Journaliser les accès",
+   "Utiliser le compte administrateur pour toutes les applications",
+   "Mettre à jour le SGBD",
+   "Chiffrer les données sensibles"
+  ],
+  "answer": 1,
+  "explain": "Le moindre privilège est la règle."
+ },
+ {
+  "id": "bd2-q133",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Dans une question de QCM « choisissez LES réponses justes », il faut :",
+  "options": [
+   "vérifier chaque proposition indépendamment",
+   "choisir une seule réponse",
+   "choisir la plus longue",
+   "choisir la première"
+  ],
+  "answer": 0,
+  "explain": "Plusieurs propositions peuvent être correctes."
+ },
+ {
+  "id": "bd2-q134",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Un énoncé contenant « pour chaque » annonce généralement :",
+  "options": [
+   "un ORDER BY seulement",
+   "un GROUP BY",
+   "un INSERT",
+   "un DROP"
+  ],
+  "answer": 1,
+  "explain": "« par » ou « pour chaque » indique un regroupement."
+ },
+ {
+  "id": "bd2-q135",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Quelle est la première étape pour répondre à une requête SQL d'examen ?",
+  "options": [
+   "Écrire le WHERE",
+   "Choisir l'index",
+   "Identifier ce que la requête doit afficher",
+   "Écrire le GROUP BY"
+  ],
+  "answer": 2,
+  "explain": "Attributs projetés → tables → jointures → regroupement."
+ },
+ {
+  "id": "bd2-q136",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "L'erreur la plus fréquente en passage au relationnel est de :",
+  "options": [
+   "placer la clé étrangère dans la clé primaire",
+   "écrire les tables en majuscules",
+   "trop nommer les attributs",
+   "utiliser des alias"
+  ],
+  "answer": 0,
+  "explain": "Une CIF ne donne qu'une clé étrangère simple."
+ }
+]

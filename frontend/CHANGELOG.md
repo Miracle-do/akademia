@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+### Nouveautés
+- Première matière de 2ᵉ année : **Bases de données** (IG2) — 14 chapitres (Merise, dépendances fonctionnelles, MCD, passage au relationnel, normalisation, algèbre relationnelle, SQL, injections et privilèges), 136 QCM, 70 cartes mémoire et 5 épreuves ENEAM corrigées (SQL exécuté pour vérification).
+- Formation « Réussir les requêtes SQL d'examen » (3 leçons, 9 exercices).
+- Ce module n'apparaît que pour les étudiants de 2ᵉ année.
+
 ## [1.4.0] — 2026-11-21
 
 ### Nouveautés

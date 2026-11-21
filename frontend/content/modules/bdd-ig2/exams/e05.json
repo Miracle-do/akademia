@@ -1,0 +1,109 @@
+{
+ "n": 5,
+ "title": "Épreuve n° 5 · Auto-entrepreneur et QCM de SQL",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Énoncé 1 : conception (8 points)",
+   "points": 8,
+   "intro": "Travail à faire : concevoir le dictionnaire des données simplifié, puis le MCD.",
+   "context": "La loi sur l'auto-entreprenariat vient d'être promulguée : vous vous mettez à votre compte. Les habitants de votre village font appel à vous pour leurs problèmes informatiques. Il vous faut un petit logiciel pour saisir vos interventions et faciliter votre comptabilité. Il permettra la saisie des coordonnées des clients et du matériel sur lequel vous êtes intervenu. Vous appliquez un **prix horaire différent selon le type d'intervention** (certaines réparations complexes sont facturées plus cher). Pour certaines pannes, vous **vendez le composant neuf** : le logiciel doit donc intégrer la vente de matériel inhérente à la réparation.",
+   "questions": [
+    {
+     "id": "e05p1q1",
+     "q": "Dictionnaire des données simplifié.",
+     "points": 4,
+     "a": "| Code | Désignation | Nature | Type |\n|---|---|---|---|\n| NumCli | numéro du client | E | N |\n| NomCli, PrenCli | nom et prénom | E | C |\n| AdrCli, TelCli | adresse, téléphone | E | C |\n| NumMat | numéro du matériel | E | N |\n| TypeMat, MarqueMat, ModeleMat | type, marque, modèle | E | C |\n| NumInter | numéro de l'intervention | E | N |\n| DateInter | date de l'intervention | E | D |\n| DescPanne | description de la panne | E | C |\n| DureeInter | durée (en heures) | E | N |\n| CodType | code du type d'intervention | E | C |\n| LibType | libellé du type | E | C |\n| PrixHoraire | prix horaire du type | E | N |\n| CodComp | code du composant | E | C |\n| LibComp | libellé du composant | E | C |\n| PrixComp | prix de vente du composant | E | N |\n| QteComp | quantité vendue dans l'intervention | E | N |\n\n**Calculé non retenu :** montant de l'intervention = DureeInter × PrixHoraire + Σ QteComp × PrixComp."
+    },
+    {
+     "id": "e05p1q2",
+     "q": "Modèle conceptuel des données.",
+     "points": 4,
+     "a": "**Entités :** CLIENT(**NumCli**, NomCli, PrenCli, AdrCli, TelCli) · MATERIEL(**NumMat**, TypeMat, MarqueMat, ModeleMat) · TYPE_INTERVENTION(**CodType**, LibType, PrixHoraire) · INTERVENTION(**NumInter**, DateInter, DescPanne, DureeInter) · COMPOSANT(**CodComp**, LibComp, PrixComp).\n\n**Associations :**\n- CLIENT (0,N) — **posséder** — (1,1) MATERIEL : CIF ;\n- MATERIEL (0,N) — **subir** — (1,1) INTERVENTION : CIF ;\n- TYPE_INTERVENTION (0,N) — **relever de** — (1,1) INTERVENTION : CIF (le type fixe le prix horaire) ;\n- INTERVENTION (0,N) — **utiliser** — (0,N) COMPOSANT, attribut **QteComp** : CIM (vente d'un composant neuf lors d'une réparation).\n\n**Passage au relationnel :** MATERIEL(NumMat, …, #NumCli) ; INTERVENTION(NumInter, …, #NumMat, #CodType) ; UTILISER(#NumInter, #CodComp, QteComp)."
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Énoncé 2 : QCM de SQL (12 points)",
+   "points": 12,
+   "intro": "Répondez aux questions à choix multiples. Mettez seulement les numéros (par exemple 2-d).",
+   "questions": [
+    {
+     "id": "e05p2q1",
+     "q": "1. select * from clients ; affiche :  a- le contenu de la base de données clients  b- le contenu du fichier clients  c- je ne sais pas",
+     "points": 1,
+     "a": "Aucune des deux affirmations n'est exacte : la commande affiche **toutes les colonnes et toutes les lignes de la table** `clients` (ni une base, ni un fichier). Si l'on doit choisir, la proposition « le contenu de la table » est celle visée."
+    },
+    {
+     "id": "e05p2q2",
+     "q": "2. Quel mot-clé évite les lignes en doublon ?  a- all  b- distinct  c- drop",
+     "points": 1,
+     "a": "**b** : `DISTINCT`. `ALL` (défaut) garde les doublons ; `DROP` supprime un objet."
+    },
+    {
+     "id": "e05p2q3",
+     "q": "3. Le langage SQL a été élaboré dans les années 2000 :  a- vrai  b- faux",
+     "points": 1,
+     "a": "**b, faux.** SQL date des années 1970 (IBM, système R, puis normalisé en 1986)."
+    },
+    {
+     "id": "e05p2q4",
+     "q": "4. Le mot-clé ASC permet d'activer l'ascenseur :  a- faux  b- vrai",
+     "points": 1,
+     "a": "**a, faux.** `ASC` demande un tri **croissant** (ascending)."
+    },
+    {
+     "id": "e05p2q5",
+     "q": "5. Le mot-clé DESC permet de trier sur un ordre décroissant :  a- vrai  b- faux",
+     "points": 1,
+     "a": "**a, vrai.** `ORDER BY col DESC`."
+    },
+    {
+     "id": "e05p2q6",
+     "q": "6. La clause Group by permet :  a- de trier sur une colonne  b- de créer des sous-requêtes  c- de créer des sous-ensembles d'occurrences",
+     "points": 1,
+     "a": "**c.** `GROUP BY` regroupe les lignes qui ont la même valeur en sous-ensembles (groupes) sur lesquels on calcule des agrégats."
+    },
+    {
+     "id": "e05p2q7",
+     "q": "7. Quel mot-clé supprime une table ?  a- delete DATABASE  b- alter  c- drop",
+     "points": 1,
+     "a": "**c : `DROP TABLE`.** `DELETE` supprime des lignes ; `ALTER` modifie la structure."
+    },
+    {
+     "id": "e05p2q8",
+     "q": "8. Qu'est-ce qu'un tuple dans une base relationnelle ?  a- table  b- ligne  c- colonne  d- objet",
+     "points": 1,
+     "a": "**b : une ligne** (n-uplet, occurrence de la relation)."
+    },
+    {
+     "id": "e05p2q9",
+     "q": "9. Qu'est-ce qui représente un attribut ?  a- table  b- ligne  c- colonne  d- objet",
+     "points": 1,
+     "a": "**c : une colonne.**"
+    },
+    {
+     "id": "e05p2q10",
+     "q": "10. Quelle instruction sélectionne une base de données par défaut ?  a- use  b- create  c- drop  d- schéma",
+     "points": 1,
+     "a": "**a : `USE nom_base;`** (MySQL, SQL Server)."
+    },
+    {
+     "id": "e05p2q11",
+     "q": "11. Quel mot-clé est le synonyme de DATABASE ?  a- table  b- object  c- DB  d- schéma",
+     "points": 1,
+     "a": "**d : `SCHEMA`.** En MySQL, `CREATE SCHEMA` et `CREATE DATABASE` sont équivalents."
+    },
+    {
+     "id": "e05p2q12",
+     "q": "12. Quel mot-clé crée une base de données ?  a- create  b- set  c- setup  d- link",
+     "points": 1,
+     "a": "**a : `CREATE DATABASE nom;`**"
+    }
+   ]
+  }
+ ]
+}

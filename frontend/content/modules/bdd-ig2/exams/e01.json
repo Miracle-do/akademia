@@ -1,0 +1,172 @@
+{
+ "n": 1,
+ "title": "Épreuve n° 1 · Devoir de base de données 2025-2026 (IG2 A et B)",
+ "durationMinutes": 120,
+ "points": 22,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Exercice 1 : la relation CLIENT",
+   "points": 5,
+   "intro": "Soit la relation CLIENT(numero, nom, prenom, dateDinscription), de clé primaire numero. Pour chaque question, indiquez **toutes** les réponses justes.",
+   "questions": [
+    {
+     "id": "e01p1q1",
+     "q": "Pourquoi dit-on que l'attribut prénom dépend fonctionnellement de numero ?\n\na. Car à une valeur de numero correspond une seule valeur de prénom\nb. Car pour un client il peut y avoir plusieurs prénoms\nc. Car à partir du prénom on peut retrouver le numéro\nd. Car à partir du numéro on peut retrouver le prénom",
+     "points": 1,
+     "a": "**a et d.** Dire que `numero → prenom` signifie qu'une valeur de `numero` détermine une seule valeur de `prenom`, donc que le numéro permet de retrouver le prénom. La réponse c est le sens inverse (faux : deux clients peuvent avoir le même prénom) et b contredit la définition."
+    },
+    {
+     "id": "e01p1q2",
+     "q": "Pourquoi dateDinscription ne dépend-il pas fonctionnellement de prenom ?\n\na. Car on ne peut pas se baser sur le prénom pour déterminer qui est le client, donc sa date d'inscription\nb. Car un attribut ne peut dépendre que d'une clé primaire\nc. Car la DF ne concerne que des attributs de même domaine\nd. Car à un même prénom peuvent correspondre plusieurs dates d'inscription",
+     "points": 1,
+     "a": "**a et d.** Plusieurs clients portent le même prénom et se sont inscrits à des dates différentes : le prénom ne détermine pas la date. Les réponses b et c sont fausses : une DF peut avoir pour source n'importe quel groupe d'attributs, quel que soit son domaine."
+    },
+    {
+     "id": "e01p1q3",
+     "q": "Que signifie « numero est clé primaire » ?\n\na. Chaque client est identifié de manière unique par numero\nb. Chaque attribut de la relation possède une valeur unique\nc. numero est affiché en premier dans la relation\nd. Aucune occurrence de CLIENT n'a la même valeur pour numero",
+     "points": 1,
+     "a": "**a et d.** La clé primaire identifie chaque occurrence de façon unique : deux clients n'ont jamais le même numéro. L'ordre d'affichage (c) n'a aucun rapport, et b est faux (les prénoms peuvent se répéter)."
+    },
+    {
+     "id": "e01p1q4",
+     "q": "Une association CIM :\n\na. peut porter des attributs\nb. ne peut jamais porter d'attributs\nc. a la cardinalité maximum 1 sur au moins une de ses pattes\nd. peut avoir plus de deux pattes",
+     "points": 1,
+     "a": "**a et d.** Une CIM (cardinalités maximales toutes à N) devient une relation, donc peut porter des attributs, et peut être ternaire ou plus. La réponse c décrit une CIF."
+    },
+    {
+     "id": "e01p1q5",
+     "q": "Une association CIF :\n\na. ne peut jamais porter d'attributs\nb. peut porter des attributs\nc. a la cardinalité maximum 1 sur toutes ses pattes\nd. a la cardinalité maximum 1 sur au moins une de ses pattes",
+     "points": 1,
+     "a": "**d.** C'est la définition : une CIF a au moins une patte de cardinalité maximale 1. Elle n'a pas forcément un 1 sur *toutes* ses pattes (c est faux). Elle ne devient pas une relation : ses éventuels attributs migrent avec la clé étrangère."
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Exercice 2 : MCD et passage au relationnel",
+   "points": 5,
+   "intro": "Le MCD proposé comporte : COMMANDES (**ID_Commande**, DateCom, Montant) ; ECHEANCE (**Num_Echeance**, Date_echeance, Montant_Echeance) ; REGLEMENT (**Date_Reglement**) ; MODE_REGLEMENT (**Id_Mode**, Libellé_Mode) et une entité CLIENT. Associations : CLIENT (1,N) — Passer — (1,1) COMMANDES ; COMMANDES (1,N) — Posséder — ((1,1)) ECHEANCE, la cardinalité entre parenthèses indiquant que ECHEANCE est une entité faible ; ECHEANCE (0,N) — Régler — REGLEMENT, avec l'attribut `Montant_réglé`, et une CIF de Régler vers MODE_REGLEMENT (1,1). Pour chaque question, choisissez **la** réponse juste.",
+   "questions": [
+    {
+     "id": "e01p2q1",
+     "q": "L'association Régler dans le modèle logique relationnel devient :\n\nA. Régler (Num_Echeance, Date_Reglement, Id_Mode, Montant_réglé), les trois premiers soulignés\nB. Régler (#Num_Echeance, #Date_Reglement, #Id_Mode, Montant_réglé), les trois soulignés\nC. Régler (#Num_Echeance, #Date_Reglement, #Id_Mode, Montant_réglé), seuls les deux premiers soulignés\nD. Aucune réponse juste",
+     "points": 1,
+     "a": "**C.** Régler est une CIM entre ECHEANCE et REGLEMENT : sa clé primaire est le couple `(Num_Echeance, Date_Reglement)`, tous deux clés étrangères. La CIF vers MODE_REGLEMENT n'ajoute qu'une clé étrangère `#Id_Mode`, **hors de la clé primaire**."
+    },
+    {
+     "id": "e01p2q2",
+     "q": "L'association Passer dans le modèle logique devient :\n\nA. Passer(#Id_client, #ID_Commande)\nB. Passer(Id_client, ID_Commande)\nC. Passer ne deviendra pas une relation\nD. Aucune réponse juste",
+     "points": 1,
+     "a": "**C.** Passer est une CIF (1,1 côté COMMANDES) : elle ne devient pas une relation. L'identifiant du client migre dans COMMANDES : `COMMANDES(ID_Commande, DateCom, Montant, #Id_client)`."
+    },
+    {
+     "id": "e01p2q3",
+     "q": "L'entité ECHEANCE dans le modèle logique devient :\n\nA. ECHEANCE (Num_Echeance, Date_echeance, Montant_Echeance)\nB. ECHEANCE (Num_Echeance, ID_Commande, Date_echeance, Montant_Echeance) avec clé primaire (Num_Echeance, ID_Commande)\nC. ECHEANCE (#Num_Echeance, #ID_Commande, …)\nD. Aucune réponse juste",
+     "points": 1,
+     "a": "**B.** ECHEANCE est une entité faible : son identifiant est **relatif** à COMMANDES. La clé primaire est le couple `(Num_Echeance, ID_Commande)`, où `ID_Commande` est aussi clé étrangère."
+    },
+    {
+     "id": "e01p2q4",
+     "q": "L'entité MODE_REGLEMENT dans le modèle logique devient :\n\nA. MODE_REGLEMENT (Id_Mode, Libellé_Mode, Montant_réglé, #Num_Echeance, #Date_Reglement)\nB. MODE_REGLEMENT (Id_Mode, Libellé_Mode, Montant_réglé)\nC. MODE_REGLEMENT (#Id_Mode, #Num_Echeance, Libellé_Mode, Montant_réglé)\nD. Aucune réponse juste",
+     "points": 1,
+     "a": "**D.** MODE_REGLEMENT n'est qu'un identifiant et un libellé : `MODE_REGLEMENT(Id_Mode, Libellé_Mode)`. La CIF part de Régler vers elle : c'est `Régler` qui reçoit la clé étrangère `Id_Mode`. `Montant_réglé` appartient à Régler, pas à MODE_REGLEMENT."
+    },
+    {
+     "id": "e01p2q5",
+     "q": "L'entité REGLEMENT devient :\n\nA. REGLEMENT (Date_Reglement)\nB. REGLEMENT (Date_Reglement, Montant_réglé)\nC. REGLEMENT (Date_Reglement, Montant_réglé, #Num_Echeance, #Id_Commande)\nD. Aucune réponse juste",
+     "points": 1,
+     "a": "**A.** REGLEMENT n'a que son identifiant ; le montant réglé est un attribut de l'association Régler, qui devient une relation à part."
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Exercice 3 : location de véhicules (dépendances fonctionnelles)",
+   "points": 5,
+   "intro": "Contexte : un client signe un contrat de location pouvant concerner plusieurs véhicules. Pour chaque véhicule on enregistre le kilométrage de départ et d'arrivée. Tous les véhicules d'un même contrat ont les mêmes dates de début et de fin. Un véhicule est loué avec ou sans chauffeur. Une pièce a un prix fixe, mais le coût de la réparation d'une pièce varie d'une réparation à l'autre. Attributs : NumLoc, DateLoc, NumCli, NomCli, NumVeh, CodMarq, LibMarq, Capacité, NumRep, DatRep, DateDeb, DatFin, KmDeb, KmFin, CodPièce, LibPièce, PrixPiece, CoûtRep, NumChauf, NomChauf. Pour chaque règle, donnez **la** dépendance fonctionnelle élémentaire directe juste.",
+   "questions": [
+    {
+     "id": "e01p3q1",
+     "q": "Une location est faite à une date et par un client.\n\nA. NumLoc, DateLoc → Numcli\nB. NumLoc, Numcli → DateLoc\nC. NumLoc → Numcli, DateLoc\nD. Numcli, DateLoc → NumLoc",
+     "points": 1,
+     "a": "**C.** Le numéro de contrat suffit à déterminer la date et le client ; A et B ne sont pas élémentaires (la source contient un attribut inutile), D est fausse (un client peut signer plusieurs contrats le même jour)."
+    },
+    {
+     "id": "e01p3q2",
+     "q": "Tous les véhicules d'un même contrat ont la même date de début et de fin.\n\nA. NumLoc → DateDeb, DatFin\nB. NumVeh, NumLoc → DateDeb, DatFin\nC. NumLoc → DateDeb, DatFin, NumVeh\nD. DateDeb, DatFin → NumLoc, NumVeh",
+     "points": 1,
+     "a": "**A.** Les dates dépendent du contrat seul. B n'est pas élémentaire ; C affirme qu'un contrat n'a qu'un véhicule ; D est fausse (plusieurs contrats peuvent avoir les mêmes dates)."
+    },
+    {
+     "id": "e01p3q3",
+     "q": "Chaque véhicule sur un contrat est loué avec ou sans chauffeur.\n\nA. NumLoc → NumChauf, NumVeh\nB. NumVeh → NumLoc, NumChauf\nC. NumVeh, NumLoc → NumChauf\nD. NumVeh, NumChauf → NumLoc",
+     "points": 1,
+     "a": "**C.** Le chauffeur dépend du **couple** véhicule-contrat : au sein d'un même contrat, chaque véhicule a son chauffeur (ou aucun)."
+    },
+    {
+     "id": "e01p3q4",
+     "q": "Pour un contrat, on enregistre le kilométrage au début et à la fin de la location pour chaque véhicule.\n\nA. NumLoc → KmDeb, KmFin\nB. NumVeh → KmDeb, KmFin\nC. NumVeh, NumLoc → KmDeb, KmFin\nD. NumVeh, KmDeb → KmFin",
+     "points": 1,
+     "a": "**C.** Il faut le contrat **et** le véhicule : un contrat concerne plusieurs véhicules (A fausse) et un véhicule est loué plusieurs fois (B fausse)."
+    },
+    {
+     "id": "e01p3q5",
+     "q": "Le coût de la réparation d'une pièce varie d'une réparation à l'autre.\n\nA. NumRep → CodPièce, CoûtRep\nB. CodPièce → NumRep, CoûtRep\nC. NumRep, CodPièce → CoûtRep\nD. NumRep, CodPièce, CoûtRep →",
+     "points": 1,
+     "a": "**C.** Le coût dépend de la réparation **et** de la pièce réparée. Une même réparation peut concerner plusieurs pièces (A fausse) ; une pièce est réparée plusieurs fois (B fausse)."
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Exercice 4 : SQL (société GLAZAÏ SARL)",
+   "points": 7,
+   "intro": "Extrait de la base : Employé (**Matricule**, nom, prénom, Sexe, #NumServ) ; Service (**NumServ**, NomServ, #Matricule) ; Salaire (**#Matricule, Mois, Année**, Montant). Un service est sous la responsabilité d'un employé, le chef de service ; chaque mois le salaire de chaque employé est enregistré. Pour chaque question, choisissez **les** requêtes justes.\n\n*Remarque : le sujet original écrit parfois `NumRayon` à la place de `NumServ` (reste d'une ancienne version) ; la correction suit le schéma ci-dessus.*",
+   "questions": [
+    {
+     "id": "e01p4q1",
+     "q": "Afficher le nombre d'employés de sexe masculin (M) par service.\n\nA. Select NumServ, Count(*) from Employé where Sexe='M' Group by Matricule, NumServ ;\nB. Select NumServ, Matricule, Count(*) from Employé where Sexe='M' Group by Matricule, NumServ ;\nC. Select Count(*) from Employé where Sexe='M' Group by NumServ ;\nD. Select Count(*) from Employé Group by NumServ, Sexe Having Sexe='M' ;",
+     "points": 1,
+     "a": "**C et D.** Elles comptent bien les hommes par service. A et B regroupent aussi par `Matricule` : chaque groupe contient **un seul** employé, le compte vaut 1 partout. (Pour afficher aussi le service, on ajouterait `NumServ` dans le SELECT.)"
+    },
+    {
+     "id": "e01p4q2",
+     "q": "Afficher les noms des chefs de service.\n\nA. Select Nom from Employé, Service where Employé.NumServ = Service.NumServ ;\nB. Select Nom from Employé where 'chef de service' ;\nC. Select Nom from Employé, Service where Employé.Matricule = Service.Matricule ;\nD. Select Nom from Employé where Matricule IN (Select Matricule from Service) ;",
+     "points": 1,
+     "a": "**C et D.** Le chef de service est l'employé dont le matricule figure dans `Service.Matricule` : jointure sur le matricule (C) ou sous-requête `IN` (D). La jointure A sur `NumServ` renvoie tous les employés de chaque service."
+    },
+    {
+     "id": "e01p4q3",
+     "q": "Afficher les noms des services qui ont plus de 10 employés.\n\nA. Select NomServ From Service Where Count(*) > 10 ;\nB. Select NomServ From Employé, Service where Employé.NumServ = Service.NumServ Group By Employé.Matricule, Service.NumServ, NomServ Having Count(*) > 10 ;\nC. Select NomServ From Employé, Service where Employé.NumService = Service.NumServ Group By Service.NumServ, NomServ Having Count(*) > 10 ;\nD. Select NomServ From Employé, Service where Employé.NumServ = Service.NumServ Group By Employé.NumServ, NomServ Having Count(*) > 10 ;",
+     "points": 1,
+     "a": "**D.** A met un agrégat dans WHERE ; B regroupe par `Matricule` (groupes d'un seul employé) ; C utilise une colonne inexistante `NumService`."
+    },
+    {
+     "id": "e01p4q4",
+     "q": "Créer la table Employé : le sexe ne peut prendre que M ou F, les autres tables sont déjà créées.\n\nA. CREATE TABLE Employé (Matricule INT, nom CHAR(15), prénom CHAR(20), Sexe CHAR(1) CHECK(Sexe='M' OR Sexe='F'), NumServ INT, PRIMARY KEY (Matricule, NumServ)) ;\nB. CREATE TABLE Employé (Matricule INT PRIMARY KEY, nom CHAR(15), prénom CHAR(20), Sexe CHAR(1) CHECK(Sexe='M' OR Sexe='F'), NumServ INT REFERENCES Service) ;\nC. CREATE TABLE Employé (Matricule INT, nom CHAR(15), prénom CHAR(20), Sexe CHAR(1) CHECK(Sexe='M' OR Sexe='F'), NumServ INT REFERENCES Service, PRIMARY KEY(Matricule)) ;\nD. CREATE TABLE Employé (Matricule INT PRIMARY KEY, nom CHAR(15), prénom CHAR(20), Sexe CHAR(1) CHECK(Sexe='M' OR Sexe='F'), NumRayon INT, FOREIGN KEY (NumServ) REFERENCES Service) ;",
+     "points": 1,
+     "a": "**B et C.** Clé primaire `Matricule` seule, contrainte CHECK correcte et clé étrangère vers Service. A fait de `(Matricule, NumServ)` la clé primaire ; D déclare une clé étrangère sur `NumServ` alors que la colonne créée s'appelle `NumRayon`."
+    },
+    {
+     "id": "e01p4q5",
+     "q": "Afficher pour chaque employé son nom et son salaire moyen de l'année 2020.\n\nA. Select Nom, AVG(Montant) from Employé, Salaire where Employé.Matricule = Salaire.Matricule And Année=2020 Group By Employé.Matricule, Nom ;\nB. Select Nom, AVG(Montant) from Employé, Salaire where Employé.Matricule = Salaire.Matricule And Année=2020 Group By Nom, Montant ;\nC. Select Nom, AVG(Montant) from Employé, Salaire where Employé.Matricule = Salaire.Matricule And Année=2020 Group By Employé.Matricule, Nom, Sum(Montant) ;\nD. Select Nom, AVG(Montant) from Employé, Salaire where Employé.Matricule = Salaire.Matricule Group By Employé.Matricule, Nom, Année HAVING Année=2020 ;",
+     "points": 1,
+     "a": "**A et D.** A filtre l'année avant le regroupement ; D regroupe par année puis garde le groupe 2020 : le résultat est le même. B regroupe par `Montant` : une ligne par montant distinct, la moyenne est fausse. C place un agrégat dans le GROUP BY, ce qui est une erreur de syntaxe."
+    },
+    {
+     "id": "e01p4q6",
+     "q": "Ajouter l'employé de nom Magengo, prénom Guttembert, sexe M, matricule 154, affecté au service 15.\n\nA. Insert Into Employé (nom, prénom, Sexe, Matricule, NumServ) Values ('Magengo','Guttembert','M',154,15) ;\nB. Insert Into Employé (Matricule, nom, prénom, Sexe, NumServ) Values ('Magengo','Guttembert','M',154,15) ;\nC. Insert Into Employé Values ('Magengo','Guttembert','M',154,15) ;\nD. Update Employé Set Matricule=154, nom='Magengo', prénom='Guttembert', Sexe='M', NumServ=15 ;",
+     "points": 1,
+     "a": "**A.** Les valeurs suivent l'ordre de la liste de colonnes. B et C placent le matricule (154) à la mauvaise position. D est un `UPDATE` : il **modifie** les lignes existantes au lieu d'en créer une."
+    },
+    {
+     "id": "e01p4q7",
+     "q": "La requête `Delete from Salaire where Matricule = 204 ;`\n\nA. supprime l'employé dont le matricule est 204\nB. modifie le salaire de l'employé 204\nC. affiche les salaires de l'employé 204\nD. aucune réponse juste",
+     "points": 1,
+     "a": "**D.** Elle supprime **toutes les lignes de la table Salaire** de l'employé 204 (tous ses salaires), mais pas l'employé lui-même (A fausse). Ce n'est ni une modification ni un affichage."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,140 @@
+{
+ "n": 2,
+ "title": "Épreuve n° 2 · SQL janvier 2020 : distribution de produits alimentaires",
+ "durationMinutes": 180,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Exercice 1 : structurer en 3FN",
+   "points": 2,
+   "intro": "À partir des dépendances fonctionnelles, structurer ces attributs en relations pour obtenir une base en 3FN.",
+   "context": "Attributs : CodePro (code produit), LibelPro (libellé), Pu (prix unitaire), NumRest (numéro restaurateur), NomRest, ContRest (contact), NumCom (numéro de commande), DateCom, QteCom (quantité commandée), NumLiv (numéro de livraison), DateLiv, QteLiv (quantité livrée), NumFac (numéro de facture), DateFac.\n\nRègles : un produit d'une commande peut être livré **partiellement** (en plusieurs livraisons) ; une facture peut concerner des produits de **commandes différentes**.",
+   "questions": [
+    {
+     "id": "e02p1q1",
+     "q": "Structurez les attributs en relations en troisième forme normale.",
+     "points": 2,
+     "a": "**Dépendances fonctionnelles élémentaires directes**\n\n- `CodePro → LibelPro, Pu`\n- `NumRest → NomRest, ContRest`\n- `NumCom → DateCom, NumRest`\n- `NumCom, CodePro → QteCom`\n- `NumLiv → DateLiv`\n- `NumLiv, NumCom, CodePro → QteLiv` (livraison partielle : une ligne de commande peut apparaître dans plusieurs livraisons)\n- `NumFac → DateFac`\n- facture ↔ lignes de commande : association plusieurs-à-plusieurs, `(NumFac, NumCom, CodePro)` seul identifie la ligne facturée.\n\n**Modèle relationnel en 3FN**\n\n- PRODUIT(**CodePro**, LibelPro, Pu)\n- RESTAURATEUR(**NumRest**, NomRest, ContRest)\n- COMMANDE(**NumCom**, DateCom, #NumRest)\n- LIGNE_COMMANDE(**#NumCom, #CodePro**, QteCom)\n- LIVRAISON(**NumLiv**, DateLiv)\n- LIVRER(**#NumLiv, #NumCom, #CodePro**, QteLiv), avec (#NumCom, #CodePro) clé étrangère vers LIGNE_COMMANDE\n- FACTURE(**NumFac**, DateFac)\n- FACTURER(**#NumFac, #NumCom, #CodePro**), avec (#NumCom, #CodePro) clé étrangère vers LIGNE_COMMANDE\n\n**Pourquoi 3FN ?** Aucun attribut non clé ne dépend d'un autre attribut non clé ; `Pu` est dans PRODUIT et non dans LIGNE_COMMANDE ; le restaurateur est déduit de la commande (pas répété dans la facture ni la livraison).\n\n*Hypothèse :* une facture est établie sur la quantité commandée (QteCom × Pu)."
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Exercice 2 : SQL (18 points)",
+   "points": 18,
+   "intro": "Utiliser la base de l'exercice 1 pour traduire en SQL les requêtes suivantes. Les dates se notent `'AAAA-MM-JJ'`.",
+   "context": "Les requêtes ont été **exécutées** sur un jeu de données d'essai ; les réponses utilisent le schéma de la correction de l'exercice 1.",
+   "questions": [
+    {
+     "id": "e02p2q1",
+     "q": "1. Lister les commandes de décembre 2019.",
+     "points": 1,
+     "a": "Pour alléger les requêtes, on commence par créer trois vues (réutilisées ensuite) :\n\n```sql\nCREATE VIEW V_LIGNE_CMD AS\nSELECT c.NumCom, c.DateCom, c.NumRest, lc.CodePro, lc.QteCom, lc.QteCom * p.Pu AS Montant\nFROM COMMANDE c\nJOIN LIGNE_COMMANDE lc ON lc.NumCom = c.NumCom\nJOIN PRODUIT p ON p.CodePro = lc.CodePro;\n\nCREATE VIEW V_LIGNE_FAC AS\nSELECT f.NumFac, fa.DateFac, c.NumRest, f.NumCom, f.CodePro, lc.QteCom * p.Pu AS Montant\nFROM FACTURER f\nJOIN FACTURE fa ON fa.NumFac = f.NumFac\nJOIN LIGNE_COMMANDE lc ON lc.NumCom = f.NumCom AND lc.CodePro = f.CodePro\nJOIN COMMANDE c ON c.NumCom = f.NumCom\nJOIN PRODUIT p ON p.CodePro = f.CodePro;\n\nCREATE VIEW V_LIVRAISON AS\nSELECT l.NumLiv, lv.DateLiv, c.NumRest, l.NumCom, l.CodePro, l.QteLiv\nFROM LIVRER l\nJOIN LIVRAISON lv ON lv.NumLiv = l.NumLiv\nJOIN COMMANDE c ON c.NumCom = l.NumCom;\n```\n\n- `V_LIGNE_CMD` : une ligne par produit commandé, avec le **montant** (QteCom × Pu) ;\n- `V_LIGNE_FAC` : une ligne par produit facturé, avec le restaurateur et le montant ;\n- `V_LIVRAISON` : une ligne par produit livré, avec le restaurateur.\n\nDéfinitions : **Total Achat** = Σ QteCom × Pu des commandes ; **chiffre d'affaires / coût des factures** = Σ montants facturés ; « le plus » se traite avec `HAVING … = (SELECT MAX(…) …)` pour garder les ex æquo.\n\n**Requête 1 :**\n```sql\nSELECT * FROM COMMANDE\nWHERE DateCom BETWEEN '2019-12-01' AND '2019-12-31';\n```"
+    },
+    {
+     "id": "e02p2q2",
+     "q": "2. Lister par nom de restaurateur les commandes de novembre 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, c.NumCom, c.DateCom\nFROM RESTAURATEUR r JOIN COMMANDE c ON c.NumRest = r.NumRest\nWHERE c.DateCom BETWEEN '2019-11-01' AND '2019-11-30'\nORDER BY r.NomRest, c.DateCom;\n```"
+    },
+    {
+     "id": "e02p2q3",
+     "q": "3. Donner le contact de Cossi Jules.",
+     "points": 1,
+     "a": "```sql\nSELECT ContRest FROM RESTAURATEUR WHERE NomRest = 'Cossi Jules';\n```"
+    },
+    {
+     "id": "e02p2q4",
+     "q": "4. Donner le chiffre d'affaires de Cossi Jules auprès du distributeur en 2019 (montant facturé).",
+     "points": 1,
+     "a": "```sql\nSELECT SUM(v.Montant) AS CA_2019\nFROM V_LIGNE_FAC v JOIN RESTAURATEUR r ON r.NumRest = v.NumRest\nWHERE r.NomRest = 'Cossi Jules'\n  AND v.DateFac BETWEEN '2019-01-01' AND '2019-12-31';\n```"
+    },
+    {
+     "id": "e02p2q5",
+     "q": "5. Lister nom et contact du réalisateur de chiffre d'affaires le plus élevé en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, r.ContRest\nFROM RESTAURATEUR r JOIN V_LIGNE_FAC v ON v.NumRest = r.NumRest\nWHERE v.DateFac BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY r.NumRest, r.NomRest, r.ContRest\nHAVING SUM(v.Montant) = (SELECT MAX(t.total)\n   FROM (SELECT SUM(Montant) AS total FROM V_LIGNE_FAC\n         WHERE DateFac BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY NumRest) t);\n```"
+    },
+    {
+     "id": "e02p2q6",
+     "q": "6. Lister nom et contact de celui qui a passé le plus de commandes en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, r.ContRest\nFROM RESTAURATEUR r JOIN COMMANDE c ON c.NumRest = r.NumRest\nWHERE c.DateCom BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY r.NumRest, r.NomRest, r.ContRest\nHAVING COUNT(*) = (SELECT MAX(t.nb)\n   FROM (SELECT COUNT(*) AS nb FROM COMMANDE\n         WHERE DateCom BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY NumRest) t);\n```"
+    },
+    {
+     "id": "e02p2q7",
+     "q": "7. Lister nom, contact et Total Achat de celui qui a commandé le plus (en montant) en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, r.ContRest, SUM(v.Montant) AS TotalAchat\nFROM RESTAURATEUR r JOIN V_LIGNE_CMD v ON v.NumRest = r.NumRest\nWHERE v.DateCom BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY r.NumRest, r.NomRest, r.ContRest\nHAVING SUM(v.Montant) = (SELECT MAX(t.total)\n   FROM (SELECT SUM(Montant) AS total FROM V_LIGNE_CMD\n         WHERE DateCom BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY NumRest) t);\n```"
+    },
+    {
+     "id": "e02p2q8",
+     "q": "8. Lister par restaurateur les commandes passées (y compris les restaurateurs sans commande).",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, c.NumCom, c.DateCom\nFROM RESTAURATEUR r LEFT JOIN COMMANDE c ON c.NumRest = r.NumRest\nORDER BY r.NomRest, c.DateCom;\n```"
+    },
+    {
+     "id": "e02p2q9",
+     "q": "9. Lister par restaurateur, en ordre décroissant du Total Achat des produits.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, SUM(v.Montant) AS TotalAchat\nFROM RESTAURATEUR r JOIN V_LIGNE_CMD v ON v.NumRest = r.NumRest\nGROUP BY r.NumRest, r.NomRest\nORDER BY TotalAchat DESC;\n```"
+    },
+    {
+     "id": "e02p2q10",
+     "q": "10. Lister par restaurateur, en ordre décroissant du Coût Total des factures.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, SUM(v.Montant) AS CoutTotalFactures\nFROM RESTAURATEUR r JOIN V_LIGNE_FAC v ON v.NumRest = r.NumRest\nGROUP BY r.NumRest, r.NomRest\nORDER BY CoutTotalFactures DESC;\n```"
+    },
+    {
+     "id": "e02p2q11",
+     "q": "11. Donner le produit le plus commandé (en quantité) en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT p.CodePro, p.LibelPro, SUM(v.QteCom) AS QteTotale\nFROM PRODUIT p JOIN V_LIGNE_CMD v ON v.CodePro = p.CodePro\nWHERE v.DateCom BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY p.CodePro, p.LibelPro\nHAVING SUM(v.QteCom) = (SELECT MAX(t.q)\n   FROM (SELECT SUM(QteCom) AS q FROM V_LIGNE_CMD\n         WHERE DateCom BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY CodePro) t);\n```"
+    },
+    {
+     "id": "e02p2q12",
+     "q": "12. Donner le produit le plus livré (en quantité) en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT p.CodePro, p.LibelPro, SUM(v.QteLiv) AS QteLivree\nFROM PRODUIT p JOIN V_LIVRAISON v ON v.CodePro = p.CodePro\nWHERE v.DateLiv BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY p.CodePro, p.LibelPro\nHAVING SUM(v.QteLiv) = (SELECT MAX(t.q)\n   FROM (SELECT SUM(QteLiv) AS q FROM V_LIVRAISON\n         WHERE DateLiv BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY CodePro) t);\n```"
+    },
+    {
+     "id": "e02p2q13",
+     "q": "13. Donner le Coût Total de vente du produit le plus commandé en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT SUM(v.Montant) AS CoutTotalVente\nFROM V_LIGNE_CMD v\nWHERE v.DateCom BETWEEN '2019-01-01' AND '2019-12-31'\n  AND v.CodePro IN (SELECT CodePro FROM V_LIGNE_CMD\n        WHERE DateCom BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY CodePro\n        HAVING SUM(QteCom) = (SELECT MAX(t.q)\n           FROM (SELECT SUM(QteCom) AS q FROM V_LIGNE_CMD\n                 WHERE DateCom BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY CodePro) t));\n```"
+    },
+    {
+     "id": "e02p2q14",
+     "q": "14. Donner le restaurateur qui a le Nombre Total de livraisons le plus élevé.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, COUNT(DISTINCT v.NumLiv) AS NbLiv\nFROM RESTAURATEUR r JOIN V_LIVRAISON v ON v.NumRest = r.NumRest\nGROUP BY r.NumRest, r.NomRest\nHAVING COUNT(DISTINCT v.NumLiv) = (SELECT MAX(t.nb)\n   FROM (SELECT COUNT(DISTINCT NumLiv) AS nb FROM V_LIVRAISON GROUP BY NumRest) t);\n```"
+    },
+    {
+     "id": "e02p2q15",
+     "q": "15. Donner le restaurateur qui a reçu le plus de produits en 2019.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, SUM(v.QteLiv) AS QteRecue\nFROM RESTAURATEUR r JOIN V_LIVRAISON v ON v.NumRest = r.NumRest\nWHERE v.DateLiv BETWEEN '2019-01-01' AND '2019-12-31'\nGROUP BY r.NumRest, r.NomRest\nHAVING SUM(v.QteLiv) = (SELECT MAX(t.q)\n   FROM (SELECT SUM(QteLiv) AS q FROM V_LIVRAISON\n         WHERE DateLiv BETWEEN '2019-01-01' AND '2019-12-31' GROUP BY NumRest) t);\n```"
+    },
+    {
+     "id": "e02p2q16",
+     "q": "16. Lister par restaurateur le Nombre Total de livraisons.",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, COUNT(DISTINCT v.NumLiv) AS NbLiv\nFROM RESTAURATEUR r LEFT JOIN V_LIVRAISON v ON v.NumRest = r.NumRest\nGROUP BY r.NumRest, r.NomRest;\n```"
+    },
+    {
+     "id": "e02p2q17",
+     "q": "17. Lister par restaurateur le Total Achat du produit qui lui est le plus livré.",
+     "points": 1,
+     "a": "```sql\nWITH liv AS (\n  SELECT NumRest, CodePro, SUM(QteLiv) AS q\n  FROM V_LIVRAISON GROUP BY NumRest, CodePro),\ntop AS (\n  SELECT * FROM liv x\n  WHERE q = (SELECT MAX(q) FROM liv y WHERE y.NumRest = x.NumRest))\nSELECT r.NomRest, t.CodePro, SUM(v.Montant) AS TotalAchat\nFROM top t\nJOIN RESTAURATEUR r ON r.NumRest = t.NumRest\nJOIN V_LIGNE_CMD v ON v.NumRest = t.NumRest AND v.CodePro = t.CodePro\nGROUP BY r.NumRest, r.NomRest, t.CodePro;\n```"
+    },
+    {
+     "id": "e02p2q18",
+     "q": "18. Lister par restaurateur le Total Achat du produit le plus livré (tous restaurateurs confondus).",
+     "points": 1,
+     "a": "```sql\nSELECT r.NomRest, SUM(v.Montant) AS TotalAchat\nFROM V_LIGNE_CMD v JOIN RESTAURATEUR r ON r.NumRest = v.NumRest\nWHERE v.CodePro IN (SELECT CodePro FROM V_LIVRAISON GROUP BY CodePro\n        HAVING SUM(QteLiv) = (SELECT MAX(t.q)\n           FROM (SELECT SUM(QteLiv) AS q FROM V_LIVRAISON GROUP BY CodePro) t))\nGROUP BY r.NumRest, r.NomRest;\n```"
+    }
+   ]
+  }
+ ]
+}

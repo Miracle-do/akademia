@@ -1,0 +1,183 @@
+{
+  "id": "bdd-ig2",
+  "title": "Bases de données",
+  "subtitle": "Merise, relationnel, SQL et sécurité · ENEAM · IG2 (AEI / AIP / ARI)",
+  "description": "Du MCD Merise au SQL : dépendances fonctionnelles, passage au relationnel, normalisation, algèbre relationnelle, requêtes SQL, injections et privilèges, avec sujets d'examen ENEAM corrigés.",
+  "emoji": "🗃️",
+  "color": "#0B7285",
+  "level": "Licence 2",
+  "estimatedHours": 14,
+  "annee": 2,
+  "parts": [
+    {
+      "id": "p1",
+      "title": "Partie 1 · Modélisation Merise",
+      "chapters": [
+        "1-1-generalites-sgbd",
+        "1-2-concepts-mcd",
+        "1-3-dependances-fonctionnelles",
+        "1-4-construire-mcd"
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Partie 2 · Modèle relationnel",
+      "chapters": [
+        "2-1-relationnel-mldr",
+        "2-2-normalisation"
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Partie 3 · Algèbre relationnelle",
+      "chapters": [
+        "3-1-algebre-relationnelle"
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Partie 4 · Le langage SQL",
+      "chapters": [
+        "4-1-sql-ddl",
+        "4-2-sql-dml-select",
+        "4-3-jointures-sous-requetes",
+        "4-4-sql-avance"
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Partie 5 · Sécurité",
+      "chapters": [
+        "5-1-injection-sql",
+        "5-2-dcl-securite"
+      ]
+    },
+    {
+      "id": "ann",
+      "title": "Annexes",
+      "chapters": [
+        "a-methode-examen"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "1-1-generalites-sgbd",
+      "number": "1.1",
+      "title": "Fichiers, SGBD et architecture",
+      "summary": "Limites des fichiers, définition d'une BD, objectifs du SGBD, trois niveaux, modèles de données.",
+      "minutes": 8,
+      "file": "1-1-generalites-sgbd.md"
+    },
+    {
+      "id": "1-2-concepts-mcd",
+      "number": "1.2",
+      "title": "Les concepts du MCD Merise",
+      "summary": "Donnée, attribut, entité, identifiant, association, cardinalités, CIF et CIM.",
+      "minutes": 10,
+      "file": "1-2-concepts-mcd.md"
+    },
+    {
+      "id": "1-3-dependances-fonctionnelles",
+      "number": "1.3",
+      "title": "Dépendances fonctionnelles et couverture minimale",
+      "summary": "Dictionnaire, DF, DFE, DFED, couverture minimale, exemple de location de véhicules.",
+      "minutes": 11,
+      "file": "1-3-dependances-fonctionnelles.md"
+    },
+    {
+      "id": "1-4-construire-mcd",
+      "number": "1.4",
+      "title": "Construire un MCD",
+      "summary": "Démarche, ternaires, réflexives, entités faibles, sous-entités X/T/XT, pseudo-entités.",
+      "minutes": 10,
+      "file": "1-4-construire-mcd.md"
+    },
+    {
+      "id": "2-1-relationnel-mldr",
+      "number": "2.1",
+      "title": "Modèle relationnel et passage MCD → MLDR",
+      "summary": "Clés, intégrité, règles CIF/CIM, réflexives, généralisation, sujet 2025-2026 corrigé.",
+      "minutes": 11,
+      "file": "2-1-relationnel-mldr.md"
+    },
+    {
+      "id": "2-2-normalisation",
+      "number": "2.2",
+      "title": "Normalisation : 1FN, 2FN, 3FN",
+      "summary": "Anomalies, trois formes normales, décomposition de « Commander », méthode.",
+      "minutes": 9,
+      "file": "2-2-normalisation.md"
+    },
+    {
+      "id": "3-1-algebre-relationnelle",
+      "number": "3.1",
+      "title": "Algèbre relationnelle",
+      "summary": "Projection, sélection, opérations ensemblistes, jointure, division, agrégats, passage à SQL.",
+      "minutes": 9,
+      "file": "3-1-algebre-relationnelle.md"
+    },
+    {
+      "id": "4-1-sql-ddl",
+      "number": "4.1",
+      "title": "SQL : définir les données (DDL)",
+      "summary": "CREATE, contraintes, actions référentielles, types, ALTER, DROP.",
+      "minutes": 10,
+      "file": "4-1-sql-ddl.md"
+    },
+    {
+      "id": "4-2-sql-dml-select",
+      "number": "4.2",
+      "title": "SQL : INSERT, UPDATE, DELETE, SELECT",
+      "summary": "Manipulation, WHERE, LIKE, NULL, agrégats, GROUP BY, HAVING, ORDER BY.",
+      "minutes": 11,
+      "file": "4-2-sql-dml-select.md"
+    },
+    {
+      "id": "4-3-jointures-sous-requetes",
+      "number": "4.3",
+      "title": "SQL : jointures et sous-requêtes",
+      "summary": "INNER/LEFT/RIGHT/FULL, auto-jointure, IN/ANY/ALL/EXISTS, UNION, questions « jamais » et « tous ».",
+      "minutes": 12,
+      "file": "4-3-jointures-sous-requetes.md"
+    },
+    {
+      "id": "4-4-sql-avance",
+      "number": "4.4",
+      "title": "SQL avancé",
+      "summary": "CASE, NULL, LIMIT/TOP/FETCH, index, AUTO_INCREMENT, fonctions, vues.",
+      "minutes": 8,
+      "file": "4-4-sql-avance.md"
+    },
+    {
+      "id": "5-1-injection-sql",
+      "number": "5.1",
+      "title": "Injection SQL",
+      "summary": "Les trois attaques classiques et les requêtes paramétrées.",
+      "minutes": 7,
+      "file": "5-1-injection-sql.md"
+    },
+    {
+      "id": "5-2-dcl-securite",
+      "number": "5.2",
+      "title": "Utilisateurs, privilèges et sauvegarde",
+      "summary": "CREATE USER, GRANT, REVOKE, DENY, rôles, sauvegarde, bonnes pratiques.",
+      "minutes": 8,
+      "file": "5-2-dcl-securite.md"
+    },
+    {
+      "id": "a-methode-examen",
+      "number": "A",
+      "title": "Méthode d'examen",
+      "summary": "Répartition des sujets, méthode de modélisation et de requête, erreurs pénalisées.",
+      "minutes": 5,
+      "file": "a-methode-examen.md"
+    }
+  ],
+  "features": {
+    "quiz": true,
+    "blitz": true,
+    "exams": true,
+    "flashcards": true
+  }
+}
