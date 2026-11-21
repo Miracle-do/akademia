@@ -5,6 +5,8 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.4.0] — 2026-11-21
+
 ### Nouveautés
 - Battle hebdomadaire ARI contre AIP séparée par année : chaque étudiant voit la Battle de sa 2ᵉ ou 3ᵉ année, avec son propre historique. Migration Supabase : `frontend/supabase/migration-annee.sql` (à rejouer, elle est sans danger).
 
