@@ -5,6 +5,8 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.3.0] — 2026-11-21
+
 ### Nouveautés
 - Années d'études : à l'inscription, l'étudiant choisit sa 2ᵉ ou 3ᵉ année, puis sa filière. Les modules, la recherche, les formations et les résultats suivent son année ; les modules des autres années apparaissent verrouillés (accès payant à venir).
 - Classement par année (ARI et AIP mélangés) avec un sélecteur pour consulter l'autre année.
