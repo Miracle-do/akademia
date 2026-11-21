@@ -21,6 +21,11 @@ create table if not exists public.profiles (
 -- Si la table existait déjà, s'assurer que la colonne filiere est présente
 alter table public.profiles add column if not exists filiere text check (filiere in ('ARI', 'AIP'));
 
+-- Année d'études (2 = 2ᵉ année, 3 = 3ᵉ année). Les comptes existants sont en 3ᵉ année.
+-- Contrairement à la filière, elle reste modifiable (passage 2 → 3 chaque rentrée).
+alter table public.profiles add column if not exists annee smallint not null default 3 check (annee in (2, 3));
+create index if not exists profiles_annee_xp_idx on public.profiles (annee, xp desc);
+
 create unique index if not exists profiles_username_lower_idx on public.profiles (lower(username));
 create index if not exists profiles_xp_idx on public.profiles (xp desc);
 create index if not exists profiles_filiere_idx on public.profiles (filiere);
@@ -125,8 +130,10 @@ as $$
 declare
   wanted_username text := nullif(trim(new.raw_user_meta_data->>'username'), '');
   wanted_filiere  text := upper(nullif(trim(new.raw_user_meta_data->>'filiere'), ''));
+  wanted_annee    text := nullif(trim(new.raw_user_meta_data->>'annee'), '');
   final_username  text;
   valid_filiere   text := 'ARI';
+  valid_annee     smallint := 3;
   initial_theme   text := 'ciel';
 begin
   if wanted_filiere in ('ARI', 'AIP') then
@@ -135,17 +142,20 @@ begin
   if valid_filiere = 'AIP' then
     initial_theme := 'violet';
   end if;
+  if wanted_annee in ('2', '3') then
+    valid_annee := wanted_annee::smallint;
+  end if;
 
   final_username := coalesce(wanted_username, 'etudiant_' || substr(replace(new.id::text, '-', ''), 1, 6));
   begin
-    insert into public.profiles (id, username, filiere)
-    values (new.id, final_username, valid_filiere)
+    insert into public.profiles (id, username, filiere, annee)
+    values (new.id, final_username, valid_filiere, valid_annee)
     on conflict (id) do update
       set filiere = coalesce(public.profiles.filiere, excluded.filiere);
   exception when unique_violation then
     -- pseudo déjà pris : ajout d'un suffixe unique pour ne jamais bloquer l'inscription
-    insert into public.profiles (id, username, filiere)
-    values (new.id, left(final_username, 20) || '_' || substr(replace(new.id::text, '-', ''), 1, 5), valid_filiere)
+    insert into public.profiles (id, username, filiere, annee)
+    values (new.id, left(final_username, 20) || '_' || substr(replace(new.id::text, '-', ''), 1, 5), valid_filiere, valid_annee)
     on conflict (id) do nothing;
   end;
 

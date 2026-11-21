@@ -13,14 +13,16 @@ import {
 } from '@/data/repo';
 import { supabase, cloudEnabled } from '@/data/supabase';
 import { disablePush } from '@/data/push';
-import { defaultState, normalizeFiliere, normalizeState, themeForFiliere } from '@/lib/progress';
-import type { BackendThemeId, FiliereId, UserState } from '@/lib/types';
+import { defaultState, normalizeAnnee, normalizeFiliere, normalizeState, themeForFiliere } from '@/lib/progress';
+import type { AnneeId, BackendThemeId, FiliereId, UserState } from '@/lib/types';
 
 export interface AuthUser {
   id: string;
   email?: string;
   username: string;
   filiere?: FiliereId | null;
+  /** Année d'études (2 ou 3). Absente = 3ᵉ année. */
+  annee?: AnneeId;
   theme?: BackendThemeId;
   guest: boolean;
 }
@@ -35,9 +37,10 @@ interface AuthApi {
     password: string,
     username: string,
     filiere?: FiliereId,
+    annee?: AnneeId,
   ): Promise<{ error?: string; needsConfirmation?: boolean }>;
   signOut(): Promise<void>;
-  updateProfile(patch: { username?: string; filiere?: FiliereId }): Promise<string | null>;
+  updateProfile(patch: { username?: string; filiere?: FiliereId; annee?: AnneeId }): Promise<string | null>;
   resetPassword(email: string, newPassword?: string): Promise<string | null>;
 }
 
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: cached.email,
         username: cached.username,
         filiere,
+        annee: normalizeAnnee(cached.annee),
         theme: themeForFiliere(filiere),
         guest: false,
       };
@@ -93,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let filiere =
         normalizeFiliere(sessionUser.user_metadata?.filiere) ??
         (cached?.id === sessionUser.id ? normalizeFiliere(cached.filiere) : null);
+      let annee: AnneeId = normalizeAnnee(
+        sessionUser.user_metadata?.annee ?? (cached?.id === sessionUser.id ? cached.annee : undefined),
+      );
 
       if (supabase) {
         try {
@@ -122,6 +129,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           /* ignore */
         }
+        // Lecture à part : si la colonne `annee` n'est pas encore migrée, cela n'affecte pas le reste du profil.
+        try {
+          const { data: anneeRow, error: anneeErr } = await supabase
+            .from('profiles')
+            .select('annee')
+            .eq('id', sessionUser.id)
+            .maybeSingle();
+          if (!anneeErr && anneeRow) annee = normalizeAnnee((anneeRow as { annee?: unknown }).annee);
+        } catch {
+          /* ignore */
+        }
       }
 
       try {
@@ -130,10 +148,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email?: string;
           username: string;
           filiere?: FiliereId | null;
+          annee?: AnneeId;
           theme?: BackendThemeId;
         }>('/me');
         if (me?.username) username = me.username;
         if (me?.filiere) filiere = normalizeFiliere(me.filiere) ?? filiere;
+        if (me?.annee) annee = normalizeAnnee(me.annee);
       } catch {
         /* backend may be cold-starting; keep Supabase profile */
       }
@@ -144,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: sessionUser.email ?? undefined,
         username,
         filiere: finalFiliere,
+        annee,
         theme: themeForFiliere(finalFiliere),
         guest: false,
       };
@@ -193,6 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email?: string;
         username: string;
         filiere?: FiliereId | null;
+        annee?: AnneeId;
         theme?: BackendThemeId;
       }>('/me');
       const filiere = normalizeFiliere(me.filiere) ?? 'ARI';
@@ -201,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: me.email,
         username: me.username,
         filiere,
+        annee: normalizeAnnee(me.annee),
         theme: themeForFiliere(filiere),
         guest: false,
       };
@@ -225,6 +248,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: cached.email,
             username: cached.username,
             filiere,
+            annee: normalizeAnnee(cached.annee),
             theme: themeForFiliere(filiere),
             guest: false,
           });
@@ -296,6 +320,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email?: string;
               username: string;
               filiere?: FiliereId | null;
+              annee?: AnneeId;
               theme?: BackendThemeId;
             };
           }>('/auth/signin', {
@@ -315,6 +340,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: res.user.email,
             username: res.user.username,
             filiere,
+            annee: normalizeAnnee(res.user.annee),
             theme: themeForFiliere(filiere),
             guest: false,
           };
@@ -332,10 +358,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      async signUp(email, password, username, filiere) {
+      async signUp(email, password, username, filiere, annee) {
         const cleanEmail = email.trim().toLowerCase();
         const cleanUsername = username.trim();
         const normFiliere: FiliereId = normalizeFiliere(filiere) ?? 'ARI';
+        const normAnnee: AnneeId = normalizeAnnee(annee);
         const initialTheme = themeForFiliere(normFiliere);
         const initialState = normalizeState({
           ...defaultState(),
@@ -355,6 +382,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email?: string;
               username: string;
               filiere?: FiliereId | null;
+              annee?: AnneeId;
               theme?: BackendThemeId;
             };
           }>('/auth/signup', {
@@ -364,6 +392,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               password,
               username: cleanUsername,
               filiere: normFiliere,
+              annee: normAnnee,
             }),
           });
 
@@ -380,6 +409,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: res.user.email || cleanEmail,
               username: res.user.username || cleanUsername,
               filiere: normalizeFiliere(res.user.filiere) ?? normFiliere,
+              annee: normalizeAnnee(res.user.annee ?? normAnnee),
               theme: initialTheme,
               guest: false,
             };
@@ -430,6 +460,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 data: {
                   username: cleanUsername,
                   filiere: normFiliere,
+                  annee: normAnnee,
                 },
               },
             });
@@ -454,6 +485,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   },
                   { onConflict: 'id' },
                 );
+              // À part : sans la colonne `annee` (schéma non migré), le profil ci-dessus reste créé.
+              await supabase.from('profiles').update({ annee: normAnnee }).eq('id', data.user.id);
               writeSnapshot(data.user.id, { state: initialState, pending: [] });
               await saveStateToSupabaseDirect(data.user.id, initialState);
               const resolved: AuthUser = {
@@ -461,6 +494,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: data.user.email ?? cleanEmail,
                 username: cleanUsername,
                 filiere: normFiliere,
+                annee: normAnnee,
                 theme: initialTheme,
                 guest: false,
               };
@@ -509,6 +543,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email?: string;
               username: string;
               filiere?: FiliereId | null;
+              annee?: AnneeId;
               theme?: BackendThemeId;
             };
           }>('/me', {
@@ -521,6 +556,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: res.user.email ?? user?.email,
             username: res.user.username,
             filiere,
+            annee: normalizeAnnee(res.user.annee ?? patch.annee ?? user?.annee),
             theme: themeForFiliere(filiere),
             guest: false,
           };
@@ -533,6 +569,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 updated_at: new Date().toISOString(),
               })
               .eq('id', user.id);
+            if (patch.annee) await supabase.from('profiles').update({ annee: patch.annee }).eq('id', user.id);
           }
           setStoredUser(resolved);
           setUser(resolved);
@@ -549,10 +586,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 })
                 .eq('id', user.id);
               if (!error) {
+                if (patch.annee) await supabase.from('profiles').update({ annee: patch.annee }).eq('id', user.id);
                 const filiere = normalizeFiliere(patch.filiere ?? user.filiere) ?? 'ARI';
                 const resolved: AuthUser = {
                   ...user,
                   username: patch.username ? patch.username.trim() : user.username,
+                  annee: normalizeAnnee(patch.annee ?? user.annee),
                   filiere,
                   theme: themeForFiliere(filiere),
                 };

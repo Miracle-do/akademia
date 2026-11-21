@@ -12,6 +12,7 @@ const {
   defaultState,
   levelFromXp,
   normalizeFiliere,
+  normalizeAnnee,
   normalizeState,
   themeForFiliere,
   computeBattleScores,
@@ -229,6 +230,7 @@ function sanitizeUser(user) {
     email: user.email,
     username: user.username || 'Étudiant',
     filiere,
+    annee: normalizeAnnee(user.annee ?? user.state?.annee),
     theme,
   };
 }
@@ -267,12 +269,13 @@ async function isUsernameTakenSupabase(username, excludeUserId = null) {
   }
 }
 
-async function upsertSupabaseProfile(accessToken, { id, username, filiere, xp, level, streak }) {
+async function upsertSupabaseProfile(accessToken, { id, username, filiere, annee, xp, level, streak }) {
   const now = new Date().toISOString();
   const payload = {
     id,
     username,
     filiere: normalizeFiliere(filiere) || 'ARI',
+    ...(annee !== undefined ? { annee: normalizeAnnee(annee) } : {}),
     ...(xp !== undefined ? { xp } : {}),
     ...(level !== undefined ? { level } : {}),
     ...(streak !== undefined ? { streak } : {}),
@@ -285,7 +288,8 @@ async function upsertSupabaseProfile(accessToken, { id, username, filiere, xp, l
       body: JSON.stringify(payload),
     });
   } catch {
-    const { filiere: _omit, ...fallbackPayload } = payload;
+    // Colonne manquante (schéma pas encore migré) : on réessaie sans filière ni année.
+    const { filiere: _omit, annee: _omitAnnee, ...fallbackPayload } = payload;
     await supabaseRequest('/rest/v1/profiles?on_conflict=id', accessToken, {
       method: 'POST',
       headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
@@ -294,11 +298,12 @@ async function upsertSupabaseProfile(accessToken, { id, username, filiere, xp, l
   }
 }
 
-async function signUpUser({ email, password, username, filiere }) {
+async function signUpUser({ email, password, username, filiere, annee }) {
   const cleanEmail = String(email || '').trim().toLowerCase();
   const cleanUsername = String(username || '').trim();
   const cleanPassword = String(password || '');
   const normFiliere = normalizeFiliere(filiere) || 'ARI';
+  const normAnnee = normalizeAnnee(annee);
 
   if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
     const err = new Error('Adresse e-mail invalide.');
@@ -340,7 +345,7 @@ async function signUpUser({ email, password, username, filiere }) {
           email: cleanEmail,
           password: cleanPassword,
           email_confirm: true,
-          user_metadata: { username: cleanUsername, filiere: normFiliere },
+          user_metadata: { username: cleanUsername, filiere: normFiliere, annee: normAnnee },
         }),
       });
       const createdUser = await readResponse(createRes);
@@ -368,7 +373,7 @@ async function signUpUser({ email, password, username, filiere }) {
         body: JSON.stringify({
           email: cleanEmail,
           password: cleanPassword,
-          data: { username: cleanUsername, filiere: normFiliere },
+          data: { username: cleanUsername, filiere: normFiliere, annee: normAnnee },
         }),
       });
       const signUpData = await readResponse(signUpRes);
@@ -417,6 +422,7 @@ async function signUpUser({ email, password, username, filiere }) {
           id: userId,
           username: cleanUsername,
           filiere: normFiliere,
+          annee: normAnnee,
           xp: 0,
           level: 1,
           streak: 0,
@@ -448,6 +454,7 @@ async function signUpUser({ email, password, username, filiere }) {
         email: cleanEmail,
         username: cleanUsername,
         filiere: normFiliere,
+        annee: normAnnee,
         theme: themeForFiliere(normFiliere),
       },
       state: initialState,
@@ -481,6 +488,7 @@ async function signUpUser({ email, password, username, filiere }) {
     username: cleanUsername,
     passwordHash: hashPassword(cleanPassword),
     filiere: normFiliere,
+    annee: normAnnee,
     xp: 0,
     level: 1,
     streak: 0,
@@ -545,6 +553,7 @@ async function signInUser({ email, password }) {
       normalizeFiliere(
         loadedState?.filiere ?? profile?.filiere ?? authUser?.user_metadata?.filiere,
       ) || 'ARI';
+    const annee = normalizeAnnee(profile?.annee ?? authUser?.user_metadata?.annee);
     const username =
       profile?.username ||
       authUser?.user_metadata?.username ||
@@ -578,6 +587,7 @@ async function signInUser({ email, password }) {
         email: authUser.email || cleanEmail,
         username,
         filiere,
+        annee,
         theme: themeForFiliere(filiere),
       },
       state,
@@ -651,6 +661,7 @@ async function refreshUserSession(refreshToken) {
             email: authUser.email,
             username,
             filiere,
+            annee: normalizeAnnee(profile?.annee ?? authUser?.user_metadata?.annee),
             theme: themeForFiliere(filiere),
           }
         : null,
@@ -755,6 +766,7 @@ async function verifyAccessToken(accessToken) {
           user.user_metadata?.username ||
           (user.email ? user.email.split('@')[0] : 'Étudiant'),
         filiere,
+        annee: normalizeAnnee(user.user_metadata?.annee),
         theme: themeForFiliere(filiere),
         user_metadata: user.user_metadata,
       };
@@ -775,10 +787,19 @@ async function verifyAccessToken(accessToken) {
 async function getProfile(accessToken, userId) {
   if (isSupabaseConfigured()) {
     try {
-      const rows = await supabaseRequest(
-        `/rest/v1/profiles?select=id,username,filiere,xp,level,streak,created_at&id=eq.${encodeURIComponent(userId)}&limit=1`,
-        accessToken,
-      );
+      let rows;
+      try {
+        rows = await supabaseRequest(
+          `/rest/v1/profiles?select=id,username,filiere,annee,xp,level,streak,created_at&id=eq.${encodeURIComponent(userId)}&limit=1`,
+          accessToken,
+        );
+      } catch {
+        // Colonne `annee` pas encore migrée : on lit sans elle (année 3 par défaut).
+        rows = await supabaseRequest(
+          `/rest/v1/profiles?select=id,username,filiere,xp,level,streak,created_at&id=eq.${encodeURIComponent(userId)}&limit=1`,
+          accessToken,
+        );
+      }
       const row = rows?.[0];
       if (!row) return null;
       const filiere = normalizeFiliere(row.filiere);
@@ -786,6 +807,7 @@ async function getProfile(accessToken, userId) {
         id: row.id,
         username: row.username,
         filiere,
+        annee: normalizeAnnee(row.annee),
         theme: themeForFiliere(filiere),
         xp: row.xp ?? 0,
         level: row.level ?? levelFromXp(row.xp ?? 0),
@@ -803,6 +825,7 @@ async function getProfile(accessToken, userId) {
         id: row.id,
         username: row.username,
         filiere: null,
+        annee: 3,
         theme: themeForFiliere(null),
         xp: row.xp ?? 0,
         level: row.level ?? levelFromXp(row.xp ?? 0),
@@ -928,7 +951,7 @@ async function saveProgress(accessToken, userId, state) {
   return normalized;
 }
 
-async function updateProfile(accessToken, userId, { username, filiere }) {
+async function updateProfile(accessToken, userId, { username, filiere, annee }) {
   if (isSupabaseConfigured()) {
     const [profile, currentState, authUser] = await Promise.all([
       getProfile(accessToken, userId).catch(() => null),
@@ -972,6 +995,12 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
     }
 
     const resolvedFiliere = finalFiliere || 'ARI';
+    if (annee !== undefined && !/^[23]$/.test(String(annee))) {
+      const err = new Error('Année invalide (2 ou 3 attendu).');
+      err.status = 400;
+      throw err;
+    }
+    const finalAnnee = annee !== undefined ? normalizeAnnee(annee) : normalizeAnnee(profile?.annee ?? authUser?.annee);
     const nextState = normalizeState({
       ...(currentState || defaultState()),
       filiere: resolvedFiliere,
@@ -982,6 +1011,7 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
       id: userId,
       username: finalUsername,
       filiere: resolvedFiliere,
+      annee: finalAnnee,
       xp: nextState.xp,
       level: levelFromXp(nextState.xp),
       streak: nextState.streak,
@@ -998,7 +1028,7 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ data: { username: finalUsername, filiere: resolvedFiliere } }),
+        body: JSON.stringify({ data: { username: finalUsername, filiere: resolvedFiliere, annee: finalAnnee } }),
       }).catch(() => {});
     }
 
@@ -1008,6 +1038,7 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
         email: authUser?.email,
         username: finalUsername,
         filiere: resolvedFiliere,
+        annee: finalAnnee,
         theme: themeForFiliere(resolvedFiliere),
       },
       state: nextState,
@@ -1054,6 +1085,15 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
     user.state = normalizeState({ ...user.state, filiere: norm, theme: themeForFiliere(norm) });
   }
 
+  if (annee !== undefined) {
+    if (!/^[23]$/.test(String(annee))) {
+      const err = new Error('Année invalide (2 ou 3 attendu).');
+      err.status = 400;
+      throw err;
+    }
+    user.annee = normalizeAnnee(annee);
+  }
+
   user.updatedAt = new Date().toISOString();
   saveDb(db);
   return {
@@ -1063,25 +1103,39 @@ async function updateProfile(accessToken, userId, { username, filiere }) {
 }
 
 // ==================== CLASSEMENT & BATTLES ====================
-async function getLeaderboard(accessToken, limit = 50) {
+async function getLeaderboard(accessToken, limit = 50, anneeFilter = null) {
   const safeLimit = Math.min(1000, Math.max(1, Number.parseInt(limit, 10) || 50));
+  // Sans paramètre valide : pas de filtre (comportement historique : toutes les années).
+  const wantedAnnee = /^[23]$/.test(String(anneeFilter ?? '')) ? Number(anneeFilter) : null;
   if (isSupabaseConfigured()) {
+    const order = 'order=xp.desc,streak.desc,id.asc';
     let rows;
     try {
+      const filter = wantedAnnee ? `&annee=eq.${wantedAnnee}` : '';
       rows = await supabaseRequest(
-        `/rest/v1/profiles?select=id,username,filiere,xp,level,streak&order=xp.desc,streak.desc,id.asc&limit=${safeLimit}`,
+        `/rest/v1/profiles?select=id,username,filiere,annee,xp,level,streak${filter}&${order}&limit=${safeLimit}`,
         accessToken,
       );
     } catch {
-      rows = await supabaseRequest(
-        `/rest/v1/profiles?select=id,username,xp,level,streak&order=xp.desc,streak.desc,id.asc&limit=${safeLimit}`,
-        accessToken,
-      );
+      // Colonne `annee` absente : tout le monde est en 3ᵉ année. Une demande « 2ᵉ année » renvoie donc une liste vide.
+      if (wantedAnnee === 2) return [];
+      try {
+        rows = await supabaseRequest(
+          `/rest/v1/profiles?select=id,username,filiere,xp,level,streak&${order}&limit=${safeLimit}`,
+          accessToken,
+        );
+      } catch {
+        rows = await supabaseRequest(
+          `/rest/v1/profiles?select=id,username,xp,level,streak&${order}&limit=${safeLimit}`,
+          accessToken,
+        );
+      }
     }
     return (rows || []).map((r) => ({
       id: r.id,
       username: r.username,
       filiere: normalizeFiliere(r.filiere) || 'ARI',
+      annee: normalizeAnnee(r.annee),
       xp: r.xp ?? 0,
       level: r.level ?? levelFromXp(r.xp ?? 0),
       streak: r.streak ?? 0,
@@ -1098,11 +1152,13 @@ async function getLeaderboard(accessToken, limit = 50) {
         id: u.id,
         username: u.username,
         filiere,
+        annee: normalizeAnnee(u.annee),
         xp,
         level: levelFromXp(xp),
         streak,
       };
     })
+    .filter((u) => !wantedAnnee || u.annee === wantedAnnee)
     .sort((a, b) => b.xp - a.xp)
     .slice(0, safeLimit);
 }

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Grades, Trash } from '@getpapillon/papicons';
 import { Bar, Empty, PageTitle, Stat } from '@/components/ui';
-import { modules } from '@/lib/content';
+import { useMyModules } from '@/state/useAnnee';
 import { chapterAccuracy } from '@/lib/stats';
 import { addDays, cn, fmtDate, fmtScore, pct, todayKey } from '@/lib/utils';
 import { useStore } from '@/state/Store';
@@ -17,6 +17,7 @@ const KIND: Record<string, string> = {
 
 export default function ResultsPage() {
   const { state, resetProgress } = useStore();
+  const modules = useMyModules();
   const [kind, setKind] = useState('all');
   const att = state.attempts;
 

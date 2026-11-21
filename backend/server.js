@@ -124,6 +124,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res, next) => {
       password: req.body?.password,
       username: req.body?.username,
       filiere: req.body?.filiere,
+      annee: req.body?.annee,
     });
     res.status(201).json(result);
   } catch (error) {
@@ -270,6 +271,7 @@ app.get('/api/me', requireUser, async (req, res, next) => {
       email: profile?.email || req.auth.user.email,
       username,
       filiere,
+      annee: progressionService.normalizeAnnee(profile?.annee ?? req.auth.user.annee),
       theme,
     });
   } catch (error) {
@@ -282,6 +284,7 @@ app.patch('/api/me', requireUser, async (req, res, next) => {
     const updated = await progressService.updateProfile(req.auth.accessToken, req.auth.user.id, {
       username: req.body?.username,
       filiere: req.body?.filiere,
+      annee: req.body?.annee,
     });
     res.json(updated);
   } catch (error) {
@@ -292,7 +295,9 @@ app.patch('/api/me', requireUser, async (req, res, next) => {
 
 app.get('/api/leaderboard', requireUser, async (req, res, next) => {
   try {
-    res.json(await progressService.getLeaderboard(req.auth.accessToken, req.query.limit));
+    res.json(
+      await progressService.getLeaderboard(req.auth.accessToken, req.query.limit, req.query.annee),
+    );
   } catch (error) {
     next(error);
   }
@@ -503,7 +508,12 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
     let leaderboardBefore = null;
     if (pushService.isConfigured()) {
       try {
-        leaderboardBefore = await progressService.getLeaderboard(req.auth.accessToken, 1000);
+        // « Dépassé » s'entend dans le classement de sa propre année.
+        leaderboardBefore = await progressService.getLeaderboard(
+          req.auth.accessToken,
+          1000,
+          req.auth.user.annee,
+        );
       } catch {
         /* les notifications ne bloquent pas la progression */
       }
@@ -539,6 +549,7 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
           const leaderboardAfter = await progressService.getLeaderboard(
             req.auth.accessToken,
             1000,
+            req.auth.user.annee,
           );
           const overtaken = progressService.overtakenPlayerIds(
             leaderboardBefore,

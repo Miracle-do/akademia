@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import ModuleGate from '@/components/ModuleGate';
 import { Spinner } from '@/components/ui';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
@@ -48,15 +49,17 @@ export default function App() {
         <Route path="profil" element={<ProfilePage />} />
         <Route path="recherche" element={<SearchPage />} />
         <Route path="modules" element={<ModulesPage />} />
-        <Route path="m/:moduleId" element={<ModulePage />} />
-        <Route path="m/:moduleId/lire/:chapterId" element={<ChapterPage />} />
-        <Route path="m/:moduleId/qcm" element={<QuizPage />} />
-        <Route path="m/:moduleId/eclair" element={<BlitzPage />} />
-        <Route path="m/:moduleId/epreuves" element={<ExamsPage />} />
-        <Route path="m/:moduleId/epreuves/:n" element={<ExamPage />} />
-        <Route path="m/:moduleId/formation/:fid" element={<FormationPage />} />
-        <Route path="m/:moduleId/formation/:fid/:lessonId" element={<FormationLessonPage />} />
-        <Route path="m/:moduleId/cartes" element={<FlashcardsPage />} />
+        <Route path="m/:moduleId" element={<ModuleGate />}>
+          <Route index element={<ModulePage />} />
+          <Route path="lire/:chapterId" element={<ChapterPage />} />
+          <Route path="qcm" element={<QuizPage />} />
+          <Route path="eclair" element={<BlitzPage />} />
+          <Route path="epreuves" element={<ExamsPage />} />
+          <Route path="epreuves/:n" element={<ExamPage />} />
+          <Route path="formation/:fid" element={<FormationPage />} />
+          <Route path="formation/:fid/:lessonId" element={<FormationLessonPage />} />
+          <Route path="cartes" element={<FlashcardsPage />} />
+        </Route>
         <Route path="resultats" element={<ResultsPage />} />
         <Route path="succes" element={<BadgesPage />} />
         <Route path="classement" element={<LeaderboardPage />} />

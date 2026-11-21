@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Check, ChevronLeft, GraduationHat, Lock, Mail, User } from '@getpapillon/papicons';
 import { useAuth } from '@/state/AuthContext';
 import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
+import type { AnneeId } from '@/lib/types';
 import { Mascot, PeekingMascot } from '@/components/Mascot';
 import { CornerClouds, CrossedSwordsIcon, FourPointStar } from '@/components/Decor';
 import { cn } from '@/lib/utils';
@@ -44,6 +45,7 @@ export default function AuthPage() {
   const [pw, setPw] = useState('');
   const [name, setName] = useState('');
   const [selectedFiliere, setSelectedFiliere] = useState<FiliereId>(hasFiliere ? filiere : 'ARI');
+  const [selectedAnnee, setSelectedAnnee] = useState<AnneeId>(3);
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -85,7 +87,7 @@ export default function AuthPage() {
         return;
       }
       setCustomPseudo(cleanName);
-      const r = await signUp(email.trim(), pw, cleanName, selectedFiliere);
+      const r = await signUp(email.trim(), pw, cleanName, selectedFiliere, selectedAnnee);
       if (r.error) setMsg({ ok: false, t: r.error });
       else if (r.needsConfirmation) {
         setAuthMode('in');
@@ -253,6 +255,39 @@ export default function AuthPage() {
                   : 'Connecte-toi avec ton e-mail et ton mot de passe'}
               </p>
             </div>
+
+            {/* Année d'études : détermine les modules et le classement affichés */}
+            {authMode === 'up' && (
+              <div className="mb-3 rounded-3xl bg-card p-3.5 shadow-card">
+                <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
+                  <span>Ton année d’études</span>
+                  <span className="text-brand">Modifiable plus tard</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Année d’études">
+                  {([2, 3] as const).map((a) => {
+                    const active = selectedAnnee === a;
+                    return (
+                      <button
+                        key={a}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setSelectedAnnee(a)}
+                        className={cn(
+                          'flex items-center justify-center gap-1.5 rounded-2xl border-2 py-2.5 font-display text-base font-extrabold transition',
+                          active
+                            ? 'border-brand bg-soft/75 text-ink shadow-sm'
+                            : 'border-line bg-bg/60 text-muted hover:bg-soft/40',
+                        )}
+                      >
+                        {a}ᵉ année
+                        {active && <Check size={14} className="text-brand" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Sélection de la filière universitaire (uniquement ARI -> Bleu et AIP -> Violet) */}
             {authMode === 'up' && (

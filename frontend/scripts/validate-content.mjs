@@ -21,6 +21,8 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
   const mf = path.join(base, 'module.json');
   if (!fs.existsSync(mf)) { err('module.json manquant'); continue; }
   const m = readJson(mf); if (!m) continue;
+  if (m.annee !== undefined && m.annee !== 2 && m.annee !== 3) err(`module ${m.id} : annee doit valoir 2 ou 3 (reçu ${JSON.stringify(m.annee)})`);
+  if (m.annee === undefined) console.log(`  ⚠ module ${m.id} : pas d'annee, considéré en 3ᵉ année`);
   if (m.id !== dir.name) err(`id "${m.id}" ≠ nom du dossier "${dir.name}"`);
   if (ids.has(m.id)) err(`id dupliqué : ${m.id}`); ids.add(m.id);
   for (const k of ['title', 'subtitle', 'description', 'emoji', 'color', 'chapters', 'parts', 'features']) if (m[k] === undefined) err(`module.json : champ "${k}" manquant`);

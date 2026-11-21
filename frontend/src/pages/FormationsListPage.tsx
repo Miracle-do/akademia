@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationHat, Play, Check } from '@getpapillon/papicons';
 import { PageTitle, Spinner } from '@/components/ui';
-import { loadAllFormations, modules, type FormationWithModule } from '@/lib/content';
+import { loadAllFormations, type FormationWithModule } from '@/lib/content';
+import { useMyModules } from '@/state/useAnnee';
 import { useStore } from '@/state/Store';
 import { AnimatedEmoji, renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 import { FormationShareAction } from '@/components/FormationShareModal';
 
 export default function FormationsListPage() {
   const { state } = useStore();
-  const [formations, setFormations] = useState<FormationWithModule[]>([]);
+  const modules = useMyModules();
+  const [allFormations, setFormations] = useState<FormationWithModule[]>([]);
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     let alive = true;
@@ -20,6 +22,11 @@ export default function FormationsListPage() {
     return () => { alive = false; };
   }, []);
   const [selectedModule, setSelectedModule] = useState<string>('all');
+  // Seules les formations des modules de son année sont proposées.
+  const formations = useMemo(
+    () => allFormations.filter((f) => modules.some((m) => m.id === f.moduleId)),
+    [allFormations, modules],
+  );
 
   // Modules distincts
   const availableModules = useMemo(() => {

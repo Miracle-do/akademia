@@ -21,6 +21,8 @@ export interface ModuleMeta {
   color: string;
   level: string;
   estimatedHours: number;
+  /** Année d'études du module (2 ou 3). Absent = 3ᵉ année. */
+  annee?: 2 | 3;
   parts: PartMeta[];
   chapters: ChapterMeta[];
   features: { quiz?: boolean; blitz?: boolean; exams?: boolean; flashcards?: boolean };
@@ -129,6 +131,8 @@ export interface ReviewItem {
   seen: number;
 }
 export type FiliereId = 'ARI' | 'AIP';
+/** Année d'études : 2 (L2) ou 3 (L3). Les comptes et modules sans année sont en 3ᵉ année. */
+export type AnneeId = 2 | 3;
 export type BackendThemeId = 'ciel' | 'violet';
 
 export interface UserState {

@@ -14,7 +14,7 @@ import {
   TextBubble,
   User,
 } from '@getpapillon/papicons';
-import { modules } from '@/lib/content';
+import { useMyModules } from '@/state/useAnnee';
 import { levelProgress } from '@/lib/gamification';
 import { cn, fmtNum } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
@@ -208,6 +208,7 @@ export default function Layout() {
     };
   }, []);
 
+  const modules = useMyModules();
   const totalChapters = modules.reduce((acc, m) => acc + m.chapters.length, 0);
   const readChapters = Object.values(state.chaptersRead ?? {}).reduce(
     (acc, list) => acc + (Array.isArray(list) ? list.length : 0),

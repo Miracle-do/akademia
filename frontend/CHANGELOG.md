@@ -5,6 +5,12 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+### Nouveautés
+- Années d'études : à l'inscription, l'étudiant choisit sa 2ᵉ ou 3ᵉ année, puis sa filière. Les modules, la recherche, les formations et les résultats suivent son année ; les modules des autres années apparaissent verrouillés (accès payant à venir).
+- Classement par année (ARI et AIP mélangés) avec un sélecteur pour consulter l'autre année.
+- Profil : l'année est modifiable (passage de 2ᵉ en 3ᵉ année), la filière reste verrouillée.
+- Les comptes et modules existants passent en 3ᵉ année. Migration Supabase à exécuter : `frontend/supabase/migration-annee.sql`.
+
 ## [1.2.0] — 2026-11-20
 
 ### Nouveautés

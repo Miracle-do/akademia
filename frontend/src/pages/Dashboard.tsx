@@ -10,7 +10,7 @@ import {
   Tasks,
 } from '@getpapillon/papicons';
 import { Bar, Ring } from '@/components/ui';
-import { modules } from '@/lib/content';
+import { useMyModules } from '@/state/useAnnee';
 import { levelProgress, nextTier, tierFor, XP } from '@/lib/gamification';
 import { dueCardIds, dueQuestionIds } from '@/lib/progress';
 import { moduleRatio, nextChapter } from '@/lib/stats';
@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 export default function Dashboard() {
   const { state } = useStore();
   const { user } = useAuth();
+  const modules = useMyModules();
   const { theme, filiere, customPseudo } = useTheme();
   const lp = levelProgress(state.xp);
   const tier = tierFor(lp.level);

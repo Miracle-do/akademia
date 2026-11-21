@@ -5,6 +5,8 @@ import { fetchLeaderboard, LeaderRow } from '@/data/repo';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
+import { useAnnee } from '@/state/useAnnee';
+import type { AnneeId } from '@/lib/types';
 import { FiliereId, useTheme } from '@/state/Theme';
 import { Mascot } from '@/components/Mascot';
 import { CustomAvatar } from '@/components/CustomAvatar';
@@ -34,22 +36,29 @@ export default function LeaderboardPage() {
   const { user } = useAuth();
   const { state } = useStore();
   const { theme, filiere } = useTheme();
+  const myAnnee = useAnnee();
+  // Classement d'une année : la sienne par défaut, l'autre en consultation seule.
+  const [viewAnnee, setViewAnnee] = useState<AnneeId>(myAnnee);
   const [period, setPeriod] = useState<'week' | 'month' | 'all'>('week');
   const [remoteRows, setRemoteRows] = useState<LeaderRow[] | null>(null);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    fetchLeaderboard(50)
+    fetchLeaderboard(50, viewAnnee)
       .then((rows) => {
         if (alive) setRemoteRows(rows);
       })
       .catch(() => {
         if (alive) setRemoteRows([]);
+      })
+      .finally(() => {
+        if (alive) setSwitching(false);
       });
     return () => {
       alive = false;
     };
-  }, [state.xp, filiere]);
+  }, [state.xp, filiere, viewAnnee]);
 
   const entries = useMemo<CampusEntry[]>(() => {
     if (!remoteRows) return [];
@@ -122,6 +131,38 @@ export default function LeaderboardPage() {
           <ChevronDown size={15} className="text-muted" />
         </button>
       </div>
+
+      {/* Choix de l'année : on peut consulter l'autre année, sans accéder à ses modules */}
+      <div className="flex items-center gap-2" role="radiogroup" aria-label="Année du classement">
+        {([2, 3] as const).map((a) => {
+          const active = viewAnnee === a;
+          return (
+            <button
+              key={a}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => {
+                if (a === viewAnnee) return;
+                setSwitching(true);
+                setViewAnnee(a);
+              }}
+              className={cn(
+                'rounded-full border-2 px-4 py-1.5 text-xs font-extrabold transition',
+                active ? 'border-brand bg-soft text-ink' : 'border-line bg-card text-muted hover:bg-soft/50',
+              )}
+            >
+              {a}ᵉ année{a === myAnnee ? ' · la tienne' : ''}
+            </button>
+          );
+        })}
+        {switching && <span className="text-[11px] font-bold text-muted">Chargement…</span>}
+      </div>
+      {viewAnnee !== myAnnee && (
+        <p className="rounded-2xl bg-soft px-4 py-2 text-xs font-bold text-muted">
+          Tu consultes le classement de la {viewAnnee}ᵉ année. Tu n’y apparais pas : tu es en {myAnnee}ᵉ année.
+        </p>
+      )}
 
       {/* ==================== PODIUM TOP 3 AVEC MASCOTTES ==================== */}
       {hasPodium && (

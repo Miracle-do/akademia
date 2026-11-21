@@ -17,6 +17,12 @@ const FILIERES = {
 
 const DEFAULT_THEME = 'ciel';
 
+// Année d'études : 2 (L2) ou 3 (L3). Toute autre valeur retombe sur 3 (comptes existants).
+function normalizeAnnee(value) {
+  const n = Number.parseInt(String(value ?? '').replace(/\D/g, ''), 10);
+  return n === 2 ? 2 : 3;
+}
+
 function normalizeFiliere(value) {
   if (typeof value !== 'string') return null;
   const upper = value.trim().toUpperCase();
@@ -448,6 +454,7 @@ module.exports = {
   FILIERES,
   DEFAULT_THEME,
   normalizeFiliere,
+  normalizeAnnee,
   themeForFiliere,
   applyAction,
   defaultState,

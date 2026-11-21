@@ -4,8 +4,8 @@
  * persistance garantie dans Supabase (user_state & profiles) + cache hors-ligne.
  */
 import { levelFromXp } from '@/lib/gamification';
-import { normalizeFiliere, normalizeState, themeForFiliere } from '@/lib/progress';
-import type { BackendThemeId, FiliereId, Summary, UserState } from '@/lib/types';
+import { normalizeAnnee, normalizeFiliere, normalizeState, themeForFiliere } from '@/lib/progress';
+import type { AnneeId, BackendThemeId, FiliereId, Summary, UserState } from '@/lib/types';
 import { API_BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL, supabase } from './supabase';
 
 export const AUTH_TOKEN_KEY = 'akademia:token';
@@ -17,6 +17,7 @@ export interface StoredUser {
   email?: string;
   username: string;
   filiere?: FiliereId | null;
+  annee?: AnneeId;
   theme?: BackendThemeId;
 }
 
@@ -696,32 +697,54 @@ export interface LeaderRow {
   id: string;
   username: string;
   filiere: FiliereId;
+  annee?: AnneeId;
   xp: number;
   level: number;
   streak: number;
 }
 
-export async function fetchLeaderboard(limit = 50): Promise<LeaderRow[]> {
+/** Classement d'une année d'études (2 ou 3), ARI et AIP mélangés. */
+export async function fetchLeaderboard(limit = 50, annee: AnneeId = 3): Promise<LeaderRow[]> {
   try {
     const rows = await apiRequest<LeaderRow[]>(
-      `/leaderboard?limit=${encodeURIComponent(String(limit))}`,
+      `/leaderboard?limit=${encodeURIComponent(String(limit))}&annee=${annee}`,
     );
-    if (Array.isArray(rows) && rows.length > 0) return rows;
+    // Une liste vide est une réponse valide (ex. aucun inscrit en 2ᵉ année) : on la rend telle quelle.
+    if (Array.isArray(rows)) return rows;
   } catch {
     /* fallback to direct Supabase query if available */
   }
   if (supabase) {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, filiere, xp, level, streak')
+        .select('id, username, filiere, annee, xp, level, streak')
+        .eq('annee', annee)
         .order('xp', { ascending: false })
         .limit(limit);
-      if (data) {
+      if (!error && data) {
         return data.map((r) => ({
           id: String(r.id),
           username: String(r.username || 'Étudiant'),
           filiere: normalizeFiliere(r.filiere) ?? 'ARI',
+          annee: normalizeAnnee(r.annee),
+          xp: Number(r.xp) || 0,
+          level: Number(r.level) || levelFromXp(Number(r.xp) || 0),
+          streak: Number(r.streak) || 0,
+        }));
+      }
+      // Colonne `annee` absente (schéma non migré) : tout le monde est en 3ᵉ année.
+      if (error && annee === 3) {
+        const { data: all } = await supabase
+          .from('profiles')
+          .select('id, username, filiere, xp, level, streak')
+          .order('xp', { ascending: false })
+          .limit(limit);
+        return (all ?? []).map((r) => ({
+          id: String(r.id),
+          username: String(r.username || 'Étudiant'),
+          filiere: normalizeFiliere(r.filiere) ?? 'ARI',
+          annee: 3 as const,
           xp: Number(r.xp) || 0,
           level: Number(r.level) || levelFromXp(Number(r.xp) || 0),
           streak: Number(r.streak) || 0,

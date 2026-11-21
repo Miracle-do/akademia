@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Empty, PageTitle, Spinner } from '@/components/ui';
 import { SearchIcon } from '@/components/SearchIcon';
-import { modules } from '@/lib/content';
+import { useMyModules } from '@/state/useAnnee';
 import { highlight, norm, searchCourses, SearchHit, tokenize } from '@/lib/search';
 
 function Marked({ text, tokens }: { text: string; tokens: string[] }) {
@@ -23,6 +23,7 @@ function Marked({ text, tokens }: { text: string; tokens: string[] }) {
 
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
+  const modules = useMyModules();
   const initial = params.get('q') ?? '';
   const [input, setInput] = useState(initial);
   const [moduleId, setModuleId] = useState(params.get('m') ?? '');
@@ -43,7 +44,7 @@ export default function SearchPage() {
     let alive = true;
     setState('loading');
     const t = window.setTimeout(() => {
-      searchCourses(query, moduleId || undefined)
+      searchCourses(query, moduleId || undefined, 40, modules.map((m) => m.id))
         .then((r) => alive && (setHits(r), setState('idle')))
         .catch(() => alive && setState('error'));
       const next = new URLSearchParams();
@@ -55,12 +56,12 @@ export default function SearchPage() {
       alive = false;
       window.clearTimeout(t);
     };
-  }, [query, moduleId, tokens.length, setParams]);
+  }, [query, moduleId, tokens.length, setParams, modules]);
 
   // Modules dont le titre correspond : accès direct.
   const moduleMatches = useMemo(
     () => (tokens.length ? modules.filter((m) => tokens.every((t) => norm(`${m.title} ${m.subtitle}`).includes(t))) : []),
-    [tokens],
+    [tokens, modules],
   );
   const moduleOf = (id: string) => modules.find((m) => m.id === id);
 

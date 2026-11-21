@@ -16,6 +16,8 @@ import {
   TextBubble,
 } from '@getpapillon/papicons';
 import { fetchLeaderboard } from '@/data/repo';
+import { useAnnee } from '@/state/useAnnee';
+import type { AnneeId } from '@/lib/types';
 import { getPublicProfile, PublicProfile } from '@/data/social';
 import { levelProgress } from '@/lib/gamification';
 import { cn, fmtNum } from '@/lib/utils';
@@ -34,6 +36,9 @@ import { Empty, PageTitle, Spinner, Stat } from '@/components/ui';
 export default function ProfilePage() {
   const { userId } = useParams();
   const { user, signOut, updateProfile, cloud } = useAuth();
+  const myAnnee = useAnnee();
+  const [anneeBusy, setAnneeBusy] = useState(false);
+  const [anneeMsg, setAnneeMsg] = useState<string | null>(null);
   const { state } = useStore();
   const { theme, filiere, hasFiliere, setFiliere, customPseudo, setCustomPseudo } = useTheme();
 
@@ -78,7 +83,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isPublicView) return;
     let alive = true;
-    fetchLeaderboard(50)
+    fetchLeaderboard(50, myAnnee)
       .then((rows) => {
         if (!alive || !user) return;
         const idx = rows.findIndex((r) => r.id === user.id);
@@ -90,7 +95,7 @@ export default function ProfilePage() {
     return () => {
       alive = false;
     };
-  }, [isPublicView, user, state.xp]);
+  }, [isPublicView, user, state.xp, myAnnee]);
 
   // ==================== RENDU PROFIL PUBLIC JOUEUR ====================
   if (isPublicView) {
@@ -191,6 +196,15 @@ export default function ProfilePage() {
     const err = await updateProfile({ username: clean });
     setSaveMsg(err || 'Profil mis à jour sur le serveur !');
     setTimeout(() => setSaveMsg(null), 2500);
+  };
+
+  const handleSelectAnnee = async (a: AnneeId) => {
+    if (a === myAnnee || anneeBusy) return;
+    setAnneeBusy(true);
+    const err = await updateProfile({ annee: a });
+    setAnneeBusy(false);
+    setAnneeMsg(err || `Tu es maintenant en ${a}ᵉ année : modules et classement mis à jour.`);
+    setTimeout(() => setAnneeMsg(null), 3500);
   };
 
   const handleSelectFiliere = async (f: 'ARI' | 'AIP') => {
@@ -374,6 +388,38 @@ export default function ProfilePage() {
               </button>
             </div>
             {saveMsg && <p className="mt-1.5 text-xs font-bold text-good">{saveMsg}</p>}
+          </div>
+
+          <div className="pt-2">
+            <label className="block text-xs font-extrabold uppercase text-muted mb-1.5">
+              Année d’études
+            </label>
+            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Année d’études">
+              {([2, 3] as const).map((a) => {
+                const active = myAnnee === a;
+                return (
+                  <button
+                    key={a}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    disabled={anneeBusy}
+                    onClick={() => void handleSelectAnnee(a)}
+                    className={cn(
+                      'flex items-center justify-between rounded-2xl border-2 p-3 text-left transition',
+                      active ? 'border-brand bg-soft shadow-sm' : 'border-line/70 bg-card hover:border-brand/40',
+                    )}
+                  >
+                    <div className="font-display text-base font-extrabold">{a}ᵉ année</div>
+                    {active && <Check size={18} className="text-brand" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-[11px] font-bold text-muted">
+              À mettre à jour à chaque rentrée (passage de 2ᵉ en 3ᵉ année).
+            </p>
+            {anneeMsg && <p className="mt-1 text-xs font-bold text-good">{anneeMsg}</p>}
           </div>
 
           <div className="pt-2">

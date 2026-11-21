@@ -7,6 +7,7 @@
   "color": "#D9480F",
   "level": "Licence 3",
   "estimatedHours": 12,
+  "annee": 3,
   "parts": [
     { "id": "ch1", "title": "Chapitre 1 · Rappels SQL Oracle", "chapters": ["1-1-ddl-dml", "1-2-requetes"] },
     { "id": "ch2", "title": "Chapitre 2 · Le langage PL/SQL", "chapters": ["2-1-blocs-variables", "2-2-controle-curseurs", "2-3-erreurs"] },

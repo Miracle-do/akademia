@@ -85,6 +85,11 @@ async function apiGetText(path: string): Promise<string> {
 
 export const modules: ModuleMeta[] = Object.values(metaFiles).sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 
+/** Année d'études d'un module : 2 ou 3 (absent = 3ᵉ année). */
+export const moduleAnnee = (m: ModuleMeta): 2 | 3 => (m.annee === 2 ? 2 : 3);
+
+export const modulesForAnnee = (annee: 2 | 3): ModuleMeta[] => modules.filter((m) => moduleAnnee(m) === annee);
+
 export function getModule(id: string | undefined): ModuleMeta | undefined {
   return modules.find((m) => m.id === id);
 }

@@ -79,13 +79,15 @@ function makeSnippet(item: Prepared, tokens: string[]): { snippet: string; headi
   return { snippet, heading };
 }
 
-export async function searchCourses(query: string, moduleId?: string, limit = 40): Promise<SearchHit[]> {
+/** `allowed` : modules consultables (ceux de l'année de l'étudiant) ; filtré avant la limite de résultats. */
+export async function searchCourses(query: string, moduleId?: string, limit = 40, allowed?: string[]): Promise<SearchHit[]> {
   const tokens = tokenize(query);
   if (!tokens.length) return [];
   const index = await loadSearchIndex();
   const hits: SearchHit[] = [];
   for (const item of index) {
     if (moduleId && item.m !== moduleId) continue;
+    if (allowed && !allowed.includes(item.m)) continue;
     let score = 0;
     let all = true;
     for (const t of tokens) {

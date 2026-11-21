@@ -235,3 +235,14 @@ test('formation lessons reward XP once and the last lesson completes the formati
   assert.throws(() => progression.applyAction(state, { type: 'formation-lesson', moduleId: 'bdd-oracle', formationId: formation.id, lessonId: 'faux' }, content));
   assert.ok(total > 0);
 });
+
+test("normalizeAnnee : 2 ou 3, tout le reste retombe sur 3 (comptes existants)", () => {
+  const { normalizeAnnee } = require('../services/progressionService');
+  assert.equal(normalizeAnnee(2), 2);
+  assert.equal(normalizeAnnee('2'), 2);
+  assert.equal(normalizeAnnee(3), 3);
+  assert.equal(normalizeAnnee(undefined), 3);
+  assert.equal(normalizeAnnee(null), 3);
+  assert.equal(normalizeAnnee('L2'), 2);
+  assert.equal(normalizeAnnee('5'), 3);
+});
