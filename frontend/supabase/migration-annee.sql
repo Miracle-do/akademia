@@ -5,6 +5,9 @@
 alter table public.profiles add column if not exists annee smallint not null default 3 check (annee in (2, 3));
 create index if not exists profiles_annee_xp_idx on public.profiles (annee, xp desc);
 
+-- Les Battles ARI vs AIP sont séparées par année (l'historique existant reste en 3ᵉ année)
+alter table public.battles add column if not exists annee smallint not null default 3 check (annee in (2, 3));
+
 -- Le trigger d'inscription lit désormais l'année choisie (user_metadata.annee)
 create or replace function public.handle_new_user()
 returns trigger

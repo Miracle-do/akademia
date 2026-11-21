@@ -71,6 +71,8 @@ create table if not exists public.battles (
   updated_at   timestamptz not null default now()
 );
 
+-- Une Battle oppose ARI et AIP au sein d'une même année d'études (3 = historique existant).
+alter table public.battles add column if not exists annee smallint not null default 3 check (annee in (2, 3));
 create index if not exists battles_status_idx on public.battles (status);
 create index if not exists battles_ends_at_idx on public.battles (ends_at desc);
 

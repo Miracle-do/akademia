@@ -246,3 +246,23 @@ test("normalizeAnnee : 2 ou 3, tout le reste retombe sur 3 (comptes existants)",
   assert.equal(normalizeAnnee('L2'), 2);
   assert.equal(normalizeAnnee('5'), 3);
 });
+
+test('la Battle oppose ARI et AIP au sein d’une même année', () => {
+  const users = {
+    a: { filiere: 'ARI', annee: 3, xp: 100 },
+    b: { filiere: 'AIP', annee: 3, xp: 40 },
+    c: { filiere: 'AIP', annee: 2, xp: 500 },
+    d: { filiere: 'ARI', xp: 10 }, // sans année = 3ᵉ année
+  };
+  const ref = new Date('2026-11-04T10:00:00');
+  const y3 = progression.computeBattleScores(users, ref);
+  assert.equal(y3.ariScore, 110);
+  assert.equal(y3.aipScore, 40);
+  assert.equal(y3.id, 'battle-2026-11-02');
+  const y2 = progression.computeBattleScores(users, ref, 2);
+  assert.equal(y2.ariScore, 0);
+  assert.equal(y2.aipScore, 500);
+  assert.equal(y2.aipMembers, 1);
+  assert.equal(y2.id, 'battle-2026-11-02-a2');
+  assert.equal(y2.annee, 2);
+});

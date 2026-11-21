@@ -790,10 +790,11 @@ export interface BattleApiResponse {
   history: BattleHistoryItem[];
 }
 
-export async function fetchBattle(): Promise<BattleApiResponse> {
-  return apiRequest<BattleApiResponse>('/battle');
+/** Battle ARI vs AIP d'une année d'études (la sienne par défaut : 3). */
+export async function fetchBattle(annee: AnneeId = 3): Promise<BattleApiResponse> {
+  return apiRequest<BattleApiResponse>(`/battle?annee=${annee}`);
 }
 
-export async function fetchFeed(): Promise<BattleApiResponse> {
-  return fetchBattle();
+export async function fetchFeed(annee: AnneeId = 3): Promise<BattleApiResponse> {
+  return fetchBattle(annee);
 }

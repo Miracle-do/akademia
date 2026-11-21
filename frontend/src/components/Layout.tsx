@@ -14,7 +14,7 @@ import {
   TextBubble,
   User,
 } from '@getpapillon/papicons';
-import { useMyModules } from '@/state/useAnnee';
+import { useAnnee, useMyModules } from '@/state/useAnnee';
 import { levelProgress } from '@/lib/gamification';
 import { cn, fmtNum } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
@@ -178,6 +178,7 @@ export default function Layout() {
   const inReader = loc.pathname.includes('/lire/');
 
   const [battle, setBattle] = useState<WeeklyBattleInfo | null>(null);
+  const annee = useAnnee();
 
   // Raccourcis : « / » ou Ctrl/⌘ + K ouvrent la recherche (sauf pendant la saisie dans un champ).
   useEffect(() => {
@@ -196,7 +197,7 @@ export default function Layout() {
 
   useEffect(() => {
     let alive = true;
-    fetchBattle()
+    fetchBattle(annee)
       .then((res) => {
         if (alive) setBattle(res.currentBattle);
       })
@@ -206,7 +207,7 @@ export default function Layout() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [annee]);
 
   const modules = useMyModules();
   const totalChapters = modules.reduce((acc, m) => acc + m.chapters.length, 0);

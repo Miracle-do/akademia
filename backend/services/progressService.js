@@ -1163,29 +1163,52 @@ async function getLeaderboard(accessToken, limit = 50, anneeFilter = null) {
     .slice(0, safeLimit);
 }
 
-async function getBattleData(referenceDate = new Date()) {
+async function getBattleData(referenceDate = new Date(), anneeInput = 3) {
+  const annee = normalizeAnnee(anneeInput);
   if (isSupabaseConfigured()) {
     try {
       let profiles = [];
       try {
         profiles =
-          (await supabaseRequest('/rest/v1/profiles?select=id,filiere,xp&limit=5000', null)) || [];
+          (await supabaseRequest('/rest/v1/profiles?select=id,filiere,annee,xp&limit=5000', null)) || [];
       } catch {
-        profiles = [];
+        // Colonne `annee` pas encore migrée : tout le monde est en 3ᵉ année.
+        try {
+          profiles =
+            (await supabaseRequest('/rest/v1/profiles?select=id,filiere,xp&limit=5000', null)) || [];
+        } catch {
+          profiles = [];
+        }
       }
       const usersMap = {};
       for (const p of profiles) {
-        usersMap[p.id] = { filiere: normalizeFiliere(p.filiere) || 'ARI', xp: p.xp ?? 0 };
+        usersMap[p.id] = {
+          filiere: normalizeFiliere(p.filiere) || 'ARI',
+          annee: normalizeAnnee(p.annee),
+          xp: p.xp ?? 0,
+        };
       }
-      const currentBattle = computeBattleScores(usersMap, referenceDate);
+      const currentBattle = computeBattleScores(usersMap, referenceDate, annee);
 
       let history = [];
       try {
-        const battleRows =
-          (await supabaseRequest(
-            '/rest/v1/battles?select=*&status=eq.completed&order=ends_at.desc&limit=20',
-            null,
-          )) || [];
+        let battleRows;
+        try {
+          battleRows =
+            (await supabaseRequest(
+              `/rest/v1/battles?select=*&status=eq.completed&annee=eq.${annee}&order=ends_at.desc&limit=20`,
+              null,
+            )) || [];
+        } catch {
+          // Colonne `annee` absente de `battles` : l'historique existant est celui de la 3ᵉ année.
+          battleRows =
+            annee === 3
+              ? (await supabaseRequest(
+                  '/rest/v1/battles?select=*&status=eq.completed&order=ends_at.desc&limit=20',
+                  null,
+                )) || []
+              : [];
+        }
         history = battleRows.map((b) => ({
           id: b.id,
           weekLabel: b.week_label || b.weekLabel,
@@ -1227,7 +1250,7 @@ async function getBattleData(referenceDate = new Date()) {
   if (!Array.isArray(db.battleHistory)) {
     db.battleHistory = [];
   }
-  const currentBattle = computeBattleScores(db.users, referenceDate);
+  const currentBattle = computeBattleScores(db.users, referenceDate, annee);
 
   if (currentBattle.isFinished) {
     const existingIdx = db.battleHistory.findIndex((b) => b.id === currentBattle.id);
@@ -1241,6 +1264,7 @@ async function getBattleData(referenceDate = new Date()) {
       ariMembers: currentBattle.ariMembers,
       aipMembers: currentBattle.aipMembers,
       winner: currentBattle.winner,
+      annee,
       status: 'completed',
     };
     if (existingIdx >= 0) {
@@ -1253,7 +1277,7 @@ async function getBattleData(referenceDate = new Date()) {
 
   return {
     currentBattle,
-    history: db.battleHistory,
+    history: db.battleHistory.filter((b) => normalizeAnnee(b.annee) === annee),
   };
 }
 

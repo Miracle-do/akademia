@@ -411,9 +411,15 @@ function getBattleWeekBounds(date = new Date()) {
   };
 }
 
-function computeBattleScores(users = {}, referenceDate = new Date()) {
+// Une Battle oppose ARI et AIP au sein d'une même année d'études (3 par défaut).
+// L'identifiant de la 3ᵉ année reste `battle-AAAA-MM-JJ` (historique existant) ; la 2ᵉ ajoute `-a2`.
+function computeBattleScores(users = {}, referenceDate = new Date(), annee = 3) {
+  const wantedAnnee = normalizeAnnee(annee);
   const bounds = getBattleWeekBounds(referenceDate);
-  const userList = Object.values(users || {});
+  if (wantedAnnee === 2) bounds.id = `${bounds.id}-a2`;
+  const userList = Object.values(users || {}).filter(
+    (u) => normalizeAnnee(u.annee ?? u.state?.annee) === wantedAnnee,
+  );
 
   let ariScore = 0;
   let aipScore = 0;
@@ -441,6 +447,7 @@ function computeBattleScores(users = {}, referenceDate = new Date()) {
 
   return {
     ...bounds,
+    annee: wantedAnnee,
     ariScore,
     aipScore,
     ariMembers,

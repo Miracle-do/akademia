@@ -303,9 +303,9 @@ app.get('/api/leaderboard', requireUser, async (req, res, next) => {
   }
 });
 
-app.get('/api/battle', async (_req, res, next) => {
+app.get('/api/battle', async (req, res, next) => {
   try {
-    res.json(await progressService.getBattleData());
+    res.json(await progressService.getBattleData(new Date(), req.query.annee));
   } catch (error) {
     next(error);
   }

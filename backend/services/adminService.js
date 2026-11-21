@@ -188,7 +188,8 @@ async function getAdminStats() {
   const now = new Date();
   const rawDb = loadRawDb();
   const usersList = Object.values(rawDb.users || {});
-  const battleData = await progressService.getBattleData().catch(() => ({ currentBattle: null, history: [] }));
+  const battleData = await progressService.getBattleData(new Date(), 3).catch(() => ({ currentBattle: null, history: [] }));
+  const battleData2 = await progressService.getBattleData(new Date(), 2).catch(() => ({ currentBattle: null, history: [] }));
   const modulesList = contentService.getModules();
 
   // 1. MODULES & CONTENT STATS (100% REAL VALID DATA, ZERO MOCK)
@@ -448,12 +449,12 @@ async function getAdminStats() {
     },
     {
       id: 'inter-filiere-battle',
-      name: 'Battle Inter-Filieres (ARI vs AIP)',
+      name: 'Battle Inter-Filieres (ARI vs AIP, par annee)',
       iconName: 'Globe',
       status: 'operational',
       statusLabel: battleData.currentBattle?.isFinished ? 'Cloturee' : 'En cours',
       description: 'Duel hebdomadaire du lundi 00h au samedi 18h avec calcul dynamique des scores de filieres.',
-      metrics: `Semaine ${battleData.currentBattle?.weekLabel || 'Active'}, ARI: ${battleData.currentBattle?.ariScore || 0} pts vs AIP: ${battleData.currentBattle?.aipScore || 0} pts`,
+      metrics: `Semaine ${battleData.currentBattle?.weekLabel || 'Active'} - 3e annee: ARI ${battleData.currentBattle?.ariScore || 0} pts vs AIP ${battleData.currentBattle?.aipScore || 0} pts - 2e annee: ARI ${battleData2.currentBattle?.ariScore || 0} pts vs AIP ${battleData2.currentBattle?.aipScore || 0} pts`,
     },
     {
       id: 'leaderboard-ranking',

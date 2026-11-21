@@ -18,17 +18,19 @@ import {
 } from '@/components/Decor';
 import { Spinner } from '@/components/ui';
 import { useTheme } from '@/state/Theme';
+import { useAnnee } from '@/state/useAnnee';
 import { cn } from '@/lib/utils';
 
 export default function FeedPage() {
   const { filiere } = useTheme();
+  const annee = useAnnee();
   const [loading, setLoading] = useState(true);
   const [currentBattle, setCurrentBattle] = useState<WeeklyBattleInfo | null>(null);
   const [history, setHistory] = useState<BattleHistoryItem[]>([]);
 
   useEffect(() => {
     let alive = true;
-    fetchBattle()
+    fetchBattle(annee)
       .then((data) => {
         if (!alive) return;
         setCurrentBattle(data.currentBattle);
@@ -43,7 +45,7 @@ export default function FeedPage() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [annee]);
 
   if (loading || !currentBattle) {
     return <Spinner label="Chargement des battles universitaires…" />;
@@ -82,7 +84,7 @@ export default function FeedPage() {
             </span>
             <div>
               <div className="font-display text-sm font-black text-ink">{currentBattle.weekLabel}</div>
-              <div className="text-[11px] font-bold text-muted">Battle de la semaine</div>
+              <div className="text-[11px] font-bold text-muted">Battle de la semaine · {annee}ᵉ année</div>
             </div>
           </div>
 
