@@ -5,6 +5,18 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.14.0] — 2026-11-22
+
+### Ajouté
+- Notifications : cloche dans l'en-tête, page « Notifications » (boîte de réception avec lu / non lu) et entrée dans le menu.
+- Nouveau module ou nouvelle formation : annonce aux étudiants de l'année concernée (push et boîte de réception).
+- Classement : en plus de « X t'a dépassé », notification quand on devient n°1 ou qu'on entre sur le podium.
+- Rappels de Nimbo après 24 h sans activité, puis à 3, 7 et 14 jours, jamais la nuit, puis silence jusqu'au retour de l'étudiant.
+- Route `/api/cron/tick` protégée par `CRON_SECRET`, appelée chaque heure par un workflow GitHub.
+
+### Modifié
+- L'invitation à activer les notifications ne parle plus seulement de messages.
+
 ## [1.13.0] — 2026-11-22
 
 ### Ajouté
