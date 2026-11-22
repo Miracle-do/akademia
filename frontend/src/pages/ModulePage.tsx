@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
   Card,
@@ -26,6 +26,7 @@ export default function ModulePage() {
   const { moduleId } = useParams();
   const m = getModule(moduleId);
   const { state } = useStore();
+  const [params, setParams] = useSearchParams();
   const [formations, setFormations] = useState<Formation[]>([]);
   useEffect(() => {
     if (!moduleId) return;
@@ -74,8 +75,16 @@ export default function ModulePage() {
     badge?: string;
   }[];
 
+  const tabs = [
+    { id: 'cours', label: 'Cours', count: m.chapters.length },
+    { id: 'entrainement', label: "S'entraîner", count: dueQ + dueC || undefined },
+    ...(formations.length > 0 ? [{ id: 'formations', label: 'Formations', count: formations.length }] : []),
+  ];
+  const wanted = params.get('tab') ?? 'cours';
+  const tab = tabs.some((t) => t.id === wanted) ? wanted : 'cours';
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Bannière Hero du Module */}
       <section className="card relative overflow-hidden p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-5">
@@ -110,9 +119,33 @@ export default function ModulePage() {
         <p className="mt-4 max-w-3xl text-sm font-semibold text-muted">{renderWithAnimatedEmojis(m.description)}</p>
       </section>
 
-      {formations.length > 0 && <FormationShowcase module={m} formations={formations} />}
+      <div role="tablist" aria-label="Sections du module" className="sticky top-[3.75rem] z-20 -mx-1 flex gap-1.5 overflow-x-auto rounded-2xl border border-line/70 bg-card/95 p-1.5 shadow-card backdrop-blur-md">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => setParams(t.id === 'cours' ? {} : { tab: t.id }, { replace: true })}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 font-display text-sm font-extrabold transition',
+              tab === t.id ? 'bg-brand text-white shadow-btn-brand' : 'text-muted hover:bg-soft hover:text-ink',
+            )}
+          >
+            {t.label}
+            {t.count ? (
+              <span className={cn('rounded-full px-1.5 text-[11px]', tab === t.id ? 'bg-white/25' : 'bg-soft text-brand')}>
+                {t.count}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'formations' && formations.length > 0 && <FormationShowcase module={m} formations={formations} />}
 
       {/* Modes d'entraînement gamifiés */}
+      {tab === 'entrainement' && (
       <section className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {modes.map((x) => (
           <Link
@@ -136,8 +169,10 @@ export default function ModulePage() {
           </Link>
         ))}
       </section>
+      )}
 
       {/* Parcours de chapitres */}
+      {tab === 'cours' && (
       <section>
         <h2 className="h-display mb-4 flex items-center gap-2 text-2xl">
           <Folder size={24} className="text-brand" />
@@ -199,6 +234,7 @@ export default function ModulePage() {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }
