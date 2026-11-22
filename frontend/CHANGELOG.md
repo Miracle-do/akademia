@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.8.0] — 2026-11-22
+
+### Modifié
+- Page d'un module : trois onglets (Cours, S'entraîner, Formations) au lieu d'une longue page. Le cours s'ouvre par défaut ; l'onglet est conservé dans l'adresse (`?tab=`).
+
 ## [1.7.0] — 2026-11-22
 
 ### Modifié
