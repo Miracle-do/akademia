@@ -37,23 +37,38 @@ import { fetchBattle, WeeklyBattleInfo } from '@/data/repo';
 
 const MOBILE_NAV = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
+  { to: '/modules', label: 'Cours', icon: Folder },
   { to: '/formations', label: 'Formations', icon: GraduationHat },
-  { to: '/actu', label: 'Actu', icon: Newspaper },
   { to: '/classement', label: 'Classement', icon: Crown },
   { to: '/profil', label: 'Profil', icon: User },
 ];
 
-const DESKTOP_NAV = [
-  { to: '/', label: 'Accueil', icon: Home, end: true },
-  { to: '/formations', label: 'Formations', icon: GraduationHat },
-  { to: '/modules', label: 'Modules de cours', icon: Folder },
-  { to: '/recherche', label: 'Rechercher', icon: SearchIcon },
-  { to: '/actu', label: 'Actualités & Battles', icon: Newspaper },
-  { to: '/classement', label: 'Classement', icon: Crown },
-  { to: '/messages', label: 'Messages', icon: TextBubble },
-  { to: '/profil', label: 'Mon Profil', icon: User },
-  { to: '/resultats', label: 'Mes statistiques', icon: Grades },
-  { to: '/succes', label: 'Mes badges', icon: Sparkles },
+const DESKTOP_NAV_GROUPS = [
+  {
+    label: 'Apprendre',
+    items: [
+      { to: '/', label: 'Accueil', icon: Home, end: true },
+      { to: '/modules', label: 'Modules de cours', icon: Folder },
+      { to: '/formations', label: 'Formations', icon: GraduationHat },
+      { to: '/recherche', label: 'Rechercher', icon: SearchIcon },
+    ],
+  },
+  {
+    label: 'Communauté',
+    items: [
+      { to: '/classement', label: 'Classement', icon: Crown },
+      { to: '/actu', label: 'Actualités & Battles', icon: Newspaper },
+      { to: '/messages', label: 'Messages', icon: TextBubble },
+    ],
+  },
+  {
+    label: 'Mon espace',
+    items: [
+      { to: '/resultats', label: 'Mes statistiques', icon: Grades },
+      { to: '/succes', label: 'Mes badges', icon: Sparkles },
+      { to: '/profil', label: 'Mon profil', icon: User },
+    ],
+  },
 ];
 
 function Logo() {
@@ -252,24 +267,31 @@ export default function Layout() {
         </div>
 
         {/* Liens de Navigation Desktop */}
-        <nav className="mt-6 flex flex-1 flex-col gap-1.5 overflow-y-auto px-1">
-          {DESKTOP_NAV.map((n) => (
-            <NavLink
-              key={n.to}
-              to={n.to}
-              end={n.end}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3.5 rounded-2xl px-3.5 py-2.5 font-display text-sm font-extrabold transition-all',
-                  isActive
-                    ? 'bg-brand text-white shadow-btn-brand'
-                    : 'text-muted hover:bg-soft hover:text-ink',
-                )}
-            >
-              <n.icon size={20} />
-              <span>{n.label}</span>
-              {n.to === '/messages' && <UnreadBadge count={unread} className="ml-auto" />}
-            </NavLink>
+        <nav className="mt-5 flex flex-1 flex-col gap-4 overflow-y-auto px-1">
+          {DESKTOP_NAV_GROUPS.map((g) => (
+            <div key={g.label} className="flex flex-col gap-1">
+              <div className="px-3.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-muted/80">
+                {g.label}
+              </div>
+              {g.items.map((n) => (
+                <NavLink
+                  key={n.to}
+                  to={n.to}
+                  end={n.end}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3.5 rounded-2xl px-3.5 py-2 font-display text-sm font-extrabold transition-all',
+                      isActive
+                        ? 'bg-brand text-white shadow-btn-brand'
+                        : 'text-muted hover:bg-soft hover:text-ink',
+                    )}
+                >
+                  <n.icon size={20} />
+                  <span>{n.label}</span>
+                  {n.to === '/messages' && <UnreadBadge count={unread} className="ml-auto" />}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 
@@ -317,6 +339,14 @@ export default function Layout() {
               <SearchIcon size={18} />
             </Link>
             <Link
+              to="/actu"
+              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition lg:hidden"
+              aria-label="Actualités et Battles"
+              title="Actualités et Battles"
+            >
+              <Newspaper size={18} />
+            </Link>
+            <Link
               to="/messages"
               className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"
               aria-label={unread > 0 ? `Messagerie : ${unread} message${unread > 1 ? 's' : ''} non lu${unread > 1 ? 's' : ''}` : 'Messagerie'}
@@ -354,7 +384,7 @@ export default function Layout() {
         </Suspense>
       </main>
 
-      {/* Bottom Navigation Bar Mobile-First (5 Onglets : Accueil, Formations, Actu, Classement, Profil) */}
+      {/* Bottom Navigation Bar Mobile-First (5 onglets : Accueil, Cours, Formations, Classement, Profil) */}
       <nav
         aria-label="Navigation mobile"
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line/70 bg-card/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1 shadow-[0_-4px_20px_rgb(0_0_0/0.05)] backdrop-blur-md lg:hidden"
@@ -364,14 +394,17 @@ export default function Layout() {
             key={n.to}
             to={n.to}
             end={n.end}
-            className={({ isActive }) =>
-              cn(
+            className={({ isActive: active }) => {
+              const isActive = active || (n.to === '/modules' && loc.pathname.startsWith('/m/'));
+              return cn(
                 'flex flex-col items-center justify-center gap-0.5 rounded-2xl py-2 text-[11px] font-extrabold transition',
                 isActive ? 'text-brand' : 'text-muted hover:text-ink',
-              )
-            }
+              );
+            }}
           >
-            {({ isActive }) => (
+            {({ isActive: active }) => {
+              const isActive = active || (n.to === '/modules' && loc.pathname.startsWith('/m/'));
+              return (
               <>
                 <span
                   className={cn(
@@ -383,7 +416,8 @@ export default function Layout() {
                 </span>
                 <span>{n.label}</span>
               </>
-            )}
+              );
+            }}
           </NavLink>
         ))}
       </nav>

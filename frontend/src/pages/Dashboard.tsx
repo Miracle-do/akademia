@@ -107,6 +107,31 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* ==================== RÉVISIONS ESPACÉES DUES ==================== */}
+      {due > 0 && (
+        <section className="card flex flex-wrap items-center justify-between gap-3 border-2 border-brand/25 bg-soft/60 p-5">
+          <div className="flex items-center gap-3">
+            <FlameBadgeIcon size={28} />
+            <div>
+              <div className="font-display text-lg font-extrabold">
+                {due} élément{due > 1 ? 's' : ''} à réviser aujourd’hui
+              </div>
+              <div className="text-xs font-bold text-muted">
+                La répétition espacée fixe tes notions durablement avant les examens.
+              </div>
+            </div>
+          </div>
+          {modules
+            .filter((m) => dueQuestionIds(state, m.id).length > 0)
+            .slice(0, 1)
+            .map((m) => (
+              <Link key={m.id} to={`/m/${m.id}/qcm?mode=review`} className="btn btn-primary">
+                Réviser maintenant <ArrowRight size={16} />
+              </Link>
+            ))}
+        </section>
+      )}
+
       {/* ==================== TUILES DE GAMIFICATION (Séries, XP, Objectif, Classement) ==================== */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="card flex items-center gap-3.5 p-4">
@@ -166,93 +191,11 @@ export default function Dashboard() {
             <div className="text-xs font-extrabold uppercase tracking-wide text-muted">
               Classement
             </div>
-            <div className="h-display text-2xl leading-tight">#5 · {filiere}</div>
-            <div className="text-[11px] font-bold text-brand">Voir le podium →</div>
+            <div className="h-display text-2xl leading-tight">Filière {filiere}</div>
+            <div className="text-[11px] font-bold text-brand">Voir ma place →</div>
           </div>
         </Link>
       </section>
-
-      {/* ==================== BANNIÈRE BATTLE DE LA SEMAINE (AIP vs ARI) ==================== */}
-      <section className="card overflow-hidden p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
-              <Crown size={24} />
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
-                  Battle de la semaine
-                </span>
-                <span className="text-xs font-bold text-muted">En direct</span>
-              </div>
-              <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
-                <span>Duel des filières : AIP vs ARI</span>
-                <CrossedSwordsIcon size={20} className="text-brand" />
-              </h2>
-              <p className="text-xs font-bold text-muted">
-                Vote pour ta filière et gagne des XP pour hisser ton camp sur la 1re marche !
-              </p>
-            </div>
-          </div>
-          <Link to="/actu" className="btn btn-primary">
-            <Newspaper size={18} /> Participer au duel
-          </Link>
-        </div>
-      </section>
-
-      {/* ==================== FORMATIONS COACHÉES ==================== */}
-      <section className="card p-5 relative overflow-hidden bg-gradient-to-r from-card via-card to-soft/40 border-2 border-brand/20">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
-              <GraduationHat size={24} />
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
-                  Nouveau · Tous modules
-                </span>
-                <span className="text-xs font-bold text-muted">14 parcours disponibles</span>
-              </div>
-              <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
-                <span>Formations interactives & coachées</span>
-              </h2>
-              <p className="text-xs font-bold text-muted">
-                Apprends avec Nimbo pas à pas, pratique sur terminal et SQL, et partage tes formations.
-              </p>
-            </div>
-          </div>
-          <Link to="/formations" className="btn btn-primary">
-            <span>Voir les formations</span> <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
-
-      {/* ==================== RÉVISIONS ESPACÉES DUES ==================== */}
-      {due > 0 && (
-        <section className="card flex flex-wrap items-center justify-between gap-3 border-2 border-brand/25 bg-soft/60 p-5">
-          <div className="flex items-center gap-3">
-            <FlameBadgeIcon size={28} />
-            <div>
-              <div className="font-display text-lg font-extrabold">
-                {due} élément{due > 1 ? 's' : ''} à réviser aujourd’hui
-              </div>
-              <div className="text-xs font-bold text-muted">
-                La répétition espacée fixe tes notions durablement avant les examens.
-              </div>
-            </div>
-          </div>
-          {modules
-            .filter((m) => dueQuestionIds(state, m.id).length > 0)
-            .slice(0, 1)
-            .map((m) => (
-              <Link key={m.id} to={`/m/${m.id}/qcm?mode=review`} className="btn btn-primary">
-                Réviser maintenant <ArrowRight size={16} />
-              </Link>
-            ))}
-        </section>
-      )}
 
       {/* ==================== MES MODULES UNIVERSITAIRES ==================== */}
       <section>
@@ -308,6 +251,67 @@ export default function Dashboard() {
             );
           })}
         </div>
+      </section>
+
+      {/* ==================== DÉCOUVRIR ==================== */}
+      <section className="grid gap-4 lg:grid-cols-2">
+      {/* ==================== FORMATIONS COACHÉES ==================== */}
+      <section className="card p-5 relative overflow-hidden bg-gradient-to-r from-card via-card to-soft/40 border-2 border-brand/20">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
+              <GraduationHat size={24} />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
+                  Formations coachées
+                </span>
+                <span className="text-xs font-bold text-muted">Terminal, SQL, code</span>
+              </div>
+              <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
+                <span>Formations interactives & coachées</span>
+              </h2>
+              <p className="text-xs font-bold text-muted">
+                Apprends avec Nimbo pas à pas, pratique sur terminal et SQL, et partage tes formations.
+              </p>
+            </div>
+          </div>
+          <Link to="/formations" className="btn btn-primary">
+            <span>Voir les formations</span> <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      {/* ==================== BANNIÈRE BATTLE DE LA SEMAINE (AIP vs ARI) ==================== */}
+      <section className="card overflow-hidden p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
+              <Crown size={24} />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
+                  Battle de la semaine
+                </span>
+                <span className="text-xs font-bold text-muted">En direct</span>
+              </div>
+              <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
+                <span>Duel des filières : AIP vs ARI</span>
+                <CrossedSwordsIcon size={20} className="text-brand" />
+              </h2>
+              <p className="text-xs font-bold text-muted">
+                Vote pour ta filière et gagne des XP pour hisser ton camp sur la 1re marche !
+              </p>
+            </div>
+          </div>
+          <Link to="/actu" className="btn btn-primary">
+            <Newspaper size={18} /> Participer au duel
+          </Link>
+        </div>
+      </section>
+
       </section>
 
       {/* ==================== DERNIÈRE ACTIVITÉ ==================== */}
