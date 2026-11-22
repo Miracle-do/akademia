@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Clock } from '@getpapillon/papicons';
 import { GraduationHat, Play, Check } from '@getpapillon/papicons';
-import { PageTitle, Spinner } from '@/components/ui';
+import { Bar, PageTitle, Spinner } from '@/components/ui';
 import { loadAllFormations, type FormationWithModule } from '@/lib/content';
 import { useMyModules } from '@/state/useAnnee';
 import { useStore } from '@/state/Store';
@@ -22,6 +23,13 @@ export default function FormationsListPage() {
     return () => { alive = false; };
   }, []);
   const [selectedModule, setSelectedModule] = useState<string>('all');
+  const [status, setStatus] = useState<'all' | 'doing' | 'todo' | 'done'>('all');
+  const [query, setQuery] = useState('');
+  const doneOf = (f: FormationWithModule) => state.formations?.[`${f.moduleId}:${f.id}`] ?? [];
+  const statusOf = (f: FormationWithModule): 'doing' | 'todo' | 'done' => {
+    const n = doneOf(f).length;
+    return n === 0 ? 'todo' : n >= f.lessons.length ? 'done' : 'doing';
+  };
   // Seules les formations des modules de son année sont proposées.
   const formations = useMemo(
     () => allFormations.filter((f) => modules.some((m) => m.id === f.moduleId)),
@@ -36,9 +44,16 @@ export default function FormationsListPage() {
 
   // Filtrage simple par module
   const filteredFormations = useMemo(() => {
-    if (selectedModule === 'all') return formations;
-    return formations.filter((f) => f.moduleId === selectedModule);
-  }, [formations, selectedModule]);
+    const q = query.trim().toLowerCase();
+    return formations.filter(
+      (f) =>
+        (selectedModule === 'all' || f.moduleId === selectedModule) &&
+        (status === 'all' || statusOf(f) === status) &&
+        (!q || `${f.title} ${f.tagline ?? ''}`.toLowerCase().includes(q)),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formations, selectedModule, status, query, state.formations]);
+  const inProgress = formations.filter((f) => statusOf(f) === 'doing');
 
   if (!loaded) return <Spinner />;
 
@@ -46,9 +61,58 @@ export default function FormationsListPage() {
     <div className="space-y-6">
       <PageTitle
         title="Formations"
-        sub="Parcours guidés thématiques tous modules confondus."
+        sub="Des parcours guidés avec Nimbo : une leçon à la fois, avec exercices."
         icon={<GraduationHat size={28} />}
       />
+
+      {inProgress.length > 0 && status === 'all' && selectedModule === 'all' && !query && (
+        <section className="card border-2 border-brand/25 bg-soft/50 p-4">
+          <h2 className="mb-2 font-display text-base font-extrabold">Reprendre où tu t'es arrêté</h2>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {inProgress.slice(0, 4).map((f) => (
+              <Link
+                key={`${f.moduleId}:${f.id}`}
+                to={`/m/${f.moduleId}/formation/${f.id}`}
+                className="flex items-center gap-3 rounded-2xl bg-card p-3 transition hover:shadow-card"
+              >
+                <span className="shrink-0"><AnimatedEmoji emoji={f.emoji} size="1.6rem" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-extrabold">{f.title}</span>
+                  <span className="text-[11px] font-bold text-muted">
+                    {doneOf(f).length}/{f.lessons.length} leçons
+                  </span>
+                </span>
+                <Play size={16} className="text-brand" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Chercher une formation…"
+          aria-label="Chercher une formation"
+          className="min-w-0 flex-1 rounded-2xl border border-line/80 bg-card px-4 py-2 text-sm font-semibold outline-none focus:border-brand sm:max-w-xs"
+        />
+        <div className="flex gap-1.5 text-xs">
+          {([['all', 'Toutes'], ['doing', 'En cours'], ['todo', 'À commencer'], ['done', 'Terminées']] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setStatus(id)}
+              className={`whitespace-nowrap rounded-2xl px-3 py-2 font-extrabold transition ${
+                status === id ? 'bg-ink text-white' : 'border border-line/80 bg-card text-muted hover:text-ink'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Filtres épurés par module */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
@@ -121,6 +185,18 @@ export default function FormationsListPage() {
                     <span>{f.title}</span>
                   </h3>
                 </Link>
+                {f.tagline && <p className="mt-2 line-clamp-2 text-xs font-semibold text-muted">{f.tagline}</p>}
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-muted">
+                  <span className="flex items-center gap-1"><Clock size={12} /> ~{f.minutes} min</span>
+                  <span>{f.lessons.length} leçons</span>
+                  {f.level && <span className="rounded-full bg-soft px-2 text-brand">{f.level}</span>}
+                </div>
+                {hasStarted && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Bar value={done.length / Math.max(1, f.lessons.length)} color={cardAccent} h={8} />
+                    <span className="text-[11px] font-extrabold text-muted">{done.length}/{f.lessons.length}</span>
+                  </div>
+                )}
               </div>
 
               {/* Actions en bas : Commencer & Partager (copie directe) */}
@@ -138,6 +214,11 @@ export default function FormationsListPage() {
             </div>
           );
         })}
+        {filteredFormations.length === 0 && (
+          <p className="card p-6 text-sm font-semibold text-muted sm:col-span-2 lg:col-span-3">
+            Aucune formation ne correspond à ces filtres.
+          </p>
+        )}
       </div>
     </div>
   );
