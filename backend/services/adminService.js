@@ -187,7 +187,8 @@ const MODULE_ICONS = {
 async function getAdminStats() {
   const now = new Date();
   const rawDb = loadRawDb();
-  const usersList = Object.values(rawDb.users || {});
+  const remoteUsers = await progressService.listUsersForAdmin();
+  const usersList = remoteUsers || Object.values(rawDb.users || {});
   const battleData = await progressService.getBattleData(new Date(), 3).catch(() => ({ currentBattle: null, history: [] }));
   const battleData2 = await progressService.getBattleData(new Date(), 2).catch(() => ({ currentBattle: null, history: [] }));
   const modulesList = contentService.getModules();

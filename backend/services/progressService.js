@@ -1430,7 +1430,43 @@ function overtakenPlayerIds(before, after, userId) {
   return before.slice(newRank, oldRank).map((player) => player.id);
 }
 
+// Liste complète des étudiants pour l'administration (nécessite SUPABASE_SERVICE_ROLE_KEY).
+// Retourne null si Supabase n'est pas utilisable : l'appelant retombe alors sur le stockage local.
+async function listUsersForAdmin() {
+  const cfg = getSupabaseConfig();
+  if (!cfg || !cfg.serviceRoleKey) return null;
+  try {
+    const [profiles, states, authList] = await Promise.all([
+      supabaseRequest('/rest/v1/profiles?select=*&limit=5000', null),
+      supabaseRequest('/rest/v1/user_state?select=user_id,state,updated_at&limit=5000', null),
+      supabaseRequest('/auth/v1/admin/users?per_page=1000', null).catch(() => null),
+    ]);
+    const stateById = new Map((states || []).map((r) => [r.user_id, r]));
+    const emailById = new Map(((authList && authList.users) || []).map((u) => [u.id, u.email]));
+    return (profiles || []).map((p) => {
+      const st = stateById.get(p.id);
+      return {
+        id: p.id,
+        email: emailById.get(p.id) || null,
+        username: p.username,
+        filiere: p.filiere,
+        annee: p.annee ?? 3,
+        xp: p.xp,
+        level: p.level,
+        streak: p.streak,
+        createdAt: p.created_at,
+        updatedAt: st?.updated_at || p.updated_at,
+        state: st?.state ? normalizeState(st.state) : {},
+      };
+    });
+  } catch (err) {
+    console.warn('[admin] lecture Supabase impossible :', err.message);
+    return null;
+  }
+}
+
 module.exports = {
+  listUsersForAdmin,
   addPostComment,
   deleteConversationForParticipants,
   deleteMessageForParticipants,
