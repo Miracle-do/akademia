@@ -40,6 +40,15 @@ export default function Dashboard() {
     modules.find((m) => (state.chaptersRead[m.id]?.length ?? 0) > 0 && moduleRatio(state, m) < 1) ??
     modules[0];
   const nc = resume ? nextChapter(state, resume) : undefined;
+  const hasRead = Object.values(state.chaptersRead).some((l) => l.length > 0);
+  const hasQcm = state.attempts.some((a) => a.kind === 'qcm' || a.kind === 'blitz' || a.kind === 'review');
+  const hasFormation = Object.values(state.formations ?? {}).some((l) => l.length > 0);
+  const firstSteps = [
+    { done: hasRead, label: 'Lis ton premier chapitre', to: resume && nc ? `/m/${resume.id}/lire/${nc.id}` : '/modules' },
+    { done: hasQcm, label: 'Teste-toi avec un QCM', to: resume ? `/m/${resume.id}/qcm` : '/modules' },
+    { done: hasFormation, label: 'Essaie une formation guidée', to: '/formations' },
+  ];
+  const showStart = state.xp < 500 && firstSteps.some((x) => !x.done);
   const displayName = user && !user.guest ? user.username : customPseudo;
 
   return (
@@ -106,6 +115,41 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      {/* ==================== POUR BIEN DÉMARRER (nouveaux utilisateurs) ==================== */}
+      {showStart && (
+        <section className="card border-2 border-brand/25 p-5">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="h-display text-xl">Pour bien démarrer</h2>
+            <span className="text-xs font-extrabold text-muted">
+              {firstSteps.filter((x) => x.done).length}/{firstSteps.length}
+            </span>
+          </div>
+          <ol className="grid gap-2.5 sm:grid-cols-3">
+            {firstSteps.map((x, i) => (
+              <li key={x.label}>
+                <Link
+                  to={x.to}
+                  className={cn(
+                    'flex items-center gap-3 rounded-2xl border p-3.5 transition hover:-translate-y-0.5 hover:shadow-card',
+                    x.done ? 'border-good/40 bg-good/10' : 'border-line/70 bg-card',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-display text-sm font-extrabold',
+                      x.done ? 'bg-good text-white' : 'bg-soft text-brand',
+                    )}
+                  >
+                    {x.done ? '✓' : i + 1}
+                  </span>
+                  <span className={cn('text-sm font-extrabold', x.done && 'text-muted line-through')}>{x.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* ==================== RÉVISIONS ESPACÉES DUES ==================== */}
       {due > 0 && (
