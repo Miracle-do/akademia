@@ -5,6 +5,14 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.13.0] — 2026-11-22
+
+### Ajouté
+- Module Bases de données Oracle (3ᵉ année) : trois nouvelles formations coachées.
+  - « Créer sa base : DDL et contraintes » : types, CREATE TABLE, PRIMARY KEY, FOREIGN KEY, CHECK, ALTER, TRUNCATE et DROP (5 leçons, 16 exercices).
+  - « Modifier les données : DML et transactions » : INSERT, UPDATE, DELETE, COMMIT, ROLLBACK, SAVEPOINT (5 leçons, 15 exercices).
+  - « Les packages PL/SQL » : spécification et corps, public et privé, variables de session, surcharge (4 leçons, 5 exercices).
+
 ## [1.12.0] — 2026-11-22
 
 ### Ajouté
