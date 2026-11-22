@@ -40,7 +40,15 @@ export default function SummaryCard({
         <div className="card w-full p-6 shadow-pop">
           <div className="h-display text-5xl text-ink">+{s.xp} XP</div>
           <p className="mt-1.5 flex items-center justify-center gap-1.5 text-lg font-extrabold text-muted">
-            <span>{mentionOn ? `Bravo champion ! (${m.label})` : 'Bravo champion !'}</span>
+            <span>
+              {s.max > 0 && s.score / s.max < 0.5
+                ? mentionOn
+                  ? `Continue, tu progresses ! (${m.label})`
+                  : 'Continue, tu progresses !'
+                : mentionOn
+                  ? `Bravo champion ! (${m.label})`
+                  : 'Bravo champion !'}
+            </span>
             <FlameBadgeIcon size={22} />
           </p>
 

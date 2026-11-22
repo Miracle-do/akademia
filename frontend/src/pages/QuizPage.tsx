@@ -158,10 +158,13 @@ export default function QuizPage() {
                 setPhase({ t: 'setup' });
               }}
             >
-              Continuer
+              Refaire un QCM
             </button>
+            <Link to={`/m/${m.id}?tab=entrainement`} className="btn btn-soft btn-lg">
+              Autres exercices
+            </Link>
             <Link to={`/m/${m.id}`} className="btn btn-soft btn-lg">
-              Module
+              Retour au cours
             </Link>
           </>
         }

@@ -153,6 +153,34 @@ export default function ChapterPage() {
             <p className="mt-1.5 font-semibold text-muted">{renderWithAnimatedEmojis(c.summary)}</p>
           </header>
 
+          {heads.length > 2 && (
+            <details className="card mb-4 p-4 lg:hidden">
+              <summary className="cursor-pointer select-none text-sm font-extrabold text-ink">
+                Dans ce chapitre ({heads.length} sections)
+              </summary>
+              <ul className="mt-3 space-y-1 border-l-2 border-line">
+                {heads.map((h) => (
+                  <li key={h.id}>
+                    <a
+                      href={`#${h.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        (e.currentTarget.closest('details') as HTMLDetailsElement | null)?.removeAttribute('open');
+                        document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className={cn(
+                        '-ml-0.5 block border-l-2 border-transparent py-1.5 pr-2 text-xs font-semibold leading-snug text-muted',
+                        h.level === 3 ? 'pl-5' : 'pl-3',
+                      )}
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+
           <div ref={body} className={cn('card p-5 sm:p-8', big ? 'reader-lg' : 'reader-sm')}>
             {text === null ? <Spinner /> : <Course text={text} />}
           </div>
