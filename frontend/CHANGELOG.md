@@ -5,6 +5,8 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.5.1] — 2026-11-22
+
 ### Corrections
 - Administration : les statistiques (étudiants, XP, séries, QCM, cartes) sont maintenant lues dans Supabase quand `SUPABASE_SERVICE_ROLE_KEY` est configurée sur le backend ; elles restaient à 0 car la page ne lisait qu'un fichier local.
 
