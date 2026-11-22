@@ -5,6 +5,15 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.12.0] — 2026-11-22
+
+### Ajouté
+- Mot de passe oublié : après le clic sur le lien reçu par e-mail, une fenêtre permet de choisir le nouveau mot de passe (jusque-là, aucun écran ne le permettait).
+
+### Modifié
+- Connexion : un appareil déjà utilisé ouvre directement l'écran de connexion, sans l'écran de démarrage ni le diaporama. L'écran de démarrage se passe d'un clic.
+- Mot de passe oublié : le message indique maintenant qu'un e-mail est envoyé ; l'ancien texte annonçait à tort un mot de passe par défaut.
+
 ## [1.11.0] — 2026-11-22
 
 ### Ajouté
