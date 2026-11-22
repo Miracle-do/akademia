@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.11.0] — 2026-11-22
+
+### Ajouté
+- Accueil : carte « Pour bien démarrer » (lire un chapitre, faire un QCM, essayer une formation) pour les nouveaux utilisateurs ; elle disparaît quand les trois étapes sont faites ou après 500 XP.
+
 ## [1.10.0] — 2026-11-22
 
 ### Modifié
