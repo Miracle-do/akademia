@@ -1,0 +1,535 @@
+{
+ "id": "dml-transactions",
+ "order": 9,
+ "title": "Modifier les données : DML et transactions",
+ "tagline": "INSERT, UPDATE, DELETE, COMMIT, ROLLBACK, SAVEPOINT : changer les données sans jamais rien perdre.",
+ "emoji": "🔄",
+ "color": "#F97316",
+ "level": "Intermédiaire",
+ "minutes": 55,
+ "pitch": [
+  "Hello ! Voici **« Modifier les données : DML et transactions »** 🔄.",
+  "Insérer, modifier, supprimer : tu sais peut-être déjà le faire. Ce qui fait la différence à l'examen, c'est de comprendre **quand** un changement est définitif, et comment **revenir en arrière**.",
+  "Tu vas écrire des `INSERT`, `UPDATE`, `DELETE`, puis jouer avec `COMMIT`, `ROLLBACK` et `SAVEPOINT` sur un exemple de **virement bancaire**.",
+  "Je suis là avec des indices si tu bloques."
+ ],
+ "benefits": [
+  "Écrire INSERT, UPDATE et DELETE sans oublier le WHERE",
+  "Insérer à partir d'un SELECT",
+  "Comprendre COMMIT, ROLLBACK et SAVEPOINT",
+  "Savoir ce qui valide automatiquement une transaction"
+ ],
+ "prerequisites": [
+  {
+   "formation": "ddl-contraintes",
+   "why": "Pour avoir des tables à remplir."
+  }
+ ],
+ "lessons": [
+  {
+   "id": "insert",
+   "title": "INSERT : ajouter des lignes",
+   "emoji": "➕",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`INSERT INTO` ajoute une ligne. On peut nommer les colonnes (recommandé) ou donner toutes les valeurs dans l'ordre de la table."
+    },
+    {
+     "type": "code",
+     "sql": "INSERT INTO produits (id, nom, prix, stock)\nVALUES (5, 'Casque', 22000, 12);\n\nINSERT INTO produits VALUES (6, 'Webcam', 18000, 7);",
+     "title": "Deux écritures",
+     "note": "Les textes et les dates s'écrivent entre apostrophes simples."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la bonne syntaxe ?",
+     "options": [
+      "INSERT produits VALUES (7, 'USB', 2500, 50);",
+      "INSERT INTO produits VALUES (7, 'USB', 2500, 50);",
+      "ADD INTO produits VALUES (7, 'USB', 2500, 50);",
+      "INSERT INTO produits (7, 'USB', 2500, 50);"
+     ],
+     "answer": 1,
+     "explain": "Il faut `INSERT INTO table VALUES (...)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute le produit : id 5, nom 'Casque', prix 22000, stock 12.",
+     "hints": [
+      "INSERT INTO produits VALUES (...)",
+      "Le texte entre apostrophes."
+     ],
+     "accept": [
+      "INSERT INTO produits VALUES (5, 'Casque', 22000, 12);",
+      "INSERT INTO produits (id, nom, prix, stock) VALUES (5, 'Casque', 22000, 12);"
+     ],
+     "solution": "INSERT INTO produits (id, nom, prix, stock)\nVALUES (5, 'Casque', 22000, 12);",
+     "explain": "Nommer les colonnes protège si la structure de la table change plus tard.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "say",
+     "text": "Si on ne renseigne que **certaines colonnes**, les autres prennent leur valeur `DEFAULT`, ou `NULL`. Là, on doit forcément nommer les colonnes."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute un produit avec seulement `id` = 8 et `nom` = 'Tapis'.",
+     "hints": [
+      "Nomme les deux colonnes entre parenthèses.",
+      "Deux valeurs correspondantes."
+     ],
+     "accept": [
+      "INSERT INTO produits (id, nom) VALUES (8, 'Tapis');"
+     ],
+     "solution": "INSERT INTO produits (id, nom)\nVALUES (8, 'Tapis');",
+     "explain": "`prix` et `stock` vaudront NULL (sauf `DEFAULT`). Si une colonne est `NOT NULL`, l'insertion échoue.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "choice",
+     "q": "Une colonne est `NOT NULL` sans `DEFAULT` et tu ne la renseignes pas. Que se passe-t-il ?",
+     "options": [
+      "Elle vaut 0",
+      "Elle vaut une chaîne vide",
+      "Erreur ORA-01400 : insertion de NULL impossible",
+      "Oracle devine la valeur"
+     ],
+     "answer": 2,
+     "explain": "ORA-01400 : cannot insert NULL into. La valeur est obligatoire."
+    },
+    {
+     "type": "say",
+     "text": "On peut aussi insérer **plusieurs lignes d'un coup** à partir d'un `SELECT`. Très pratique pour archiver : les deux tables doivent avoir des colonnes compatibles."
+    },
+    {
+     "type": "code",
+     "sql": "INSERT INTO produits_archive\nSELECT * FROM produits WHERE stock = 0;",
+     "title": "INSERT ... SELECT"
+    },
+    {
+     "type": "exercise",
+     "q": "Copie dans `produits_archive` tous les produits dont le stock vaut 0.",
+     "hints": [
+      "Pas de VALUES : un SELECT directement.",
+      "WHERE stock = 0"
+     ],
+     "accept": [
+      "INSERT INTO produits_archive SELECT * FROM produits WHERE stock = 0;"
+     ],
+     "solution": "INSERT INTO produits_archive\nSELECT * FROM produits\nWHERE stock = 0;",
+     "explain": "Seul le Câble HDMI est copié. Aucun mot `VALUES` quand on insère depuis un SELECT.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "choice",
+     "q": "Pour insérer l'ensemble des lignes d'une table dans une autre de même structure, on écrit :",
+     "options": [
+      "INSERT INTO b VALUES (SELECT * FROM a);",
+      "INSERT INTO b SELECT * FROM a;",
+      "COPY a TO b;",
+      "INSERT b FROM a;"
+     ],
+     "answer": 1,
+     "explain": "`INSERT INTO b SELECT * FROM a;` sans `VALUES` ni parenthèses."
+    }
+   ]
+  },
+  {
+   "id": "update-delete",
+   "title": "UPDATE et DELETE : modifier, supprimer",
+   "emoji": "✏️",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`UPDATE` modifie des lignes existantes, `DELETE` en supprime. Dans les deux cas, **le `WHERE` choisit les lignes concernées**."
+    },
+    {
+     "type": "code",
+     "sql": "UPDATE produits SET prix = 16000 WHERE id = 1;\nDELETE FROM produits WHERE id = 4;",
+     "title": "Avec WHERE : une seule ligne"
+    },
+    {
+     "type": "choice",
+     "q": "Que fait `UPDATE produits SET prix = 0;` sans WHERE ?",
+     "options": [
+      "Rien, une erreur est levée",
+      "Il met le prix à 0 pour **tous** les produits",
+      "Il met à 0 le premier produit",
+      "Il demande confirmation"
+     ],
+     "answer": 1,
+     "explain": "Sans `WHERE`, **toutes les lignes** sont modifiées. Oracle ne demande aucune confirmation : c'est la grande erreur à éviter (mais un `ROLLBACK` te sauve tant que tu n'as pas validé)."
+    },
+    {
+     "type": "exercise",
+     "q": "Passe le prix du produit n° 2 à 8500.",
+     "hints": [
+      "UPDATE produits SET ...",
+      "WHERE id = 2"
+     ],
+     "accept": [
+      "UPDATE produits SET prix = 8500 WHERE id = 2;"
+     ],
+     "solution": "UPDATE produits\nSET    prix = 8500\nWHERE  id = 2;",
+     "explain": "Le `WHERE` cible précisément la ligne.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "say",
+     "text": "On peut modifier **plusieurs colonnes** en les séparant par une virgule, et utiliser un **calcul** basé sur la valeur actuelle."
+    },
+    {
+     "type": "exercise",
+     "q": "Augmente de 10 % le prix de tous les produits dont le prix dépasse 10000.",
+     "hints": [
+      "SET prix = prix * 1.1",
+      "WHERE prix > 10000"
+     ],
+     "accept": [
+      "UPDATE produits SET prix = prix * 1.1 WHERE prix > 10000;",
+      "UPDATE produits SET prix = prix*1.10 WHERE prix > 10000;",
+      "UPDATE produits SET prix = 1.1 * prix WHERE prix > 10000;"
+     ],
+     "solution": "UPDATE produits\nSET    prix = prix * 1.1\nWHERE  prix > 10000;",
+     "explain": "Le Clavier et l'Écran sont concernés. `prix` à droite du signe = est la valeur avant modification.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "exercise",
+     "q": "Mets le stock à 50 et le prix à 3000 pour le produit n° 4, en une seule commande.",
+     "hints": [
+      "SET col1 = ..., col2 = ...",
+      "Une virgule entre les deux affectations."
+     ],
+     "accept": [
+      "UPDATE produits SET stock = 50, prix = 3000 WHERE id = 4;",
+      "UPDATE produits SET prix = 3000, stock = 50 WHERE id = 4;"
+     ],
+     "solution": "UPDATE produits\nSET    stock = 50,\n       prix  = 3000\nWHERE  id = 4;",
+     "explain": "On n'écrit **qu'un seul** `SET` ; les colonnes se séparent par une virgule.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "say",
+     "text": "`DELETE FROM table WHERE ...` supprime des lignes. Sans `WHERE`, **toute la table** est vidée (mais reste annulable tant qu'on n'a pas validé)."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime les produits dont le stock vaut 0.",
+     "hints": [
+      "DELETE FROM produits WHERE ..."
+     ],
+     "accept": [
+      "DELETE FROM produits WHERE stock = 0;",
+      "DELETE produits WHERE stock = 0;"
+     ],
+     "solution": "DELETE FROM produits\nWHERE  stock = 0;",
+     "explain": "En Oracle, le mot `FROM` est facultatif après `DELETE`, mais on l'écrit toujours.",
+     "table": "PRODUITS\nID | NOM        | PRIX  | STOCK\n 1 | Clavier    | 15000 | 20\n 2 | Souris     |  8000 | 35\n 3 | Écran      | 85000 | 5\n 4 | Câble HDMI |  3500 | 0"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande supprime les produits qui n'ont jamais été commandés (table `commandes` avec `id_produit`) ?",
+     "options": [
+      "DELETE FROM produits WHERE id NOT IN (SELECT id_produit FROM commandes);",
+      "DELETE produits WHERE id = commandes.id_produit;",
+      "DELETE FROM produits JOIN commandes;",
+      "DELETE * FROM produits WHERE commandes IS NULL;"
+     ],
+     "answer": 0,
+     "explain": "Une sous-requête dans le `WHERE` est la façon usuelle de supprimer selon une autre table. Attention : si `id_produit` contient un NULL, `NOT IN` ne renvoie rien ; `NOT EXISTS` est plus sûr."
+    }
+   ]
+  },
+  {
+   "id": "transactions",
+   "title": "COMMIT et ROLLBACK : valider ou annuler",
+   "emoji": "✅",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une **transaction** est un ensemble de modifications qui doivent réussir **toutes ensemble ou pas du tout**. L'exemple type : un **virement bancaire**."
+    },
+    {
+     "type": "code",
+     "sql": "COMPTES\nNUM | TITULAIRE | SOLDE\n 1  | Awa       | 100000\n 2  | Koffi     |  40000",
+     "title": "Deux comptes"
+    },
+    {
+     "type": "code",
+     "sql": "UPDATE comptes SET solde = solde - 30000 WHERE num = 1;  -- on débite Awa\nUPDATE comptes SET solde = solde + 30000 WHERE num = 2;  -- on crédite Koffi\nCOMMIT;                                                 -- on valide",
+     "title": "Un virement en deux étapes"
+    },
+    {
+     "type": "say",
+     "text": "Tant qu'on n'a pas fait `COMMIT`, les changements sont **provisoires** : visibles pour toi seulement. Les autres sessions voient encore l'ancienne valeur."
+    },
+    {
+     "type": "choice",
+     "q": "Entre le premier UPDATE et le COMMIT, un collègue lit le solde d'Awa. Que voit-il ?",
+     "options": [
+      "70 000, le nouveau solde",
+      "100 000, l'ancien solde",
+      "Une erreur de verrou",
+      "Un solde vide"
+     ],
+     "answer": 1,
+     "explain": "Les modifications non validées ne sont visibles que dans ta session. C'est l'isolation des transactions."
+    },
+    {
+     "type": "say",
+     "text": "`COMMIT` valide **définitivement**. `ROLLBACK` annule **tout depuis le dernier COMMIT**."
+    },
+    {
+     "type": "exercise",
+     "q": "Annule toutes les modifications faites depuis le dernier COMMIT.",
+     "hints": [
+      "Un seul mot suffit."
+     ],
+     "accept": [
+      "ROLLBACK;",
+      "ROLLBACK WORK;"
+     ],
+     "solution": "ROLLBACK;",
+     "explain": "Après le `ROLLBACK`, Awa a de nouveau 100 000. Rien n'a bougé.",
+     "table": "COMPTES\nNUM | TITULAIRE | SOLDE\n 1  | Awa       | 100000\n 2  | Koffi     |  40000"
+    },
+    {
+     "type": "exercise",
+     "q": "Valide définitivement les modifications en cours.",
+     "hints": [
+      "Un seul mot."
+     ],
+     "accept": [
+      "COMMIT;",
+      "COMMIT WORK;"
+     ],
+     "solution": "COMMIT;",
+     "explain": "Après un `COMMIT`, plus aucun retour en arrière possible avec `ROLLBACK`."
+    },
+    {
+     "type": "choice",
+     "q": "Tu fais un UPDATE, puis la connexion tombe brutalement sans COMMIT. Que devient l'UPDATE ?",
+     "options": [
+      "Il est validé automatiquement",
+      "Il est annulé par Oracle",
+      "Il reste en attente pour la prochaine connexion",
+      "Il est appliqué à moitié"
+     ],
+     "answer": 1,
+     "explain": "Sans `COMMIT`, une déconnexion anormale entraîne un `ROLLBACK` automatique. (Une déconnexion **normale**, elle, valide.)"
+    },
+    {
+     "type": "say",
+     "text": "Certaines actions provoquent un **COMMIT automatique** : toute commande **DDL** (`CREATE`, `ALTER`, `DROP`, `TRUNCATE`…) et une déconnexion normale."
+    },
+    {
+     "type": "choice",
+     "q": "Tu fais un UPDATE, puis `CREATE TABLE test (a NUMBER);`, puis `ROLLBACK;`. L'UPDATE est-il annulé ?",
+     "options": [
+      "Oui",
+      "Non : le CREATE TABLE a validé la transaction",
+      "Seulement si la table est vide",
+      "Oui, mais la table test aussi"
+     ],
+     "answer": 1,
+     "explain": "Le `CREATE TABLE` (DDL) a fait un COMMIT implicite : l'UPDATE était déjà validé."
+    },
+    {
+     "type": "choice",
+     "q": "Lequel de ces ordres n'est PAS annulable avec ROLLBACK ?",
+     "options": [
+      "INSERT",
+      "UPDATE",
+      "DELETE",
+      "TRUNCATE TABLE"
+     ],
+     "answer": 3,
+     "explain": "`TRUNCATE` est du DDL, donc validé immédiatement. Les trois autres sont du DML."
+    }
+   ]
+  },
+  {
+   "id": "savepoint",
+   "title": "SAVEPOINT : revenir à un point précis",
+   "emoji": "📍",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "`ROLLBACK` annule **tout**. Si on veut n'annuler qu'une **partie** de la transaction, on pose des **repères** avec `SAVEPOINT`."
+    },
+    {
+     "type": "code",
+     "sql": "UPDATE comptes SET solde = solde - 30000 WHERE num = 1;\nSAVEPOINT apres_debit;\nUPDATE comptes SET solde = solde + 3000000 WHERE num = 2;   -- erreur de frappe !\nROLLBACK TO apres_debit;                                     -- on annule seulement le crédit\nUPDATE comptes SET solde = solde + 30000 WHERE num = 2;\nCOMMIT;",
+     "title": "Annuler seulement la fin"
+    },
+    {
+     "type": "choice",
+     "q": "Après `ROLLBACK TO apres_debit;`, que reste-t-il de la transaction ?",
+     "options": [
+      "Tout est annulé",
+      "Le débit est conservé, le mauvais crédit est annulé",
+      "Tout est validé",
+      "Seul le crédit est conservé"
+     ],
+     "answer": 1,
+     "explain": "`ROLLBACK TO nom` revient à ce repère : tout ce qui est **après** est annulé, ce qui est **avant** reste en attente (non validé)."
+    },
+    {
+     "type": "exercise",
+     "q": "Pose un repère nommé `point_a`.",
+     "hints": [
+      "SAVEPOINT nom"
+     ],
+     "accept": [
+      "SAVEPOINT point_a;"
+     ],
+     "solution": "SAVEPOINT point_a;",
+     "explain": "Un repère n'a de sens qu'au milieu d'une transaction en cours."
+    },
+    {
+     "type": "exercise",
+     "q": "Annule les modifications faites depuis le repère `point_a`.",
+     "hints": [
+      "ROLLBACK TO ..."
+     ],
+     "accept": [
+      "ROLLBACK TO point_a;",
+      "ROLLBACK TO SAVEPOINT point_a;"
+     ],
+     "solution": "ROLLBACK TO point_a;",
+     "explain": "Le mot `SAVEPOINT` est facultatif dans cette commande."
+    },
+    {
+     "type": "choice",
+     "q": "Après `ROLLBACK TO point_a;`, la transaction est-elle terminée ?",
+     "options": [
+      "Oui, elle est validée",
+      "Oui, elle est annulée",
+      "Non, elle continue : il reste à faire COMMIT ou ROLLBACK",
+      "Non, mais Oracle la valide au bout de 5 minutes"
+     ],
+     "answer": 2,
+     "explain": "`ROLLBACK TO` ne termine pas la transaction. Il faut toujours conclure par `COMMIT` ou `ROLLBACK`."
+    },
+    {
+     "type": "say",
+     "text": "Dans un bloc PL/SQL, on combine souvent ces ordres avec la gestion d'erreurs : en cas d'exception, un `ROLLBACK` annule le travail à moitié fait. On le retrouve dans la formation **PL/SQL**."
+    },
+    {
+     "type": "choice",
+     "q": "Quel est l'intérêt principal d'une transaction pour un virement ?",
+     "options": [
+      "Aller plus vite",
+      "Garantir que le débit et le crédit réussissent ensemble ou pas du tout",
+      "Économiser de la mémoire",
+      "Éviter d'écrire le WHERE"
+     ],
+     "answer": 1,
+     "explain": "C'est l'**atomicité** : tout ou rien. Jamais un compte débité sans que l'autre soit crédité."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : le virement sécurisé",
+   "emoji": "🏆",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Scénario : Awa envoie 20 000 FCFA à Koffi. Tu vas écrire les ordres un par un."
+    },
+    {
+     "type": "code",
+     "sql": "COMPTES\nNUM | TITULAIRE | SOLDE\n 1  | Awa       | 100000\n 2  | Koffi     |  40000",
+     "title": "État de départ"
+    },
+    {
+     "type": "exercise",
+     "q": "Débite le compte n° 1 de 20000.",
+     "hints": [
+      "UPDATE comptes SET solde = solde - ...",
+      "WHERE num = 1"
+     ],
+     "accept": [
+      "UPDATE comptes SET solde = solde - 20000 WHERE num = 1;"
+     ],
+     "solution": "UPDATE comptes\nSET    solde = solde - 20000\nWHERE  num = 1;",
+     "explain": "Awa passe à 80 000.",
+     "table": "COMPTES\nNUM | TITULAIRE | SOLDE\n 1  | Awa       | 100000\n 2  | Koffi     |  40000"
+    },
+    {
+     "type": "exercise",
+     "q": "Pose un repère `apres_debit`.",
+     "hints": [
+      "SAVEPOINT ..."
+     ],
+     "accept": [
+      "SAVEPOINT apres_debit;"
+     ],
+     "solution": "SAVEPOINT apres_debit;",
+     "explain": "Si le crédit échoue, on pourra revenir ici."
+    },
+    {
+     "type": "exercise",
+     "q": "Crédite le compte n° 2 de 20000.",
+     "hints": [
+      "Même forme, avec un +."
+     ],
+     "accept": [
+      "UPDATE comptes SET solde = solde + 20000 WHERE num = 2;"
+     ],
+     "solution": "UPDATE comptes\nSET    solde = solde + 20000\nWHERE  num = 2;",
+     "explain": "Koffi passe à 60 000.",
+     "table": "COMPTES\nNUM | TITULAIRE | SOLDE\n 1  | Awa       | 100000\n 2  | Koffi     |  40000"
+    },
+    {
+     "type": "choice",
+     "q": "Tu constates que le compte n° 2 n'existe pas (0 ligne modifiée). Que fais-tu ?",
+     "options": [
+      "COMMIT quand même",
+      "ROLLBACK : on annule le débit aussi",
+      "Rien, le débit reste valable",
+      "DROP TABLE comptes"
+     ],
+     "answer": 1,
+     "explain": "Si le crédit n'a pas eu lieu, il faut annuler **tout** le virement, y compris le débit : `ROLLBACK`."
+    },
+    {
+     "type": "exercise",
+     "q": "Le virement s'est bien passé. Valide-le.",
+     "hints": [
+      "Un seul mot."
+     ],
+     "accept": [
+      "COMMIT;"
+     ],
+     "solution": "COMMIT;",
+     "explain": "Les deux changements deviennent définitifs et visibles de tous."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi avoir posé un SAVEPOINT entre le débit et le crédit ?",
+     "options": [
+      "Pour accélérer le COMMIT",
+      "Pour pouvoir annuler seulement le crédit en gardant le débit",
+      "Pour valider le débit tout de suite",
+      "Pour verrouiller la table"
+     ],
+     "answer": 1,
+     "explain": "`ROLLBACK TO apres_debit` annule la seconde étape sans perdre la première, au lieu de tout recommencer."
+    },
+    {
+     "type": "say",
+     "text": "🎉 Bravo ! Tu maîtrises le cycle **modifier, valider, annuler**. Il est temps d'automatiser tout cela côté serveur avec les **packages PL/SQL**."
+    }
+   ]
+  }
+ ]
+}

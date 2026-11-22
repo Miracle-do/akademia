@@ -1,0 +1,522 @@
+{
+ "id": "ddl-contraintes",
+ "order": 8,
+ "title": "Créer sa base : DDL et contraintes",
+ "tagline": "CREATE TABLE, types Oracle, PRIMARY KEY, FOREIGN KEY, CHECK, ALTER, TRUNCATE : construire un schéma solide dès le départ.",
+ "emoji": "🏗️",
+ "color": "#0EA5E9",
+ "level": "Intermédiaire",
+ "minutes": 50,
+ "pitch": [
+  "Salut ! Je te propose **« Créer sa base : DDL et contraintes »** 🏗️.",
+  "Avant de manipuler des données, il faut un **schéma** bien construit : les bons types, les bonnes clés, des règles qui empêchent les valeurs absurdes. C'est le rôle des commandes **DDL**.",
+  "Tu vas écrire toi-même des `CREATE TABLE` et des `ALTER TABLE`, puis relever un **défi final** : monter le schéma d'une petite boutique.",
+  "Chaque leçon est courte. Je t'aide avec des indices si tu bloques."
+ ],
+ "benefits": [
+  "Choisir le bon type Oracle (VARCHAR2, NUMBER, DATE…)",
+  "Poser PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, NOT NULL et DEFAULT",
+  "Modifier une table existante avec ALTER TABLE",
+  "Distinguer DELETE, TRUNCATE et DROP, et savoir lequel est annulable"
+ ],
+ "lessons": [
+  {
+   "id": "types",
+   "title": "Types de données et premier CREATE TABLE",
+   "emoji": "🔤",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une table se crée avec **`CREATE TABLE`**. Pour chaque colonne, on donne un **nom** et un **type**. Oracle a ses propres types : retenons les quatre qui reviennent tout le temps."
+    },
+    {
+     "type": "code",
+     "sql": "NUMBER(8,2)    -- nombre : 8 chiffres au total, dont 2 après la virgule\nVARCHAR2(50)   -- texte de 50 caractères maximum\nCHAR(1)        -- texte de longueur fixe (ex. 'M' ou 'F')\nDATE           -- date ET heure",
+     "title": "Les types essentiels"
+    },
+    {
+     "type": "choice",
+     "q": "Quel type Oracle utilise-t-on pour un texte de longueur variable ?",
+     "options": [
+      "VARCHAR",
+      "VARCHAR2",
+      "STRING",
+      "TEXT"
+     ],
+     "answer": 1,
+     "explain": "En Oracle, c'est `VARCHAR2`. `VARCHAR` existe mais est déconseillé, `STRING` et `TEXT` n'existent pas."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE TABLE clients (\n  id    NUMBER(6),\n  nom   VARCHAR2(50),\n  ville VARCHAR2(30)\n);",
+     "title": "Une table minimale",
+     "note": "Chaque colonne est séparée par une virgule ; pas de virgule après la dernière."
+    },
+    {
+     "type": "choice",
+     "q": "`NUMBER(8,2)` peut stocker quelle valeur ?",
+     "options": [
+      "123456.78",
+      "1234567.89",
+      "12345678.9",
+      "0.123456"
+     ],
+     "answer": 0,
+     "explain": "8 chiffres au total dont 2 décimales : au maximum 6 chiffres avant la virgule. `123456.78` convient ; `1234567.89` en a 9."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `produits` avec trois colonnes : `id` (NUMBER(6)), `nom` (VARCHAR2(40)) et `prix` (NUMBER(8,2)).",
+     "hints": [
+      "Commence par CREATE TABLE produits (",
+      "Chaque colonne : nom puis type, séparées par une virgule.",
+      "Termine par );"
+     ],
+     "accept": [
+      "CREATE TABLE produits (id NUMBER(6), nom VARCHAR2(40), prix NUMBER(8,2));"
+     ],
+     "solution": "CREATE TABLE produits (\n  id   NUMBER(6),\n  nom  VARCHAR2(40),\n  prix NUMBER(8,2)\n);",
+     "explain": "Les retours à la ligne et les espaces n'ont pas d'importance pour SQL. Seuls comptent les noms, les types et la ponctuation."
+    },
+    {
+     "type": "say",
+     "text": "Une `DATE` Oracle contient **toujours une heure** (heure, minute, seconde), même si on n'affiche que le jour. `SYSDATE` donne la date et l'heure courantes."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `evenements` avec `id` (NUMBER(6)) et `date_event` (DATE).",
+     "hints": [
+      "Deux colonnes seulement.",
+      "Le type de la seconde colonne est DATE, sans taille."
+     ],
+     "accept": [
+      "CREATE TABLE evenements (id NUMBER(6), date_event DATE);"
+     ],
+     "solution": "CREATE TABLE evenements (\n  id         NUMBER(6),\n  date_event DATE\n);",
+     "explain": "`DATE` ne prend jamais de taille entre parenthèses."
+    },
+    {
+     "type": "choice",
+     "q": "Que se passe-t-il avec `CREATE TABLE t (a NUMBER(3), b VARCHAR2);` ?",
+     "options": [
+      "La table est créée avec b de taille 1",
+      "Erreur : VARCHAR2 exige une taille",
+      "La table est créée avec b illimité",
+      "Erreur : NUMBER exige deux paramètres"
+     ],
+     "answer": 1,
+     "explain": "`VARCHAR2` sans longueur provoque une erreur (ORA-00906). Il faut toujours écrire `VARCHAR2(n)`."
+    }
+   ]
+  },
+  {
+   "id": "contraintes",
+   "title": "Les contraintes : protéger les données",
+   "emoji": "🛡️",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une **contrainte** est une règle que la base impose. Si une insertion la viole, Oracle refuse la ligne. C'est ce qui garantit la **cohérence** des données."
+    },
+    {
+     "type": "code",
+     "sql": "PRIMARY KEY   -- identifiant unique et jamais nul\nNOT NULL      -- valeur obligatoire\nUNIQUE        -- pas de doublon (les NULL sont tolérés)\nCHECK (...)   -- une condition qui doit être vraie\nDEFAULT val   -- valeur prise si on n'en donne pas\nREFERENCES    -- clé étrangère vers une autre table",
+     "title": "Les six outils"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle contrainte interdit à la fois les doublons et les valeurs NULL ?",
+     "options": [
+      "UNIQUE",
+      "NOT NULL",
+      "PRIMARY KEY",
+      "CHECK"
+     ],
+     "answer": 2,
+     "explain": "`PRIMARY KEY` = `UNIQUE` + `NOT NULL`. Une table n'a qu'une clé primaire."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE TABLE departement (\n  id_departement NUMBER(6)    PRIMARY KEY,\n  nom            VARCHAR2(50) NOT NULL,\n  budget         NUMBER(10,2) DEFAULT 0 CHECK (budget >= 0)\n);",
+     "title": "Contraintes sur la colonne"
+    },
+    {
+     "type": "say",
+     "text": "Ici : la clé primaire identifie chaque département, le nom est obligatoire, le budget vaut **0 par défaut** et ne peut pas être négatif."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `matieres` : `code` (VARCHAR2(10)) clé primaire, `libelle` (VARCHAR2(60)) obligatoire.",
+     "hints": [
+      "PRIMARY KEY se place juste après le type.",
+      "NOT NULL aussi."
+     ],
+     "accept": [
+      "CREATE TABLE matieres (code VARCHAR2(10) PRIMARY KEY, libelle VARCHAR2(60) NOT NULL);"
+     ],
+     "solution": "CREATE TABLE matieres (\n  code    VARCHAR2(10) PRIMARY KEY,\n  libelle VARCHAR2(60) NOT NULL\n);",
+     "explain": "La contrainte s'écrit à la suite de la colonne, séparée du type par un espace."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `notes` : `id` (NUMBER(6)) clé primaire et `valeur` (NUMBER(4,2)) avec la règle : la valeur doit être comprise entre 0 et 20 (`CHECK`).",
+     "hints": [
+      "CHECK (condition) se place après le type de valeur.",
+      "BETWEEN 0 AND 20 ou deux comparaisons."
+     ],
+     "accept": [
+      "CREATE TABLE notes (id NUMBER(6) PRIMARY KEY, valeur NUMBER(4,2) CHECK (valeur BETWEEN 0 AND 20));",
+      "CREATE TABLE notes (id NUMBER(6) PRIMARY KEY, valeur NUMBER(4,2) CHECK (valeur >= 0 AND valeur <= 20));"
+     ],
+     "solution": "CREATE TABLE notes (\n  id     NUMBER(6) PRIMARY KEY,\n  valeur NUMBER(4,2) CHECK (valeur BETWEEN 0 AND 20)\n);",
+     "explain": "Toute insertion avec une valeur de 25 sera refusée (ORA-02290, contrainte CHECK violée)."
+    },
+    {
+     "type": "say",
+     "text": "**La clé étrangère** relie une colonne à la clé primaire d'une autre table. Elle garantit qu'on ne peut pas référencer quelque chose qui n'existe pas."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE TABLE employe (\n  id_employe     NUMBER(6)    PRIMARY KEY,\n  nom            VARCHAR2(50) NOT NULL,\n  email          VARCHAR2(80) UNIQUE,\n  id_departement NUMBER(6)    REFERENCES departement(id_departement)\n);",
+     "title": "Clé étrangère en une ligne"
+    },
+    {
+     "type": "choice",
+     "q": "Un employé a `id_departement = 99` mais aucun département 99 n'existe. Que fait Oracle à l'INSERT ?",
+     "options": [
+      "Il accepte et met NULL",
+      "Il accepte la ligne telle quelle",
+      "Il refuse : ORA-02291, clé parent introuvable",
+      "Il crée automatiquement le département 99"
+     ],
+     "answer": 2,
+     "explain": "L'intégrité référentielle interdit une valeur de clé étrangère qui n'existe pas dans la table parent : ORA-02291."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `inscriptions` avec `id` (NUMBER(6)) clé primaire et `id_etudiant` (NUMBER(6)) qui référence `etudiants(id)`.",
+     "hints": [
+      "REFERENCES table(colonne)",
+      "La clé étrangère se déclare comme une contrainte de colonne."
+     ],
+     "accept": [
+      "CREATE TABLE inscriptions (id NUMBER(6) PRIMARY KEY, id_etudiant NUMBER(6) REFERENCES etudiants(id));"
+     ],
+     "solution": "CREATE TABLE inscriptions (\n  id          NUMBER(6) PRIMARY KEY,\n  id_etudiant NUMBER(6) REFERENCES etudiants(id)\n);",
+     "explain": "La table `etudiants` doit déjà exister pour que la clé étrangère soit créée."
+    }
+   ]
+  },
+  {
+   "id": "alter",
+   "title": "ALTER TABLE : modifier une table existante",
+   "emoji": "🔧",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Une table existe déjà et il faut la changer ? **`ALTER TABLE`**. C'est la seule commande pour modifier la structure ; `CHANGE TABLE` ou `MODIFY TABLE` n'existent pas en Oracle."
+    },
+    {
+     "type": "code",
+     "sql": "ALTER TABLE employe ADD (telephone VARCHAR2(20));            -- ajouter une colonne\nALTER TABLE employe MODIFY (nom VARCHAR2(100));              -- changer type ou taille\nALTER TABLE employe DROP COLUMN telephone;                   -- supprimer une colonne\nALTER TABLE employe RENAME COLUMN nom TO nom_famille;        -- renommer une colonne\nALTER TABLE employe RENAME TO salarie;                       -- renommer la table",
+     "title": "Les cinq opérations"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande ajoute une colonne ?",
+     "options": [
+      "ALTER TABLE t ADD (c VARCHAR2(10));",
+      "UPDATE TABLE t ADD c VARCHAR2(10);",
+      "CHANGE TABLE t ADD c;",
+      "ALTER t ADD COLUMN c;"
+     ],
+     "answer": 0,
+     "explain": "On utilise `ALTER TABLE ... ADD (...)`."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute à la table `clients` une colonne `email` de type VARCHAR2(80).",
+     "hints": [
+      "ALTER TABLE clients ADD (...)"
+     ],
+     "accept": [
+      "ALTER TABLE clients ADD (email VARCHAR2(80));",
+      "ALTER TABLE clients ADD email VARCHAR2(80);"
+     ],
+     "solution": "ALTER TABLE clients ADD (email VARCHAR2(80));",
+     "explain": "Les parenthèses sont facultatives pour une seule colonne, obligatoires pour en ajouter plusieurs."
+    },
+    {
+     "type": "exercise",
+     "q": "Agrandis la colonne `nom` de la table `clients` à VARCHAR2(100).",
+     "hints": [
+      "Utilise MODIFY.",
+      "ALTER TABLE clients MODIFY (nom ...)"
+     ],
+     "accept": [
+      "ALTER TABLE clients MODIFY (nom VARCHAR2(100));",
+      "ALTER TABLE clients MODIFY nom VARCHAR2(100);"
+     ],
+     "solution": "ALTER TABLE clients MODIFY (nom VARCHAR2(100));",
+     "explain": "Agrandir est toujours possible ; réduire une colonne déjà remplie échoue si des valeurs sont plus longues."
+    },
+    {
+     "type": "exercise",
+     "q": "Renomme la colonne `ville` de `clients` en `commune`.",
+     "hints": [
+      "RENAME COLUMN ancien TO nouveau"
+     ],
+     "accept": [
+      "ALTER TABLE clients RENAME COLUMN ville TO commune;"
+     ],
+     "solution": "ALTER TABLE clients RENAME COLUMN ville TO commune;",
+     "explain": "Le mot `COLUMN` est obligatoire dans cette forme."
+    },
+    {
+     "type": "say",
+     "text": "On peut aussi ajouter une contrainte **après coup**, avec un nom que l'on choisit. Utile pour la retrouver et la supprimer plus tard."
+    },
+    {
+     "type": "code",
+     "sql": "ALTER TABLE employe ADD CONSTRAINT fk_dept\n  FOREIGN KEY (id_departement) REFERENCES departement(id_departement);\n\nALTER TABLE employe DROP CONSTRAINT fk_dept;",
+     "title": "Ajouter, puis supprimer une contrainte nommée"
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute à `produits` une contrainte nommée `ck_prix` qui impose `prix > 0`.",
+     "hints": [
+      "ALTER TABLE ... ADD CONSTRAINT nom CHECK (...)"
+     ],
+     "accept": [
+      "ALTER TABLE produits ADD CONSTRAINT ck_prix CHECK (prix > 0);"
+     ],
+     "solution": "ALTER TABLE produits ADD CONSTRAINT ck_prix CHECK (prix > 0);",
+     "explain": "Si des lignes existantes violent la règle, Oracle refuse d'ajouter la contrainte."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande supprime la colonne `tel` de `clients` ?",
+     "options": [
+      "ALTER TABLE clients DROP COLUMN tel;",
+      "DROP COLUMN clients.tel;",
+      "DELETE COLUMN tel FROM clients;",
+      "ALTER TABLE clients REMOVE tel;"
+     ],
+     "answer": 0,
+     "explain": "`ALTER TABLE ... DROP COLUMN`."
+    }
+   ]
+  },
+  {
+   "id": "copier",
+   "title": "Copier, vider, supprimer : DELETE, TRUNCATE, DROP",
+   "emoji": "🗑️",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Trois façons de « vider » une table, trois effets très différents. C'est un grand classique d'examen."
+    },
+    {
+     "type": "code",
+     "sql": "DELETE FROM clients;       -- supprime les lignes (annulable avec ROLLBACK)\nTRUNCATE TABLE clients;   -- vide la table d'un coup (auto-commit, non annulable)\nDROP TABLE clients;       -- supprime la table elle-même, structure comprise",
+     "title": "Les trois commandes"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande supprime les lignes mais garde la table, tout en pouvant être annulée par `ROLLBACK` ?",
+     "options": [
+      "DELETE FROM t;",
+      "TRUNCATE TABLE t;",
+      "DROP TABLE t;",
+      "CLEAR t;"
+     ],
+     "answer": 0,
+     "explain": "`DELETE` est une commande DML : elle reste dans la transaction. `TRUNCATE` et `DROP` sont du DDL, donc validées automatiquement."
+    },
+    {
+     "type": "say",
+     "text": "Règle d'or : les commandes **DDL** (CREATE, ALTER, DROP, TRUNCATE) font un **COMMIT automatique**. On ne peut pas les annuler."
+    },
+    {
+     "type": "choice",
+     "q": "Tu exécutes `TRUNCATE TABLE clients;` puis `ROLLBACK;`. Les lignes reviennent-elles ?",
+     "options": [
+      "Oui, ROLLBACK annule tout",
+      "Non : TRUNCATE a déjà été validée",
+      "Oui, mais seulement la moitié",
+      "Cela dépend de la taille de la table"
+     ],
+     "answer": 1,
+     "explain": "`TRUNCATE` est du DDL : COMMIT implicite. Le `ROLLBACK` n'a plus rien à annuler."
+    },
+    {
+     "type": "exercise",
+     "q": "Vide complètement la table `logs` sans pouvoir annuler, en une commande rapide.",
+     "hints": [
+      "Ce n'est ni DELETE ni DROP.",
+      "TRUNCATE TABLE ..."
+     ],
+     "accept": [
+      "TRUNCATE TABLE logs;"
+     ],
+     "solution": "TRUNCATE TABLE logs;",
+     "explain": "`TRUNCATE` est plus rapide que `DELETE` car elle ne journalise pas ligne par ligne, mais elle ne permet pas de `WHERE`."
+    },
+    {
+     "type": "say",
+     "text": "Pour **copier** une table, on combine `CREATE TABLE` et `SELECT`. La condition toujours fausse `WHERE 1 = 0` copie la structure **sans** les lignes."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE TABLE clients_copie  AS SELECT * FROM clients;               -- structure + données\nCREATE TABLE clients_modele AS SELECT * FROM clients WHERE 1 = 0; -- structure seule",
+     "title": "Copier une table"
+    },
+    {
+     "type": "exercise",
+     "q": "Crée la table `produits_vide` avec la même structure que `produits`, mais sans aucune ligne.",
+     "hints": [
+      "CREATE TABLE ... AS SELECT * FROM produits",
+      "Ajoute une condition toujours fausse."
+     ],
+     "accept": [
+      "CREATE TABLE produits_vide AS SELECT * FROM produits WHERE 1 = 0;",
+      "CREATE TABLE produits_vide AS SELECT * FROM produits WHERE 1=0;"
+     ],
+     "solution": "CREATE TABLE produits_vide AS\nSELECT * FROM produits WHERE 1 = 0;",
+     "explain": "Réflexe d'examen : « même schéma que X » = `CREATE TABLE ... AS SELECT * FROM X WHERE 1 = 0`."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime définitivement la table `produits_vide`.",
+     "hints": [
+      "Une seule commande, trois mots."
+     ],
+     "accept": [
+      "DROP TABLE produits_vide;"
+     ],
+     "solution": "DROP TABLE produits_vide;",
+     "explain": "Si d'autres tables ont une clé étrangère vers elle, il faut ajouter `CASCADE CONSTRAINTS`."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle commande renomme la table `employe` en `salarie` ?",
+     "options": [
+      "RENAME employe TO salarie;",
+      "ALTER TABLE employe RENAME TO salarie;",
+      "UPDATE TABLE employe SET NAME = 'salarie';",
+      "Les deux premières fonctionnent"
+     ],
+     "answer": 3,
+     "explain": "Oracle accepte `RENAME ancien TO nouveau;` et `ALTER TABLE ancien RENAME TO nouveau;`."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : le schéma d'une boutique",
+   "emoji": "🏆",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "On passe à la pratique. Tu vas construire pas à pas le schéma d'une petite boutique : des **catégories**, des **produits** et des **commandes**."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée `categories` : `id` (NUMBER(4)) clé primaire, `libelle` (VARCHAR2(40)) obligatoire.",
+     "hints": [
+      "PRIMARY KEY et NOT NULL."
+     ],
+     "accept": [
+      "CREATE TABLE categories (id NUMBER(4) PRIMARY KEY, libelle VARCHAR2(40) NOT NULL);"
+     ],
+     "solution": "CREATE TABLE categories (\n  id      NUMBER(4)    PRIMARY KEY,\n  libelle VARCHAR2(40) NOT NULL\n);",
+     "explain": "La table parent se crée toujours avant les tables qui la référencent."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée `produits` : `id` (NUMBER(6)) clé primaire, `nom` (VARCHAR2(60)) obligatoire, `prix` (NUMBER(8,2)) avec `CHECK (prix > 0)`, `id_categorie` (NUMBER(4)) qui référence `categories(id)`.",
+     "hints": [
+      "Quatre colonnes.",
+      "Chaque contrainte suit son type."
+     ],
+     "accept": [
+      "CREATE TABLE produits (id NUMBER(6) PRIMARY KEY, nom VARCHAR2(60) NOT NULL, prix NUMBER(8,2) CHECK (prix > 0), id_categorie NUMBER(4) REFERENCES categories(id));"
+     ],
+     "solution": "CREATE TABLE produits (\n  id           NUMBER(6)    PRIMARY KEY,\n  nom          VARCHAR2(60) NOT NULL,\n  prix         NUMBER(8,2)  CHECK (prix > 0),\n  id_categorie NUMBER(4)    REFERENCES categories(id)\n);",
+     "explain": "Cette fois on cumule trois sortes de contraintes dans une seule table."
+    },
+    {
+     "type": "choice",
+     "q": "On tente d'insérer un produit de prix −500. Quelle contrainte réagit ?",
+     "options": [
+      "PRIMARY KEY",
+      "NOT NULL",
+      "CHECK",
+      "REFERENCES"
+     ],
+     "answer": 2,
+     "explain": "Le `CHECK (prix > 0)` refuse la ligne : ORA-02290."
+    },
+    {
+     "type": "exercise",
+     "q": "Crée `commandes` : `id` (NUMBER(8)) clé primaire, `date_commande` (DATE) valant `SYSDATE` par défaut, `id_produit` (NUMBER(6)) référençant `produits(id)`.",
+     "hints": [
+      "DEFAULT SYSDATE après le type DATE.",
+      "La clé étrangère vise produits(id)."
+     ],
+     "accept": [
+      "CREATE TABLE commandes (id NUMBER(8) PRIMARY KEY, date_commande DATE DEFAULT SYSDATE, id_produit NUMBER(6) REFERENCES produits(id));"
+     ],
+     "solution": "CREATE TABLE commandes (\n  id            NUMBER(8) PRIMARY KEY,\n  date_commande DATE      DEFAULT SYSDATE,\n  id_produit    NUMBER(6) REFERENCES produits(id)\n);",
+     "explain": "`DEFAULT` se place avant les contraintes éventuelles."
+    },
+    {
+     "type": "exercise",
+     "q": "Ajoute à `commandes` une colonne `quantite` de type NUMBER(4).",
+     "hints": [
+      "ALTER TABLE ... ADD"
+     ],
+     "accept": [
+      "ALTER TABLE commandes ADD (quantite NUMBER(4));",
+      "ALTER TABLE commandes ADD quantite NUMBER(4);"
+     ],
+     "solution": "ALTER TABLE commandes ADD (quantite NUMBER(4));",
+     "explain": "Une colonne ajoutée à une table déjà remplie vaut NULL pour les lignes existantes."
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre faut-il créer les trois tables ?",
+     "options": [
+      "commandes, produits, categories",
+      "categories, produits, commandes",
+      "L'ordre n'a aucune importance",
+      "produits, categories, commandes"
+     ],
+     "answer": 1,
+     "explain": "Une clé étrangère ne peut référencer qu'une table qui existe déjà : on crée d'abord les tables parents."
+    },
+    {
+     "type": "choice",
+     "q": "Pour repartir de zéro, dans quel ordre supprimer les tables avec `DROP TABLE` sans option ?",
+     "options": [
+      "categories, produits, commandes",
+      "produits, categories, commandes",
+      "commandes, produits, categories",
+      "Peu importe"
+     ],
+     "answer": 2,
+     "explain": "On supprime d'abord les tables enfants (celles qui portent les clés étrangères) : l'inverse de la création."
+    },
+    {
+     "type": "say",
+     "text": "🎉 Bravo ! Tu sais maintenant **concevoir** et **modifier** un schéma. Prochaine étape logique : y mettre des données avec la formation **DML et transactions**."
+    }
+   ]
+  }
+ ]
+}

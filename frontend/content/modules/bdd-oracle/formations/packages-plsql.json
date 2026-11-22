@@ -1,0 +1,386 @@
+{
+ "id": "packages-plsql",
+ "order": 10,
+ "title": "Les packages PL/SQL",
+ "tagline": "Spécification, corps, éléments publics et privés, surcharge : ranger ses procédures et fonctions comme un professionnel.",
+ "emoji": "📦",
+ "color": "#65A30D",
+ "level": "Avancé",
+ "minutes": 45,
+ "pitch": [
+  "Salut ! Aujourd'hui : **« Les packages PL/SQL »** 📦.",
+  "Quand on a dix procédures et fonctions qui parlent du même sujet, les laisser en vrac devient vite ingérable. Un **package** les range dans une seule boîte, avec une **vitrine** (ce qu'on peut utiliser) et une **réserve** (ce qui reste caché).",
+  "Tu vas comprendre la différence entre **spécification** et **corps**, écrire une spécification, appeler des éléments de package, et relever un petit défi.",
+  "Je t'aide avec des indices si besoin."
+ ],
+ "benefits": [
+  "Distinguer spécification et corps d'un package",
+  "Savoir ce qui est public et ce qui est privé",
+  "Appeler une fonction ou une procédure de package",
+  "Comprendre la surcharge et la persistance des variables par session"
+ ],
+ "prerequisites": [
+  {
+   "formation": "plsql",
+   "why": "Pour savoir écrire une procédure ou une fonction."
+  }
+ ],
+ "lessons": [
+  {
+   "id": "deux-parties",
+   "title": "Deux parties : spécification et corps",
+   "emoji": "🧱",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un **package** regroupe des procédures, fonctions, variables, curseurs et exceptions qui parlent du même sujet. Il est composé de **deux parties créées séparément**."
+    },
+    {
+     "type": "code",
+     "sql": "Spécification (CREATE PACKAGE)       → la VITRINE : ce qui est utilisable de l'extérieur\nCorps          (CREATE PACKAGE BODY)  → la RÉSERVE : le code réel + ce qui reste privé",
+     "title": "Deux parties"
+    },
+    {
+     "type": "choice",
+     "q": "Que contient la **spécification** d'un package ?",
+     "options": [
+      "Le code complet des sous-programmes",
+      "Les déclarations de ce qui est accessible de l'extérieur",
+      "Uniquement les variables privées",
+      "Les données de la table"
+     ],
+     "answer": 1,
+     "explain": "La spécification ne contient que des **déclarations** (noms, paramètres, types de retour). Le code est dans le corps."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE PACKAGE gestion_clients IS\n  FUNCTION  nb_commandes (p_id NUMBER) RETURN NUMBER;\n  PROCEDURE afficher     (p_id NUMBER);\nEND gestion_clients;\n/",
+     "title": "La spécification",
+     "note": "Seulement les en-têtes, terminés par des points-virgules."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE PACKAGE BODY gestion_clients IS\n  FUNCTION nb_commandes (p_id NUMBER) RETURN NUMBER IS\n    n NUMBER;\n  BEGIN\n    SELECT COUNT(*) INTO n FROM commandes WHERE client_id = p_id;\n    RETURN n;\n  END nb_commandes;\n\n  PROCEDURE afficher (p_id NUMBER) IS\n  BEGIN\n    DBMS_OUTPUT.PUT_LINE('Commandes : ' || nb_commandes(p_id));\n  END afficher;\nEND gestion_clients;\n/",
+     "title": "Le corps"
+    },
+    {
+     "type": "say",
+     "text": "Remarque : dans le corps, chaque sous-programme est **défini en entier** (avec `IS` ... `BEGIN` ... `END`). Les en-têtes doivent être **identiques** à ceux de la spécification."
+    },
+    {
+     "type": "choice",
+     "q": "Dans quel ordre crée-t-on les deux parties ?",
+     "options": [
+      "Le corps d'abord, puis la spécification",
+      "La spécification d'abord, puis le corps",
+      "Dans un seul ordre CREATE",
+      "Peu importe"
+     ],
+     "answer": 1,
+     "explain": "Le corps s'appuie sur la spécification : sans elle, `CREATE PACKAGE BODY` échoue. Les deux se compilent **séparément**."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la **spécification** du package `outils` avec une seule fonction `carre (n NUMBER) RETURN NUMBER;`.",
+     "hints": [
+      "CREATE OR REPLACE PACKAGE outils IS",
+      "Une seule ligne de déclaration, terminée par ;",
+      "Termine par END outils;"
+     ],
+     "accept": [
+      "CREATE OR REPLACE PACKAGE outils IS FUNCTION carre (n NUMBER) RETURN NUMBER; END outils;",
+      "CREATE OR REPLACE PACKAGE outils AS FUNCTION carre (n NUMBER) RETURN NUMBER; END outils;",
+      "CREATE OR REPLACE PACKAGE outils IS FUNCTION carre (n NUMBER) RETURN NUMBER; END outils; /"
+     ],
+     "solution": "CREATE OR REPLACE PACKAGE outils IS\n  FUNCTION carre (n NUMBER) RETURN NUMBER;\nEND outils;\n/",
+     "explain": "Dans la spécification d'une fonction, **pas de IS ni de BEGIN** : uniquement l'en-tête. `IS` et `AS` sont interchangeables après le nom du package."
+    },
+    {
+     "type": "choice",
+     "q": "Si la spécification déclare une fonction que le corps ne définit pas, que se passe-t-il ?",
+     "options": [
+      "Rien, elle sera définie plus tard",
+      "Le corps est créé avec des erreurs de compilation",
+      "Oracle la crée automatiquement vide",
+      "La spécification est supprimée"
+     ],
+     "answer": 1,
+     "explain": "Le corps doit définir tout ce que la spécification déclare, sinon : erreur de compilation (PLS-00323). Consulte `USER_ERRORS` ou `SHOW ERRORS`."
+    }
+   ]
+  },
+  {
+   "id": "appeler",
+   "title": "Appeler un package",
+   "emoji": "📞",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Pour utiliser un élément, on préfixe son nom par celui du package, avec un point : **`package.element`**."
+    },
+    {
+     "type": "code",
+     "sql": "SELECT gestion_clients.nb_commandes(1) FROM DUAL;   -- une fonction, dans un SELECT\nEXEC gestion_clients.afficher(1);                     -- une procédure, avec EXEC",
+     "title": "Deux façons d'appeler"
+    },
+    {
+     "type": "choice",
+     "q": "Comment appelle-t-on la procédure `afficher` du package `gestion_clients` pour le client 3 ?",
+     "options": [
+      "EXEC gestion_clients.afficher(3);",
+      "EXEC afficher.gestion_clients(3);",
+      "CALL afficher(3) IN gestion_clients;",
+      "RUN gestion_clients(3);"
+     ],
+     "answer": 0,
+     "explain": "Toujours `nom_package.nom_element`."
+    },
+    {
+     "type": "exercise",
+     "q": "Affiche le nombre de commandes du client 2 avec un SELECT, en appelant `gestion_clients.nb_commandes`.",
+     "hints": [
+      "SELECT ... FROM DUAL",
+      "La fonction se prépare avec le nom du package."
+     ],
+     "accept": [
+      "SELECT gestion_clients.nb_commandes(2) FROM dual;"
+     ],
+     "solution": "SELECT gestion_clients.nb_commandes(2)\nFROM   DUAL;",
+     "explain": "`DUAL` est la table à une seule ligne qu'on utilise quand on n'interroge aucune vraie table."
+    },
+    {
+     "type": "exercise",
+     "q": "Exécute la procédure `afficher` du package `gestion_clients` pour le client 2.",
+     "hints": [
+      "EXEC package.procedure(argument);"
+     ],
+     "accept": [
+      "EXEC gestion_clients.afficher(2);",
+      "EXECUTE gestion_clients.afficher(2);"
+     ],
+     "solution": "EXEC gestion_clients.afficher(2);",
+     "explain": "`EXEC` est l'abréviation de `EXECUTE`. Sans `SET SERVEROUTPUT ON`, tu ne verrais pas le message."
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on utiliser une procédure de package dans un SELECT ?",
+     "options": [
+      "Oui, comme une fonction",
+      "Non : seules les fonctions s'utilisent dans un SELECT",
+      "Oui si on ajoute DUAL",
+      "Oui avec CALL"
+     ],
+     "answer": 1,
+     "explain": "Une procédure ne retourne pas de valeur : elle s'appelle avec `EXEC` ou depuis un bloc PL/SQL. Seule une **fonction** peut être appelée dans un `SELECT`."
+    },
+    {
+     "type": "say",
+     "text": "Depuis un autre bloc PL/SQL, on l'appelle de la même façon, sans `EXEC`."
+    },
+    {
+     "type": "code",
+     "sql": "BEGIN\n  gestion_clients.afficher(1);\nEND;\n/",
+     "title": "Appel depuis un bloc"
+    },
+    {
+     "type": "choice",
+     "q": "Dans le corps du package, la procédure `afficher` appelle `nb_commandes(p_id)` sans préfixe. Pourquoi est-ce correct ?",
+     "options": [
+      "Par erreur, Oracle devine",
+      "Parce qu'on est déjà à l'intérieur du package : les éléments se voient entre eux",
+      "Parce que nb_commandes est une variable",
+      "Ce n'est pas correct"
+     ],
+     "answer": 1,
+     "explain": "À l'intérieur du package, il est inutile de préfixer ses propres éléments."
+    }
+   ]
+  },
+  {
+   "id": "prive",
+   "title": "Public, privé et variables de session",
+   "emoji": "🔒",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tout ce qui est **déclaré dans la spécification** est **public**. Ce qui n'est défini **que dans le corps** est **privé** : invisible de l'extérieur."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE PACKAGE BODY gestion_clients IS\n  -- PRIVÉ : absent de la spécification\n  FUNCTION nom_valide (p_nom VARCHAR2) RETURN BOOLEAN IS\n  BEGIN\n    RETURN LENGTH(p_nom) >= 3;\n  END nom_valide;\n  ...\nEND gestion_clients;",
+     "title": "Un sous-programme privé"
+    },
+    {
+     "type": "choice",
+     "q": "Un sous-programme défini dans le corps, mais non déclaré dans la spécification, est :",
+     "options": [
+      "Public",
+      "Privé : utilisable seulement à l'intérieur du package",
+      "Supprimé à la compilation",
+      "Accessible avec EXEC"
+     ],
+     "answer": 1,
+     "explain": "Il est privé : seuls les autres éléments du package peuvent l'appeler. C'est l'**encapsulation**."
+    },
+    {
+     "type": "say",
+     "text": "Autre atout : les **variables et curseurs** déclarés dans la spécification **gardent leur valeur pendant toute la session**. **Chaque session a sa propre copie**."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE PACKAGE compteur IS\n  nb_appels NUMBER := 0;\n  PROCEDURE incrementer;\nEND compteur;\n/\n\nCREATE OR REPLACE PACKAGE BODY compteur IS\n  PROCEDURE incrementer IS\n  BEGIN\n    nb_appels := nb_appels + 1;\n  END incrementer;\nEND compteur;\n/",
+     "title": "Une variable de package"
+    },
+    {
+     "type": "choice",
+     "q": "Dans une même session, on exécute `compteur.incrementer;` trois fois. Quelle est la valeur de `compteur.nb_appels` ?",
+     "options": [
+      "0",
+      "1",
+      "3",
+      "Cela dépend des autres utilisateurs"
+     ],
+     "answer": 2,
+     "explain": "La variable persiste dans la session : 0 → 1 → 2 → 3."
+    },
+    {
+     "type": "choice",
+     "q": "Un collègue, dans **sa propre session**, exécute `compteur.incrementer;` deux fois. Que voit-il pour `compteur.nb_appels` ?",
+     "options": [
+      "5",
+      "2",
+      "3",
+      "0"
+     ],
+     "answer": 1,
+     "explain": "Chaque session a sa propre copie des variables de package : il part de 0 et obtient 2. Les valeurs ne sont **pas partagées** entre sessions."
+    },
+    {
+     "type": "say",
+     "text": "⚠️ Une variable de package ne se lit **pas** directement dans un `SELECT` (erreur ORA-06553). On la lit depuis un bloc PL/SQL, ou en ajoutant une **fonction** qui la retourne."
+    },
+    {
+     "type": "choice",
+     "q": "Comment rendre la valeur de `nb_appels` lisible depuis un SELECT ?",
+     "options": [
+      "Ajouter à la spécification une fonction qui retourne nb_appels",
+      "Utiliser EXEC dans le SELECT",
+      "Changer le type en VARCHAR2",
+      "Ce n'est pas possible"
+     ],
+     "answer": 0,
+     "explain": "Une fonction de package qui retourne la variable peut, elle, être appelée dans un `SELECT`."
+    }
+   ]
+  },
+  {
+   "id": "surcharge",
+   "title": "Surcharge, suppression et défi",
+   "emoji": "🏁",
+   "minutes": 11,
+   "steps": [
+    {
+     "type": "say",
+     "text": "**Surcharge** : dans un package, plusieurs sous-programmes peuvent porter **le même nom** si leurs **listes de paramètres diffèrent** (nombre ou types)."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE PACKAGE films IS\n  FUNCTION nb_films (p_num_real NUMBER)   RETURN NUMBER;   -- par numéro de réalisateur\n  FUNCTION nb_films (p_nom_real VARCHAR2) RETURN NUMBER;   -- par nom du réalisateur\nEND films;",
+     "title": "Même nom, paramètres différents"
+    },
+    {
+     "type": "choice",
+     "q": "Oracle choisit la bonne version en fonction de…",
+     "options": [
+      "L'ordre de création",
+      "Le type ou le nombre des paramètres passés",
+      "Un mot-clé OVERLOAD",
+      "Il est impossible de surcharger"
+     ],
+     "answer": 1,
+     "explain": "C'est le type ou le nombre d'arguments qui détermine quelle version est appelée : `nb_films(12)` ou `nb_films('Spielberg')`."
+    },
+    {
+     "type": "choice",
+     "q": "Deux fonctions du package ont le même nom et les mêmes types de paramètres mais des types de retour différents. Est-ce une surcharge valide ?",
+     "options": [
+      "Oui",
+      "Non : le type de retour seul ne suffit pas à les distinguer",
+      "Oui avec un mot-clé",
+      "Oui si l'une est privée"
+     ],
+     "answer": 1,
+     "explain": "Seule la **liste de paramètres** distingue les versions, jamais le type de retour."
+    },
+    {
+     "type": "say",
+     "text": "Pour **supprimer** un package :"
+    },
+    {
+     "type": "code",
+     "sql": "DROP PACKAGE gestion_clients;        -- supprime la spécification ET le corps\nDROP PACKAGE BODY gestion_clients;   -- supprime seulement le corps",
+     "title": "Suppression"
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime uniquement le corps du package `gestion_clients`, en gardant la spécification.",
+     "hints": [
+      "Il y a deux mots après DROP."
+     ],
+     "accept": [
+      "DROP PACKAGE BODY gestion_clients;"
+     ],
+     "solution": "DROP PACKAGE BODY gestion_clients;",
+     "explain": "Après cela, la spécification existe encore : tu peux recréer un corps sans toucher aux programmes qui l'utilisent."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime entièrement le package `gestion_clients` (spécification et corps).",
+     "hints": [
+      "Un seul mot après DROP : PACKAGE."
+     ],
+     "accept": [
+      "DROP PACKAGE gestion_clients;"
+     ],
+     "solution": "DROP PACKAGE gestion_clients;",
+     "explain": "Supprimer la spécification supprime aussi le corps."
+    },
+    {
+     "type": "say",
+     "text": "**Défi final** : deux questions qui reprennent tout ce que tu viens de voir."
+    },
+    {
+     "type": "choice",
+     "q": "Tu veux publier `calcul_remise` pour tous, mais garder `taux_secret` caché. Où les places-tu ?",
+     "options": [
+      "calcul_remise dans la spécification (et le corps), taux_secret dans le corps seulement",
+      "Les deux dans la spécification",
+      "Les deux dans le corps",
+      "taux_secret dans la spécification, calcul_remise dans le corps"
+     ],
+     "answer": 0,
+     "explain": "Public = déclaré dans la spécification. Privé = défini dans le corps uniquement."
+    },
+    {
+     "type": "choice",
+     "q": "Quel avantage un package offre-t-il par rapport à des procédures isolées ?",
+     "options": [
+      "Il est toujours plus rapide à écrire",
+      "Regroupement, éléments privés, surcharge et variables de session",
+      "Il remplace les tables",
+      "Il évite d'utiliser COMMIT"
+     ],
+     "answer": 1,
+     "explain": "Organisation du code, encapsulation (privé/public), surcharge, état conservé pendant la session."
+    },
+    {
+     "type": "say",
+     "text": "🎉 Bravo ! Tu connais maintenant l'essentiel sur les **packages**. Ils reviennent très souvent dans les sujets d'examen de PL/SQL."
+    }
+   ]
+  }
+ ]
+}
