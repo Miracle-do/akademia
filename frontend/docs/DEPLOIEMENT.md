@@ -37,6 +37,13 @@ Les comptes, la progression, le classement et les notifications passent par Expr
    - `CORS_ORIGINS` : domaines du frontend autorisés, séparés par des virgules (ex. `https://akademia.vercel.app,http://localhost:5173`). Sans cette variable, toutes les origines sont acceptées.
    - Limites de débit par IP : 300 requêtes/min sur l’API, 20 tentatives/15 min sur connexion, inscription et réinitialisation, 60 écritures/min (messages, likes, commentaires), 30 tentatives/15 min sur l’administration.
 
+### Rappels d’inactivité et nouveautés
+1. Exécute `frontend/supabase/migration-notifications.sql` dans le SQL Editor de Supabase (crée la boîte de notifications, l’état des rappels et la mémoire des nouveautés).
+2. Sur Render, ajoute `CRON_SECRET` (chaîne longue et aléatoire).
+3. Dans GitHub → Settings → Secrets and variables → Actions, crée `API_URL` (adresse de l’API, sans `/api`) et `CRON_SECRET` (même valeur). Le workflow `.github/workflows/rappels.yml` appelle l’API chaque heure ; il peut aussi être lancé à la main (onglet Actions).
+4. Règles : premier rappel après 24 h sans activité, puis à 3, 7 et 14 jours, puis silence jusqu’au retour de l’étudiant ; jamais entre 21 h et 7 h (heure du Bénin) ; seuls les appareils ayant activé les notifications reçoivent un push.
+5. Les nouveaux modules et formations sont annoncés à chaque démarrage de l’API et à chaque passage horaire, aux étudiants de l’année concernée. La toute première exécution mémorise le contenu existant sans rien envoyer.
+
 ### Notifications Web Push
 1. Génère une paire VAPID depuis la racine avec `npm --prefix backend exec -- web-push generate-vapid-keys`.
 2. Ajoute les clés VAPID et `SUPABASE_SERVICE_ROLE_KEY` uniquement dans les variables du service Render. Utilise `VAPID_SUBJECT=mailto:admin@ton-domaine.fr`; ne mets jamais ces secrets dans Vercel.

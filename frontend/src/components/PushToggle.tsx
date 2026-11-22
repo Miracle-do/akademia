@@ -4,7 +4,7 @@ import { disablePush, enablePush, getPushEnabled, getPushPermission } from '@/da
 import { isIos, isStandalone } from '@/components/InstallPwaModal';
 import { cn } from '@/lib/utils';
 
-/** Interrupteur « Notifications de messages » des paramètres du profil. */
+/** Interrupteur « Notifications » des paramètres du profil. */
 export default function PushToggle() {
   const permission = getPushPermission();
   const [enabled, setEnabled] = useState(false);
@@ -60,15 +60,15 @@ export default function PushToggle() {
             <TextBubble size={18} />
           </span>
           <div className="min-w-0">
-            <p className="font-display text-sm font-extrabold text-ink">Notifications de messages</p>
-            <p className="text-[11px] font-bold text-muted">Sois prévenu même quand l’application est fermée.</p>
+            <p className="font-display text-sm font-extrabold text-ink">Notifications</p>
+            <p className="text-[11px] font-bold text-muted">Messages, nouveautés, classement et rappels de Nimbo, même application fermée.</p>
           </div>
         </div>
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
-          aria-label="Notifications de messages"
+          aria-label="Notifications"
           disabled={disabled}
           onClick={() => void toggle()}
           className={cn(

@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Bell,
   Check,
   Crown,
   Folder,
@@ -34,6 +35,7 @@ import VersionBadge from './VersionBadge';
 import PushPrompt from './PushPrompt';
 import { UnreadBadge } from './UnreadBadge';
 import { useUnreadMessages } from '@/state/useUnread';
+import { useNotifications } from '@/state/useNotifications';
 import { fetchBattle, WeeklyBattleInfo } from '@/data/repo';
 
 const MOBILE_NAV = [
@@ -60,6 +62,7 @@ const DESKTOP_NAV_GROUPS = [
       { to: '/classement', label: 'Classement', icon: Crown },
       { to: '/actu', label: 'Actualités & Battles', icon: Newspaper },
       { to: '/messages', label: 'Messages', icon: TextBubble },
+      { to: '/notifications', label: 'Notifications', icon: Bell },
     ],
   },
   {
@@ -198,6 +201,7 @@ export default function Layout() {
   }, []);
   const navigate = useNavigate();
   const unread = useUnreadMessages();
+  const { unread: notifUnread } = useNotifications();
   const inReader = loc.pathname.includes('/lire/');
 
   const [battle, setBattle] = useState<WeeklyBattleInfo | null>(null);
@@ -347,12 +351,13 @@ export default function Layout() {
               <SearchIcon size={18} />
             </Link>
             <Link
-              to="/actu"
-              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition lg:hidden"
-              aria-label="Actualités et Battles"
-              title="Actualités et Battles"
+              to="/notifications"
+              className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"
+              aria-label={notifUnread > 0 ? `Notifications : ${notifUnread} non lue${notifUnread > 1 ? 's' : ''}` : 'Notifications'}
+              title="Notifications"
             >
-              <Newspaper size={18} />
+              <Bell size={18} />
+              <UnreadBadge count={notifUnread} className="absolute -right-1.5 -top-1.5" />
             </Link>
             <Link
               to="/messages"

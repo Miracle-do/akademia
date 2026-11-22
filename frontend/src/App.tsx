@@ -25,6 +25,7 @@ const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const ConversationPage = lazy(() => import('@/pages/ConversationPage'));
 const ModulePage = lazy(() => import('@/pages/ModulePage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const NotificationsPage = lazy(() => import('@/pages/NotificationsPage'));
 const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
 const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="succes" element={<BadgesPage />} />
         <Route path="classement" element={<LeaderboardPage />} />
         <Route path="joueurs/:userId" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="messages" element={<MessagesPage />} />
         <Route path="messages/:userId" element={<ConversationPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

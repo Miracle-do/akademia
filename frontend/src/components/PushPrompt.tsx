@@ -26,7 +26,7 @@ function markDismissed() {
 
 /**
  * - Si les notifications sont déjà autorisées : ré-enregistre l'abonnement push en silence.
- * - Sinon, propose (une fois, avec délai de réserve) d'activer les notifications de messages.
+ * - Sinon, propose (une fois, avec délai de réserve) d'activer les notifications.
  *   La permission du navigateur n'est demandée qu'au clic, comme l'exigent iOS et Chrome.
  */
 export default function PushPrompt() {
@@ -78,12 +78,12 @@ export default function PushPrompt() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-display text-sm font-extrabold text-ink">
-            {done ? 'Notifications activées !' : 'Ne rate plus un message 🔔'}
+            {done ? 'Notifications activées !' : 'Ne rate plus rien 🔔'}
           </p>
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {done
               ? 'Tu seras prévenu sur ce téléphone, même quand Akademia est fermé.'
-              : 'Reçois une notification quand un étudiant t’écrit, même quand l’application est fermée.'}
+              : 'Messages, nouveaux cours et formations, classement, et un petit rappel de Nimbo si tu oublies de réviser.'}
           </p>
           {error && <p role="alert" className="mt-1.5 text-xs font-bold text-bad">{error}</p>}
           {!done && (

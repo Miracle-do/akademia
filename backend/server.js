@@ -14,6 +14,7 @@ const contentService = require('./services/contentService');
 const progressService = require('./services/progressService');
 const progressionService = require('./services/progressionService');
 const pushService = require('./services/pushService');
+const notificationService = require('./services/notificationService');
 const adminService = require('./services/adminService');
 
 const app = express();
@@ -336,6 +337,41 @@ app.delete('/api/push/subscriptions', requireUser, async (req, res, next) => {
   }
 });
 
+app.get('/api/notifications', requireUser, async (req, res, next) => {
+  try {
+    res.json(await notificationService.listForUser(req.auth.user.id, req.query.limit));
+  } catch (error) {
+    // Table absente (migration non exécutée) : la boîte reste simplement vide.
+    if (error.status === 404 || error.status === 400) return res.json({ items: [], unread: 0 });
+    return next(error);
+  }
+});
+
+app.post('/api/notifications/read', requireUser, writeLimiter, async (req, res, next) => {
+  try {
+    await notificationService.markRead(req.auth.user.id, req.body?.ids);
+    res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Déclenché toutes les heures par un planificateur externe (voir .github/workflows/rappels.yml).
+app.post('/api/cron/tick', async (req, res, next) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return res.status(503).json({ error: 'CRON_SECRET non configuré.' });
+  const given = Buffer.from(String(req.headers['x-cron-secret'] || ''));
+  const expected = Buffer.from(secret);
+  if (given.length !== expected.length || !crypto.timingSafeEqual(given, expected)) {
+    return res.status(401).json({ error: 'Non autorisé.' });
+  }
+  try {
+    res.json(await notificationService.runScheduledJobs());
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/api/messages', requireUser, writeLimiter, async (req, res, next) => {
   const recipientId = req.body?.recipientId;
   const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
@@ -506,7 +542,7 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
     }
 
     let leaderboardBefore = null;
-    if (pushService.isConfigured()) {
+    if (notificationService.storageConfigured()) {
       try {
         // « Dépassé » s'entend dans le classement de sa propre année.
         leaderboardBefore = await progressService.getLeaderboard(
@@ -556,12 +592,15 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
             leaderboardAfter,
             req.auth.user.id,
           );
+          const oldRank = leaderboardBefore.findIndex((p) => p.id === req.auth.user.id);
+          const newRank = leaderboardAfter.findIndex((p) => p.id === req.auth.user.id);
+          await notificationService.notifyClimb(req.auth.user.id, oldRank, newRank);
           if (overtaken.length) {
             const profile = await progressService.getProfile(
               req.auth.accessToken,
               req.auth.user.id,
             );
-            await pushService.notifyOvertaken(overtaken, profile?.username || 'Un joueur');
+            await notificationService.notifyOvertaken(overtaken, profile?.username || 'Un joueur');
           }
         } catch (error) {
           console.error('Push ranking failed:', error.message || error);
@@ -646,6 +685,11 @@ app.use((err, _req, res, _next) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Akademia backend listening on http://localhost:${PORT}`);
+    // À chaque démarrage (donc après chaque déploiement) : annonce les modules et formations ajoutés.
+    void notificationService
+      .announceNewContent()
+      .then((r) => console.log('[notifications] nouveautés :', JSON.stringify(r)))
+      .catch((e) => console.warn('[notifications] nouveautés impossibles :', e.message));
   });
 }
 
