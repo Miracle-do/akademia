@@ -5,6 +5,16 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.7.0] — 2026-11-22
+
+### Modifié
+- Navigation mobile : l'onglet « Cours » (modules) remplace « Actu », qui passe dans l'en-tête.
+- Menu latéral regroupé en trois parties : Apprendre, Communauté, Mon espace.
+- Accueil : les révisions à faire passent en premier, puis les modules ; Formations et Battle sont regroupées sous « Découvrir ».
+
+### Corrigé
+- Accueil : suppression du faux classement « #5 » et du faux compteur « 14 parcours » (valeurs écrites en dur).
+
 ## [1.6.0] — 2026-11-22
 
 ### Nouveautés
