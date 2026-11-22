@@ -5,6 +5,12 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.10.0] — 2026-11-22
+
+### Modifié
+- Lecture d'un chapitre : sur mobile, sommaire « Dans ce chapitre » repliable (jusque-là réservé à l'ordinateur).
+- Fin de QCM : boutons « Refaire un QCM », « Autres exercices » et « Retour au cours » ; le message « Bravo champion ! » n'apparaît plus quand le score est sous 50 %.
+
 ## [1.9.0] — 2026-11-22
 
 ### Modifié
