@@ -37,9 +37,16 @@ export default function AuthPage() {
   const { theme, filiere, hasFiliere, setCustomPseudo } = useTheme();
   const nav = useNavigate();
 
-  const [screen, setScreen] = useState<'splash' | 'welcome' | 'join'>('splash');
+  const returning = (() => {
+    try {
+      return localStorage.getItem('akademia:seen') === '1';
+    } catch {
+      return false;
+    }
+  })();
+  const [screen, setScreen] = useState<'splash' | 'welcome' | 'join'>(returning ? 'join' : 'splash');
   const [slide, setSlide] = useState(0);
-  const [authMode, setAuthMode] = useState<'up' | 'in'>('up');
+  const [authMode, setAuthMode] = useState<'up' | 'in'>(returning ? 'in' : 'up');
 
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
@@ -68,7 +75,14 @@ export default function AuthPage() {
     }
   }, [screen, authMode, selectedFiliere]);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    try {
+      localStorage.setItem('akademia:seen', '1');
+    } catch {
+      /* ignore */
+    }
+    return <Navigate to="/" replace />;
+  }
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -125,7 +139,10 @@ export default function AuthPage() {
     >
       {/* ==================== ÉCRAN 1 : SPLASH SCREEN (Automatique 2s) ==================== */}
       {screen === 'splash' && (
-        <div className="relative flex min-h-dvh w-full flex-col justify-between overflow-hidden">
+        <div
+          className="relative flex min-h-dvh w-full cursor-pointer flex-col justify-between overflow-hidden"
+          onClick={() => setScreen('welcome')}
+        >
           <FourPointStar size={36} color="rgb(255 255 255 / 0.25)" className="absolute left-8 top-20 sm:left-1/4" />
           <FourPointStar size={28} color="rgb(255 255 255 / 0.25)" className="absolute right-8 top-16 sm:right-1/4" />
 
@@ -352,7 +369,7 @@ export default function AuthPage() {
                 <input
                   className={inputCls}
                   type="email"
-                  placeholder="Ton adresse e-mail universitaire"
+                  placeholder="Ton adresse e-mail"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -399,16 +416,13 @@ export default function AuthPage() {
                       setMsg({ ok: false, t: 'Saisis ton adresse e-mail ci-dessus.' });
                       return;
                     }
-                    const err = await resetPassword(email.trim(), pw.length >= 6 ? pw : undefined);
+                    const err = await resetPassword(email.trim());
                     setMsg(
                       err
                         ? { ok: false, t: err }
                         : {
                             ok: true,
-                            t:
-                              pw.length >= 6
-                                ? 'Mot de passe mis à jour ! Tu peux maintenant te connecter.'
-                                : 'Mot de passe réinitialisé par défaut (akademia123).',
+                            t: 'Si un compte existe pour cette adresse, un e-mail avec un lien de réinitialisation vient d’être envoyé. Pense à vérifier les spams.',
                           },
                     );
                   }}

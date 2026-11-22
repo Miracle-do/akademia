@@ -42,6 +42,9 @@ interface AuthApi {
   signOut(): Promise<void>;
   updateProfile(patch: { username?: string; filiere?: FiliereId; annee?: AnneeId }): Promise<string | null>;
   resetPassword(email: string, newPassword?: string): Promise<string | null>;
+  /** Vrai quand l'utilisateur arrive depuis le lien « mot de passe oublié » et doit en choisir un nouveau. */
+  recovery: boolean;
+  setNewPassword(password: string): Promise<string | null>;
 }
 
 const Ctx = createContext<AuthApi | null>(null);
@@ -82,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   });
   const [ready, setReady] = useState(false);
+  const [recovery, setRecovery] = useState(false);
 
   const resolveSupabaseUser = useCallback(
     async (sessionUser: {
@@ -267,7 +271,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStoredToken(session.access_token);
         if (session.refresh_token) setStoredRefreshToken(session.refresh_token);
       }
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true);
       if (event === 'SIGNED_OUT') {
+        setRecovery(false);
         setStoredToken(null);
         setStoredRefreshToken(null);
         setStoredUser(null);
@@ -607,6 +613,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
 
+      recovery,
+      async setNewPassword(password) {
+        if (!supabase) return 'Service indisponible.';
+        if (password.length < 6) return 'Le mot de passe doit contenir au moins 6 caractères.';
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) return frError(error.message);
+        setRecovery(false);
+        return null;
+      },
       async resetPassword(email, newPassword) {
         const cleanEmail = email.trim().toLowerCase();
         if (supabase && !newPassword) {
@@ -630,7 +645,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
     }),
-    [user, ready, resolveSupabaseUser],
+    [user, ready, recovery, resolveSupabaseUser],
   );
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;

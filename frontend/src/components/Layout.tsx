@@ -29,6 +29,7 @@ import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
 import InstallPwaModal from './InstallPwaModal';
 import UpdateBanner from './UpdateBanner';
+import NewPasswordModal from './NewPasswordModal';
 import VersionBadge from './VersionBadge';
 import PushPrompt from './PushPrompt';
 import { UnreadBadge } from './UnreadBadge';
@@ -188,6 +189,13 @@ export default function Layout() {
   const { state, online, pendingSync, syncError } = useStore();
   const { filiere, customPseudo } = useTheme();
   const loc = useLocation();
+  useEffect(() => {
+    try {
+      localStorage.setItem('akademia:seen', '1');
+    } catch {
+      /* ignore */
+    }
+  }, []);
   const navigate = useNavigate();
   const unread = useUnreadMessages();
   const inReader = loc.pathname.includes('/lire/');
@@ -422,6 +430,7 @@ export default function Layout() {
         ))}
       </nav>
 
+      <NewPasswordModal />
       <WeeklyBattleWinnerModal battle={battle} />
       <FilierePromptModal />
       <InstallPwaModal />
