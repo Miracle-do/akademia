@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.9.0] — 2026-11-22
+
+### Modifié
+- Page Formations : bloc « Reprendre où tu t'es arrêté », recherche, filtre par statut (en cours, à commencer, terminées), et cartes avec résumé, durée, nombre de leçons et barre de progression.
+
 ## [1.8.0] — 2026-11-22
 
 ### Modifié
