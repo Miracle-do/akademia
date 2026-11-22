@@ -1,0 +1,26 @@
+[
+ {
+  "n": 1,
+  "title": "Épreuve n° 1 · Sujet réel : Session normale 2024-2025 (IG2 A et B)",
+  "scenario": "QCM JavaScript / PHP / React / Laravel + fiche d'emploi",
+  "cas": "QCM de 20 questions et formulaire → modèle logique → enregistrement PHP",
+  "durationMinutes": 90,
+  "points": 20.0
+ },
+ {
+  "n": 2,
+  "title": "Épreuve n° 2 · Entraînement : JavaScript et formulaires",
+  "scenario": "Inscription contrôlée côté navigateur",
+  "cas": "Cours JavaScript, validation de formulaire, fonctions",
+  "durationMinutes": 90,
+  "points": 20
+ },
+ {
+  "n": 3,
+  "title": "Épreuve n° 3 · Entraînement : PHP et MySQL (gestion de produits)",
+  "scenario": "Catalogue de produits",
+  "cas": "Questions de cours, formulaire, requêtes préparées, liste et recherche",
+  "durationMinutes": 120,
+  "points": 20
+ }
+]

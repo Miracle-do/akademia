@@ -1,0 +1,92 @@
+{
+ "n": 2,
+ "title": "Épreuve n° 2 · Entraînement : JavaScript et formulaires",
+ "durationMinutes": 90,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Partie 1 : questions de cours",
+   "points": 6,
+   "intro": "*Épreuve d'entraînement composée pour ce module (ce n'est pas un sujet officiel).*",
+   "questions": [
+    {
+     "id": "e02p1q1",
+     "q": "Quelle est la différence entre `var`, `let` et `const` ?",
+     "points": 1,
+     "a": "`var` : portée de fonction, ancienne forme. `let` : variable modifiable, portée de **bloc**. `const` : valeur **non réaffectable**, portée de bloc."
+    },
+    {
+     "id": "e02p1q2",
+     "q": "Que valent `\"5\" + 3` et `\"5\" - 3` ?",
+     "points": 1,
+     "a": "`\"5\" + 3` donne `\"53\"` (concaténation, car `+` avec une chaîne concatène) et `\"5\" - 3` donne `2` (le `-` force un calcul numérique)."
+    },
+    {
+     "id": "e02p1q3",
+     "q": "Quelle différence entre `==` et `===` ?",
+     "points": 1,
+     "a": "`==` compare après **conversion de type** (`\"5\" == 5` est vrai). `===` compare la **valeur et le type** (`\"5\" === 5` est faux)."
+    },
+    {
+     "id": "e02p1q4",
+     "q": "Que renvoie `prompt()` et que faut-il faire avant de calculer ?",
+     "points": 1,
+     "a": "Une **chaîne** (ou `null` si l'utilisateur annule). Pour calculer, on la convertit avec `parseInt`, `parseFloat` ou `Number`."
+    },
+    {
+     "id": "e02p1q5",
+     "q": "Quel événement se déclenche quand un champ perd le focus, et lequel quand sa valeur change ?",
+     "points": 1,
+     "a": "`onblur` quand il perd le focus ; `onchange` quand sa valeur a changé (et que le champ perd le focus)."
+    },
+    {
+     "id": "e02p1q6",
+     "q": "Comment supprimer un cookie en JavaScript ?",
+     "points": 1,
+     "a": "On le réécrit avec une date d'expiration **passée** : `document.cookie = \"nom=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\";`."
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Partie 2 : contrôle de formulaire",
+   "points": 8,
+   "intro": "On veut un formulaire d'inscription (nom, e-mail, mot de passe d'au moins 8 caractères) contrôlé avant l'envoi.",
+   "questions": [
+    {
+     "id": "e02p2q1",
+     "q": "Écrire le formulaire et la fonction de contrôle JavaScript.",
+     "points": 8,
+     "a": "```html\n<form name=\"inscription\" action=\"inscrire.php\" method=\"post\" onsubmit=\"return controler()\">\n  Nom <input type=\"text\" name=\"nom\"><br>\n  E-mail <input type=\"text\" name=\"email\"><br>\n  Mot de passe <input type=\"password\" name=\"mdp\"><br>\n  <input type=\"submit\" value=\"S'inscrire\">\n</form>\n\n<script>\nfunction controler() {\n  var f = document.inscription;\n  var motifMail = /^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}$/;\n  if (f.nom.value === \"\") {\n    alert(\"Le nom est obligatoire\");\n    f.nom.focus();\n    return false;\n  }\n  if (!motifMail.test(f.email.value)) {\n    alert(\"Adresse e-mail invalide\");\n    f.email.focus();\n    return false;\n  }\n  if (f.mdp.value.length < 8) {\n    alert(\"Le mot de passe doit avoir au moins 8 caractères\");\n    return false;\n  }\n  return true;     // l'envoi est autorisé\n}\n</script>\n```\n\nLe gestionnaire `onsubmit=\"return controler()\"` annule l'envoi quand la fonction renvoie `false`."
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Partie 3 : fonctions et tableaux",
+   "points": 6,
+   "intro": "Écrire en JavaScript :",
+   "questions": [
+    {
+     "id": "e02p3q1",
+     "q": "Une fonction `ttc(ht, taux)` qui renvoie le prix TTC arrondi à 2 décimales.",
+     "points": 2,
+     "a": "```javascript\nfunction ttc(ht, taux) {\n  return Math.round(ht * (1 + taux) * 100) / 100;\n}\nttc(1000, 0.18);   // 1180\n```"
+    },
+    {
+     "id": "e02p3q2",
+     "q": "Une fonction `moyenne(t)` qui renvoie la moyenne d'un tableau de notes (0 si le tableau est vide).",
+     "points": 2,
+     "a": "```javascript\nfunction moyenne(t) {\n  var somme = 0;\n  for (var i = 0; i < t.length; i++) { somme += t[i]; }\n  return t.length ? somme / t.length : 0;\n}\nmoyenne([12, 15, 9]);   // 12\n```"
+    },
+    {
+     "id": "e02p3q3",
+     "q": "Une fonction `max(t)` qui renvoie la plus grande valeur d'un tableau.",
+     "points": 2,
+     "a": "```javascript\nfunction max(t) {\n  var m = t[0];\n  for (var i = 1; i < t.length; i++) { if (t[i] > m) { m = t[i]; } }\n  return m;\n}\nmax([3, 9, 2]);   // 9\n```"
+    }
+   ]
+  }
+ ]
+}

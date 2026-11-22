@@ -1,0 +1,356 @@
+[
+ {
+  "id": "wb2-f001",
+  "front": "JavaScript : où s'exécute-t-il ?",
+  "back": "Dans le navigateur (côté client) ; PHP s'exécute côté serveur",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f002",
+  "front": "Balise pour le JavaScript",
+  "back": "<script> … </script> ou <script src=\"fichier.js\">",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f003",
+  "front": "\"5\" + 3 et \"5\" - 3",
+  "back": "\"53\" (concaténation) et 2 (calcul)",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f004",
+  "front": "== et ===",
+  "back": "== compare après conversion ; === compare valeur et type",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f005",
+  "front": "var, let, const",
+  "back": "var : portée de fonction · let : portée de bloc, modifiable · const : non réaffectable",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f006",
+  "front": "Paramètres vs arguments",
+  "back": "Paramètres : dans la déclaration · arguments : valeurs de l'appel",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f007",
+  "front": "break et continue",
+  "back": "break termine la boucle/switch · continue passe au tour suivant",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f008",
+  "front": "alert, prompt, confirm",
+  "back": "Affiche · demande un texte (chaîne) · demande OK/Annuler (true/false)",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f009",
+  "front": "Nombre d'éléments d'un formulaire",
+  "back": "document.monform.elements.length",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f010",
+  "front": "Événements clavier",
+  "back": "onkeydown, onkeyup, onkeypress",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f011",
+  "front": "onfocus / onblur / onchange",
+  "back": "Reçoit le focus · perd le focus · valeur modifiée",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f012",
+  "front": "Annuler l'envoi d'un formulaire",
+  "back": "onsubmit=\"return controler()\" avec controler() qui renvoie false",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f013",
+  "front": "Mois de Date.getMonth()",
+  "back": "0 (janvier) à 11 (décembre)",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f014",
+  "front": "Supprimer un cookie",
+  "back": "Le réécrire avec une date d'expiration passée",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f015",
+  "front": "Regex : ^ $ \\d {n}",
+  "back": "Début · fin · chiffre · n répétitions",
+  "tag": "JavaScript"
+ },
+ {
+  "id": "wb2-f016",
+  "front": "PHP : signification",
+  "back": "PHP: Hypertext Preprocessor, langage côté serveur",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f017",
+  "front": "LAMP / WAMP",
+  "back": "Linux/Windows + Apache + MySQL + PHP",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f018",
+  "front": "Balises PHP",
+  "back": "<?php … ?> ; chaque instruction se termine par ;",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f019",
+  "front": "Commentaires PHP",
+  "back": "// · # · /* … */ (les trois sont valides)",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f020",
+  "front": "Variable PHP",
+  "back": "Commence par $ ; sensible à la casse ; $this réservé ; $5var invalide",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f021",
+  "front": "Constante PHP",
+  "back": "define(\"NOM\", valeur) ou const NOM = valeur ; sans $",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f022",
+  "front": "Concaténation PHP",
+  "back": "Le point (.)",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f023",
+  "front": "Guillemets doubles vs apostrophes",
+  "back": "Variables remplacées seulement entre guillemets doubles",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f024",
+  "front": "$_GET / $_POST / $_FILES",
+  "back": "Paramètres de l'URL · données POST · fichiers téléversés",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f025",
+  "front": "isset() vs empty()",
+  "back": "Existe et non NULL · vide",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f026",
+  "front": "require vs include",
+  "back": "require : erreur fatale si absent · include : avertissement",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f027",
+  "front": "Passage par référence",
+  "back": "Préfixer le paramètre de & : function f(&$x)",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f028",
+  "front": "try / catch / finally",
+  "back": "Code à risque · récupère l'exception · s'exécute dans tous les cas",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f029",
+  "front": "GET ou POST ?",
+  "back": "GET : recherche, URL visible · POST : saisie, mot de passe",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f030",
+  "front": "Cases à cocher multiples",
+  "back": "name=\"competences[]\" → tableau PHP ; une case non cochée n'est pas envoyée",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f031",
+  "front": "Upload de fichier",
+  "back": "enctype=\"multipart/form-data\", method post, $_FILES, move_uploaded_file()",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f032",
+  "front": "htmlspecialchars()",
+  "back": "Neutralise les balises HTML : protection XSS",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f033",
+  "front": "Contrôle JavaScript vs PHP",
+  "back": "JavaScript : confort, contournable · PHP : garantie, dernier mot",
+  "tag": "PHP"
+ },
+ {
+  "id": "wb2-f034",
+  "front": "Association N:M en base",
+  "back": "Table d'association à clé primaire concaténée",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f035",
+  "front": "Association 1:N en base",
+  "back": "La clé du côté 1 devient clé étrangère côté N",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f036",
+  "front": "PDO",
+  "back": "PHP Data Objects : interface commune à plusieurs SGBD",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f037",
+  "front": "MySQLi vs PDO",
+  "back": "MySQLi : MySQL seulement · PDO : MySQL, SQLite, PostgreSQL…",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f038",
+  "front": "Requête préparée",
+  "back": "Requête avec marqueurs (? ou :nom) et valeurs transmises à part : bloque l'injection SQL",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f039",
+  "front": "lastInsertId()",
+  "back": "Dernier identifiant AUTO_INCREMENT inséré",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f040",
+  "front": "Transaction PDO",
+  "back": "beginTransaction() · commit() · rollBack()",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f041",
+  "front": "Méthodes PDO",
+  "back": "query, exec, prepare + execute, fetch, fetchAll, rowCount",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f042",
+  "front": "LIKE avec requête préparée",
+  "back": "Passer \"%mot%\" comme valeur du paramètre",
+  "tag": "MySQL"
+ },
+ {
+  "id": "wb2-f043",
+  "front": "ReactJS",
+  "back": "Bibliothèque JavaScript pour l'interface utilisateur (couche UI)",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f044",
+  "front": "DOM virtuel",
+  "back": "Copie en mémoire comparée à la nouvelle version : seul le changement est appliqué au vrai DOM",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f045",
+  "front": "Props vs state",
+  "back": "Props : reçues du parent, lecture seule · state : interne, modifiable",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f046",
+  "front": "Accès à l'état (composant classe)",
+  "back": "this.state (modifier avec this.setState)",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f047",
+  "front": "useState",
+  "back": "const [valeur, setValeur] = useState(initiale)",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f048",
+  "front": "Dossier des composants (QCM)",
+  "back": "js/components/ (projet Vite : src/components/)",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f049",
+  "front": "JSX",
+  "back": "Syntaxe type HTML dans JavaScript ; className ; accolades pour le JS",
+  "tag": "React"
+ },
+ {
+  "id": "wb2-f050",
+  "front": "Laravel",
+  "back": "Framework PHP MVC",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f051",
+  "front": "Démarrer le serveur Laravel",
+  "back": "php artisan serve",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f052",
+  "front": "Connexion base dans Laravel",
+  "back": "Fichier .env",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f053",
+  "front": "Créer un contrôleur",
+  "back": "php artisan make:controller NomController",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f054",
+  "front": "Extension des vues Laravel",
+  "back": "blade.php (moteur Blade)",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f055",
+  "front": "Composer",
+  "back": "Gestionnaire de dépendances PHP (installe Laravel)",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f056",
+  "front": "MVC",
+  "back": "Modèle (données) · Vue (affichage) · Contrôleur (logique)",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f057",
+  "front": "migrate",
+  "back": "php artisan migrate : applique les migrations de la base",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f058",
+  "front": "Eloquent",
+  "back": "ORM de Laravel : Client::find(1), Client::create([...])",
+  "tag": "Laravel"
+ },
+ {
+  "id": "wb2-f059",
+  "front": "Blade : {{ }}",
+  "back": "Affiche une valeur en échappant le HTML",
+  "tag": "Laravel"
+ }
+]

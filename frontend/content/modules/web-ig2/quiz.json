@@ -1,0 +1,1668 @@
+[
+ {
+  "id": "wb2-q001",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 1,
+  "q": "JavaScript s'exécute principalement :",
+  "options": [
+   "dans le navigateur du visiteur",
+   "sur le serveur web uniquement",
+   "dans la base de données",
+   "sur le routeur"
+  ],
+  "answer": 0,
+  "explain": "JavaScript est exécuté côté client par le navigateur ; PHP s'exécute côté serveur."
+ },
+ {
+  "id": "wb2-q002",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 1,
+  "q": "Dans quelle balise HTML place-t-on du code JavaScript ?",
+  "options": [
+   "<js>",
+   "<script>",
+   "<javascript>",
+   "<code>"
+  ],
+  "answer": 1,
+  "explain": "La balise <script> (en ligne ou avec l'attribut src)."
+ },
+ {
+  "id": "wb2-q003",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 1,
+  "q": "JavaScript est-il sensible à la casse ?",
+  "options": [
+   "Non, jamais",
+   "Seulement pour les fonctions",
+   "Oui : nom et Nom sont deux variables différentes",
+   "Seulement pour les constantes"
+  ],
+  "answer": 2,
+  "explain": "Les identifiants JavaScript sont sensibles à la casse."
+ },
+ {
+  "id": "wb2-q004",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "Que vaut \"5\" + 3 en JavaScript ?",
+  "options": [
+   "\"53\"",
+   "8",
+   "2",
+   "Une erreur"
+  ],
+  "answer": 0,
+  "explain": "Avec une chaîne, + concatène."
+ },
+ {
+  "id": "wb2-q005",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "Que vaut \"5\" - 3 en JavaScript ?",
+  "options": [
+   "\"53\"",
+   "\"2\"",
+   "NaN",
+   "2"
+  ],
+  "answer": 3,
+  "explain": "L'opérateur - force une conversion numérique."
+ },
+ {
+  "id": "wb2-q006",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "Quelle comparaison est vraie ?",
+  "options": [
+   "\"5\" === 5",
+   "\"5\" !== \"5\"",
+   "5 === \"5\"",
+   "\"5\" == 5"
+  ],
+  "answer": 3,
+  "explain": "== convertit les types ; === compare valeur et type."
+ },
+ {
+  "id": "wb2-q007",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "Quel mot-clé déclare une constante en JavaScript moderne ?",
+  "options": [
+   "define",
+   "constant",
+   "final",
+   "const"
+  ],
+  "answer": 3,
+  "explain": "define est une fonction PHP."
+ },
+ {
+  "id": "wb2-q008",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "La différence entre let et var est que let :",
+  "options": [
+   "ne peut pas être modifiée",
+   "est réservée aux nombres",
+   "a une portée de bloc",
+   "crée une constante"
+  ],
+  "answer": 2,
+  "explain": "var a une portée de fonction ; let une portée de bloc ; const est non réaffectable."
+ },
+ {
+  "id": "wb2-q009",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 2,
+  "q": "JavaScript est un langage :",
+  "options": [
+   "fortement typé avec déclaration obligatoire",
+   "sans types",
+   "faiblement typé : le type suit la valeur",
+   "compilé uniquement"
+  ],
+  "answer": 2,
+  "explain": "Une variable peut recevoir successivement un nombre puis une chaîne."
+ },
+ {
+  "id": "wb2-q010",
+  "chapter": "1-1-javascript-bases",
+  "difficulty": 1,
+  "q": "Quel opérateur signifie « et logique » ?",
+  "options": [
+   "&&",
+   "||",
+   "!",
+   "=="
+  ],
+  "answer": 0,
+  "explain": "|| est le « ou », ! le « non »."
+ },
+ {
+  "id": "wb2-q011",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 1,
+  "q": "Comment appelle-t-on une fonction nommée sum ?",
+  "options": [
+   "call sum()",
+   "sum()",
+   "call function sum()",
+   "run sum"
+  ],
+  "answer": 1,
+  "explain": "On écrit le nom suivi de parenthèses."
+ },
+ {
+  "id": "wb2-q012",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "Dans function f(a, b), a et b sont :",
+  "options": [
+   "des arguments seulement lors de la déclaration",
+   "des paramètres",
+   "des variables globales",
+   "des constantes"
+  ],
+  "answer": 1,
+  "explain": "Les paramètres sont dans la déclaration ; les arguments sont les valeurs de l'appel."
+ },
+ {
+  "id": "wb2-q013",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "Une variable déclarée à l'intérieur d'une fonction est :",
+  "options": [
+   "locale à la fonction",
+   "globale",
+   "constante",
+   "visible partout"
+  ],
+  "answer": 0,
+  "explain": "Elle disparaît à la fin de l'exécution de la fonction."
+ },
+ {
+  "id": "wb2-q014",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 1,
+  "q": "Quel mot-clé termine une boucle ou un switch ?",
+  "options": [
+   "continue",
+   "break",
+   "stop",
+   "exit()"
+  ],
+  "answer": 1,
+  "explain": "continue passe seulement au tour suivant."
+ },
+ {
+  "id": "wb2-q015",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "Que fait continue dans une boucle ?",
+  "options": [
+   "Il quitte la boucle",
+   "Il redémarre le programme",
+   "Il saute le reste du tour et passe à l'itération suivante",
+   "Il relance la boucle depuis le début"
+  ],
+  "answer": 2,
+  "explain": "break termine la boucle ; continue passe au tour suivant."
+ },
+ {
+  "id": "wb2-q016",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "Quelle boucle s'exécute au moins une fois ?",
+  "options": [
+   "do … while",
+   "while",
+   "for",
+   "foreach"
+  ],
+  "answer": 0,
+  "explain": "La condition est testée après le premier passage."
+ },
+ {
+  "id": "wb2-q017",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 1,
+  "q": "Quelle boîte de message demande une saisie ?",
+  "options": [
+   "alert()",
+   "confirm()",
+   "write()",
+   "prompt()"
+  ],
+  "answer": 3,
+  "explain": "alert affiche, confirm demande OK/Annuler, prompt demande un texte."
+ },
+ {
+  "id": "wb2-q018",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "confirm() renvoie :",
+  "options": [
+   "une chaîne",
+   "un nombre",
+   "rien",
+   "true ou false"
+  ],
+  "answer": 3,
+  "explain": "true si l'utilisateur clique sur OK."
+ },
+ {
+  "id": "wb2-q019",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "prompt() renvoie :",
+  "options": [
+   "toujours un nombre",
+   "un booléen",
+   "rien",
+   "une chaîne de caractères (ou null)"
+  ],
+  "answer": 3,
+  "explain": "Il faut convertir avec parseInt ou Number avant de calculer."
+ },
+ {
+  "id": "wb2-q020",
+  "chapter": "1-2-fonctions-controle",
+  "difficulty": 2,
+  "q": "Que se passe-t-il dans un switch sans break ?",
+  "options": [
+   "Une erreur de syntaxe",
+   "Le switch s'arrête",
+   "L'exécution continue dans le case suivant",
+   "Le default est ignoré"
+  ],
+  "answer": 2,
+  "explain": "C'est le « fall-through »."
+ },
+ {
+  "id": "wb2-q021",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 1,
+  "q": "Que désigne this dans une méthode d'objet ?",
+  "options": [
+   "La fenêtre",
+   "Le document",
+   "L'objet courant",
+   "La dernière variable déclarée"
+  ],
+  "answer": 2,
+  "explain": "this désigne l'objet qui possède la méthode."
+ },
+ {
+  "id": "wb2-q022",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "Comment connaître le nombre d'éléments d'un formulaire myform ?",
+  "options": [
+   "document.myform.elements.length",
+   "document.myform.elements.count",
+   "document.myform.count",
+   "document.myform.size"
+  ],
+  "answer": 0,
+  "explain": "elements est la collection des champs ; length son nombre."
+ },
+ {
+  "id": "wb2-q023",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 1,
+  "q": "Quel événement est propre au clavier ?",
+  "options": [
+   "onclick",
+   "onkeydown",
+   "onfocus",
+   "onmouseover"
+  ],
+  "answer": 1,
+  "explain": "onkeydown, onkeyup et onkeypress sont des événements clavier."
+ },
+ {
+  "id": "wb2-q024",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 1,
+  "q": "Quel événement se déclenche au clic de souris ?",
+  "options": [
+   "onfocus",
+   "onclick",
+   "onchange",
+   "onload"
+  ],
+  "answer": 1,
+  "explain": "onload se produit au chargement de la page."
+ },
+ {
+  "id": "wb2-q025",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "onfocus se produit quand :",
+  "options": [
+   "un champ reçoit le focus",
+   "un champ perd le focus",
+   "la page se charge",
+   "le formulaire est envoyé"
+  ],
+  "answer": 0,
+  "explain": "onblur correspond à la perte de focus."
+ },
+ {
+  "id": "wb2-q026",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "onchange se produit quand :",
+  "options": [
+   "on clique sur le champ",
+   "la valeur d'un champ a changé",
+   "la souris survole le champ",
+   "la page est fermée"
+  ],
+  "answer": 1,
+  "explain": "Souvent déclenché à la perte du focus après modification."
+ },
+ {
+  "id": "wb2-q027",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "Quel événement s'applique à l'envoi d'un formulaire ?",
+  "options": [
+   "onsend",
+   "onpost",
+   "onsubmit",
+   "ondone"
+  ],
+  "answer": 2,
+  "explain": "onreset correspond à la remise à zéro."
+ },
+ {
+  "id": "wb2-q028",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 3,
+  "q": "Comment empêcher l'envoi d'un formulaire invalide ?",
+  "options": [
+   "Faire renvoyer false par le gestionnaire onsubmit",
+   "Mettre method=\"none\"",
+   "Supprimer l'attribut action",
+   "Utiliser onload"
+  ],
+  "answer": 0,
+  "explain": "onsubmit=\"return controler()\" avec controler() qui renvoie false."
+ },
+ {
+  "id": "wb2-q029",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "Quelle propriété donne le texte d'un champ <input type=\"text\" name=\"nom\"> ?",
+  "options": [
+   "document.f.nom.text",
+   "document.f.nom.checked",
+   "document.f.nom.length",
+   "document.f.nom.value"
+  ],
+  "answer": 3,
+  "explain": "checked concerne les cases et boutons radio."
+ },
+ {
+  "id": "wb2-q030",
+  "chapter": "1-3-objets-formulaires-evenements",
+  "difficulty": 2,
+  "q": "Pour savoir si une case à cocher est cochée :",
+  "options": [
+   "la propriété value",
+   "la propriété selected",
+   "la méthode isChecked()",
+   "la propriété checked"
+  ],
+  "answer": 3,
+  "explain": "checked vaut true ou false."
+ },
+ {
+  "id": "wb2-q031",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 1,
+  "q": "Quel est l'indice du premier élément d'un tableau ?",
+  "options": [
+   "1",
+   "-1",
+   "Cela dépend du tableau",
+   "0"
+  ],
+  "answer": 3,
+  "explain": "Les indices commencent à 0."
+ },
+ {
+  "id": "wb2-q032",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Quelle méthode ajoute un élément à la fin d'un tableau ?",
+  "options": [
+   "pop()",
+   "shift()",
+   "push()",
+   "unshift()"
+  ],
+  "answer": 2,
+  "explain": "pop retire le dernier ; shift retire le premier ; unshift ajoute au début."
+ },
+ {
+  "id": "wb2-q033",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Que renvoie new Date().getMonth() en janvier ?",
+  "options": [
+   "1",
+   "12",
+   "0",
+   "\"janvier\""
+  ],
+  "answer": 2,
+  "explain": "Les mois vont de 0 à 11."
+ },
+ {
+  "id": "wb2-q034",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Quel objet est au sommet de l'arborescence du navigateur ?",
+  "options": [
+   "window",
+   "document",
+   "navigator",
+   "location"
+  ],
+  "answer": 0,
+  "explain": "document, navigator, location et history sont ses sous-objets."
+ },
+ {
+  "id": "wb2-q035",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Quel objet donne le nom et la version du navigateur ?",
+  "options": [
+   "history",
+   "navigator",
+   "location",
+   "screen"
+  ],
+  "answer": 1,
+  "explain": "navigator.appName, navigator.userAgent…"
+ },
+ {
+  "id": "wb2-q036",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Math.round(2.6) renvoie :",
+  "options": [
+   "2",
+   "3",
+   "2.6",
+   "NaN"
+  ],
+  "answer": 1,
+  "explain": "Arrondi à l'entier le plus proche."
+ },
+ {
+  "id": "wb2-q037",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Comment écrire un cookie en JavaScript ?",
+  "options": [
+   "En affectant une chaîne nom=valeur à document.cookie",
+   "Avec window.cookie()",
+   "Avec localStorage uniquement",
+   "Avec cookie.write()"
+  ],
+  "answer": 0,
+  "explain": "On peut ajouter expires et path."
+ },
+ {
+  "id": "wb2-q038",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 3,
+  "q": "Comment supprimer un cookie ?",
+  "options": [
+   "Appeler document.cookie.delete()",
+   "Lui donner une date d'expiration passée",
+   "Fermer le navigateur",
+   "Le mettre à null"
+  ],
+  "answer": 1,
+  "explain": "Réécrire le cookie avec expires dans le passé."
+ },
+ {
+  "id": "wb2-q039",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "L'expression régulière /^\\d{8}$/ accepte :",
+  "options": [
+   "huit lettres",
+   "au moins huit chiffres",
+   "exactement huit chiffres",
+   "un seul chiffre"
+  ],
+  "answer": 2,
+  "explain": "^ et $ ancrent le début et la fin ; \\d{8} = huit chiffres."
+ },
+ {
+  "id": "wb2-q040",
+  "chapter": "1-4-tableaux-objets-navigateur",
+  "difficulty": 2,
+  "q": "Le DOM représente :",
+  "options": [
+   "la page sous forme d'arbre d'éléments",
+   "la base de données",
+   "le serveur web",
+   "les cookies"
+  ],
+  "answer": 0,
+  "explain": "On le manipule avec getElementById, innerHTML…"
+ },
+ {
+  "id": "wb2-q041",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 1,
+  "q": "PHP signifie :",
+  "options": [
+   "Personal Hypertext Page",
+   "Programmed Home Processor",
+   "Public HTML Program",
+   "PHP: Hypertext Preprocessor"
+  ],
+  "answer": 3,
+  "explain": "À l'origine Personal Home Page."
+ },
+ {
+  "id": "wb2-q042",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 1,
+  "q": "PHP s'exécute :",
+  "options": [
+   "côté client",
+   "dans la base de données",
+   "dans le routeur",
+   "côté serveur"
+  ],
+  "answer": 3,
+  "explain": "Seul le HTML produit est envoyé au navigateur."
+ },
+ {
+  "id": "wb2-q043",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 1,
+  "q": "LAMP désigne :",
+  "options": [
+   "Linux, Access, MongoDB, Python",
+   "Laravel, Apache, MySQL, PHP",
+   "Linux, Angular, MySQL, PHP",
+   "Linux, Apache, MySQL, PHP"
+  ],
+  "answer": 3,
+  "explain": "WAMP est la variante sous Windows."
+ },
+ {
+  "id": "wb2-q044",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 1,
+  "q": "Quelle extension porte un script PHP ?",
+  "options": [
+   "html",
+   "js",
+   "php",
+   "sql"
+  ],
+  "answer": 2,
+  "explain": "Le fichier est interprété par le moteur PHP."
+ },
+ {
+  "id": "wb2-q045",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 1,
+  "q": "Quelle est la forme des balises PHP ?",
+  "options": [
+   "<php> … </php>",
+   "<% … %>",
+   "<?php … ?>",
+   "<script php>"
+  ],
+  "answer": 2,
+  "explain": "Le code PHP est délimité par <?php et ?>."
+ },
+ {
+  "id": "wb2-q046",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 2,
+  "q": "Quelles formes de commentaires sont valides en PHP ?",
+  "options": [
+   "//, # et /* */",
+   "// et /* */ seulement",
+   "# seulement",
+   "<!-- -->"
+  ],
+  "answer": 0,
+  "explain": "Les trois formes existent."
+ },
+ {
+  "id": "wb2-q047",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 2,
+  "q": "Que voit le visiteur en affichant le code source d'une page PHP ?",
+  "options": [
+   "Le code PHP complet",
+   "Le HTML produit, jamais le PHP",
+   "Le code SQL",
+   "Les mots de passe"
+  ],
+  "answer": 1,
+  "explain": "Le PHP est exécuté par le serveur avant l'envoi."
+ },
+ {
+  "id": "wb2-q048",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 2,
+  "q": "Quelle instruction inclut un fichier et arrête le script s'il est absent ?",
+  "options": [
+   "include",
+   "require",
+   "import",
+   "use"
+  ],
+  "answer": 1,
+  "explain": "include se contente d'un avertissement."
+ },
+ {
+  "id": "wb2-q049",
+  "chapter": "2-1-php-introduction",
+  "difficulty": 2,
+  "q": "phpMyAdmin sert à :",
+  "options": [
+   "gérer une base MySQL par une interface web",
+   "écrire du PHP",
+   "compiler du JavaScript",
+   "héberger un site"
+  ],
+  "answer": 0,
+  "explain": "Création de tables, import/export, requêtes."
+ },
+ {
+  "id": "wb2-q050",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 1,
+  "q": "Une variable PHP commence par :",
+  "options": [
+   "@",
+   "$",
+   "#",
+   "&"
+  ],
+  "answer": 1,
+  "explain": "Exemple : $nom."
+ },
+ {
+  "id": "wb2-q051",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Laquelle de ces variables ne peut pas recevoir de valeur ?",
+  "options": [
+   "$_var",
+   "$var",
+   "$this",
+   "$nom2"
+  ],
+  "answer": 2,
+  "explain": "$this est réservé à l'objet courant."
+ },
+ {
+  "id": "wb2-q052",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Quel nom est invalide ?",
+  "options": [
+   "$5var",
+   "$_var",
+   "$var",
+   "$a5"
+  ],
+  "answer": 0,
+  "explain": "Un chiffre ne peut pas suivre directement le $."
+ },
+ {
+  "id": "wb2-q053",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Les noms de variables PHP sont :",
+  "options": [
+   "insensibles à la casse",
+   "limités à 8 caractères",
+   "obligatoirement en minuscules",
+   "sensibles à la casse"
+  ],
+  "answer": 3,
+  "explain": "Les noms de fonctions, eux, ne le sont pas."
+ },
+ {
+  "id": "wb2-q054",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 1,
+  "q": "Comment déclare-t-on une constante en PHP ?",
+  "options": [
+   "constant NOM = valeur",
+   "#pragma NOM valeur",
+   "def NOM = valeur",
+   "define(\"NOM\", valeur)"
+  ],
+  "answer": 3,
+  "explain": "const NOM = valeur est aussi possible."
+ },
+ {
+  "id": "wb2-q055",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Une constante PHP s'écrit :",
+  "options": [
+   "avec $",
+   "avec @",
+   "entre guillemets obligatoires",
+   "sans le signe $"
+  ],
+  "answer": 3,
+  "explain": "echo TVA; (et non $TVA)."
+ },
+ {
+  "id": "wb2-q056",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Quel opérateur concatène deux chaînes en PHP ?",
+  "options": [
+   "+",
+   "&",
+   "le point (.)",
+   "||"
+  ],
+  "answer": 2,
+  "explain": "En JavaScript c'est +."
+ },
+ {
+  "id": "wb2-q057",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Quelle différence entre guillemets doubles et apostrophes ?",
+  "options": [
+   "Aucune",
+   "Les apostrophes remplacent les variables",
+   "Les variables sont remplacées seulement entre guillemets doubles",
+   "Les guillemets doubles interdisent les accents"
+  ],
+  "answer": 2,
+  "explain": "\"Salut $nom\" affiche la valeur ; 'Salut $nom' affiche le texte brut."
+ },
+ {
+  "id": "wb2-q058",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Quelle superglobale contient les données d'un formulaire en POST ?",
+  "options": [
+   "$_POST",
+   "$_GET",
+   "$_FILES",
+   "$_SERVER"
+  ],
+  "answer": 0,
+  "explain": "$_GET contient les paramètres de l'URL."
+ },
+ {
+  "id": "wb2-q059",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "Comment ajouter une valeur à la fin d'un tableau PHP $t ?",
+  "options": [
+   "$t.push(valeur)",
+   "$t[] = valeur",
+   "$t->add(valeur)",
+   "append($t, valeur)"
+  ],
+  "answer": 1,
+  "explain": "On peut aussi utiliser array_push."
+ },
+ {
+  "id": "wb2-q060",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 2,
+  "q": "isset($x) renvoie TRUE si :",
+  "options": [
+   "$x est vide",
+   "$x existe et n'est pas NULL",
+   "$x est un entier",
+   "$x est une chaîne"
+  ],
+  "answer": 1,
+  "explain": "empty() teste si la valeur est vide."
+ },
+ {
+  "id": "wb2-q061",
+  "chapter": "2-2-php-variables-types",
+  "difficulty": 3,
+  "q": "Quel est le type d'un tableau associatif ?",
+  "options": [
+   "array : les clés sont des chaînes",
+   "object obligatoirement",
+   "string",
+   "resource"
+  ],
+  "answer": 0,
+  "explain": "$etu[\"nom\"] = \"Ama\";"
+ },
+ {
+  "id": "wb2-q062",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 1,
+  "q": "Quelle boucle PHP parcourt un tableau ?",
+  "options": [
+   "each()",
+   "foreach",
+   "loop",
+   "iterate"
+  ],
+  "answer": 1,
+  "explain": "foreach ($t as $v)."
+ },
+ {
+  "id": "wb2-q063",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Comment parcourir clés et valeurs ?",
+  "options": [
+   "foreach ($t as $valeur, $cle)",
+   "for ($t as $cle)",
+   "foreach ($t as $cle => $valeur)",
+   "each($t)"
+  ],
+  "answer": 2,
+  "explain": "La flèche => sépare clé et valeur."
+ },
+ {
+  "id": "wb2-q064",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Quelle structure gère les erreurs en PHP ?",
+  "options": [
+   "try / catch / finally",
+   "if / else seulement",
+   "on error goto",
+   "assert uniquement"
+  ],
+  "answer": 0,
+  "explain": "throw new Exception(\"message\") lève l'exception."
+ },
+ {
+  "id": "wb2-q065",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Comment passer un paramètre par référence ?",
+  "options": [
+   "Avec le mot ref",
+   "Avec *",
+   "Avec @",
+   "En faisant précéder le paramètre de &"
+  ],
+  "answer": 3,
+  "explain": "function f(&$x) modifie la variable d'origine."
+ },
+ {
+  "id": "wb2-q066",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Comment utiliser une variable globale dans une fonction ?",
+  "options": [
+   "Rien : elle est visible",
+   "L'écrire avec @",
+   "La déclarer static",
+   "La déclarer avec global dans la fonction"
+  ],
+  "answer": 3,
+  "explain": "Il vaut mieux la passer en paramètre."
+ },
+ {
+  "id": "wb2-q067",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Quel est le résultat de (5 > 3) ? 'oui' : 'non' ?",
+  "options": [
+   "non",
+   "5",
+   "true",
+   "oui"
+  ],
+  "answer": 3,
+  "explain": "Opérateur ternaire."
+ },
+ {
+  "id": "wb2-q068",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 3,
+  "q": "declare(strict_types=1); sert à :",
+  "options": [
+   "interdire les variables globales",
+   "activer les exceptions",
+   "imposer le typage strict des paramètres",
+   "chiffrer le script"
+  ],
+  "answer": 2,
+  "explain": "Sans lui, PHP convertit les types faiblement."
+ },
+ {
+  "id": "wb2-q069",
+  "chapter": "2-3-php-controle-fonctions",
+  "difficulty": 2,
+  "q": "Quelle fonction affiche la date du jour au format jj/mm/aaaa ?",
+  "options": [
+   "now()",
+   "getdate(\"jj/mm/aaaa\")",
+   "date(\"d/m/Y\")",
+   "today()"
+  ],
+  "answer": 2,
+  "explain": "d = jour, m = mois, Y = année sur 4 chiffres."
+ },
+ {
+  "id": "wb2-q070",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 1,
+  "q": "Quel attribut indique le script PHP qui reçoit un formulaire ?",
+  "options": [
+   "action",
+   "target",
+   "method",
+   "src"
+  ],
+  "answer": 0,
+  "explain": "<form action=\"cible.php\">."
+ },
+ {
+  "id": "wb2-q071",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Pourquoi utiliser method=\"post\" pour un mot de passe ?",
+  "options": [
+   "post est chiffré",
+   "Les données ne s'affichent pas dans l'URL",
+   "get est interdit",
+   "post est plus rapide"
+  ],
+  "answer": 1,
+  "explain": "post ne chiffre pas : c'est HTTPS qui chiffre."
+ },
+ {
+  "id": "wb2-q072",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Que faut-il ajouter au formulaire pour téléverser un fichier ?",
+  "options": [
+   "method=\"get\"",
+   "enctype=\"multipart/form-data\"",
+   "action=\"upload\"",
+   "type=\"file\" seulement"
+  ],
+  "answer": 1,
+  "explain": "Et method=\"post\"."
+ },
+ {
+  "id": "wb2-q073",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Comment récupérer plusieurs cases à cocher dans un tableau ?",
+  "options": [
+   "Donner aux cases le nom nom[]",
+   "Utiliser le même id",
+   "Ajouter multiple",
+   "Utiliser $_FILES"
+  ],
+  "answer": 0,
+  "explain": "name=\"competences[]\" produit un tableau PHP."
+ },
+ {
+  "id": "wb2-q074",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Une case à cocher non cochée est :",
+  "options": [
+   "envoyée avec la valeur 0",
+   "absente des données envoyées",
+   "envoyée avec la valeur vide",
+   "envoyée avec false"
+  ],
+  "answer": 1,
+  "explain": "On vérifie donc avec isset()."
+ },
+ {
+  "id": "wb2-q075",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "htmlspecialchars() sert à :",
+  "options": [
+   "chiffrer un mot de passe",
+   "supprimer les accents",
+   "neutraliser les balises HTML avant affichage",
+   "convertir en majuscules"
+  ],
+  "answer": 2,
+  "explain": "Protection contre l'attaque XSS."
+ },
+ {
+  "id": "wb2-q076",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 3,
+  "q": "Quelle fonction déplace un fichier téléversé vers sa destination ?",
+  "options": [
+   "move_uploaded_file()",
+   "copy_upload()",
+   "rename_file()",
+   "save_file()"
+  ],
+  "answer": 0,
+  "explain": "Le fichier est d'abord dans un répertoire temporaire."
+ },
+ {
+  "id": "wb2-q077",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Pourquoi revérifier côté PHP ce qui a été contrôlé en JavaScript ?",
+  "options": [
+   "Car PHP est plus rapide",
+   "Car JavaScript est interdit",
+   "Car les navigateurs ne l'exécutent pas",
+   "Car le JavaScript peut être contourné"
+  ],
+  "answer": 3,
+  "explain": "Seul le serveur garantit la validité des données."
+ },
+ {
+  "id": "wb2-q078",
+  "chapter": "2-4-php-formulaires",
+  "difficulty": 2,
+  "q": "Quelle superglobale contient les fichiers téléversés ?",
+  "options": [
+   "$_FILE",
+   "$_UPLOAD",
+   "$_POST",
+   "$_FILES"
+  ],
+  "answer": 3,
+  "explain": "Avec name, type, tmp_name, error et size."
+ },
+ {
+  "id": "wb2-q079",
+  "chapter": "3-1-mysql-sql-phpmyadmin",
+  "difficulty": 1,
+  "q": "Quel SGBD accompagne classiquement PHP ?",
+  "options": [
+   "Oracle uniquement",
+   "Access",
+   "Excel",
+   "MySQL"
+  ],
+  "answer": 3,
+  "explain": "Le trio Apache, MySQL, PHP."
+ },
+ {
+  "id": "wb2-q080",
+  "chapter": "3-1-mysql-sql-phpmyadmin",
+  "difficulty": 2,
+  "q": "Une association N:M devient :",
+  "options": [
+   "une clé étrangère dans une des tables",
+   "un champ texte",
+   "une table d'association à clé concaténée",
+   "une vue"
+  ],
+  "answer": 2,
+  "explain": "Exemple : POSSEDER(#id_candidat, #id_competence)."
+ },
+ {
+  "id": "wb2-q081",
+  "chapter": "3-1-mysql-sql-phpmyadmin",
+  "difficulty": 2,
+  "q": "Une association 1:N donne :",
+  "options": [
+   "une table d'association",
+   "une clé primaire composée",
+   "une clé étrangère dans la table côté N",
+   "un index"
+  ],
+  "answer": 2,
+  "explain": "La clé du côté « 1 » migre vers le côté « N »."
+ },
+ {
+  "id": "wb2-q082",
+  "chapter": "3-1-mysql-sql-phpmyadmin",
+  "difficulty": 2,
+  "q": "Quelle commande SQL ajoute une ligne ?",
+  "options": [
+   "INSERT INTO",
+   "ADD ROW",
+   "PUSH INTO",
+   "CREATE ROW"
+  ],
+  "answer": 0,
+  "explain": "INSERT INTO t (cols) VALUES (…)."
+ },
+ {
+  "id": "wb2-q083",
+  "chapter": "3-1-mysql-sql-phpmyadmin",
+  "difficulty": 2,
+  "q": "Que fait AUTO_INCREMENT ?",
+  "options": [
+   "Chiffre une colonne",
+   "Génère automatiquement un numéro croissant",
+   "Interdit les doublons de texte",
+   "Crée un index texte"
+  ],
+  "answer": 1,
+  "explain": "Fréquent sur une clé primaire numérique."
+ },
+ {
+  "id": "wb2-q084",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 1,
+  "q": "PDO signifie :",
+  "options": [
+   "Public Database Online",
+   "PHP Data Objects",
+   "PHP Dynamic Output",
+   "Program Data Operations"
+  ],
+  "answer": 1,
+  "explain": "Interface commune pour plusieurs SGBD."
+ },
+ {
+  "id": "wb2-q085",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Quelle différence entre MySQLi et PDO ?",
+  "options": [
+   "PDO accepte plusieurs SGBD, MySQLi seulement MySQL",
+   "MySQLi est plus récent que PDO",
+   "PDO n'a pas de requêtes préparées",
+   "Aucune"
+  ],
+  "answer": 0,
+  "explain": "On change de base en modifiant la chaîne de connexion."
+ },
+ {
+  "id": "wb2-q086",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Que fait ERRMODE_EXCEPTION ?",
+  "options": [
+   "Masque les erreurs",
+   "Fait lever une exception à chaque erreur SQL",
+   "Ferme la connexion",
+   "Active le cache"
+  ],
+  "answer": 1,
+  "explain": "On l'attrape avec try / catch (PDOException)."
+ },
+ {
+  "id": "wb2-q087",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Pourquoi utiliser une requête préparée ?",
+  "options": [
+   "Pour accélérer l'affichage HTML",
+   "Pour compresser les données",
+   "Pour empêcher l'injection SQL",
+   "Pour remplacer la clé primaire"
+  ],
+  "answer": 2,
+  "explain": "Les valeurs sont transmises séparément de la requête."
+ },
+ {
+  "id": "wb2-q088",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Quelle méthode PDO donne le dernier identifiant inséré ?",
+  "options": [
+   "lastInsertId()",
+   "lastId()",
+   "insertedId()",
+   "getLastKey()"
+  ],
+  "answer": 0,
+  "explain": "Pour une colonne AUTO_INCREMENT."
+ },
+ {
+  "id": "wb2-q089",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Quelle méthode exécute une requête préparée ?",
+  "options": [
+   "run()",
+   "send()",
+   "go()",
+   "execute()"
+  ],
+  "answer": 3,
+  "explain": "$req->execute([$a, $b])."
+ },
+ {
+  "id": "wb2-q090",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "fetchAll(PDO::FETCH_ASSOC) renvoie :",
+  "options": [
+   "une seule ligne",
+   "un nombre",
+   "un objet de connexion",
+   "toutes les lignes sous forme de tableaux associatifs"
+  ],
+  "answer": 3,
+  "explain": "Les clés sont les noms de colonnes."
+ },
+ {
+  "id": "wb2-q091",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 3,
+  "q": "Pourquoi une transaction lors de plusieurs INSERT liés ?",
+  "options": [
+   "Pour accélérer l'affichage",
+   "Pour chiffrer les données",
+   "Pour éviter les formulaires",
+   "Pour que tout réussisse ou que rien ne soit enregistré"
+  ],
+  "answer": 3,
+  "explain": "beginTransaction, commit, rollBack."
+ },
+ {
+  "id": "wb2-q092",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 3,
+  "q": "Comment compter les lignes concernées par un UPDATE préparé ?",
+  "options": [
+   "$req->count()",
+   "$pdo->rows()",
+   "$req->rowCount()",
+   "count($req)"
+  ],
+  "answer": 2,
+  "explain": "rowCount() renvoie le nombre de lignes touchées."
+ },
+ {
+  "id": "wb2-q093",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Dans un LIKE préparé pour chercher « riz » n'importe où, on passe :",
+  "options": [
+   "\"riz\" entre apostrophes dans la requête",
+   "\"*riz*\"",
+   "\"%riz%\" comme valeur du paramètre",
+   "\"?riz?\""
+  ],
+  "answer": 2,
+  "explain": "Le % se place dans la valeur, pas dans la requête."
+ },
+ {
+  "id": "wb2-q094",
+  "chapter": "3-2-php-mysql-pdo",
+  "difficulty": 2,
+  "q": "Que fait exit(\"message\") dans un script ?",
+  "options": [
+   "Affiche le message et arrête le script",
+   "Ferme la base",
+   "Redémarre le serveur",
+   "Efface la page"
+  ],
+  "answer": 0,
+  "explain": "Utile pour une donnée invalide."
+ },
+ {
+  "id": "wb2-q095",
+  "chapter": "4-1-reactjs",
+  "difficulty": 1,
+  "q": "ReactJS est :",
+  "options": [
+   "un SGBD",
+   "une bibliothèque JavaScript pour construire des interfaces",
+   "un framework PHP",
+   "un serveur web"
+  ],
+  "answer": 1,
+  "explain": "Créée par Facebook."
+ },
+ {
+  "id": "wb2-q096",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "ReactJS couvre :",
+  "options": [
+   "la couche de données",
+   "la couche d'interface utilisateur",
+   "la couche réseau",
+   "la couche physique"
+  ],
+  "answer": 1,
+  "explain": "Pour les données, on utilise une API et un serveur."
+ },
+ {
+  "id": "wb2-q097",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "Le DOM virtuel sert à :",
+  "options": [
+   "améliorer les performances en ne mettant à jour que ce qui change",
+   "chiffrer la page",
+   "remplacer le HTML",
+   "stocker des cookies"
+  ],
+  "answer": 0,
+  "explain": "React compare l'ancienne et la nouvelle version."
+ },
+ {
+  "id": "wb2-q098",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "Quelles sont les deux façons de traiter les données dans React ?",
+  "options": [
+   "services et components",
+   "state et props",
+   "state et services",
+   "props et components"
+  ],
+  "answer": 1,
+  "explain": "Les props viennent du parent, le state est interne."
+ },
+ {
+  "id": "wb2-q099",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "Les props d'un composant sont :",
+  "options": [
+   "modifiables librement",
+   "stockées dans le DOM réel",
+   "en lecture seule",
+   "réservées aux classes"
+  ],
+  "answer": 2,
+  "explain": "Seul le parent peut les changer."
+ },
+ {
+  "id": "wb2-q100",
+  "chapter": "4-1-reactjs",
+  "difficulty": 1,
+  "q": "Comment accède-t-on à l'état d'un composant classe ?",
+  "options": [
+   "this.state",
+   "this.getState()",
+   "this.values",
+   "this.prototype.stateValue"
+  ],
+  "answer": 0,
+  "explain": "On le modifie avec this.setState()."
+ },
+ {
+  "id": "wb2-q101",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "useState(0) renvoie :",
+  "options": [
+   "seulement la valeur",
+   "un objet DOM",
+   "une promesse",
+   "la valeur et une fonction de mise à jour"
+  ],
+  "answer": 3,
+  "explain": "const [n, setN] = useState(0)."
+ },
+ {
+  "id": "wb2-q102",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "Le nom d'un composant React commence par :",
+  "options": [
+   "une minuscule obligatoirement",
+   "un $",
+   "un _",
+   "une majuscule"
+  ],
+  "answer": 3,
+  "explain": "<Bonjour /> est un composant, <div /> une balise HTML."
+ },
+ {
+  "id": "wb2-q103",
+  "chapter": "4-1-reactjs",
+  "difficulty": 2,
+  "q": "JSX est :",
+  "options": [
+   "un nouveau SGBD",
+   "un format de base de données",
+   "un framework CSS",
+   "une syntaxe de type HTML écrite dans du JavaScript"
+  ],
+  "answer": 3,
+  "explain": "On écrit className au lieu de class."
+ },
+ {
+  "id": "wb2-q104",
+  "chapter": "4-1-reactjs",
+  "difficulty": 3,
+  "q": "À quoi sert la propriété key dans une liste ?",
+  "options": [
+   "Chiffrer l'élément",
+   "Définir son style",
+   "Aider React à identifier chaque élément",
+   "Trier la liste"
+  ],
+  "answer": 2,
+  "explain": "<li key={p.id}>."
+ },
+ {
+  "id": "wb2-q105",
+  "chapter": "4-2-laravel",
+  "difficulty": 1,
+  "q": "Laravel est :",
+  "options": [
+   "une bibliothèque JavaScript",
+   "un SGBD",
+   "un framework PHP suivant l'architecture MVC",
+   "un serveur web"
+  ],
+  "answer": 2,
+  "explain": "Modèle, Vue, Contrôleur."
+ },
+ {
+  "id": "wb2-q106",
+  "chapter": "4-2-laravel",
+  "difficulty": 1,
+  "q": "Quelle commande démarre le serveur de développement ?",
+  "options": [
+   "php artisan serve",
+   "php artisan start",
+   "php serve",
+   "composer serve"
+  ],
+  "answer": 0,
+  "explain": "Par défaut sur http://127.0.0.1:8000."
+ },
+ {
+  "id": "wb2-q107",
+  "chapter": "4-2-laravel",
+  "difficulty": 1,
+  "q": "Où définit-on la connexion à la base de données dans Laravel ?",
+  "options": [
+   "Dans routes/web.php",
+   "Dans le fichier .env",
+   "Dans resources/views",
+   "Dans composer.json"
+  ],
+  "answer": 1,
+  "explain": "config/database.php lit les variables de .env."
+ },
+ {
+  "id": "wb2-q108",
+  "chapter": "4-2-laravel",
+  "difficulty": 1,
+  "q": "Quelle extension ont les vues Laravel ?",
+  "options": [
+   "view",
+   "blade.php",
+   "tpl",
+   "jsx"
+  ],
+  "answer": 1,
+  "explain": "Le moteur de modèles s'appelle Blade."
+ },
+ {
+  "id": "wb2-q109",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Quelle commande crée un contrôleur ?",
+  "options": [
+   "php artisan make:controller NomController",
+   "php artisan new controller",
+   "composer make controller",
+   "php make:controller"
+  ],
+  "answer": 0,
+  "explain": "--resource génère les méthodes CRUD."
+ },
+ {
+  "id": "wb2-q110",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "À quoi sert Composer ?",
+  "options": [
+   "Gérer les versions du code",
+   "Gérer les dépendances PHP",
+   "Démarrer le serveur",
+   "Compiler le JavaScript"
+  ],
+  "answer": 1,
+  "explain": "git gère les versions du code."
+ },
+ {
+  "id": "wb2-q111",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Où se trouvent les routes web ?",
+  "options": [
+   "app/routes.php",
+   "config/routes.php",
+   "routes/web.php",
+   "public/web.php"
+  ],
+  "answer": 2,
+  "explain": "Route::get('/clients', …)."
+ },
+ {
+  "id": "wb2-q112",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Quelle commande applique les migrations ?",
+  "options": [
+   "php artisan migrate",
+   "php artisan db:run",
+   "php artisan make:table",
+   "composer migrate"
+  ],
+  "answer": 0,
+  "explain": "make:migration crée le fichier de migration."
+ },
+ {
+  "id": "wb2-q113",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "{{ $variable }} dans Blade :",
+  "options": [
+   "exécute du SQL",
+   "définit une variable",
+   "importe un fichier",
+   "affiche la valeur en échappant le HTML"
+  ],
+  "answer": 3,
+  "explain": "Protection contre l'attaque XSS."
+ },
+ {
+  "id": "wb2-q114",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Dans MVC, que fait le contrôleur ?",
+  "options": [
+   "Stocke les données",
+   "Affiche le HTML seulement",
+   "Chiffre les mots de passe",
+   "Reçoit la requête, appelle le modèle et choisit la vue"
+  ],
+  "answer": 3,
+  "explain": "Le modèle accède aux données ; la vue affiche."
+ },
+ {
+  "id": "wb2-q115",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Eloquent est :",
+  "options": [
+   "son moteur de vues",
+   "son serveur",
+   "son gestionnaire de paquets",
+   "l'ORM de Laravel"
+  ],
+  "answer": 3,
+  "explain": "Client::all(), Client::find(1)…"
+ },
+ {
+  "id": "wb2-q116",
+  "chapter": "4-2-laravel",
+  "difficulty": 2,
+  "q": "Quel est l'autre grand framework PHP cité au cours ?",
+  "options": [
+   "Django",
+   "Express",
+   "Symfony",
+   "Spring"
+  ],
+  "answer": 2,
+  "explain": "Il utilise Twig et Doctrine."
+ },
+ {
+  "id": "wb2-q117",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Pour un champ « choix multiple » du formulaire, la base contient :",
+  "options": [
+   "une seule colonne texte",
+   "un champ calculé",
+   "une table d'association N:M",
+   "une vue"
+  ],
+  "answer": 2,
+  "explain": "Exemple : POSSEDER(#id_candidat, #id_competence)."
+ },
+ {
+  "id": "wb2-q118",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Dans une fiche d'examen, les boutons EFFACER et ENVOI sont de type :",
+  "options": [
+   "reset et submit",
+   "button et link",
+   "clear et send",
+   "cancel et post"
+  ],
+  "answer": 0,
+  "explain": "type=\"reset\" remet à zéro ; type=\"submit\" envoie."
+ },
+ {
+  "id": "wb2-q119",
+  "chapter": "a-methode-examen",
+  "difficulty": 2,
+  "q": "Dans un QCM « Toutes les réponses sont vraies », il faut :",
+  "options": [
+   "la choisir par défaut",
+   "vérifier chaque proposition séparément",
+   "l'éliminer toujours",
+   "choisir la plus courte"
+  ],
+  "answer": 1,
+  "explain": "Elle est souvent juste pour une liste de formes valides."
+ }
+]

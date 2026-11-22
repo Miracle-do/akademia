@@ -1,0 +1,90 @@
+{
+ "n": 3,
+ "title": "Épreuve n° 3 · Entraînement : PHP et MySQL (gestion de produits)",
+ "durationMinutes": 120,
+ "points": 20,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Partie 1 : questions de cours",
+   "points": 6,
+   "intro": "*Épreuve d'entraînement composée pour ce module (ce n'est pas un sujet officiel).*",
+   "questions": [
+    {
+     "id": "e03p1q1",
+     "q": "Quelle différence entre `$_GET` et `$_POST` ? Quand utiliser chacun ?",
+     "points": 1,
+     "a": "`$_GET` reçoit les paramètres de l'**URL** (visibles, partageables) : recherche, pagination. `$_POST` reçoit les données du **corps** de la requête : saisie, enregistrement, connexion (jamais de mot de passe dans l'URL)."
+    },
+    {
+     "id": "e03p1q2",
+     "q": "À quoi sert `htmlspecialchars()` ?",
+     "points": 1,
+     "a": "Elle transforme `<`, `>`, `&`, guillemets en entités HTML : une saisie contenant une balise `<script>` s'affiche comme du texte au lieu d'être exécutée. C'est la protection de base contre l'attaque **XSS**."
+    },
+    {
+     "id": "e03p1q3",
+     "q": "Différence entre `include` et `require` ?",
+     "points": 1,
+     "a": "Si le fichier est introuvable, `include` émet un avertissement et le script continue ; `require` provoque une **erreur fatale** et arrête le script. On utilise `require` pour les fichiers indispensables (connexion à la base)."
+    },
+    {
+     "id": "e03p1q4",
+     "q": "Pourquoi utiliser une requête préparée ?",
+     "points": 1,
+     "a": "Les valeurs sont transmises **séparément** de la requête : elles ne sont jamais interprétées comme du SQL, ce qui bloque les **injections SQL** (par exemple `' OR '1'='1`)."
+    },
+    {
+     "id": "e03p1q5",
+     "q": "Quelle différence entre MySQLi et PDO ?",
+     "points": 1,
+     "a": "MySQLi ne fonctionne qu'avec MySQL (style objet ou procédural). PDO est une couche commune qui accepte plusieurs SGBD (MySQL, SQLite, PostgreSQL…) : on change de base en modifiant surtout la chaîne de connexion."
+    },
+    {
+     "id": "e03p1q6",
+     "q": "Quelle méthode de PDO donne le dernier identifiant auto-incrémenté ?",
+     "points": 1,
+     "a": "`$pdo->lastInsertId()`."
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Partie 2 : gestion de produits",
+   "points": 14,
+   "intro": "On gère un petit catalogue : désignation, prix, stock.",
+   "questions": [
+    {
+     "id": "e03p2q1",
+     "q": "1. Écrire la requête SQL de création de la table `produit` (clé auto-incrémentée, prix positif, stock par défaut 0).",
+     "points": 2,
+     "a": "```sql\nCREATE TABLE produit (\n  id_produit  INT AUTO_INCREMENT PRIMARY KEY,\n  designation VARCHAR(60) NOT NULL,\n  prix        DECIMAL(10,2) NOT NULL CHECK (prix >= 0),\n  stock       INT NOT NULL DEFAULT 0\n);\n```"
+    },
+    {
+     "id": "e03p2q2",
+     "q": "2. Écrire le formulaire d'ajout d'un produit.",
+     "points": 2,
+     "a": "```html\n<form action=\"ajouter.php\" method=\"post\">\n  Désignation <input type=\"text\" name=\"designation\">\n  Prix <input type=\"number\" name=\"prix\" step=\"0.01\" min=\"0\">\n  Stock <input type=\"number\" name=\"stock\" min=\"0\">\n  <input type=\"submit\" value=\"Ajouter\">\n</form>\n```"
+    },
+    {
+     "id": "e03p2q3",
+     "q": "3. Écrire `ajouter.php` : contrôle des données, requête préparée, message de confirmation.",
+     "points": 4,
+     "a": "```php\n<?php\nrequire \"connexion.php\";   // objet PDO $pdo\n\n$des   = trim($_POST[\"designation\"] ?? \"\");\n$prix  = filter_var($_POST[\"prix\"] ?? \"\", FILTER_VALIDATE_FLOAT);\n$stock = filter_var($_POST[\"stock\"] ?? \"\", FILTER_VALIDATE_INT);\n\nif ($des === \"\" || $prix === false || $stock === false) {\n    exit(\"Données invalides.\");\n}\n$req = $pdo->prepare(\"INSERT INTO produit (designation, prix, stock) VALUES (?, ?, ?)\");\n$req->execute([$des, $prix, $stock]);\necho \"Produit ajouté, numéro \" . htmlspecialchars($pdo->lastInsertId());\n```"
+    },
+    {
+     "id": "e03p2q4",
+     "q": "4. Afficher la liste des produits dans un tableau HTML.",
+     "points": 3,
+     "a": "```php\n<?php\nrequire \"connexion.php\";\n$produits = $pdo->query(\"SELECT id_produit, designation, prix, stock FROM produit ORDER BY designation\");\necho \"<table border='1'><tr><th>N°</th><th>Désignation</th><th>Prix</th><th>Stock</th></tr>\";\nforeach ($produits as $p) {\n    echo \"<tr><td>\" . $p[\"id_produit\"] . \"</td>\"\n       . \"<td>\" . htmlspecialchars($p[\"designation\"]) . \"</td>\"\n       . \"<td>\" . $p[\"prix\"] . \"</td>\"\n       . \"<td>\" . $p[\"stock\"] . \"</td></tr>\";\n}\necho \"</table>\";\n```"
+    },
+    {
+     "id": "e03p2q5",
+     "q": "5. Écrire la recherche par mot-clé sur la désignation.",
+     "points": 3,
+     "a": "```php\n<?php\nrequire \"connexion.php\";\n$motcle = trim($_GET[\"motcle\"] ?? \"\");\n$req = $pdo->prepare(\"SELECT designation, prix FROM produit WHERE designation LIKE ? ORDER BY prix\");\n$req->execute([\"%\" . $motcle . \"%\"]);\n$lignes = $req->fetchAll(PDO::FETCH_ASSOC);\n\necho count($lignes) . \" résultat(s)<ul>\";\nforeach ($lignes as $l) {\n    echo \"<li>\" . htmlspecialchars($l[\"designation\"]) . \" — \" . $l[\"prix\"] . \" F</li>\";\n}\necho \"</ul>\";\n```\n\nLe formulaire de recherche utilise `method=\"get\"` et un champ `name=\"motcle\"`."
+    }
+   ]
+  }
+ ]
+}

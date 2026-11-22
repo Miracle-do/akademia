@@ -1,0 +1,168 @@
+{
+  "id": "web-ig2",
+  "title": "Programmation web",
+  "subtitle": "JavaScript, PHP/MySQL, ReactJS et Laravel · ENEAM · IG2 (AEI / AIP / ARI)",
+  "description": "Du JavaScript côté navigateur à PHP et MySQL côté serveur, puis ReactJS et Laravel : formulaires, événements, PDO, requêtes préparées, avec l'épreuve ENEAM corrigée.",
+  "emoji": "🌐",
+  "color": "#5F3DC4",
+  "level": "Licence 2",
+  "estimatedHours": 15,
+  "annee": 2,
+  "parts": [
+    {
+      "id": "p1",
+      "title": "Partie 1 · Programmation JavaScript",
+      "chapters": [
+        "1-1-javascript-bases",
+        "1-2-fonctions-controle",
+        "1-3-objets-formulaires-evenements",
+        "1-4-tableaux-objets-navigateur"
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Partie 2 · Programmation PHP",
+      "chapters": [
+        "2-1-php-introduction",
+        "2-2-php-variables-types",
+        "2-3-php-controle-fonctions",
+        "2-4-php-formulaires"
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Partie 3 · PHP et bases de données",
+      "chapters": [
+        "3-1-mysql-sql-phpmyadmin",
+        "3-2-php-mysql-pdo"
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Partie 4 · Frameworks : ReactJS et Laravel",
+      "chapters": [
+        "4-1-reactjs",
+        "4-2-laravel"
+      ]
+    },
+    {
+      "id": "ann",
+      "title": "Annexes",
+      "chapters": [
+        "a-methode-examen"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "1-1-javascript-bases",
+      "number": "1.1",
+      "title": "JavaScript : bases du langage",
+      "summary": "Web statique/dynamique, balise script, variables, types, opérateurs.",
+      "minutes": 9,
+      "file": "1-1-javascript-bases.md"
+    },
+    {
+      "id": "1-2-fonctions-controle",
+      "number": "1.2",
+      "title": "Fonctions, conditions, boucles et boîtes de message",
+      "summary": "Fonctions, paramètres/arguments, portée, if/switch, boucles, break/continue, alert/prompt/confirm.",
+      "minutes": 9,
+      "file": "1-2-fonctions-controle.md"
+    },
+    {
+      "id": "1-3-objets-formulaires-evenements",
+      "number": "1.3",
+      "title": "Objets, formulaires et événements",
+      "summary": "Objets et this, champs de formulaire, événements souris et clavier, contrôle avant envoi.",
+      "minutes": 10,
+      "file": "1-3-objets-formulaires-evenements.md"
+    },
+    {
+      "id": "1-4-tableaux-objets-navigateur",
+      "number": "1.4",
+      "title": "Tableaux, navigateur, DOM, cookies et regex",
+      "summary": "Tableaux, window/navigator/document, Math/String/Date, cookies, expressions régulières, classes.",
+      "minutes": 11,
+      "file": "1-4-tableaux-objets-navigateur.md"
+    },
+    {
+      "id": "2-1-php-introduction",
+      "number": "2.1",
+      "title": "PHP : introduction",
+      "summary": "Rôle de PHP, LAMP/WAMP, cycle de vie d'une page, commentaires, include.",
+      "minutes": 8,
+      "file": "2-1-php-introduction.md"
+    },
+    {
+      "id": "2-2-php-variables-types",
+      "number": "2.2",
+      "title": "PHP : variables, constantes, types et tableaux",
+      "summary": "Noms valides, define, opérateurs, tableaux, superglobales.",
+      "minutes": 10,
+      "file": "2-2-php-variables-types.md"
+    },
+    {
+      "id": "2-3-php-controle-fonctions",
+      "number": "2.3",
+      "title": "PHP : contrôle, exceptions et fonctions",
+      "summary": "Conditions, boucles, exceptions, fonctions, référence, portée.",
+      "minutes": 10,
+      "file": "2-3-php-controle-fonctions.md"
+    },
+    {
+      "id": "2-4-php-formulaires",
+      "number": "2.4",
+      "title": "PHP : formulaires et téléversement",
+      "summary": "GET/POST, récupération des données, cases à cocher, upload.",
+      "minutes": 10,
+      "file": "2-4-php-formulaires.md"
+    },
+    {
+      "id": "3-1-mysql-sql-phpmyadmin",
+      "number": "3.1",
+      "title": "MySQL, SQL et phpMyAdmin",
+      "summary": "Du MCD à la table, création, requêtes de base.",
+      "minutes": 8,
+      "file": "3-1-mysql-sql-phpmyadmin.md"
+    },
+    {
+      "id": "3-2-php-mysql-pdo",
+      "number": "3.2",
+      "title": "PHP et MySQL : MySQLi et PDO",
+      "summary": "Connexion, lecture, requêtes préparées, modification, transactions.",
+      "minutes": 12,
+      "file": "3-2-php-mysql-pdo.md"
+    },
+    {
+      "id": "4-1-reactjs",
+      "number": "4.1",
+      "title": "ReactJS",
+      "summary": "Composants, JSX, DOM virtuel, props et state, hooks.",
+      "minutes": 9,
+      "file": "4-1-reactjs.md"
+    },
+    {
+      "id": "4-2-laravel",
+      "number": "4.2",
+      "title": "Framework Laravel (et Symfony)",
+      "summary": "MVC, Composer, artisan, .env, routes, contrôleurs, Blade, migrations.",
+      "minutes": 10,
+      "file": "4-2-laravel.md"
+    },
+    {
+      "id": "a-methode-examen",
+      "number": "A",
+      "title": "Méthode d'examen",
+      "summary": "Exercice formulaire → base → PHP corrigé, réflexes QCM.",
+      "minutes": 8,
+      "file": "a-methode-examen.md"
+    }
+  ],
+  "features": {
+    "quiz": true,
+    "blitz": true,
+    "exams": true,
+    "flashcards": true
+  }
+}

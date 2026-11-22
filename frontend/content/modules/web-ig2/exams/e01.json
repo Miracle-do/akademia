@@ -1,0 +1,163 @@
+{
+ "n": 1,
+ "title": "Épreuve n° 1 · Sujet réel : Session normale 2024-2025 (IG2 A et B)",
+ "durationMinutes": 90,
+ "points": 20.0,
+ "parts": [
+  {
+   "id": "p1",
+   "title": "Exercice 1 : QCM (20 questions)",
+   "points": 10.0,
+   "intro": "Reprenez le numéro et la lettre correspondant à la bonne réponse. *(Barème indicatif : le sujet ne le précise pas.)*",
+   "questions": [
+    {
+     "id": "e01p1q1",
+     "q": "1. Laquelle des variables suivantes peut-on lui attribuer une valeur ?  A- $5var  B- $_var  C- $var  D- $this  E- Toutes les réponses sont vraies",
+     "points": 0.5,
+     "a": "**B et C.** `$_var` et `$var` sont des noms valides. `$5var` est invalide (un chiffre ne peut pas suivre le `$`) et `$this` est réservé à l'objet courant : on ne peut pas lui affecter de valeur."
+    },
+    {
+     "id": "e01p1q2",
+     "q": "2. Lequel des énoncés est correct à propos de PHP ?  A- PHP remplit des fonctions système (créer, ouvrir, lire, écrire, fermer un fichier)  B- PHP peut manipuler des formulaires (rassembler des données, les enregistrer, envoyer un courrier électronique, renvoyer des données à l'utilisateur)  C- On ajoute, supprime, modifie des éléments dans la base de données via PHP  D- Toutes les réponses sont vraies",
+     "points": 0.5,
+     "a": "**D.** Les trois propositions décrivent des usages réels de PHP : fichiers, formulaires et bases de données."
+    },
+    {
+     "id": "e01p1q3",
+     "q": "3. Lequel des éléments suivants sert à déclarer une constante ?  A- const  B- constant  C- define  D- #pragma  E- def",
+     "points": 0.5,
+     "a": "**C : `define`.** (`const NOM = valeur;` est aussi valable en PHP, mais la forme classique du cours est `define(\"NOM\", valeur)`.) `#pragma` est du langage C."
+    },
+    {
+     "id": "e01p1q4",
+     "q": "4. Quelle est la façon de créer des commentaires en PHP ?  A- //code commenté en fin de ligne  B- /* code commenté ici */  C- #code commenté à la fin de la ligne  D- Toutes les réponses sont vraies",
+     "points": 0.5,
+     "a": "**D.** `//`, `#` et `/* … */` sont tous valides."
+    },
+    {
+     "id": "e01p1q5",
+     "q": "5. Quelles sont les deux façons dont les données sont traitées dans React ?  A- state & props  B- services & components  C- state & services  D- props & components",
+     "points": 0.5,
+     "a": "**A : state & props.** Les props viennent du parent (lecture seule), le state est interne au composant."
+    },
+    {
+     "id": "e01p1q6",
+     "q": "6. Quel mot-clé termine la boucle « for » ou la condition « switch » et transfère l'exécution à l'instruction qui suit immédiatement ?  A- break  B- continue",
+     "points": 0.5,
+     "a": "**A : `break`.** `continue` saute seulement le reste du tour de boucle."
+    },
+    {
+     "id": "e01p1q7",
+     "q": "7. Dans quelle balise HTML place-t-on le code JavaScript ?  A- la balise js  B- la balise javascript  C- la balise script  D- la balise rel",
+     "points": 0.5,
+     "a": "**C : `<script>`.**"
+    },
+    {
+     "id": "e01p1q8",
+     "q": "8. Comment faire appel à une fonction nommée « sum » ?  A- sum()  B- call function sum()  C- call sum()  D- Aucune de ces réponses",
+     "points": 0.5,
+     "a": "**A : `sum()`.**"
+    },
+    {
+     "id": "e01p1q9",
+     "q": "9. Quel événement est spécifique au clavier ?  A- onkeypress  B- onkeydown  C- onclick  D- onfocus",
+     "points": 0.5,
+     "a": "**A et B.** `onkeypress`, `onkeydown` (et `onkeyup`) sont des événements clavier ; `onclick` est un événement souris et `onfocus` concerne le focus. Si une seule réponse est attendue, retenez `onkeydown` (`onkeypress` est déprécié dans les navigateurs récents)."
+    },
+    {
+     "id": "e01p1q10",
+     "q": "10. Comment connaître le nombre d'éléments d'un formulaire ?  A- document.myform.elements.count  B- document.myform.length  C- document.myform.count  D- document.myform.elements.length",
+     "points": 0.5,
+     "a": "**D : `document.myform.elements.length`.**"
+    },
+    {
+     "id": "e01p1q11",
+     "q": "11. Laquelle de ces affirmations est vraie ?  A- les arguments sont des paramètres  B- les arguments et paramètres doivent avoir le même nom  C- les arguments sont des espaces réservés  D- les arguments sont en désaccord avec les paramètres",
+     "points": 0.5,
+     "a": "**A.** Les arguments sont les valeurs transmises aux paramètres de la fonction ; ils n'ont pas à porter le même nom (B fausse)."
+    },
+    {
+     "id": "e01p1q12",
+     "q": "12. ReactJS couvre la ______  A- couche d'interface utilisateur (UI)  B- couche de données  C- les deux A et B sont vraies  D- aucune",
+     "points": 0.5,
+     "a": "**A.** React est une bibliothèque d'interface utilisateur."
+    },
+    {
+     "id": "e01p1q13",
+     "q": "13. ReactJS utilise ______ pour augmenter les performances.  A- DOM virtuel  B- DOM réel  C- les deux  D- aucune",
+     "points": 0.5,
+     "a": "**A : le DOM virtuel.** React compare l'ancienne et la nouvelle version virtuelle et ne modifie que ce qui a changé dans le DOM réel."
+    },
+    {
+     "id": "e01p1q14",
+     "q": "14. Dans quel répertoire les composants de React JS sont-ils enregistrés ?  A- js/components/  B- vendor/components/  C- external/components/  D- vendor/",
+     "points": 0.5,
+     "a": "**A : `js/components/`** (réponse attendue parmi ces choix). Dans un projet moderne créé avec Vite, on range les composants dans `src/components/`."
+    },
+    {
+     "id": "e01p1q15",
+     "q": "15. Comment accéder à l'état d'un composant à l'intérieur d'une fonction membre ?  A- this.getState()  B- this.prototype.stateValue  C- this.state  D- this.values",
+     "points": 0.5,
+     "a": "**C : `this.state`.**"
+    },
+    {
+     "id": "e01p1q16",
+     "q": "16. Où devons-nous définir la connexion à la base de données dans Laravel ?  A- config.php  B- setting.php  C- dans les fichiers d'amorçage  D- fichier .ENV",
+     "points": 0.5,
+     "a": "**D : le fichier `.env`** (lu par `config/database.php`)."
+    },
+    {
+     "id": "e01p1q17",
+     "q": "17. Quelle commande est de Laravel ?  A- git  B- composer  C- php artisan  D- php -v",
+     "points": 0.5,
+     "a": "**C : `php artisan`.**"
+    },
+    {
+     "id": "e01p1q18",
+     "q": "18. Comment créer un contrôleur dans Laravel avec CMD ?  A- php artisan make: generate controller mycontoller  B- php artisan make:controller generate  C- php artisan make:controller --plain  D- php artisan make:request mycontoller create",
+     "points": 0.5,
+     "a": "**C.** La commande est `php artisan make:controller NomController` ; l'option `--plain` (contrôleur vide) est celle proposée ici. Les autres écritures n'existent pas."
+    },
+    {
+     "id": "e01p1q19",
+     "q": "19. Les fichiers Vues (view) dans Laravel se terminent par ______  A- .php  B- .blade  C- .view  D- .blade.php",
+     "points": 0.5,
+     "a": "**D : `.blade.php`** (moteur de modèles Blade)."
+    },
+    {
+     "id": "e01p1q20",
+     "q": "20. Quelle commande démarre le serveur Laravel ?  A- php artisan serve  B- php artisan project_name  C- php artisan start php  D- artisan start-server",
+     "points": 0.5,
+     "a": "**A : `php artisan serve`.**"
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Exercice 2 : fiche « Recherche d'emploi »",
+   "points": 10,
+   "intro": "Soit le formulaire ci-dessous.",
+   "context": "Formulaire « Recherche d'emploi : complétez la fiche » : champs **Nom** (GEELSEN), **Prénom** (Jan), **Âge** (47) ; liste **Langues pratiquées** (allemand sélectionné) ; **Compétences informatiques** : cases XHTML, PHP, MySQL (cochées) et ASP.Net (non cochée) ; boutons **EFFACER** et **ENVOI**.",
+   "questions": [
+    {
+     "id": "e01p2q1",
+     "q": "1. Donner le script du formulaire.",
+     "points": 3,
+     "a": "```html\n<form action=\"enregistrer.php\" method=\"post\">\n  <fieldset>\n    <legend>Recherche d'emploi : complétez la fiche</legend>\n    Nom <input type=\"text\" name=\"nom\">\n    Prénom <input type=\"text\" name=\"prenom\">\n    Âge <input type=\"number\" name=\"age\" min=\"16\" max=\"99\">\n\n    <p>Langues pratiquées</p>\n    <select name=\"langue\">\n      <option value=\"1\">français</option>\n      <option value=\"2\">anglais</option>\n      <option value=\"3\">allemand</option>\n    </select>\n\n    <p>Compétences informatiques</p>\n    XHTML <input type=\"checkbox\" name=\"competences[]\" value=\"1\">\n    PHP <input type=\"checkbox\" name=\"competences[]\" value=\"2\">\n    MySQL <input type=\"checkbox\" name=\"competences[]\" value=\"3\">\n    ASP.Net <input type=\"checkbox\" name=\"competences[]\" value=\"4\">\n\n    <p>\n      <input type=\"reset\"  value=\"EFFACER\">\n      <input type=\"submit\" value=\"ENVOI\">\n    </p>\n  </fieldset>\n</form>\n```\n\n`method=\"post\"`, un `name` par champ, `competences[]` pour obtenir un tableau, `reset` pour EFFACER et `submit` pour ENVOI."
+    },
+    {
+     "id": "e01p2q2",
+     "q": "2. Donner le modèle logique correspondant.",
+     "points": 3,
+     "a": "- LANGUE(**id_langue**, libelle)\n- COMPETENCE(**id_competence**, libelle)\n- CANDIDAT(**id_candidat**, nom, prenom, age, #id_langue)\n- POSSEDER(**#id_candidat, #id_competence**)\n\nLe choix multiple des compétences est une association **N:M** : un candidat a plusieurs compétences et une compétence est possédée par plusieurs candidats. Elle devient la table `POSSEDER`, à clé primaire concaténée. La langue, choisie dans une liste à choix unique, devient une clé étrangère dans CANDIDAT. *(Si la liste autorisait plusieurs langues, on ajouterait de même une table `PARLER`.)*"
+    },
+    {
+     "id": "e01p2q3",
+     "q": "3. Donner le code PHP de l'action d'enregistrement dudit formulaire dans la base de données.",
+     "points": 4,
+     "a": "```php\n<?php\n// enregistrer.php\nrequire \"connexion.php\";   // définit l'objet PDO $pdo\n\n$nom    = trim($_POST[\"nom\"] ?? \"\");\n$prenom = trim($_POST[\"prenom\"] ?? \"\");\n$age    = filter_var($_POST[\"age\"] ?? \"\", FILTER_VALIDATE_INT);\n$langue = (int) ($_POST[\"langue\"] ?? 0);\n$competences = $_POST[\"competences\"] ?? [];\n\nif ($nom === \"\" || $prenom === \"\" || $age === false || $langue === 0) {\n    exit(\"Données incomplètes ou invalides.\");\n}\n\ntry {\n    $pdo->beginTransaction();\n    $req = $pdo->prepare(\n        \"INSERT INTO candidat (nom, prenom, age, id_langue) VALUES (?, ?, ?, ?)\"\n    );\n    $req->execute([$nom, $prenom, $age, $langue]);\n    $id = $pdo->lastInsertId();\n\n    $lien = $pdo->prepare(\n        \"INSERT INTO posseder (id_candidat, id_competence) VALUES (?, ?)\"\n    );\n    foreach ($competences as $c) {\n        $lien->execute([$id, (int) $c]);\n    }\n    $pdo->commit();\n    echo \"Fiche enregistrée. Numéro : \" . htmlspecialchars($id);\n} catch (PDOException $e) {\n    $pdo->rollBack();\n    echo \"Erreur d'enregistrement.\";\n}\n```\n\n*Ce script a été exécuté sur une base d'essai : le candidat et ses trois compétences sont bien enregistrés.*"
+    }
+   ]
+  }
+ ]
+}

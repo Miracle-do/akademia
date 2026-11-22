@@ -1,0 +1,208 @@
+{
+ "id": "formulaire-base-php",
+ "order": 1,
+ "title": "Du formulaire à la base de données",
+ "tagline": "L'exercice classique d'examen : formulaire HTML, modèle logique, enregistrement PHP avec PDO.",
+ "emoji": "🧩",
+ "color": "#5F3DC4",
+ "level": "Débutant",
+ "minutes": 28,
+ "pitch": [
+  "Bonjour ! Je te propose **« Du formulaire à la base de données »** 🧩.",
+  "C'est l'exercice de synthèse qui revient à l'examen de programmation web : une fiche à remplir, la table qui la reçoit, le script PHP qui enregistre.",
+  "On le traite pas à pas, avec des questions pour vérifier chaque étape."
+ ],
+ "benefits": [
+  "Retrouver les données d'un formulaire avec $_POST",
+  "Choisir entre colonne et table d'association",
+  "Écrire un enregistrement avec PDO et une requête préparée",
+  "Protéger l'enregistrement avec une transaction"
+ ],
+ "lessons": [
+  {
+   "id": "formulaire",
+   "title": "Du formulaire au script PHP",
+   "emoji": "📝",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "L'exercice classique d'examen : **un formulaire**, une **table**, un **script PHP** qui enregistre. On avance étape par étape sur une fiche « Recherche d'emploi »."
+    },
+    {
+     "type": "code",
+     "title": "Le formulaire (extrait)",
+     "sql": "<form action=\"enregistrer.php\" method=\"post\">\n  Nom <input type=\"text\" name=\"nom\">\n  Âge <input type=\"number\" name=\"age\">\n  PHP <input type=\"checkbox\" name=\"competences[]\" value=\"2\">\n  MySQL <input type=\"checkbox\" name=\"competences[]\" value=\"3\">\n  <input type=\"reset\" value=\"EFFACER\">\n  <input type=\"submit\" value=\"ENVOI\">\n</form>",
+     "lang": "html"
+    },
+    {
+     "type": "choice",
+     "q": "Comment PHP retrouve-t-il la valeur saisie dans le champ name=\"nom\" ?",
+     "options": [
+      "$_GET[\"nom\"]",
+      "$_POST[\"nom\"]",
+      "$_FILES[\"nom\"]"
+     ],
+     "answer": 1,
+     "explain": "Le formulaire utilise `method=\"post\"` : les données sont dans `$_POST`, sous la clé égale à l'attribut `name`."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi écrire competences[] pour les cases à cocher ?",
+     "options": [
+      "Pour que PHP reçoive un tableau",
+      "Pour les rendre obligatoires",
+      "Pour les cacher"
+     ],
+     "answer": 0,
+     "explain": "Les crochets font arriver toutes les cases cochées dans un **tableau** `$_POST[\"competences\"]`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'expression PHP qui lit le champ nom envoyé en POST.",
+     "hints": [
+      "Utilise la superglobale des formulaires POST."
+     ],
+     "accept": [
+      "$_POST['nom']"
+     ],
+     "solution": "$_POST[\"nom\"]",
+     "explain": "`$_POST[\"nom\"]`, la clé est l'attribut `name`.",
+     "placeholder": "...",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Que reçoit PHP pour une case NON cochée ?",
+     "options": [
+      "La valeur 0",
+      "Rien : la clé est absente",
+      "La valeur false"
+     ],
+     "answer": 1,
+     "explain": "Une case non cochée n'est **pas envoyée**. On teste donc avec `isset()` ou `?? []`."
+    }
+   ]
+  },
+  {
+   "id": "modele",
+   "title": "Le modèle logique",
+   "emoji": "🗂️",
+   "minutes": 8,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Chaque champ simple devient une **colonne**. Un choix **multiple** (les compétences) devient une **table d'association**."
+    },
+    {
+     "type": "code",
+     "title": "Modèle logique",
+     "sql": "CANDIDAT(id_candidat, nom, age, #id_langue)\nCOMPETENCE(id_competence, libelle)\nPOSSEDER(#id_candidat, #id_competence)",
+     "lang": "text"
+    },
+    {
+     "type": "choice",
+     "q": "Un candidat peut avoir plusieurs compétences, et une compétence plusieurs candidats. Cette association est de type :",
+     "options": [
+      "1:1",
+      "1:N",
+      "N:M"
+     ],
+     "answer": 2,
+     "explain": "Plusieurs de chaque côté : **N:M**. Elle devient une table avec une clé primaire concaténée."
+    },
+    {
+     "type": "choice",
+     "q": "Quelle est la clé primaire de POSSEDER ?",
+     "options": [
+      "id_candidat seul",
+      "(id_candidat, id_competence)",
+      "id_competence seul"
+     ],
+     "answer": 1,
+     "explain": "La clé primaire est la **concaténation** des deux identifiants, qui sont aussi des clés étrangères."
+    },
+    {
+     "type": "choice",
+     "q": "La langue est choisie dans une liste à choix unique. Où la range-t-on ?",
+     "options": [
+      "Une clé étrangère #id_langue dans CANDIDAT",
+      "Une table PARLER obligatoire",
+      "Dans la table COMPETENCE"
+     ],
+     "answer": 0,
+     "explain": "Choix unique : une **clé étrangère** suffit. Pour un choix multiple, il faudrait une table d'association."
+    }
+   ]
+  },
+  {
+   "id": "enregistrement",
+   "title": "Enregistrer avec PDO",
+   "emoji": "💾",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Dernière étape : le script `enregistrer.php`. On connecte, on **contrôle**, on utilise une **requête préparée**."
+    },
+    {
+     "type": "code",
+     "title": "Le cœur du script",
+     "sql": "$req = $pdo->prepare(\n  \"INSERT INTO candidat (nom, age, id_langue) VALUES (?, ?, ?)\"\n);\n$req->execute([$nom, $age, $langue]);\n$id = $pdo->lastInsertId();",
+     "lang": "php"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi des points d'interrogation plutôt que de coller $nom dans la requête ?",
+     "options": [
+      "Pour que le script aille plus vite",
+      "Pour bloquer l'injection SQL",
+      "Parce que PHP l'impose"
+     ],
+     "answer": 1,
+     "explain": "Les valeurs sont transmises séparément : elles ne peuvent pas être interprétées comme du SQL."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'instruction qui récupère l'identifiant du candidat qu'on vient d'insérer (objet PDO $pdo).",
+     "hints": [
+      "Une méthode de $pdo."
+     ],
+     "accept": [
+      "$id = $pdo->lastInsertId()"
+     ],
+     "solution": "$id = $pdo->lastInsertId();",
+     "explain": "`lastInsertId()` renvoie le dernier identifiant `AUTO_INCREMENT`.",
+     "placeholder": "$id = ...",
+     "caseSensitive": true
+    },
+    {
+     "type": "choice",
+     "q": "Pour insérer les compétences cochées, on :",
+     "options": [
+      "écrit une seule requête avec le tableau",
+      "boucle sur le tableau avec foreach et insère une ligne dans POSSEDER par case",
+      "les stocke dans une colonne texte"
+     ],
+     "answer": 1,
+     "explain": "Une ligne de POSSEDER par compétence cochée : `foreach ($competences as $c) { $lien->execute([$id, $c]); }`."
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi une transaction (beginTransaction / commit) ?",
+     "options": [
+      "Pour que le candidat et ses compétences soient enregistrés ensemble ou pas du tout",
+      "Pour chiffrer les données",
+      "Pour accélérer l'affichage"
+     ],
+     "answer": 0,
+     "explain": "Si une insertion échoue, `rollBack()` annule tout et laisse la base cohérente."
+    },
+    {
+     "type": "say",
+     "text": "Bravo ! Tu as le schéma complet de l'exercice : **formulaire → modèle → PDO préparé → transaction**."
+    }
+   ]
+  }
+ ]
+}
