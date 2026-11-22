@@ -5,6 +5,8 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.6.0] — 2026-11-22
+
 ### Nouveautés
 - Deuxième matière de 2ᵉ année : **Programmation web** (IG2) — 13 chapitres (JavaScript, PHP, formulaires, MySQL avec PDO, ReactJS, Laravel), 119 QCM, 59 cartes mémoire et 3 épreuves : le sujet réel « Session normale 2024-2025 » corrigé et 2 épreuves d'entraînement.
 - Formation « Du formulaire à la base de données » (3 leçons).
