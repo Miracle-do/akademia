@@ -5,6 +5,14 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.16.0] — 2026-11-23
+
+### Ajouté
+- Page « Paramètres » dédiée (`/parametres`), ouverte depuis la roue crantée du profil : compte (pseudo validé, année, filière), taille du texte de lecture, notifications, changement de mot de passe, installation, aide, version et déconnexion avec confirmation.
+
+### Modifié
+- Le profil ne contient plus de tiroirs Paramètres et Aide : la ligne « Paramètres » ouvre la nouvelle page.
+
 ## [1.15.0] — 2026-11-23
 
 ### Ajouté
