@@ -1,0 +1,905 @@
+{
+ "id": "triggers-complet",
+ "order": 11,
+ "title": "Les triggers de A à Z",
+ "tagline": "Les 12 types, :OLD et :NEW, journal d'audit, règles métier, table en mutation, gestion : tout ce qui tombe à l'examen.",
+ "emoji": "⚡",
+ "color": "#E11D48",
+ "level": "Avancé",
+ "minutes": 75,
+ "pitch": [
+  "Salut ! Voici la formation complète sur les **triggers** ⚡.",
+  "Un trigger est un programme qui s'exécute **tout seul** quand on insère, modifie ou supprime des données. Il sert à contrôler, tracer, propager, initialiser.",
+  "On part des bases (anatomie, 12 types, ordre d'exécution), puis on passe à `:OLD` et `:NEW`, au journal d'audit, aux règles métier, à l'erreur **table en mutation**, et à la gestion des triggers. Le tout se termine par un défi.",
+  "Chaque leçon est courte et je te donne des indices si tu bloques."
+ ],
+ "benefits": [
+  "Choisir le bon type de trigger (BEFORE/AFTER, ordre/ligne)",
+  "Maîtriser :OLD, :NEW, WHEN, UPDATE OF, INSERTING/UPDATING/DELETING",
+  "Écrire un journal d'audit et des règles métier",
+  "Comprendre et éviter ORA-04091 et ORA-04092",
+  "Activer, désactiver et supprimer un trigger"
+ ],
+ "prerequisites": [
+  {
+   "formation": "plsql",
+   "why": "Un trigger contient un bloc PL/SQL."
+  }
+ ],
+ "lessons": [
+  {
+   "id": "anatomie",
+   "title": "Anatomie d'un trigger",
+   "emoji": "🧬",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un **trigger** (déclencheur) est un bloc PL/SQL **stocké** dans la base et **exécuté automatiquement** quand un événement survient sur une table : `INSERT`, `UPDATE` ou `DELETE`. On ne l'appelle **jamais** soi-même."
+    },
+    {
+     "type": "say",
+     "text": "À quoi ça sert ? **Contrôler** une règle de gestion, **journaliser** (audit), **propager** une modification vers d'autres tables, **initialiser** des valeurs (date, identifiant), **protéger** des données."
+    },
+    {
+     "type": "choice",
+     "q": "Comment exécute-t-on un trigger ?",
+     "options": [
+      "Avec EXEC nom_trigger;",
+      "Avec CALL nom_trigger;",
+      "On ne l'exécute pas : il se déclenche seul",
+      "Avec RUN nom_trigger;"
+     ],
+     "answer": 2,
+     "explain": "Un trigger est déclenché par l'événement. On ne peut pas l'appeler directement."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER nom_trigger\n  BEFORE | AFTER                          -- le MOMENT\n  INSERT OR UPDATE [OF col] OR DELETE     -- l'ÉVÉNEMENT\n  ON nom_table\n  [FOR EACH ROW]                          -- le MODE : par ligne (sinon, par ordre)\n  [WHEN (condition)]                      -- filtre facultatif\nDECLARE\n  -- variables (facultatif)\nBEGIN\n  -- code PL/SQL\nEND;\n/",
+     "title": "Squelette complet"
+    },
+    {
+     "type": "say",
+     "text": "En cas d'**échec** du trigger, l'ordre SQL qui l'a déclenché est **annulé**. C'est ce qui permet de **refuser** une opération en levant une erreur."
+    },
+    {
+     "type": "choice",
+     "q": "Un `INSERT` déclenche un trigger qui lève une erreur. Que devient l'INSERT ?",
+     "options": [
+      "Il est exécuté quand même",
+      "Il est annulé",
+      "Il est exécuté à moitié",
+      "Il attend un COMMIT"
+     ],
+     "answer": 1,
+     "explain": "L'erreur du trigger fait échouer l'ordre qui l'a déclenché : la ligne n'est pas insérée."
+    },
+    {
+     "type": "say",
+     "text": "Pour **refuser** une opération avec un message personnalisé, on utilise `RAISE_APPLICATION_ERROR(code, 'message')`, avec un code **entre -20000 et -20999**."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_interdit\nBEFORE DELETE ON produits\nBEGIN\n  RAISE_APPLICATION_ERROR(-20001, 'Suppression interdite');\nEND;\n/",
+     "title": "Un trigger qui refuse"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'appel qui refuse l'opération avec le code -20010 et le message 'Opération interdite'.",
+     "hints": [
+      "RAISE_APPLICATION_ERROR(code, 'message');"
+     ],
+     "accept": [
+      "RAISE_APPLICATION_ERROR(-20010, 'Opération interdite');"
+     ],
+     "solution": "RAISE_APPLICATION_ERROR(-20010, 'Opération interdite');",
+     "explain": "Le code doit être compris entre -20000 et -20999 : les autres numéros sont réservés à Oracle."
+    },
+    {
+     "type": "choice",
+     "q": "Quel code d'erreur est valide dans RAISE_APPLICATION_ERROR ?",
+     "options": [
+      "-1000",
+      "-20500",
+      "20500",
+      "-21000"
+     ],
+     "answer": 1,
+     "explain": "Seule la plage de **-20000 à -20999** est autorisée."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'en-tête d'un trigger `trg_prod` qui se déclenche AVANT un INSERT sur `produits` (ordre complet jusqu'à BEGIN).",
+     "hints": [
+      "CREATE OR REPLACE TRIGGER ... BEFORE INSERT ON ...",
+      "Termine par BEGIN."
+     ],
+     "accept": [
+      "CREATE OR REPLACE TRIGGER trg_prod BEFORE INSERT ON produits BEGIN"
+     ],
+     "solution": "CREATE OR REPLACE TRIGGER trg_prod\nBEFORE INSERT ON produits\nBEGIN",
+     "explain": "Pas de `FOR EACH ROW` : c'est un trigger **par ordre**, exécuté une seule fois."
+    }
+   ]
+  },
+  {
+   "id": "douze",
+   "title": "Les 12 types et l'ordre d'exécution",
+   "emoji": "🧩",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Trois critères se combinent : **3 événements** (INSERT, UPDATE, DELETE) × **2 modes** (par ordre, par ligne) × **2 moments** (BEFORE, AFTER) = **12 types** de triggers."
+    },
+    {
+     "type": "code",
+     "sql": "Événement : INSERT | UPDATE | DELETE\nMode      : par ORDRE (1 fois par instruction)  |  par LIGNE (FOR EACH ROW : 1 fois par ligne touchée)\nMoment    : BEFORE (avant l'écriture)  |  AFTER (après)",
+     "title": "Les 3 critères"
+    },
+    {
+     "type": "choice",
+     "q": "`UPDATE produits SET prix = prix * 1.1;` modifie 50 lignes. Combien de fois s'exécute un trigger **par ordre** ?",
+     "options": [
+      "50",
+      "1",
+      "0",
+      "Cela dépend du WHERE"
+     ],
+     "answer": 1,
+     "explain": "Un trigger par ordre s'exécute **une seule fois** par instruction, quel que soit le nombre de lignes."
+    },
+    {
+     "type": "choice",
+     "q": "Même instruction, mais avec un trigger **FOR EACH ROW**. Combien d'exécutions ?",
+     "options": [
+      "1",
+      "50",
+      "100",
+      "0"
+     ],
+     "answer": 1,
+     "explain": "Un trigger de ligne s'exécute **une fois par ligne** modifiée : 50 fois."
+    },
+    {
+     "type": "say",
+     "text": "**BEFORE** sert à **contrôler** ou **modifier `:NEW`** avant l'écriture. **AFTER** sert à **tracer**, journaliser, propager vers d'autres tables."
+    },
+    {
+     "type": "code",
+     "sql": "1. BEFORE  par ORDRE\n2. pour chaque ligne :\n     BEFORE par LIGNE  →  écriture de la ligne  →  AFTER par LIGNE\n3. AFTER   par ORDRE",
+     "title": "Ordre d'exécution quand plusieurs triggers existent"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le tout premier trigger exécuté ?",
+     "options": [
+      "AFTER par ligne",
+      "BEFORE par ordre",
+      "AFTER par ordre",
+      "BEFORE par ligne"
+     ],
+     "answer": 1,
+     "explain": "Le trigger BEFORE par ordre passe en premier, une fois ; le AFTER par ordre passe en dernier."
+    },
+    {
+     "type": "choice",
+     "q": "Un UPDATE touche 2 lignes. Il existe les 4 triggers (BEFORE/AFTER, ordre/ligne). Combien d'exécutions au total ?",
+     "options": [
+      "4",
+      "6",
+      "2",
+      "8"
+     ],
+     "answer": 1,
+     "explain": "BEFORE ordre (1) + BEFORE ligne (2) + AFTER ligne (2) + AFTER ordre (1) = 6."
+    },
+    {
+     "type": "say",
+     "text": "Pour limiter un trigger d'`UPDATE` à certaines colonnes : **`UPDATE OF col`**. Le trigger ne se déclenche que si cette colonne figure dans la clause `SET`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'en-tête d'un trigger de **ligne** qui se déclenche APRÈS un UPDATE de la colonne `stock` sur `produits`.",
+     "hints": [
+      "AFTER UPDATE OF stock ON produits",
+      "Ajoute FOR EACH ROW."
+     ],
+     "accept": [
+      "CREATE OR REPLACE TRIGGER trg_stock AFTER UPDATE OF stock ON produits FOR EACH ROW BEGIN"
+     ],
+     "solution": "CREATE OR REPLACE TRIGGER trg_stock\nAFTER UPDATE OF stock ON produits\nFOR EACH ROW\nBEGIN",
+     "explain": "Le nom du trigger est libre ; on a pris `trg_stock`."
+    },
+    {
+     "type": "choice",
+     "q": "Un trigger `BEFORE UPDATE OF prix`. L'instruction `UPDATE produits SET stock = 0;` le déclenche-t-elle ?",
+     "options": [
+      "Oui, toujours",
+      "Non : prix n'est pas dans le SET",
+      "Oui, mais seulement si prix change",
+      "Seulement avec WHEN"
+     ],
+     "answer": 1,
+     "explain": "`UPDATE OF prix` ne réagit que si `prix` est cité dans la clause `SET`."
+    }
+   ]
+  },
+  {
+   "id": "old-new",
+   "title": "Triggers de ligne : :OLD, :NEW et WHEN",
+   "emoji": "🔀",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Avec `FOR EACH ROW`, deux « mémoires » sont disponibles : **`:OLD`** (la ligne **avant**) et **`:NEW`** (la ligne **après**)."
+    },
+    {
+     "type": "code",
+     "sql": "Ordre    | :OLD                       | :NEW\nINSERT   | NULL                       | valeur créée\nUPDATE   | valeur avant modification  | valeur après modification\nDELETE   | valeur avant suppression   | NULL",
+     "title": "Contenu de :OLD et :NEW"
+    },
+    {
+     "type": "choice",
+     "q": "Dans un trigger sur `DELETE`, quelle valeur de `id` utilise-t-on ?",
+     "options": [
+      ":NEW.id",
+      ":OLD.id",
+      "id",
+      "INSERTING.id"
+     ],
+     "answer": 1,
+     "explain": "À la suppression, la ligne n'existe plus : `:NEW` est vide, on lit `:OLD.id`."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_prix\nBEFORE INSERT OR UPDATE OF prix ON produits\nFOR EACH ROW\nBEGIN\n  IF :NEW.prix IS NULL OR :NEW.prix <= 0 THEN\n    RAISE_APPLICATION_ERROR(-20030, 'Prix invalide');\n  END IF;\nEND;\n/",
+     "title": "Contrôler une valeur"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la condition `IF ... THEN` qui détecte un nouveau stock négatif (colonne `stock`).",
+     "hints": [
+      "Utilise :NEW.stock",
+      "IF :NEW.stock < 0 THEN"
+     ],
+     "accept": [
+      "IF :NEW.stock < 0 THEN"
+     ],
+     "solution": "IF :NEW.stock < 0 THEN",
+     "explain": "On teste la valeur **après** modification, donc `:NEW`."
+    },
+    {
+     "type": "say",
+     "text": "Dans un trigger **BEFORE** de ligne, on peut **modifier `:NEW`** pour corriger ou compléter la donnée avant l'écriture. Impossible dans un AFTER : la ligne est déjà écrite (erreur **ORA-04084**)."
+    },
+    {
+     "type": "code",
+     "sql": ":NEW.nom := UPPER(:NEW.nom);       -- tout en majuscules\n:NEW.date_creation := SYSDATE;    -- date automatique",
+     "title": "Modifier :NEW (BEFORE uniquement)"
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'instruction qui met le nom du produit en majuscules avant l'écriture.",
+     "hints": [
+      "Affectation avec := sur :NEW.nom",
+      "Fonction UPPER"
+     ],
+     "accept": [
+      ":NEW.nom := UPPER(:NEW.nom);"
+     ],
+     "solution": ":NEW.nom := UPPER(:NEW.nom);",
+     "explain": "Dans un `BEFORE INSERT OR UPDATE` de ligne, cette affectation change la valeur réellement stockée."
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on écrire `:NEW.nom := UPPER(:NEW.nom);` dans un trigger AFTER INSERT de ligne ?",
+     "options": [
+      "Oui",
+      "Non : erreur ORA-04084",
+      "Oui, mais seulement en UPDATE",
+      "Oui si on ajoute WHEN"
+     ],
+     "answer": 1,
+     "explain": "Les valeurs `:NEW` ne se modifient que dans un trigger **BEFORE** de ligne."
+    },
+    {
+     "type": "say",
+     "text": "La clause **`WHEN`** filtre les lignes pour lesquelles le trigger s'exécute. Dans `WHEN`, on écrit `NEW` et `OLD` **sans deux-points** ; et on ne peut **pas** y mettre de requête SQL."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_gros_prix\nAFTER UPDATE OF prix ON produits\nFOR EACH ROW\nWHEN (NEW.prix > OLD.prix * 2)\nBEGIN\n  DBMS_OUTPUT.PUT_LINE('Hausse de plus de 100 % sur ' || :OLD.nom);\nEND;\n/",
+     "title": "WHEN : sans deux-points ; dans le bloc : avec"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle écriture de la condition est correcte dans la clause WHEN ?",
+     "options": [
+      "WHEN (:NEW.prix > 100)",
+      "WHEN (NEW.prix > 100)",
+      "WHEN (SELECT prix > 100)",
+      "WHEN NEW.prix > 100 THEN"
+     ],
+     "answer": 1,
+     "explain": "Dans la clause `WHEN`, pas de deux-points : `NEW.prix`. Dans le bloc PL/SQL, avec : `:NEW.prix`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la clause WHEN qui limite le trigger aux lignes dont le nouveau prix dépasse 100000.",
+     "hints": [
+      "WHEN (NEW.prix > ...)"
+     ],
+     "accept": [
+      "WHEN (NEW.prix > 100000)"
+     ],
+     "solution": "WHEN (NEW.prix > 100000)",
+     "explain": "Les parenthèses sont obligatoires autour de la condition."
+    }
+   ]
+  },
+  {
+   "id": "audit",
+   "title": "Un seul trigger pour plusieurs événements : le journal d'audit",
+   "emoji": "📒",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un même trigger peut gérer **plusieurs événements** (`INSERT OR UPDATE OR DELETE`). Les trois **prédicats** `INSERTING`, `UPDATING` et `DELETING` disent alors **lequel** a déclenché le trigger."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_produits_journal\nAFTER INSERT OR UPDATE OR DELETE ON produits\nFOR EACH ROW\nDECLARE\n  v_op journal.operation%TYPE;\n  v_id produits.id%TYPE;\nBEGIN\n  IF INSERTING THEN\n    v_op := 'INSERT'; v_id := :NEW.id;\n  ELSIF UPDATING THEN\n    v_op := 'UPDATE'; v_id := :NEW.id;\n  ELSE\n    v_op := 'DELETE'; v_id := :OLD.id;     -- :NEW est vide à la suppression\n  END IF;\n\n  INSERT INTO journal (table_nom, operation, ligne_id, utilisateur, date_op)\n  VALUES ('PRODUITS', v_op, v_id, USER, SYSDATE);\nEND;\n/",
+     "title": "Journal d'audit avec un seul trigger"
+    },
+    {
+     "type": "choice",
+     "q": "Pourquoi utiliser AFTER (et non BEFORE) pour un journal d'audit ?",
+     "options": [
+      "C'est impossible en BEFORE",
+      "On ne journalise que ce qui a réellement été écrit",
+      "AFTER est plus rapide",
+      "BEFORE ne connaît pas USER"
+     ],
+     "answer": 1,
+     "explain": "Un trigger AFTER s'exécute une fois la ligne écrite : on trace ce qui a réellement été fait, avec les valeurs définitives (y compris celles qu'un trigger BEFORE a corrigées)."
+    },
+    {
+     "type": "choice",
+     "q": "Quel prédicat est vrai lors d'un `UPDATE` ?",
+     "options": [
+      "INSERTING",
+      "UPDATING",
+      "DELETING",
+      "MODIFYING"
+     ],
+     "answer": 1,
+     "explain": "`UPDATING`. Les prédicats sont `INSERTING`, `UPDATING`, `DELETING`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris la ligne qui teste, dans le bloc PL/SQL, si le trigger a été déclenché par une suppression.",
+     "hints": [
+      "IF ... THEN",
+      "Prédicat DELETING"
+     ],
+     "accept": [
+      "IF DELETING THEN"
+     ],
+     "solution": "IF DELETING THEN",
+     "explain": "Pas de deux-points ni de comparaison : `DELETING` est déjà un booléen."
+    },
+    {
+     "type": "say",
+     "text": "On enregistre souvent aussi **qui** et **quand** : `USER` renvoie l'utilisateur connecté, `SYSDATE` la date et l'heure."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'instruction qui ajoute au `journal` une ligne avec l'utilisateur courant et la date du jour dans les colonnes `utilisateur` et `date_op`.",
+     "hints": [
+      "INSERT INTO journal (...) VALUES (...)",
+      "USER et SYSDATE"
+     ],
+     "accept": [
+      "INSERT INTO journal (utilisateur, date_op) VALUES (USER, SYSDATE);"
+     ],
+     "solution": "INSERT INTO journal (utilisateur, date_op)\nVALUES (USER, SYSDATE);",
+     "explain": "`USER` et `SYSDATE` s'utilisent sans parenthèses."
+    },
+    {
+     "type": "choice",
+     "q": "Pour garder l'ancien prix et le nouveau prix dans le journal lors d'un UPDATE, on lit :",
+     "options": [
+      ":OLD.prix et :NEW.prix",
+      "Seulement :NEW.prix",
+      "prix_avant et prix_apres",
+      "OLD(prix) et NEW(prix)"
+     ],
+     "answer": 0,
+     "explain": "`:OLD.prix` = avant, `:NEW.prix` = après. C'est le principe d'un historique des modifications."
+    },
+    {
+     "type": "choice",
+     "q": "Un trigger d'audit lève une erreur (par exemple le journal est plein). Que devient l'ordre qui l'a déclenché ?",
+     "options": [
+      "Il est exécuté quand même",
+      "Il est annulé",
+      "Il est suspendu",
+      "Il est validé"
+     ],
+     "answer": 1,
+     "explain": "L'échec du trigger annule l'ordre. Un audit qui plante bloque donc l'opération : à surveiller."
+    }
+   ]
+  },
+  {
+   "id": "regles",
+   "title": "Règles métier : propager et interdire",
+   "emoji": "🛠️",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deuxième grand usage : appliquer une **règle de gestion** automatiquement. Exemple : quand une commande est enregistrée, le **stock** du produit doit diminuer."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_commande_stock\nAFTER INSERT ON commandes\nFOR EACH ROW\nBEGIN\n  UPDATE produits\n  SET    stock = stock - :NEW.quantite\n  WHERE  id = :NEW.produit_id;\nEND;\n/",
+     "title": "Propager vers une autre table"
+    },
+    {
+     "type": "code",
+     "sql": "PRODUITS\nID | NOM     | PRIX  | STOCK\n 1 | Clavier | 15000 | 20\n 2 | Souris  |  8000 | 35",
+     "title": "Données de référence"
+    },
+    {
+     "type": "choice",
+     "q": "Le trigger ci-dessus tourne pour une commande de 5 claviers (id 1). Quel sera le stock du Clavier ?",
+     "options": [
+      "20",
+      "15",
+      "25",
+      "5"
+     ],
+     "answer": 1,
+     "explain": "20 − 5 = 15 : l'UPDATE de la table `produits` est fait par le trigger."
+    },
+    {
+     "type": "choice",
+     "q": "Le trigger lit/modifie la table `produits` alors que l'ordre en cours concerne `commandes`. Y a-t-il un problème de table en mutation ?",
+     "options": [
+      "Oui",
+      "Non : ce n'est pas la table qui subit l'ordre en cours",
+      "Oui, avec AFTER",
+      "Oui, avec FOR EACH ROW"
+     ],
+     "answer": 1,
+     "explain": "La table en mutation est celle que l'ordre en cours modifie (`commandes`). Une **autre** table se lit et se modifie sans problème."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'instruction qui augmente le stock de `:OLD.quantite` pour le produit `:OLD.produit_id` (cas d'une commande supprimée).",
+     "hints": [
+      "UPDATE produits SET stock = stock + ...",
+      "WHERE id = :OLD.produit_id"
+     ],
+     "accept": [
+      "UPDATE produits SET stock = stock + :OLD.quantite WHERE id = :OLD.produit_id;"
+     ],
+     "solution": "UPDATE produits\nSET    stock = stock + :OLD.quantite\nWHERE  id = :OLD.produit_id;",
+     "explain": "Lors d'un DELETE, la ligne supprimée est dans `:OLD`."
+    },
+    {
+     "type": "say",
+     "text": "Troisième usage : **refuser** une opération qui violerait une règle, avec un message lisible, quand une contrainte ne suffit pas."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_client_suppression\nBEFORE DELETE ON clients\nFOR EACH ROW\nDECLARE\n  v_nb NUMBER;\nBEGIN\n  SELECT COUNT(*) INTO v_nb FROM commandes WHERE client_id = :OLD.id;\n  IF v_nb > 0 THEN\n    RAISE_APPLICATION_ERROR(-20032, 'Ce client a des commandes : suppression refusée');\n  END IF;\nEND;\n/",
+     "title": "Empêcher une suppression, avec un message métier"
+    },
+    {
+     "type": "choice",
+     "q": "Sans ce trigger, supprimer un client ayant des commandes (clé étrangère) produirait quelle erreur Oracle ?",
+     "options": [
+      "ORA-02292 : enregistrement fils existant",
+      "ORA-04091",
+      "ORA-00001",
+      "ORA-01400"
+     ],
+     "answer": 0,
+     "explain": "ORA-02292 « child record found ». Le trigger remplace ce message technique par un message lisible."
+    },
+    {
+     "type": "say",
+     "text": "Un trigger **BEFORE** convient pour **corriger** une donnée avant écriture. Exemple : prix minimum automatique."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris, dans un trigger BEFORE de ligne, les lignes qui remplacent un prix NULL par 0 (`IF :NEW.prix IS NULL THEN :NEW.prix := 0; END IF;`).",
+     "hints": [
+      "IF ... IS NULL THEN ... END IF;"
+     ],
+     "accept": [
+      "IF :NEW.prix IS NULL THEN :NEW.prix := 0; END IF;"
+     ],
+     "solution": "IF :NEW.prix IS NULL THEN\n  :NEW.prix := 0;\nEND IF;",
+     "explain": "On peut aussi utiliser `:NEW.prix := NVL(:NEW.prix, 0);`."
+    },
+    {
+     "type": "choice",
+     "q": "Une règle simple comme « prix > 0 » : trigger ou contrainte ?",
+     "options": [
+      "Trigger, toujours",
+      "Contrainte CHECK : plus simple et plus fiable",
+      "Aucun des deux",
+      "Un index"
+     ],
+     "answer": 1,
+     "explain": "Une contrainte déclarative (`CHECK`, `NOT NULL`, `FOREIGN KEY`) suffit : on réserve les triggers aux règles qu'une contrainte ne sait pas exprimer."
+    }
+   ]
+  },
+  {
+   "id": "restrictions",
+   "title": "Les restrictions : COMMIT et table en mutation",
+   "emoji": "🚧",
+   "minutes": 12,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deux grandes règles à connaître absolument (elles tombent tout le temps à l'examen)."
+    },
+    {
+     "type": "say",
+     "text": "**1. Pas de COMMIT ni de ROLLBACK dans un trigger.** Le trigger fait partie de la transaction de l'ordre qui l'a déclenché. Sinon : **ORA-04092**."
+    },
+    {
+     "type": "choice",
+     "q": "Peut-on écrire `COMMIT;` dans le corps d'un trigger ?",
+     "options": [
+      "Oui, c'est conseillé",
+      "Non : erreur ORA-04092",
+      "Oui, mais seulement dans un AFTER",
+      "Oui, avec EXEC"
+     ],
+     "answer": 1,
+     "explain": "Un trigger ne valide ni n'annule : c'est la transaction principale qui décide."
+    },
+    {
+     "type": "say",
+     "text": "**2. Table en mutation.** Un trigger **de ligne** ne peut ni **lire** ni **modifier** la table que l'ordre en cours est en train de modifier. Sinon : **ORA-04091**."
+    },
+    {
+     "type": "code",
+     "sql": "-- ERREUR : le trigger sur EMPLOYES lit EMPLOYES\nCREATE OR REPLACE TRIGGER trg_interdit\nAFTER INSERT ON employes\nFOR EACH ROW\nDECLARE\n  v_moy NUMBER;\nBEGIN\n  SELECT AVG(salaire) INTO v_moy FROM employes;   -- ORA-04091 !\nEND;\n/",
+     "title": "Table en mutation"
+    },
+    {
+     "type": "choice",
+     "q": "Quel est le message de l'erreur « table en mutation » ?",
+     "options": [
+      "ORA-04091",
+      "ORA-04092",
+      "ORA-02292",
+      "ORA-01403"
+     ],
+     "answer": 0,
+     "explain": "ORA-04091 : « la table est en mutation, le déclencheur ne peut la voir »."
+    },
+    {
+     "type": "choice",
+     "q": "Ce trigger lit la table `employes` dans un trigger **par ordre** (sans FOR EACH ROW) AFTER INSERT sur `employes`. Y a-t-il ORA-04091 ?",
+     "options": [
+      "Oui, toujours",
+      "Non : l'erreur ne concerne que les triggers de ligne",
+      "Oui, mais seulement en BEFORE",
+      "Non, jamais d'erreur"
+     ],
+     "answer": 1,
+     "explain": "L'ORA-04091 concerne les triggers **par ligne**. Un trigger par ordre AFTER peut interroger sa table : c'est l'astuce classique."
+    },
+    {
+     "type": "say",
+     "text": "**Comment contourner ?** Comparer à une **constante**, lire une **autre** table, passer par un trigger **par ordre** AFTER, ou, pour les cas avancés, un **trigger composé** (*compound trigger*)."
+    },
+    {
+     "type": "choice",
+     "q": "Tu as besoin de la moyenne des salaires **après** une insertion. Quelle solution évite ORA-04091 ?",
+     "options": [
+      "Un trigger de ligne qui lit la table",
+      "Un trigger AFTER par ordre (sans FOR EACH ROW) qui calcule la moyenne",
+      "COMMIT dans le trigger",
+      "Désactiver les contraintes"
+     ],
+     "answer": 1,
+     "explain": "Un trigger AFTER **par ordre** s'exécute quand la modification est terminée : la table peut alors être lue."
+    },
+    {
+     "type": "say",
+     "text": "Autres restrictions : un trigger ne peut pas modifier une colonne **clé primaire**, **unique** ou **étrangère** de sa propre ligne, et un trigger qui fait un `INSERT`/`UPDATE`/`DELETE` peut en **déclencher d'autres** (effet en cascade)."
+    },
+    {
+     "type": "choice",
+     "q": "Un trigger sur `A` modifie `B`, et `B` a un trigger qui modifie `A`. Risque principal ?",
+     "options": [
+      "Aucun",
+      "Une cascade infinie ou une erreur de table en mutation",
+      "Une perte de stockage",
+      "Un COMMIT automatique"
+     ],
+     "answer": 1,
+     "explain": "Des triggers qui se rappellent mutuellement peuvent boucler ou se heurter à ORA-04091 : à concevoir avec soin."
+    }
+   ]
+  },
+  {
+   "id": "gestion",
+   "title": "Gérer ses triggers",
+   "emoji": "🧰",
+   "minutes": 9,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Un trigger est un objet stocké comme une table : on peut le **lister**, le **désactiver**, le **réactiver** et le **supprimer**."
+    },
+    {
+     "type": "code",
+     "sql": "SELECT trigger_name, trigger_type, triggering_event, table_name, status\nFROM   user_triggers;",
+     "title": "Lister les triggers de l'utilisateur"
+    },
+    {
+     "type": "choice",
+     "q": "Quelle vue contient la liste des triggers de l'utilisateur connecté ?",
+     "options": [
+      "USER_TRIGGERS",
+      "ALL_TRIGGERS_ME",
+      "TRIGGER_LIST",
+      "USER_OBJECTS_TRG"
+     ],
+     "answer": 0,
+     "explain": "`USER_TRIGGERS`. (`ALL_TRIGGERS` pour ceux accessibles, `DBA_TRIGGERS` pour tous.)"
+    },
+    {
+     "type": "code",
+     "sql": "ALTER TRIGGER nom DISABLE;               -- désactiver un trigger\nALTER TRIGGER nom ENABLE;                -- le réactiver\nALTER TABLE clients DISABLE ALL TRIGGERS; -- tous ceux d'une table\nALTER TABLE clients ENABLE ALL TRIGGERS;\nDROP TRIGGER nom;                        -- supprimer",
+     "title": "Les commandes de gestion"
+    },
+    {
+     "type": "exercise",
+     "q": "Désactive le trigger `trg_prix`.",
+     "hints": [
+      "ALTER TRIGGER nom DISABLE"
+     ],
+     "accept": [
+      "ALTER TRIGGER trg_prix DISABLE;"
+     ],
+     "solution": "ALTER TRIGGER trg_prix DISABLE;",
+     "explain": "Pratique pour charger un gros volume de données sans déclencher les contrôles ; pense à le réactiver."
+    },
+    {
+     "type": "exercise",
+     "q": "Désactive tous les triggers de la table `produits`.",
+     "hints": [
+      "ALTER TABLE ... DISABLE ALL TRIGGERS"
+     ],
+     "accept": [
+      "ALTER TABLE produits DISABLE ALL TRIGGERS;"
+     ],
+     "solution": "ALTER TABLE produits DISABLE ALL TRIGGERS;",
+     "explain": "Pour les réactiver : `ALTER TABLE produits ENABLE ALL TRIGGERS;`."
+    },
+    {
+     "type": "exercise",
+     "q": "Supprime le trigger `trg_prix`.",
+     "hints": [
+      "DROP TRIGGER nom"
+     ],
+     "accept": [
+      "DROP TRIGGER trg_prix;"
+     ],
+     "solution": "DROP TRIGGER trg_prix;",
+     "explain": "Supprimer la table supprime aussi ses triggers."
+    },
+    {
+     "type": "choice",
+     "q": "Ton trigger affiche « créé avec des erreurs de compilation ». Comment voir les erreurs ?",
+     "options": [
+      "SHOW ERRORS; ou la vue USER_ERRORS",
+      "SELECT * FROM TRIGGER_ERRORS;",
+      "DESC trigger;",
+      "Il n'y a pas moyen"
+     ],
+     "answer": 0,
+     "explain": "`SHOW ERRORS` (SQL*Plus) ou `SELECT * FROM user_errors WHERE name = 'NOM_DU_TRIGGER'`."
+    },
+    {
+     "type": "choice",
+     "q": "Un trigger invalide (non compilé) est attaché à `produits`. Que se passe-t-il à un INSERT sur `produits` ?",
+     "options": [
+      "L'INSERT réussit sans le trigger",
+      "L'INSERT échoue (ORA-04098 : trigger invalide)",
+      "L'INSERT est mis en attente",
+      "Le trigger est supprimé"
+     ],
+     "answer": 1,
+     "explain": "Oracle refuse l'ordre : ORA-04098. Il faut corriger puis recompiler le trigger."
+    },
+    {
+     "type": "say",
+     "text": "Le cours indique qu'on peut associer **un seul trigger de chaque type** par table. Les versions récentes d'Oracle en acceptent plusieurs (ordre réglable avec `FOLLOWS`). **À l'examen, suis la présentation du cours.**"
+    }
+   ]
+  },
+  {
+   "id": "speciaux",
+   "title": "Pour aller plus loin : INSTEAD OF et trigger composé",
+   "emoji": "🚀",
+   "minutes": 8,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Deux notions au-delà du cours de base, utiles à connaître."
+    },
+    {
+     "type": "say",
+     "text": "**`INSTEAD OF`** : trigger posé sur une **vue** pour remplacer l'opération. Il permet de rendre modifiable une vue qui ne l'est pas (par exemple une vue sur une jointure)."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_vue_insert\nINSTEAD OF INSERT ON v_clients_villes\nFOR EACH ROW\nBEGIN\n  INSERT INTO clients (id, nom, ville_id) VALUES (:NEW.id, :NEW.nom, :NEW.ville_id);\nEND;\n/",
+     "title": "Un trigger INSTEAD OF sur une vue"
+    },
+    {
+     "type": "choice",
+     "q": "Sur quel objet pose-t-on un trigger INSTEAD OF ?",
+     "options": [
+      "Une table",
+      "Une vue",
+      "Une séquence",
+      "Un index"
+     ],
+     "answer": 1,
+     "explain": "Sur une **vue** : le trigger remplace l'opération qui échouerait sur la vue."
+    },
+    {
+     "type": "say",
+     "text": "**Trigger composé (`COMPOUND TRIGGER`)** : un seul trigger avec plusieurs sections (BEFORE STATEMENT, AFTER EACH ROW, AFTER STATEMENT) qui partagent des variables. C'est la solution moderne au problème de table en mutation."
+    },
+    {
+     "type": "code",
+     "sql": "CREATE OR REPLACE TRIGGER trg_compose\nFOR UPDATE ON produits\nCOMPOUND TRIGGER\n  AFTER EACH ROW IS\n  BEGIN\n    NULL;  -- on mémorise les lignes touchées\n  END AFTER EACH ROW;\n\n  AFTER STATEMENT IS\n  BEGIN\n    NULL;  -- la table peut ici être lue\n  END AFTER STATEMENT;\nEND trg_compose;\n/",
+     "title": "Squelette d'un trigger composé"
+    },
+    {
+     "type": "choice",
+     "q": "Quel avantage principal apporte un trigger composé ?",
+     "options": [
+      "Il s'exécute plus vite",
+      "Il évite ORA-04091 en regroupant le traitement par ligne et par ordre",
+      "Il remplace les contraintes",
+      "Il permet les COMMIT"
+     ],
+     "answer": 1,
+     "explain": "On collecte les lignes dans la section « par ligne », puis on les traite dans « AFTER STATEMENT » où la table peut être lue."
+    }
+   ]
+  },
+  {
+   "id": "defi",
+   "title": "Défi final : stock, audit et contrôle",
+   "emoji": "🏆",
+   "minutes": 15,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Tu gères une boutique. Voici ce que veut le patron : **1.** refuser les prix négatifs ou nuls, **2.** mettre les noms de produits en majuscules, **3.** tenir un journal de toute modification, **4.** décrémenter le stock à chaque commande."
+    },
+    {
+     "type": "choice",
+     "q": "Pour la règle 1 (refuser un prix ≤ 0), quel type de trigger ?",
+     "options": [
+      "AFTER INSERT par ordre",
+      "BEFORE INSERT OR UPDATE OF prix, FOR EACH ROW",
+      "AFTER DELETE par ligne",
+      "INSTEAD OF"
+     ],
+     "answer": 1,
+     "explain": "On contrôle **avant** l'écriture, **ligne par ligne**, sur les valeurs `:NEW.prix`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'en-tête complet de ce trigger de contrôle, nommé `trg_prix_ok` (jusqu'à BEGIN).",
+     "hints": [
+      "BEFORE INSERT OR UPDATE OF prix ON produits",
+      "FOR EACH ROW"
+     ],
+     "accept": [
+      "CREATE OR REPLACE TRIGGER trg_prix_ok BEFORE INSERT OR UPDATE OF prix ON produits FOR EACH ROW BEGIN"
+     ],
+     "solution": "CREATE OR REPLACE TRIGGER trg_prix_ok\nBEFORE INSERT OR UPDATE OF prix ON produits\nFOR EACH ROW\nBEGIN",
+     "explain": "Pour la règle 1, on ajoute ensuite `IF :NEW.prix <= 0 THEN RAISE_APPLICATION_ERROR(-20040, 'Prix invalide'); END IF;`."
+    },
+    {
+     "type": "choice",
+     "q": "Pour la règle 2 (noms en majuscules), le trigger doit être :",
+     "options": [
+      "AFTER ligne",
+      "BEFORE ligne",
+      "BEFORE ordre",
+      "AFTER ordre"
+     ],
+     "answer": 1,
+     "explain": "On modifie `:NEW`, ce qui n'est possible que dans un trigger **BEFORE** de ligne."
+    },
+    {
+     "type": "choice",
+     "q": "Pour la règle 3 (journal), quel moment et quel mode ?",
+     "options": [
+      "BEFORE ordre",
+      "AFTER ligne, avec INSERTING/UPDATING/DELETING",
+      "BEFORE ligne",
+      "INSTEAD OF"
+     ],
+     "answer": 1,
+     "explain": "On trace après l'écriture, pour chaque ligne, avec les prédicats pour savoir quelle opération a eu lieu."
+    },
+    {
+     "type": "choice",
+     "q": "Pour la règle 4 (stock), le trigger est posé sur quelle table ?",
+     "options": [
+      "produits",
+      "commandes",
+      "journal",
+      "clients"
+     ],
+     "answer": 1,
+     "explain": "La commande est l'événement déclencheur : trigger **AFTER INSERT ON commandes**, qui modifie `produits`."
+    },
+    {
+     "type": "exercise",
+     "q": "Écris l'instruction centrale de ce trigger : décrémenter le stock du produit commandé (`:NEW.produit_id`) de `:NEW.quantite`.",
+     "hints": [
+      "UPDATE produits SET stock = stock - ...",
+      "WHERE id = :NEW.produit_id"
+     ],
+     "accept": [
+      "UPDATE produits SET stock = stock - :NEW.quantite WHERE id = :NEW.produit_id;"
+     ],
+     "solution": "UPDATE produits\nSET    stock = stock - :NEW.quantite\nWHERE  id = :NEW.produit_id;",
+     "explain": "`produits` n'est pas la table en mutation (c'est `commandes`), donc pas d'ORA-04091."
+    },
+    {
+     "type": "choice",
+     "q": "Un collègue ajoute un `COMMIT;` à la fin du trigger de stock. Que se passe-t-il ?",
+     "options": [
+      "Rien",
+      "ORA-04092 : COMMIT interdit dans un trigger",
+      "Le stock est plus sûr",
+      "La commande est validée deux fois"
+     ],
+     "answer": 1,
+     "explain": "On ne valide jamais dans un trigger : la transaction appartient à l'ordre qui l'a déclenché."
+    },
+    {
+     "type": "choice",
+     "q": "Lequel de ces besoins est le mieux traité par une simple contrainte plutôt que par un trigger ?",
+     "options": [
+      "Journaliser les modifications",
+      "Interdire un stock négatif : CHECK (stock >= 0)",
+      "Décrémenter le stock à chaque commande",
+      "Mettre les noms en majuscules"
+     ],
+     "answer": 1,
+     "explain": "Une contrainte `CHECK` suffit pour une règle simple sur une colonne. Les trois autres demandent du code."
+    },
+    {
+     "type": "say",
+     "text": "🎉 Bravo ! Tu connais maintenant les triggers : types, `:OLD`/`:NEW`, `WHEN`, audit, règles métier, restrictions et gestion. Révise les erreurs **ORA-04091** et **ORA-04092** : elles tombent souvent."
+    }
+   ]
+  }
+ ]
+}
