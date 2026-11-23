@@ -129,6 +129,12 @@ export interface ReviewItem {
   box: number; // 1..5 (Leitner)
   due: string; // YYYY-MM-DD
   seen: number;
+  /** Intervalle actuel en jours (absent sur les anciens éléments : déduit de `box`). */
+  ivl?: number;
+  /** Facilité propre à l'élément (1.3 = difficile … 3 = facile). */
+  ease?: number;
+  /** Nombre d'oublis (réponses ratées après un rappel). */
+  lapses?: number;
 }
 export type FiliereId = 'ARI' | 'AIP';
 /** Année d'études : 2 (L2) ou 3 (L3). Les comptes et modules sans année sont en 3ᵉ année. */

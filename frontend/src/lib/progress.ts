@@ -3,7 +3,7 @@
  * Facile à tester et indépendante du stockage (local ou Supabase).
  */
 import { BADGES, Ctx, XP, evaluateBadges, levelFromXp } from './gamification';
-import type { AnneeId, Attempt, AttemptKind, BackendThemeId, FiliereId, Formation, Summary, UserState, XpLine } from './types';
+import type { AnneeId, Attempt, AttemptKind, BackendThemeId, FiliereId, Formation, ReviewItem, Summary, UserState, XpLine } from './types';
 import { addDays, diffDays, todayKey, uid } from './utils';
 
 /** 2 ou 3 ; toute autre valeur (ou absence) = 3ᵉ année, pour les comptes existants. */
@@ -117,13 +117,24 @@ function finish(s0: UserState, ctx: Ctx, base: Omit<Summary, 'xp' | 'lines' | 'l
   return { state: b.state, summary };
 }
 
-// ---------- Répétition espacée (Leitner) ----------
+// ---------- Répétition espacée adaptative (type SM-2) ----------
+// Chaque élément garde un intervalle (ivl, en jours) et une « facilité » (ease) qui lui est propre :
+// une question que tu rates souvent revient plus vite, une question facile s'espace plus vite.
+// `box` (1..5) reste renseigné pour les anciens écrans et les statistiques admin.
 export const BOX_DAYS: Record<number, number> = { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 };
-function promote(it: { box: number; seen: number }, today: string) {
-  const box = Math.min(it.box + 1, 6);
-  return box > 5 ? null : { box, due: addDays(today, BOX_DAYS[box]), seen: it.seen + 1 };
+const GRADUATE_DAYS = 60;
+const boxOf = (ivl: number) => (ivl <= 1 ? 1 : ivl <= 3 ? 2 : ivl <= 7 ? 3 : ivl <= 14 ? 4 : 5);
+function promote(it: ReviewItem, today: string): ReviewItem | null {
+  const prev = it.ivl ?? BOX_DAYS[it.box] ?? 1;
+  const ease = Math.min(3, (it.ease ?? 2.5) + 0.05);
+  const ivl = prev <= 1 ? 3 : prev <= 3 ? 7 : Math.round(prev * ease);
+  if (ivl >= GRADUATE_DAYS) return null; // maîtrisé : sort de la file
+  return { box: boxOf(ivl), due: addDays(today, ivl), seen: it.seen + 1, ivl, ease, lapses: it.lapses ?? 0 };
 }
-const demote = (it: { seen: number } | undefined, today: string) => ({ box: 1, due: addDays(today, 1), seen: (it?.seen ?? 0) + 1 });
+const demote = (it: ReviewItem | undefined, today: string): ReviewItem => ({
+  box: 1, due: addDays(today, 1), seen: (it?.seen ?? 0) + 1, ivl: 1,
+  ease: Math.max(1.3, (it?.ease ?? 2.5) - 0.2), lapses: (it?.lapses ?? 0) + 1,
+});
 
 export const reviewKey = (moduleId: string, id: string) => `${moduleId}:${id}`;
 
@@ -263,7 +274,7 @@ export function applyCards(s: UserState, ctx: Ctx, inp: CardsInput) {
     const k = `${inp.moduleId}:fc:${id}`;
     const cur = review[k];
     if (cur) { const nx = promote(cur, today); if (nx) review[k] = nx; else delete review[k]; }
-    else review[k] = { box: 2, due: addDays(today, BOX_DAYS[2]), seen: 1 };
+    else review[k] = { box: 2, due: addDays(today, 3), seen: 1, ivl: 3, ease: 2.5, lapses: 0 };
   }
   for (const id of inp.unknown) review[`${inp.moduleId}:fc:${id}`] = demote(review[`${inp.moduleId}:fc:${id}`], today);
   const gain = Math.min(XP.cardCap, inp.known.length * XP.cardKnown);

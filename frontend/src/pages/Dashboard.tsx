@@ -12,7 +12,7 @@ import {
 import { Bar, Ring } from '@/components/ui';
 import { useMyModules } from '@/state/useAnnee';
 import { levelProgress, nextTier, tierFor, XP } from '@/lib/gamification';
-import { dueCardIds, dueQuestionIds } from '@/lib/progress';
+import { dueByModule, weakChapters } from '@/lib/adaptive';
 import { moduleRatio, nextChapter } from '@/lib/stats';
 import { fmtDate, fmtNum, fmtScore } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
@@ -31,10 +31,9 @@ export default function Dashboard() {
   const tier = tierFor(lp.level);
   const nt = nextTier(lp.level);
   const goalRatio = Math.min(1, state.daily.xp / state.dailyGoal);
-  const due = modules.reduce(
-    (n, m) => n + dueQuestionIds(state, m.id).length + dueCardIds(state, m.id).length,
-    0,
-  );
+  const dueMods = dueByModule(state, modules);
+  const due = dueMods.reduce((n, d) => n + d.questions + d.cards, 0);
+  const weak = weakChapters(state, modules);
   const last = state.attempts[0];
   const resume =
     modules.find((m) => (state.chaptersRead[m.id]?.length ?? 0) > 0 && moduleRatio(state, m) < 1) ??
@@ -151,9 +150,9 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* ==================== RÉVISIONS ESPACÉES DUES ==================== */}
+      {/* ==================== À RÉVISER AUJOURD'HUI (répétition espacée, tous modules) ==================== */}
       {due > 0 && (
-        <section className="card flex flex-wrap items-center justify-between gap-3 border-2 border-brand/25 bg-soft/60 p-5">
+        <section className="card space-y-3 border-2 border-brand/25 bg-soft/60 p-5">
           <div className="flex items-center gap-3">
             <FlameBadgeIcon size={28} />
             <div>
@@ -161,18 +160,60 @@ export default function Dashboard() {
                 {due} élément{due > 1 ? 's' : ''} à réviser aujourd’hui
               </div>
               <div className="text-xs font-bold text-muted">
-                La répétition espacée fixe tes notions durablement avant les examens.
+                Chaque question revient juste avant que tu l’oublies : plus tu la réussis, plus elle s’espace.
               </div>
             </div>
           </div>
-          {modules
-            .filter((m) => dueQuestionIds(state, m.id).length > 0)
-            .slice(0, 1)
-            .map((m) => (
-              <Link key={m.id} to={`/m/${m.id}/qcm?mode=review`} className="btn btn-primary">
-                Réviser maintenant <ArrowRight size={16} />
-              </Link>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {dueMods.map((d) => (
+              <li key={d.moduleId} className="flex items-center justify-between gap-3 rounded-2xl border border-line/70 bg-card p-3">
+                <div className="min-w-0">
+                  <div className="truncate font-display text-sm font-extrabold">{d.title}</div>
+                  <div className="text-[11px] font-bold text-muted">
+                    {d.questions > 0 && `${d.questions} question${d.questions > 1 ? 's' : ''}`}
+                    {d.questions > 0 && d.cards > 0 && ' · '}
+                    {d.cards > 0 && `${d.cards} carte${d.cards > 1 ? 's' : ''}`}
+                  </div>
+                </div>
+                <Link
+                  to={d.questions > 0 ? `/m/${d.moduleId}/qcm?mode=review` : `/m/${d.moduleId}/cartes`}
+                  className="btn btn-primary !px-3 !py-1.5 text-xs"
+                >
+                  Réviser <ArrowRight size={14} />
+                </Link>
+              </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* ==================== CHAPITRES À RENFORCER (maîtrise estimée) ==================== */}
+      {weak.length > 0 && (
+        <section className="card space-y-3 p-5">
+          <div>
+            <h2 className="font-display text-lg font-extrabold">Chapitres à renforcer</h2>
+            <p className="text-xs font-bold text-muted">D’après tes réponses aux QCM : voilà où tu perds le plus de points.</p>
+          </div>
+          <ul className="space-y-2">
+            {weak.map((w) => (
+              <li key={`${w.moduleId}:${w.chapterId}`}>
+                <Link
+                  to={`/m/${w.moduleId}/qcm?chap=${encodeURIComponent(w.chapterId)}`}
+                  className="flex items-center gap-3 rounded-2xl border border-line/70 bg-card p-3 transition hover:border-brand/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-extrabold">{w.chapterTitle}</div>
+                    <div className="truncate text-[11px] font-bold text-muted">{w.moduleTitle}</div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line/60">
+                      <div className="h-full rounded-full bg-bad" style={{ width: `${Math.max(6, Math.round(w.mastery * 100))}%` }} />
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs font-extrabold text-bad">{Math.round(w.mastery * 100)} %</span>
+                  <ArrowRight size={14} className="shrink-0 text-muted" />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

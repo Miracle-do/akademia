@@ -169,13 +169,23 @@ function addAttempt(state, attempt) {
   return { ...state, attempts: [...state.attempts, entry].slice(-300) };
 }
 
+// Répétition espacée adaptative (type SM-2) : voir frontend/src/lib/progress.ts (même algorithme).
+const GRADUATE_DAYS = 60;
+const boxOf = (ivl) => (ivl <= 1 ? 1 : ivl <= 3 ? 2 : ivl <= 7 ? 3 : ivl <= 14 ? 4 : 5);
+
 function promote(item, today) {
-  const box = Math.min(item.box + 1, 6);
-  return box > 5 ? null : { box, due: dateOffset(today, BOX_DAYS[box]), seen: item.seen + 1 };
+  const prev = item.ivl ?? BOX_DAYS[item.box] ?? 1;
+  const ease = Math.min(3, (item.ease ?? 2.5) + 0.05);
+  const ivl = prev <= 1 ? 3 : prev <= 3 ? 7 : Math.round(prev * ease);
+  if (ivl >= GRADUATE_DAYS) return null;
+  return { box: boxOf(ivl), due: dateOffset(today, ivl), seen: item.seen + 1, ivl, ease, lapses: item.lapses ?? 0 };
 }
 
 function demote(item, today) {
-  return { box: 1, due: dateOffset(today, 1), seen: (item?.seen || 0) + 1 };
+  return {
+    box: 1, due: dateOffset(today, 1), seen: (item?.seen || 0) + 1, ivl: 1,
+    ease: Math.max(1.3, (item?.ease ?? 2.5) - 0.2), lapses: (item?.lapses ?? 0) + 1,
+  };
 }
 
 function requireModule(moduleId, content) {
@@ -309,7 +319,7 @@ function applyCards(state, modules, input, content) {
     const key = `${module.id}:fc:${id}`;
     const current = review[key];
     if (current) { const next = promote(current, today); if (next) review[key] = next; else delete review[key]; }
-    else review[key] = { box: 2, due: dateOffset(today, BOX_DAYS[2]), seen: 1 };
+    else review[key] = { box: 2, due: dateOffset(today, 3), seen: 1, ivl: 3, ease: 2.5, lapses: 0 };
   }
   for (const id of unknown) review[`${module.id}:fc:${id}`] = demote(review[`${module.id}:fc:${id}`], today);
   const gain = Math.min(XP.cardCap, known.length * XP.cardKnown);
@@ -464,6 +474,8 @@ module.exports = {
   normalizeAnnee,
   themeForFiliere,
   applyAction,
+  promote,
+  demote,
   defaultState,
   importLegacyState,
   normalizeState,

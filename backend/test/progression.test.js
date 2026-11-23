@@ -266,3 +266,27 @@ test('la Battle oppose ARI et AIP au sein d’une même année', () => {
   assert.equal(y2.id, 'battle-2026-11-02-a2');
   assert.equal(y2.annee, 2);
 });
+
+test('spaced repetition: intervals grow on success, reset and lose ease on a miss', () => {
+  const today = '2026-11-23';
+  let item = progression.demote(undefined, today);
+  assert.equal(item.ivl, 1);
+  assert.equal(item.lapses, 1);
+  assert.equal(item.due, '2026-11-24');
+  const ivls = [];
+  for (let i = 0; i < 3; i++) { item = progression.promote(item, today); ivls.push(item.ivl); }
+  assert.deepEqual(ivls.slice(0, 2), [3, 7]);
+  assert.ok(ivls[2] > 7, 'le 3e intervalle dépasse une semaine');
+  const hard = progression.demote(item, today);
+  assert.equal(hard.ivl, 1);
+  assert.ok(hard.ease < item.ease, 'une erreur réduit la facilité');
+  assert.ok(hard.ease >= 1.3);
+});
+
+test('spaced repetition: legacy Leitner items still work and long intervals graduate', () => {
+  const legacy = { box: 3, due: '2026-11-20', seen: 2 };
+  const next = progression.promote(legacy, '2026-11-23');
+  assert.ok(next.ivl >= 7);
+  let item = { box: 5, due: '2026-11-23', seen: 9, ivl: 45, ease: 2.8, lapses: 0 };
+  assert.equal(progression.promote(item, '2026-11-23'), null);
+});
