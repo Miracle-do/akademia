@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.15.0] — 2026-11-23
+
+### Ajouté
+- Module Bases de données Oracle (3ᵉ année) : formation « Les triggers de A à Z » (9 leçons, 15 exercices) : anatomie, 12 types et ordre d'exécution, :OLD / :NEW / WHEN, journal d'audit, règles métier, ORA-04091 et ORA-04092, gestion (USER_TRIGGERS, ENABLE/DISABLE), INSTEAD OF et trigger composé, défi final.
+
 ## [1.14.0] — 2026-11-22
 
 ### Ajouté
