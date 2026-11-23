@@ -2,22 +2,17 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
-  Check,
   ChevronRight,
   Clock,
   Gears,
   Grades,
   GraduationHat,
-  Info,
-  Lock,
-  Logout,
   Sparkles,
   Star,
   TextBubble,
 } from '@getpapillon/papicons';
 import { fetchLeaderboard } from '@/data/repo';
 import { useAnnee } from '@/state/useAnnee';
-import type { AnneeId } from '@/lib/types';
 import { getPublicProfile, PublicProfile } from '@/data/social';
 import { levelProgress } from '@/lib/gamification';
 import { cn, fmtNum } from '@/lib/utils';
@@ -28,19 +23,15 @@ import { Mascot } from '@/components/Mascot';
 import { renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 import { FlameBadgeIcon, TrophyBadgeIcon } from '@/components/Decor';
 import { CustomAvatar } from '@/components/CustomAvatar';
-import { isStandalone, triggerInstallPrompt } from '@/components/InstallPwaModal';
-import PushToggle from '@/components/PushToggle';
 import VersionBadge from '@/components/VersionBadge';
 import { Empty, PageTitle, Spinner, Stat } from '@/components/ui';
 
 export default function ProfilePage() {
   const { userId } = useParams();
-  const { user, signOut, updateProfile, cloud } = useAuth();
+  const { user } = useAuth();
   const myAnnee = useAnnee();
-  const [anneeBusy, setAnneeBusy] = useState(false);
-  const [anneeMsg, setAnneeMsg] = useState<string | null>(null);
   const { state } = useStore();
-  const { theme, filiere, hasFiliere, setFiliere, customPseudo, setCustomPseudo } = useTheme();
+  const { theme, filiere, customPseudo } = useTheme();
 
   // Public Profile State (if viewing someone else)
   const isPublicView = Boolean(userId && userId !== user?.id);
@@ -49,14 +40,7 @@ export default function ProfilePage() {
   const [publicError, setPublicError] = useState('');
 
   // Self Profile State
-  const [openSection, setOpenSection] = useState<'settings' | 'help' | null>(null);
-  const [pseudoInput, setPseudoInput] = useState(user?.username || customPseudo);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [myRank, setMyRank] = useState<number>(1);
-
-  useEffect(() => {
-    if (user?.username) setPseudoInput(user.username);
-  }, [user?.username]);
 
   // Load public profile if in public view mode
   useEffect(() => {
@@ -189,42 +173,18 @@ export default function ProfilePage() {
   const displayName = user?.username || customPseudo;
   const displayXp = state.xp >= 1000 ? `${(state.xp / 1000).toFixed(1)}k` : fmtNum(state.xp);
 
-  const handleSavePseudo = async () => {
-    const clean = pseudoInput.trim();
-    if (!clean) return;
-    setCustomPseudo(clean);
-    const err = await updateProfile({ username: clean });
-    setSaveMsg(err || 'Profil mis à jour sur le serveur !');
-    setTimeout(() => setSaveMsg(null), 2500);
-  };
-
-  const handleSelectAnnee = async (a: AnneeId) => {
-    if (a === myAnnee || anneeBusy) return;
-    setAnneeBusy(true);
-    const err = await updateProfile({ annee: a });
-    setAnneeBusy(false);
-    setAnneeMsg(err || `Tu es maintenant en ${a}ᵉ année : modules et classement mis à jour.`);
-    setTimeout(() => setAnneeMsg(null), 3500);
-  };
-
-  const handleSelectFiliere = async (f: 'ARI' | 'AIP') => {
-    await setFiliere(f);
-    await updateProfile({ filiere: f });
-  };
-
   return (
     <div className="mx-auto max-w-md space-y-6">
       {/* En-tête Mon Profil + Roue crantée Paramètres */}
       <div className="relative flex items-center justify-center pt-1">
         <h1 className="h-display text-2xl sm:text-3xl">Mon Profil</h1>
-        <button
-          type="button"
-          onClick={() => setOpenSection(openSection === 'settings' ? null : 'settings')}
+        <Link
+          to="/parametres"
           className="absolute right-0 flex h-10 w-10 items-center justify-center rounded-full bg-card text-ink shadow-card transition hover:scale-105"
           aria-label="Paramètres"
         >
           <Gears size={22} />
-        </button>
+        </Link>
       </div>
 
       {/* Avatar Personnalisé avec Initiales et Couleur Filière + Nom + Pilule Niveau */}
@@ -326,10 +286,9 @@ export default function ProfilePage() {
           <ChevronRight size={18} className="text-muted" />
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setOpenSection(openSection === 'settings' ? null : 'settings')}
-          className="flex w-full items-center justify-between p-4 transition hover:bg-soft/50 text-left"
+        <Link
+          to="/parametres"
+          className="flex items-center justify-between p-4 transition hover:bg-soft/50"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-soft text-brand">
@@ -337,168 +296,10 @@ export default function ProfilePage() {
             </span>
             <span className="font-display text-sm font-extrabold text-ink">Paramètres</span>
           </div>
-          <ChevronRight
-            size={18}
-            className={cn('text-muted transition-transform', openSection === 'settings' && 'rotate-90')}
-          />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setOpenSection(openSection === 'help' ? null : 'help')}
-          className="flex w-full items-center justify-between p-4 transition hover:bg-soft/50 text-left"
-        >
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-soft text-brand">
-              <Info size={18} />
-            </span>
-            <span className="font-display text-sm font-extrabold text-ink">Aide & Support</span>
-          </div>
-          <ChevronRight
-            size={18}
-            className={cn('text-muted transition-transform', openSection === 'help' && 'rotate-90')}
-          />
-        </button>
+          <ChevronRight size={18} className="text-muted" />
+        </Link>
       </section>
 
-      {/* ==================== TIROIR PARAMÈTRES ==================== */}
-      {openSection === 'settings' && (
-        <section className="card space-y-4 p-5 animate-fadeIn">
-          <h3 className="font-display text-lg font-extrabold">Paramètres du compte</h3>
-
-          <div>
-            <label className="block text-xs font-extrabold uppercase text-muted mb-1.5">
-              Modifier mon pseudo
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={pseudoInput}
-                onChange={(e) => setPseudoInput(e.target.value)}
-                maxLength={30}
-                className="input flex-1"
-                placeholder="Ton pseudo..."
-              />
-              <button
-                type="button"
-                onClick={handleSavePseudo}
-                className="btn btn-primary whitespace-nowrap"
-              >
-                Enregistrer
-              </button>
-            </div>
-            {saveMsg && <p className="mt-1.5 text-xs font-bold text-good">{saveMsg}</p>}
-          </div>
-
-          <div className="pt-2">
-            <label className="block text-xs font-extrabold uppercase text-muted mb-1.5">
-              Année d’études
-            </label>
-            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Année d’études">
-              {([2, 3] as const).map((a) => {
-                const active = myAnnee === a;
-                return (
-                  <button
-                    key={a}
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    disabled={anneeBusy}
-                    onClick={() => void handleSelectAnnee(a)}
-                    className={cn(
-                      'flex items-center justify-between rounded-2xl border-2 p-3 text-left transition',
-                      active ? 'border-brand bg-soft shadow-sm' : 'border-line/70 bg-card hover:border-brand/40',
-                    )}
-                  >
-                    <div className="font-display text-base font-extrabold">{a}ᵉ année</div>
-                    {active && <Check size={18} className="text-brand" />}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-1.5 text-[11px] font-bold text-muted">
-              À mettre à jour à chaque rentrée (passage de 2ᵉ en 3ᵉ année).
-            </p>
-            {anneeMsg && <p className="mt-1 text-xs font-bold text-good">{anneeMsg}</p>}
-          </div>
-
-          <div className="pt-2">
-            <label className="block text-xs font-extrabold uppercase text-muted mb-1.5">
-              Filière universitaire
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {FILIERES.map((f) => {
-                const active = filiere === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    disabled={hasFiliere}
-                    onClick={() => void handleSelectFiliere(f.id)}
-                    className={cn(
-                      'flex items-center justify-between rounded-2xl border-2 p-3 text-left transition',
-                      active
-                        ? 'border-brand bg-soft shadow-sm'
-                        : 'border-line/70 bg-card hover:border-brand/40',
-                      hasFiliere && 'cursor-not-allowed opacity-90',
-                    )}
-                  >
-                    <div>
-                      <div className="font-display text-base font-extrabold">{f.id}</div>
-                      <div className="text-[10px] font-bold text-muted">{f.name}</div>
-                    </div>
-                    {active && <Check size={18} className="text-brand" />}
-                    {hasFiliere && !active && <Lock size={14} className="text-muted" />}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-1.5 text-[11px] font-bold text-muted flex items-center gap-1">
-              <Lock size={12} /> La filière ne peut plus être modifiée une fois définie.
-            </p>
-          </div>
-
-          {cloud && !user?.guest && <PushToggle />}
-
-          <div className="pt-3 border-t border-line/60 space-y-2">
-            {!isStandalone() && (
-              <button
-                type="button"
-                onClick={triggerInstallPrompt}
-                className="btn btn-primary w-full"
-              >
-                <Sparkles size={16} /> Installer l'application sur mon téléphone
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => void signOut()}
-              className="btn btn-soft w-full text-bad"
-            >
-              <Logout size={18} /> Se déconnecter
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ==================== TIROIR AIDE & SUPPORT ==================== */}
-      {openSection === 'help' && (
-        <section className="card space-y-3 p-5 text-sm animate-fadeIn">
-          <h3 className="font-display text-lg font-extrabold">Comment fonctionne Akademia ?</h3>
-          <p className="font-semibold text-muted">
-            Chaque chapitre lu (+25 XP), QCM réussi, Défi Éclair ou Épreuve te fait monter de niveau et
-            rapporte des points à ta filière (<b>{filiere}</b>) lors de la Battle hebdomadaire !
-          </p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Link to="/modules" className="btn btn-primary !py-2 text-xs">
-              Explorer les modules
-            </Link>
-            <Link to="/actu" className="btn btn-soft !py-2 text-xs">
-              Voir la Battle AIP vs ARI
-            </Link>
-          </div>
-        </section>
-      )}
       <div className="pt-2 text-center">
         <VersionBadge />
       </div>
