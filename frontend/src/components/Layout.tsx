@@ -30,6 +30,7 @@ import { CustomAvatar } from './CustomAvatar';
 import { WeeklyBattleWinnerModal } from './WeeklyBattleWinnerModal';
 import InstallPwaModal from './InstallPwaModal';
 import UpdateBanner from './UpdateBanner';
+import ModeToggle from './ModeToggle';
 import NewPasswordModal from './NewPasswordModal';
 import VersionBadge from './VersionBadge';
 import PushPrompt from './PushPrompt';
@@ -247,9 +248,9 @@ export default function Layout() {
   const displayName = user?.username || customPseudo;
 
   return (
-    <div className="min-h-screen bg-bg text-ink transition-colors duration-300">
+    <div className="min-h-screen bg-bg text-ink transition-colors duration-300 lg:pl-64">
       {/* Sidebar Desktop Playful Soft UI */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col border-r border-line/70 bg-card/80 p-4 shadow-sm backdrop-blur-md lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-line/70 bg-card/80 p-4 shadow-sm backdrop-blur-md lg:flex">
         <div className="px-2 pt-2">
           {/* <Logo /> */}
         </div>
@@ -342,6 +343,7 @@ export default function Layout() {
           </div>
           <div className="flex items-center gap-2">
             <XpChip />
+            <ModeToggle />
             <Link
               to="/recherche"
               className="flex h-9 w-9 items-center justify-center rounded-2xl border border-line/80 bg-card text-muted hover:text-brand shadow-card transition"

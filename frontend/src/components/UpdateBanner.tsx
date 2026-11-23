@@ -41,7 +41,7 @@ export default function UpdateBanner() {
 
   if (!available) return null;
   return (
-    <div role="status" className="fixed inset-x-3 bottom-20 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg md:bottom-4">
+    <div role="status" className="fixed inset-x-3 bottom-20 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg ring-1 ring-white/10 md:bottom-4">
       <span className="flex-1">{newVersion && newVersion !== __APP_VERSION__ ? `Akademia v${newVersion} est disponible.` : "Une nouvelle version d'Akademia est disponible."}</span>
       <button type="button" onClick={() => window.location.reload()} className="rounded-xl bg-white px-3 py-1.5 font-semibold text-slate-900">Actualiser</button>
       <button type="button" aria-label="Plus tard" onClick={() => setAvailable(false)} className="px-1 text-white/70">✕</button>

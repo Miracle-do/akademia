@@ -105,7 +105,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.remove('dark');
     const metaInfo = THEMES.find((x) => x.id === backendTheme) ?? THEMES[0];
     const metaTag = document.querySelector('meta[name="theme-color"]');
-    if (metaTag) metaTag.setAttribute('content', metaInfo.brandHex);
+    if (metaTag && document.documentElement.getAttribute('data-mode') !== 'dark')
+      metaTag.setAttribute('content', metaInfo.brandHex);
     try {
       if (rawFiliere) {
         localStorage.setItem('akademia:filiere', rawFiliere);

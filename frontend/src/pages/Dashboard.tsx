@@ -101,7 +101,7 @@ export default function Dashboard() {
                     'btn btn-lg',
                     theme === 'violet'
                       ? 'btn-primary'
-                      : 'bg-white text-ink shadow-[0_4px_0_0_rgba(0,0,0,0.18)] hover:brightness-95',
+                      : 'bg-white text-slate-900 shadow-[0_4px_0_0_rgba(0,0,0,0.18)] hover:brightness-95',
                   )}
                 >
                   <span>

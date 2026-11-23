@@ -5,6 +5,13 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+### Ajouté
+- Mode sombre complet (bleu nuit / violet nuit, jamais noir pur), pour chaque thème. Choix Auto / Clair / Sombre dans Paramètres > Apparence, et bouton rapide dans l'en-tête. Appliqué avant l'affichage, donc sans flash blanc.
+
+### Corrigé
+- Sur ordinateur, la barre latérale recouvrait le début du contenu.
+- Les champs de saisie des Paramètres n'avaient aucun style (classe `input` manquante).
+
 ## [1.16.0] — 2026-11-23
 
 ### Ajouté

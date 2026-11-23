@@ -20,7 +20,7 @@ const KINDS = {
     label: 'Exemple concret',
     icon: Sparkles,
     mood: 'wink' as MascotMood,
-    cls: 'border-amber-400/45 bg-amber-50/80 pattern-grid',
+    cls: 'border-amber-400/45 bg-amber-50/80 pattern-grid dark:border-amber-400/30 dark:bg-amber-400/10',
     badgeCls: 'bg-amber-500 text-white',
   },
   attention: {

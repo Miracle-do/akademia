@@ -66,7 +66,7 @@ export default function BadgesPage() {
               <div
                 className={cn(
                   'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm',
-                  date ? RARITY_STYLE[b.rarity] : 'from-slate-200 to-slate-300 text-slate-500',
+                  date ? RARITY_STYLE[b.rarity] : 'from-slate-200 to-slate-300 text-slate-500 dark:from-slate-700 dark:to-slate-800 dark:text-slate-400',
                 )}
               >
                 {date ? <Star size={26} /> : <Lock size={22} />}

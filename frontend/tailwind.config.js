@@ -5,6 +5,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['selector', '[data-mode="dark"]'],
   content: [path.join(__dirname, 'index.html'), path.join(__dirname, 'src/**/*.{ts,tsx}')],
   theme: {
     extend: {
@@ -39,8 +40,8 @@ export default {
         '4xl': '2.25rem',
       },
       boxShadow: {
-        card: '0 4px 16px -4px rgb(var(--shadow) / 0.08), 0 2px 6px -1px rgb(var(--shadow) / 0.04)',
-        pop: '0 14px 36px -8px rgb(var(--shadow) / 0.18), 0 4px 12px -2px rgb(var(--shadow) / 0.08)',
+        card: '0 4px 16px -4px rgb(var(--shadow) / var(--shadow-a, 0.08)), 0 2px 6px -1px rgb(var(--shadow) / calc(var(--shadow-a, 0.08) / 2))',
+        pop: '0 14px 36px -8px rgb(var(--shadow) / var(--shadow-pop-a, 0.18)), 0 4px 12px -2px rgb(var(--shadow) / calc(var(--shadow-pop-a, 0.18) / 2))',
         'btn-cta': '0 4px 0 0 rgb(var(--cta-deep))',
         'btn-brand': '0 4px 0 0 rgb(var(--brand-deep))',
         'btn-good': '0 4px 0 0 #15803D',

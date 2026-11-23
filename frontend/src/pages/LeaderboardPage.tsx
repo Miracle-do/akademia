@@ -89,11 +89,11 @@ export default function LeaderboardPage() {
     theme === 'ciel'
       ? {
           c1Mascot: '#1D6FFF',
-          c1Bar: 'bg-[#FDE047] text-ink border-[#FACC15]',
+          c1Bar: 'bg-[#FDE047] text-slate-900 border-[#FACC15]',
           c2Mascot: '#8B5CF6',
-          c2Bar: 'bg-[#DDD6FE] text-ink border-[#C4B5FD]',
+          c2Bar: 'bg-[#DDD6FE] text-slate-900 border-[#C4B5FD]',
           c3Mascot: '#22C55E',
-          c3Bar: 'bg-[#FEF08A]/70 text-ink border-[#FDE047]',
+          c3Bar: 'bg-[#FEF08A]/70 text-slate-900 border-[#FDE047]',
         }
       : {
           c1Mascot: '#7C3AED',

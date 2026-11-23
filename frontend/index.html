@@ -12,6 +12,19 @@
       content="Akademia : Apprends, Progresse, Gagne. Cours, QCM, défis, battles de filières et classement universitaire."
     />
     <meta name="theme-color" content="#FF574A" id="meta-theme-color" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem('akademia:mode') || 'auto';
+          var dark = p === 'dark' || (p === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var t = localStorage.getItem('akademia:theme');
+          if (t) document.documentElement.setAttribute('data-theme', t);
+          document.documentElement.setAttribute('data-mode', dark ? 'dark' : 'light');
+          if (dark) document.getElementById('meta-theme-color').setAttribute('content', '#0B1020');
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Icônes & Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

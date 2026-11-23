@@ -2,6 +2,7 @@ import { FormEvent, ReactNode, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Check, ChevronRight, Info, Lock, Logout, Sparkles } from '@getpapillon/papicons';
 import { cn } from '@/lib/utils';
+import { ModePref, useMode } from '@/lib/mode';
 import type { AnneeId } from '@/lib/types';
 import { useAuth } from '@/state/AuthContext';
 import { useAnnee } from '@/state/useAnnee';
@@ -41,6 +42,7 @@ const readerPref = () => {
 };
 
 export default function SettingsPage() {
+  const { pref: modePref, setPref: setModePref } = useMode();
   const { user, signOut, updateProfile, setNewPassword, cloud } = useAuth();
   const myAnnee = useAnnee();
   const { filiere, hasFiliere, customPseudo, setCustomPseudo } = useTheme();
@@ -147,6 +149,18 @@ export default function SettingsPage() {
           <p className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-muted">
             <Lock size={12} /> {hasFiliere ? 'La filière ne peut plus être modifiée une fois choisie.' : 'Choisis ta filière à l’inscription.'}
           </p>
+        </div>
+      </Section>
+
+      <Section title="Apparence" hint="Clair, sombre, ou selon le réglage de ton téléphone.">
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Mode d’affichage">
+          {([['auto', 'Auto', 'linear-gradient(90deg,#f4f7ff 50%,#101728 50%)'], ['light', 'Clair', '#f4f7ff'], ['dark', 'Sombre', '#101728']] as [ModePref, string, string][]).map(([id, label, bg]) => (
+            <button key={id} type="button" role="radio" aria-checked={modePref === id} onClick={() => setModePref(id)}
+              className={cn('rounded-2xl border-2 p-3 text-left transition', modePref === id ? 'border-brand bg-soft' : 'border-line/70 bg-card hover:border-brand/40')}>
+              <span className="mb-2 block h-8 rounded-lg border border-line/70" style={{ background: bg }} />
+              <span className="text-xs font-extrabold">{label}</span>
+            </button>
+          ))}
         </div>
       </Section>
 
