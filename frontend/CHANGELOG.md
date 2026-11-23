@@ -5,6 +5,8 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.18.0] — 2026-11-23
+
 ### Ajouté
 - Révision espacée adaptative (type SM-2) : chaque question a son propre intervalle et sa propre facilité. Une erreur la ramène à demain et la rend plus fréquente ; les réussites l'espacent (3, 7 jours, puis ×facilité) jusqu'à la sortie de la file après 60 jours. Même algorithme côté serveur (les anciennes données restent compatibles).
 - Accueil : « À réviser aujourd'hui » liste tous les modules concernés (questions et cartes), pas seulement le premier.
