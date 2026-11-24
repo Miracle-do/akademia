@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.20.1] — 2026-11-24
+
+### Modifié
+- Les filières n'ont plus d'emoji : badge sobre avec le code de la filière (page de présentation, inscription, sélecteur de classe, Explorer). Page de présentation allégée (plus de pastilles flottantes).
+
 ## [1.20.0] — 2026-11-24
 
 ### Ajouté
