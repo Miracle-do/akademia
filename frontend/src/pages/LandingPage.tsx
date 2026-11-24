@@ -4,7 +4,7 @@ import { useAuth } from '@/state/AuthContext';
 import { PROGRAMMES } from '@/lib/cursus';
 import { Mascot } from '@/components/Mascot';
 import ModeToggle from '@/components/ModeToggle';
-import { CrossedSwordsIcon, FlameBadgeIcon, FourPointStar, TrophyBadgeIcon, WinnerTrophyCup } from '@/components/Decor';
+import { CrossedSwordsIcon, WinnerTrophyCup } from '@/components/Decor';
 import { cn } from '@/lib/utils';
 
 /** Apparition douce au défilement (désactivée si l'utilisateur réduit les animations). */
@@ -137,7 +137,7 @@ export default function LandingPage() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 lg:grid-cols-2 lg:pt-20">
           <div className="text-center lg:text-left">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-soft px-3.5 py-1 text-xs font-black uppercase tracking-wider text-brand">
-              <FourPointStar size={14} /> La plateforme des étudiants de l’ENEAM
+              La plateforme des étudiants de l’ENEAM
             </span>
             <h1 className="h-display mt-4 text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
               Révise mieux. <span className="text-brand">Joue le jeu.</span> Réussis.
@@ -156,12 +156,6 @@ export default function LandingPage() {
             <div className="absolute -inset-6 rounded-[3rem] bg-brand/10 blur-2xl" />
             <div className="relative">
               <Mascot mood="excited" size={230} graduationCap />
-              <div className="card absolute -left-4 top-4 flex items-center gap-2 px-3 py-2 text-xs font-black sm:-left-10" aria-hidden="true">
-                <FlameBadgeIcon size={24} /> 7 jours de série
-              </div>
-              <div className="card absolute -right-2 bottom-6 flex items-center gap-2 px-3 py-2 text-xs font-black sm:-right-10" aria-hidden="true">
-                <TrophyBadgeIcon size={24} /> Nouveau badge !
-              </div>
             </div>
           </div>
         </div>
@@ -239,9 +233,8 @@ export default function LandingPage() {
             {PROGRAMMES.map((p, i) => (
               <Reveal key={p.id} delay={(i % 4) * 80}>
                 <div className="card flex h-full flex-col items-center p-4 text-center">
-                  <span className="text-3xl" aria-hidden="true">{p.emoji}</span>
-                  <div className="h-display mt-2 text-lg text-brand">{p.short}</div>
-                  <div className="text-xs font-bold text-muted">{p.name}</div>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand font-display text-sm font-black tracking-wide text-white" aria-hidden="true">{p.short}</span>
+                  <div className="mt-3 text-sm font-extrabold leading-snug text-ink">{p.name}</div>
                 </div>
               </Reveal>
             ))}

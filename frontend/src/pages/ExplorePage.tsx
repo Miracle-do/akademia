@@ -28,7 +28,7 @@ export default function ExplorePage() {
           onChange={(n) => setParams({ classe: classCode(n.programme, n.annee) }, { replace: true })}
         />
         <div className="flex flex-wrap items-center gap-3 border-t border-line/60 pt-3">
-          <span className="text-lg" aria-hidden="true">{meta.emoji}</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand font-display text-xs font-black text-white" aria-hidden="true">{meta.short}</span>
           <div className="min-w-0 flex-1">
             <div className="font-display text-lg font-extrabold">{classLabel(picked.programme, picked.annee)}</div>
             <div className="text-xs font-bold text-muted">

@@ -314,11 +314,10 @@ export default function AuthPage() {
                             setSelectedFiliere(null);
                           }}
                           className={cn(
-                            'flex flex-col items-center gap-0.5 rounded-2xl border-2 py-2 font-display text-sm font-extrabold transition',
+                            'flex items-center justify-center rounded-2xl border-2 py-2.5 font-display text-sm font-extrabold transition',
                             active ? 'border-brand bg-soft/75 text-ink shadow-sm' : 'border-line bg-bg/60 text-muted hover:bg-soft/40',
                           )}
                         >
-                          <span className="text-lg leading-none" aria-hidden="true">{p.emoji}</span>
                           {p.short}
                         </button>
                       );

@@ -31,7 +31,7 @@ export default function ClassPicker({ programme, annee, onChange, mine }: Props)
                 active ? 'border-brand bg-brand text-white shadow-card' : 'border-line/70 bg-card text-ink hover:border-brand/40',
               )}
             >
-              <span aria-hidden="true">{p.emoji}</span> {p.short}
+              {p.short}
               {mine?.programme === p.id && <span className="ml-1 text-[9px] opacity-80">●</span>}
             </button>
           );

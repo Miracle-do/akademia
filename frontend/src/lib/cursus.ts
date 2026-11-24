@@ -8,7 +8,6 @@ export interface Programme {
   id: ProgrammeId;
   short: string;
   name: string;
-  emoji: string;
   theme: ThemeId;
   annees: AnneeId[];
   /** Spécialités par année, ex. { '3': ['ARI','AIP'] } pour IG. */
