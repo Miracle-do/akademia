@@ -38,6 +38,7 @@ Les comptes, la progression, le classement et les notifications passent par Expr
    - Limites de débit par IP : 300 requêtes/min sur l’API, 20 tentatives/15 min sur connexion, inscription et réinitialisation, 60 écritures/min (messages, likes, commentaires), 30 tentatives/15 min sur l’administration.
 
 ### Rappels d’inactivité et nouveautés
+0. Exécute `frontend/supabase/migration-cursus.sql` (filières, années 1 à 3, spécialité IG3 uniquement). À faire avant de déployer cette version.
 1. Exécute `frontend/supabase/migration-notifications.sql` dans le SQL Editor de Supabase (crée la boîte de notifications, l’état des rappels et la mémoire des nouveautés).
 2. Sur Render, ajoute `CRON_SECRET` (chaîne longue et aléatoire).
 3. Dans GitHub → Settings → Secrets and variables → Actions, crée `API_URL` (adresse de l’API, sans `/api`) et `CRON_SECRET` (même valeur). Le workflow `.github/workflows/rappels.yml` appelle l’API chaque heure ; il peut aussi être lancé à la main (onglet Actions).

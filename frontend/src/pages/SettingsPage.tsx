@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { Bell, Check, ChevronRight, Info, Lock, Logout, Sparkles } from '@getpapillon/papicons';
 import { cn } from '@/lib/utils';
 import { ModePref, useMode } from '@/lib/mode';
-import type { AnneeId } from '@/lib/types';
+import type { AnneeId, FiliereId } from '@/lib/types';
+import { classLabel, specialitesFor, type ProgrammeId } from '@/lib/cursus';
+import ClassPicker from '@/components/ClassPicker';
 import { useAuth } from '@/state/AuthContext';
-import { useAnnee } from '@/state/useAnnee';
+import { useIdentity } from '@/state/useAnnee';
 import { FILIERES, useTheme } from '@/state/Theme';
 import { isStandalone, triggerInstallPrompt } from '@/components/InstallPwaModal';
 import PushToggle from '@/components/PushToggle';
@@ -44,14 +46,16 @@ const readerPref = () => {
 export default function SettingsPage() {
   const { pref: modePref, setPref: setModePref } = useMode();
   const { user, signOut, updateProfile, setNewPassword, cloud } = useAuth();
-  const myAnnee = useAnnee();
-  const { filiere, hasFiliere, customPseudo, setCustomPseudo } = useTheme();
+  const mine = useIdentity();
+  const { filiere, customPseudo, setCustomPseudo } = useTheme();
   const signedIn = Boolean(user && !user.guest && cloud);
 
   const [pseudo, setPseudo] = useState(user?.username || customPseudo);
   const [pseudoMsg, setPseudoMsg] = useState<{ ok: boolean; t: string } | null>(null);
-  const [anneeBusy, setAnneeBusy] = useState(false);
-  const [anneeMsg, setAnneeMsg] = useState<{ ok: boolean; t: string } | null>(null);
+  const [draft, setDraft] = useState<{ programme: ProgrammeId; annee: AnneeId }>({ programme: mine.programme, annee: mine.annee });
+  const [draftSpec, setDraftSpec] = useState<FiliereId | null>(null);
+  const [classBusy, setClassBusy] = useState(false);
+  const [classMsg, setClassMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [reader, setReader] = useState<'sm' | 'lg'>(readerPref);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -71,12 +75,25 @@ export default function SettingsPage() {
     setPseudoMsg(err ? { ok: false, t: err } : { ok: true, t: 'Pseudo enregistré.' });
   };
 
-  const chooseAnnee = async (a: AnneeId) => {
-    if (a === myAnnee || anneeBusy) return;
-    setAnneeBusy(true);
-    const err = await updateProfile({ annee: a });
-    setAnneeBusy(false);
-    setAnneeMsg(err ? { ok: false, t: err } : { ok: true, t: `Tu es en ${a}ᵉ année : modules et classement mis à jour.` });
+  const draftSpecs = specialitesFor(draft.programme, draft.annee);
+  const needsSpecChoice = draftSpecs.length > 0 && !mine.filiere; // spécialité à choisir (définitive)
+  const classChanged = draft.programme !== mine.programme || draft.annee !== mine.annee;
+  const canSaveClass = classChanged && !classBusy && (!needsSpecChoice || !!draftSpec);
+
+  const saveClass = async () => {
+    if (!canSaveClass) return;
+    setClassBusy(true);
+    const err = await updateProfile({
+      programme: draft.programme,
+      annee: draft.annee,
+      ...(needsSpecChoice && draftSpec ? { filiere: draftSpec } : {}),
+    });
+    setClassBusy(false);
+    setClassMsg(
+      err
+        ? { ok: false, t: err }
+        : { ok: true, t: `Tu es en ${classLabel(draft.programme, draft.annee)} : cours et classement mis à jour.` },
+    );
   };
 
   const chooseReader = (v: 'sm' | 'lg') => {
@@ -119,37 +136,50 @@ export default function SettingsPage() {
         </form>
 
         <div>
-          <p className="mb-1.5 text-xs font-extrabold uppercase text-muted">Année d’études</p>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Année d’études">
-            {([2, 3] as const).map((a) => (
-              <button key={a} type="button" role="radio" aria-checked={myAnnee === a} disabled={anneeBusy} onClick={() => void chooseAnnee(a)}
-                className={cn('flex items-center justify-between rounded-2xl border-2 p-3 text-left transition', myAnnee === a ? 'border-brand bg-soft' : 'border-line/70 bg-card hover:border-brand/40')}>
-                <span className="font-display text-base font-extrabold">{a}ᵉ année</span>
-                {myAnnee === a && <Check size={18} className="text-brand" />}
-              </button>
-            ))}
+          <p className="mb-1.5 text-xs font-extrabold uppercase text-muted">Ma classe</p>
+          <ClassPicker
+            programme={draft.programme}
+            annee={draft.annee}
+            mine={{ programme: mine.programme, annee: mine.annee }}
+            onChange={(n) => {
+              setDraft(n);
+              setClassMsg(null);
+              setDraftSpec(null);
+            }}
+          />
+          {needsSpecChoice && (
+            <div className="mt-3">
+              <p className="mb-1.5 text-xs font-extrabold uppercase text-muted">Spécialité (définitive)</p>
+              <div className="grid grid-cols-2 gap-2">
+                {FILIERES.map((f) => (
+                  <button key={f.id} type="button" onClick={() => setDraftSpec(f.id)}
+                    className={cn('rounded-2xl border-2 p-3 text-left transition', draftSpec === f.id ? 'border-brand bg-soft' : 'border-line/70 bg-card hover:border-brand/40')}>
+                    <div className="font-display text-base font-extrabold">{f.id}</div>
+                    <div className="text-[10px] font-bold text-muted">{f.full}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {draft.programme !== mine.programme && (
+            <p className="mt-2 rounded-xl bg-soft px-3 py-2 text-[11px] font-bold text-muted">
+              Tu changes de filière : tu gardes ton XP et tes badges, mais tu passes dans les cours et le classement de la nouvelle classe.
+            </p>
+          )}
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <Feedback msg={classMsg} />
+            <button type="button" className="btn btn-primary ml-auto whitespace-nowrap" disabled={!canSaveClass} onClick={() => void saveClass()}>
+              {classBusy ? 'Enregistrement…' : 'Enregistrer ma classe'}
+            </button>
           </div>
-          <p className="mt-1.5 text-[11px] font-bold text-muted">À mettre à jour à chaque rentrée. Les modules et le classement changent avec l’année.</p>
-          <Feedback msg={anneeMsg} />
+          <p className="mt-1.5 text-[11px] font-bold text-muted">À mettre à jour à chaque rentrée.</p>
         </div>
 
-        <div>
-          <p className="mb-1.5 text-xs font-extrabold uppercase text-muted">Filière</p>
-          <div className="grid grid-cols-2 gap-2">
-            {FILIERES.map((f) => (
-              <div key={f.id} className={cn('flex items-center justify-between rounded-2xl border-2 p-3', filiere === f.id ? 'border-brand bg-soft' : 'border-line/70 bg-card opacity-70')}>
-                <div>
-                  <div className="font-display text-base font-extrabold">{f.id}</div>
-                  <div className="text-[10px] font-bold text-muted">{f.name}</div>
-                </div>
-                {filiere === f.id ? <Check size={18} className="text-brand" /> : <Lock size={14} className="text-muted" />}
-              </div>
-            ))}
-          </div>
-          <p className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-muted">
-            <Lock size={12} /> {hasFiliere ? 'La filière ne peut plus être modifiée une fois choisie.' : 'Choisis ta filière à l’inscription.'}
+        {filiere && (
+          <p className="flex items-center gap-1.5 rounded-2xl bg-soft/60 p-3 text-[11px] font-bold text-muted">
+            <Lock size={12} /> Spécialité {filiere} : elle ne peut plus être modifiée une fois choisie.
           </p>
-        </div>
+        )}
       </Section>
 
       <Section title="Apparence" hint="Clair, sombre, ou selon le réglage de ton téléphone.">

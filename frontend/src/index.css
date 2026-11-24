@@ -100,6 +100,122 @@
 }
 
 
+/* ---------- Thème Vert Émeraude ---------- */
+[data-theme='emeraude'] {
+  --bg: 245 250 246;
+  --bg-tinted: 227 245 234;
+  --card: 255 255 255;
+  --soft: 211 240 223;
+  --ink: 14 42 30;
+  --muted: 86 118 100;
+  --line: 214 232 220;
+  --brand: 13 148 92;
+  --brand-light: 52 190 130;
+  --brand-deep: 10 117 72;
+  --cta: 13 148 92;
+  --cta-deep: 10 117 72;
+  --cta-ink: 255 255 255;
+  --night: 8 58 40;
+  --accent: 255 176 32;
+  --good: 34 197 94;
+  --bad: 239 68 68;
+  --gold: 255 201 60;
+  --shadow: 10 45 30;
+}
+
+/* ---------- Thème Ambre Doré ---------- */
+[data-theme='ambre'] {
+  --bg: 253 249 240;
+  --bg-tinted: 255 243 220;
+  --card: 255 255 255;
+  --soft: 254 235 200;
+  --ink: 43 28 10;
+  --muted: 125 105 80;
+  --line: 236 226 208;
+  --brand: 200 105 5;
+  --brand-light: 245 158 11;
+  --brand-deep: 154 76 4;
+  --cta: 200 105 5;
+  --cta-deep: 154 76 4;
+  --cta-ink: 255 255 255;
+  --night: 66 38 6;
+  --accent: 255 176 32;
+  --good: 34 197 94;
+  --bad: 239 68 68;
+  --gold: 255 201 60;
+  --shadow: 50 30 10;
+}
+
+/* ---------- Thème Rose Magenta ---------- */
+[data-theme='rose'] {
+  --bg: 253 247 249;
+  --bg-tinted: 253 230 240;
+  --card: 255 255 255;
+  --soft: 252 220 235;
+  --ink: 50 16 32;
+  --muted: 130 100 114;
+  --line: 238 222 229;
+  --brand: 219 39 119;
+  --brand-light: 244 114 182;
+  --brand-deep: 157 23 77;
+  --cta: 219 39 119;
+  --cta-deep: 157 23 77;
+  --cta-ink: 255 255 255;
+  --night: 76 12 48;
+  --accent: 255 176 32;
+  --good: 34 197 94;
+  --bad: 239 68 68;
+  --gold: 255 201 60;
+  --shadow: 60 20 40;
+}
+
+/* ---------- Thème Bleu Ardoise ---------- */
+[data-theme='ardoise'] {
+  --bg: 246 247 250;
+  --bg-tinted: 232 236 246;
+  --card: 255 255 255;
+  --soft: 222 227 242;
+  --ink: 22 28 48;
+  --muted: 100 108 134;
+  --line: 222 225 235;
+  --brand: 71 85 140;
+  --brand-light: 129 142 196;
+  --brand-deep: 46 56 100;
+  --cta: 71 85 140;
+  --cta-deep: 46 56 100;
+  --cta-ink: 255 255 255;
+  --night: 22 28 62;
+  --accent: 255 176 32;
+  --good: 34 197 94;
+  --bad: 239 68 68;
+  --gold: 255 201 60;
+  --shadow: 22 28 55;
+}
+
+/* ---------- Thème Bordeaux ---------- */
+[data-theme='bordeaux'] {
+  --bg: 252 247 247;
+  --bg-tinted: 253 232 236;
+  --card: 255 255 255;
+  --soft: 251 221 228;
+  --ink: 42 14 20;
+  --muted: 126 98 104;
+  --line: 238 222 225;
+  --brand: 159 18 57;
+  --brand-light: 232 80 110;
+  --brand-deep: 112 10 40;
+  --cta: 159 18 57;
+  --cta-deep: 112 10 40;
+  --cta-ink: 255 255 255;
+  --night: 60 8 28;
+  --accent: 255 176 32;
+  --good: 34 197 94;
+  --bad: 239 68 68;
+  --gold: 255 201 60;
+  --shadow: 48 14 22;
+}
+
+
 /* =====================================================================
    MODE SOMBRE : surcharge des mêmes variables, par thème.
    Fonds bleu nuit teintés (jamais noir pur), cartes plus claires que le fond,
@@ -181,6 +297,91 @@
   --cta-deep: 14 130 168;
   --cta-ink: 6 30 42;
   --night: 5 40 56;
+}
+
+[data-mode='dark'][data-theme='emeraude'] {
+  --bg: 7 15 12;
+  --bg-tinted: 10 26 20;
+  --card: 13 24 19;
+  --soft: 20 46 35;
+  --ink: 230 245 237;
+  --muted: 138 170 152;
+  --line: 30 56 44;
+  --brand: 24 168 108;
+  --brand-light: 74 205 150;
+  --brand-deep: 10 117 72;
+  --cta: 24 168 108;
+  --cta-deep: 10 117 72;
+  --cta-ink: 255 255 255;
+  --night: 5 28 20;
+}
+
+[data-mode='dark'][data-theme='ambre'] {
+  --bg: 17 12 7;
+  --bg-tinted: 34 24 10;
+  --card: 26 19 11;
+  --soft: 52 36 14;
+  --ink: 250 241 226;
+  --muted: 186 164 130;
+  --line: 62 46 26;
+  --brand: 217 119 14;
+  --brand-light: 251 170 60;
+  --brand-deep: 154 76 4;
+  --cta: 217 119 14;
+  --cta-deep: 154 76 4;
+  --cta-ink: 255 255 255;
+  --night: 30 18 4;
+}
+
+[data-mode='dark'][data-theme='rose'] {
+  --bg: 18 9 14;
+  --bg-tinted: 36 14 26;
+  --card: 28 16 22;
+  --soft: 56 26 42;
+  --ink: 252 235 243;
+  --muted: 190 156 172;
+  --line: 66 40 54;
+  --brand: 230 60 135;
+  --brand-light: 248 130 190;
+  --brand-deep: 157 23 77;
+  --cta: 230 60 135;
+  --cta-deep: 157 23 77;
+  --cta-ink: 255 255 255;
+  --night: 40 8 26;
+}
+
+[data-mode='dark'][data-theme='ardoise'] {
+  --bg: 9 11 20;
+  --bg-tinted: 15 19 36;
+  --card: 17 21 36;
+  --soft: 28 34 62;
+  --ink: 232 235 248;
+  --muted: 150 158 186;
+  --line: 40 47 74;
+  --brand: 99 117 190;
+  --brand-light: 150 165 224;
+  --brand-deep: 56 66 128;
+  --cta: 99 117 190;
+  --cta-deep: 56 66 128;
+  --cta-ink: 255 255 255;
+  --night: 12 15 38;
+}
+
+[data-mode='dark'][data-theme='bordeaux'] {
+  --bg: 17 8 10;
+  --bg-tinted: 34 12 18;
+  --card: 27 15 18;
+  --soft: 54 22 30;
+  --ink: 252 236 238;
+  --muted: 190 154 160;
+  --line: 64 38 44;
+  --brand: 214 40 85;
+  --brand-light: 246 110 140;
+  --brand-deep: 140 14 52;
+  --cta: 214 40 85;
+  --cta-deep: 140 14 52;
+  --cta-ink: 255 255 255;
+  --night: 36 6 16;
 }
 
 html[data-mode='dark'] {

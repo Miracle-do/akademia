@@ -11,6 +11,7 @@ const warn = (m) => { warns++; console.log('  ! ' + m); };
 const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { err(`${f} : JSON invalide (${e.message})`); return null; } };
 
 if (!fs.existsSync(root)) { console.log('Aucun dossier content/modules'); process.exit(1); }
+const cursusData = JSON.parse(fs.readFileSync(path.join(root, '..', 'cursus.json'), 'utf8'));
 const ids = new Set();
 const allFormations = new Map();
 const allFormationRefs = [];
@@ -21,8 +22,20 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
   const mf = path.join(base, 'module.json');
   if (!fs.existsSync(mf)) { err('module.json manquant'); continue; }
   const m = readJson(mf); if (!m) continue;
-  if (m.annee !== undefined && m.annee !== 2 && m.annee !== 3) err(`module ${m.id} : annee doit valoir 2 ou 3 (reçu ${JSON.stringify(m.annee)})`);
-  if (m.annee === undefined) console.log(`  ⚠ module ${m.id} : pas d'annee, considéré en 3ᵉ année`);
+  // Classes destinataires : `cursus: ["IG3"]`, `["GRH1","GRH2"]`, `["IG3-ARI"]`… (voir content/cursus.json)
+  if (m.cursus === undefined) {
+    if (m.annee !== undefined && ![1, 2, 3].includes(m.annee)) err(`module ${m.id} : annee doit valoir 1, 2 ou 3 (reçu ${JSON.stringify(m.annee)})`);
+    console.log(`  ⚠ module ${m.id} : pas de "cursus" (ancien champ annee utilisé), considéré comme IG${m.annee ?? 3}`);
+  } else if (!Array.isArray(m.cursus) || m.cursus.length === 0) {
+    err(`module ${m.id} : "cursus" doit être une liste non vide, ex. ["IG3"]`);
+  } else {
+    for (const code of m.cursus) {
+      const mm = /^([A-Z]+)([123])(?:-([A-Z]+))?$/.exec(String(code));
+      const prog = mm && cursusData.programmes.find((p) => p.id === mm[1]);
+      if (!prog) { err(`module ${m.id} : classe inconnue « ${code} » (attendu ex. IG3, GRH2, IG3-ARI)`); continue; }
+      if (mm[3] && !(prog.specialites?.[mm[2]] ?? []).includes(mm[3])) err(`module ${m.id} : « ${code} » : la spécialité ${mm[3]} n'existe pas pour ${mm[1]}${mm[2]}`);
+    }
+  }
   if (m.id !== dir.name) err(`id "${m.id}" ≠ nom du dossier "${dir.name}"`);
   if (ids.has(m.id)) err(`id dupliqué : ${m.id}`); ids.add(m.id);
   for (const k of ['title', 'subtitle', 'description', 'emoji', 'color', 'chapters', 'parts', 'features']) if (m[k] === undefined) err(`module.json : champ "${k}" manquant`);

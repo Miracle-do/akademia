@@ -15,6 +15,7 @@ const progressService = require('./services/progressService');
 const progressionService = require('./services/progressionService');
 const pushService = require('./services/pushService');
 const notificationService = require('./services/notificationService');
+const cursus = require('./services/cursus');
 const adminService = require('./services/adminService');
 
 const app = express();
@@ -61,9 +62,15 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.get('/api/cursus', (_req, res) => {
+  res.json(cursus.data);
+});
+
 app.get('/api/theme', (req, res) => {
   const filiere = progressionService.normalizeFiliere(req.query.filiere);
-  const theme = progressionService.themeForFiliere(filiere);
+  const theme = req.query.programme || req.query.annee
+    ? cursus.themeFor(req.query.programme, req.query.annee, filiere)
+    : progressionService.themeForFiliere(filiere);
   res.json({
     filiere,
     theme,
@@ -126,6 +133,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res, next) => {
       username: req.body?.username,
       filiere: req.body?.filiere,
       annee: req.body?.annee,
+      programme: req.body?.programme,
     });
     res.status(201).json(result);
   } catch (error) {
@@ -245,11 +253,12 @@ app.get('/api/me', requireUser, async (req, res, next) => {
       progressService.getProfile(req.auth.accessToken, req.auth.user.id).catch(() => null),
       progressService.loadProgress(req.auth.accessToken, req.auth.user.id).catch(() => null),
     ]);
-    const filiere =
-      progressionService.normalizeFiliere(
-        state?.filiere ?? profile?.filiere ?? req.auth.user.filiere,
-      ) || 'ARI';
-    const theme = progressionService.themeForFiliere(filiere);
+    const identity = progressService.identityOf({
+      programme: profile?.programme ?? req.auth.user.programme,
+      annee: profile?.annee ?? req.auth.user.annee,
+      filiere: state?.filiere ?? profile?.filiere ?? req.auth.user.filiere,
+    });
+    const { filiere, theme } = identity;
     const username =
       profile?.username ||
       req.auth.user.username ||
@@ -271,9 +280,7 @@ app.get('/api/me', requireUser, async (req, res, next) => {
       id: req.auth.user.id,
       email: profile?.email || req.auth.user.email,
       username,
-      filiere,
-      annee: progressionService.normalizeAnnee(profile?.annee ?? req.auth.user.annee),
-      theme,
+      ...identity,
     });
   } catch (error) {
     next(error);
@@ -286,6 +293,7 @@ app.patch('/api/me', requireUser, async (req, res, next) => {
       username: req.body?.username,
       filiere: req.body?.filiere,
       annee: req.body?.annee,
+      programme: req.body?.programme,
     });
     res.json(updated);
   } catch (error) {
@@ -297,7 +305,10 @@ app.patch('/api/me', requireUser, async (req, res, next) => {
 app.get('/api/leaderboard', requireUser, async (req, res, next) => {
   try {
     res.json(
-      await progressService.getLeaderboard(req.auth.accessToken, req.query.limit, req.query.annee),
+      await progressService.getLeaderboard(req.auth.accessToken, req.query.limit, {
+        classe: req.query.classe,
+        annee: req.query.annee,
+      }),
     );
   } catch (error) {
     next(error);
@@ -500,14 +511,15 @@ app.get('/api/progress', requireUser, async (req, res, next) => {
       progressService.getProfile(req.auth.accessToken, req.auth.user.id).catch(() => null),
     ]);
     const baseState = loaded || progressionService.defaultState();
-    const filiere =
-      progressionService.normalizeFiliere(
-        baseState.filiere ?? profile?.filiere ?? req.auth.user.filiere,
-      ) || 'ARI';
+    const identity = progressService.identityOf({
+      programme: profile?.programme ?? req.auth.user.programme,
+      annee: profile?.annee ?? req.auth.user.annee,
+      filiere: baseState.filiere ?? profile?.filiere ?? req.auth.user.filiere,
+    });
     const state = {
       ...baseState,
-      filiere,
-      theme: progressionService.themeForFiliere(filiere),
+      filiere: identity.filiere,
+      theme: identity.theme,
     };
     if (!loaded) {
       await progressService
@@ -548,7 +560,7 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
         leaderboardBefore = await progressService.getLeaderboard(
           req.auth.accessToken,
           1000,
-          req.auth.user.annee,
+          { classe: cursus.classCode(req.auth.user.programme, req.auth.user.annee) },
         );
       } catch {
         /* les notifications ne bloquent pas la progression */
@@ -585,7 +597,7 @@ app.post('/api/progress/actions', requireUser, async (req, res, next) => {
           const leaderboardAfter = await progressService.getLeaderboard(
             req.auth.accessToken,
             1000,
-            req.auth.user.annee,
+            { classe: cursus.classCode(req.auth.user.programme, req.auth.user.annee) },
           );
           const overtaken = progressService.overtakenPlayerIds(
             leaderboardBefore,
@@ -657,11 +669,10 @@ app.post('/api/progress/sync', requireUser, async (req, res, next) => {
 async function handleResetProgress(req, res, next) {
   try {
     const current = await progressService.loadProgress(req.auth.accessToken, req.auth.user.id);
-    const filiere = progressionService.normalizeFiliere(current?.filiere) || 'ARI';
     const state = {
       ...progressionService.defaultState(),
-      filiere,
-      theme: progressionService.themeForFiliere(filiere),
+      filiere: progressionService.normalizeFiliere(current?.filiere),
+      theme: current?.theme ?? progressionService.DEFAULT_THEME,
     };
     const saved = await progressService.saveProgress(req.auth.accessToken, req.auth.user.id, state);
     res.json({ ok: true, state: saved });

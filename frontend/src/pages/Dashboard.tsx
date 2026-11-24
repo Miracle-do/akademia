@@ -11,6 +11,7 @@ import {
 } from '@getpapillon/papicons';
 import { Bar, Ring } from '@/components/ui';
 import { useMyModules } from '@/state/useAnnee';
+import { classLabel, isBattleClass } from '@/lib/cursus';
 import { levelProgress, nextTier, tierFor, XP } from '@/lib/gamification';
 import { dueByModule, weakChapters } from '@/lib/adaptive';
 import { moduleRatio, nextChapter } from '@/lib/stats';
@@ -26,7 +27,9 @@ export default function Dashboard() {
   const { state } = useStore();
   const { user } = useAuth();
   const modules = useMyModules();
-  const { theme, filiere, customPseudo } = useTheme();
+  const { theme, identity, filiere, customPseudo } = useTheme();
+  const classe = classLabel(identity.programme, identity.annee, identity.filiere);
+  const inBattle = isBattleClass(identity.programme, identity.annee) && !!filiere;
   const lp = levelProgress(state.xp);
   const tier = tierFor(lp.level);
   const nt = nextTier(lp.level);
@@ -66,7 +69,7 @@ export default function Dashboard() {
             <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-white backdrop-blur-sm">
               <GraduationHat size={15} />
               <span>
-                Filière {filiere} · Niveau {lp.level} ({tier.name})
+                {classe} · Niveau {lp.level} ({tier.name})
               </span>
             </div>
 
@@ -276,7 +279,7 @@ export default function Dashboard() {
             <div className="text-xs font-extrabold uppercase tracking-wide text-muted">
               Classement
             </div>
-            <div className="h-display text-2xl leading-tight">Filière {filiere}</div>
+            <div className="h-display text-2xl leading-tight">Classe {classe}</div>
             <div className="text-[11px] font-bold text-brand">Voir ma place →</div>
           </div>
         </Link>
@@ -369,33 +372,35 @@ export default function Dashboard() {
       </section>
 
       {/* ==================== BANNIÈRE BATTLE DE LA SEMAINE (AIP vs ARI) ==================== */}
-      <section className="card overflow-hidden p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
-              <Crown size={24} />
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
-                  Battle de la semaine
-                </span>
-                <span className="text-xs font-bold text-muted">En direct</span>
+      {inBattle && (
+        <section className="card overflow-hidden p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-btn-brand">
+                <Crown size={24} />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-soft px-2.5 py-0.5 text-[11px] font-extrabold text-brand">
+                    Battle de la semaine
+                  </span>
+                  <span className="text-xs font-bold text-muted">En direct</span>
+                </div>
+                <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
+                  <span>Duel des filières : AIP vs ARI</span>
+                  <CrossedSwordsIcon size={20} className="text-brand" />
+                </h2>
+                <p className="text-xs font-bold text-muted">
+                  Vote pour ta filière et gagne des XP pour hisser ton camp sur la 1re marche !
+                </p>
               </div>
-              <h2 className="h-display mt-0.5 flex items-center gap-1.5 text-xl">
-                <span>Duel des filières : AIP vs ARI</span>
-                <CrossedSwordsIcon size={20} className="text-brand" />
-              </h2>
-              <p className="text-xs font-bold text-muted">
-                Vote pour ta filière et gagne des XP pour hisser ton camp sur la 1re marche !
-              </p>
             </div>
+            <Link to="/actu" className="btn btn-primary">
+              <Newspaper size={18} /> Participer au duel
+            </Link>
           </div>
-          <Link to="/actu" className="btn btn-primary">
-            <Newspaper size={18} /> Participer au duel
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       </section>
 

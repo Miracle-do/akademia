@@ -3,6 +3,7 @@
  * L’API backend concentre désormais la source de vérité pour les données pédagogiques,
  * tandis que le système local reste en fallback pour garder l’application fonctionnelle.
  */
+import { classCode, moduleCodes, moduleVisibleFor } from './cursus';
 import type { ChapterMeta, Exam, Formation, ExamIndexItem, Flashcard, ModuleMeta, Question } from './types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api';
@@ -85,10 +86,18 @@ async function apiGetText(path: string): Promise<string> {
 
 export const modules: ModuleMeta[] = Object.values(metaFiles).sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 
-/** Année d'études d'un module : 2 ou 3 (absent = 3ᵉ année). */
-export const moduleAnnee = (m: ModuleMeta): 2 | 3 => (m.annee === 2 ? 2 : 3);
+/** Classes visées par un module (voir cursus.ts). */
+export const moduleClasses = (m: ModuleMeta): string[] => moduleCodes(m);
 
-export const modulesForAnnee = (annee: 2 | 3): ModuleMeta[] => modules.filter((m) => moduleAnnee(m) === annee);
+/** Modules ouverts à une classe : sa filière + année (et sa spécialité en IG3). */
+export const modulesForClass = (programme: unknown, annee: unknown, specialite?: unknown): ModuleMeta[] =>
+  modules.filter((m) => moduleVisibleFor(m, programme, annee, specialite));
+
+/** Modules d'une classe donnée, toutes spécialités confondues (pour explorer une autre classe). */
+export const modulesOfClass = (programme: unknown, annee: unknown): ModuleMeta[] => {
+  const base = classCode(programme, annee);
+  return modules.filter((m) => moduleCodes(m).some((c) => c === base || c.startsWith(`${base}-`)));
+};
 
 export function getModule(id: string | undefined): ModuleMeta | undefined {
   return modules.find((m) => m.id === id);

@@ -12,7 +12,8 @@ import {
   TextBubble,
 } from '@getpapillon/papicons';
 import { fetchLeaderboard } from '@/data/repo';
-import { useAnnee } from '@/state/useAnnee';
+import { useIdentity } from '@/state/useAnnee';
+import { classLabel } from '@/lib/cursus';
 import { getPublicProfile, PublicProfile } from '@/data/social';
 import { levelProgress } from '@/lib/gamification';
 import { cn, fmtNum } from '@/lib/utils';
@@ -29,7 +30,7 @@ import { Empty, PageTitle, Spinner, Stat } from '@/components/ui';
 export default function ProfilePage() {
   const { userId } = useParams();
   const { user } = useAuth();
-  const myAnnee = useAnnee();
+  const mine = useIdentity();
   const { state } = useStore();
   const { theme, filiere, customPseudo } = useTheme();
 
@@ -67,7 +68,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isPublicView) return;
     let alive = true;
-    fetchLeaderboard(50, myAnnee)
+    fetchLeaderboard(50, mine.programme, mine.annee)
       .then((rows) => {
         if (!alive || !user) return;
         const idx = rows.findIndex((r) => r.id === user.id);
@@ -79,7 +80,7 @@ export default function ProfilePage() {
     return () => {
       alive = false;
     };
-  }, [isPublicView, user, state.xp, myAnnee]);
+  }, [isPublicView, user, state.xp, mine.programme, mine.annee]);
 
   // ==================== RENDU PROFIL PUBLIC JOUEUR ====================
   if (isPublicView) {
@@ -211,7 +212,7 @@ export default function ProfilePage() {
             <span>Niveau {lp.level}</span>
           </span>
           <span className="rounded-full bg-soft px-3 py-1 text-xs font-extrabold text-brand">
-            Filière {filiere}
+            {classLabel(mine.programme, mine.annee, mine.filiere)}
           </span>
         </div>
       </section>

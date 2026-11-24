@@ -17,11 +17,8 @@ const FILIERES = {
 
 const DEFAULT_THEME = 'ciel';
 
-// Année d'études : 2 (L2) ou 3 (L3). Toute autre valeur retombe sur 3 (comptes existants).
-function normalizeAnnee(value) {
-  const n = Number.parseInt(String(value ?? '').replace(/\D/g, ''), 10);
-  return n === 2 ? 2 : 3;
-}
+// Année d'études : 1, 2 ou 3 (toute autre valeur retombe sur 3 : comptes existants). Voir cursus.js.
+const { normalizeAnnee } = require('./cursus');
 
 function normalizeFiliere(value) {
   if (typeof value !== 'string') return null;
@@ -421,14 +418,14 @@ function getBattleWeekBounds(date = new Date()) {
   };
 }
 
-// Une Battle oppose ARI et AIP au sein d'une même année d'études (3 par défaut).
-// L'identifiant de la 3ᵉ année reste `battle-AAAA-MM-JJ` (historique existant) ; la 2ᵉ ajoute `-a2`.
-function computeBattleScores(users = {}, referenceDate = new Date(), annee = 3) {
-  const wantedAnnee = normalizeAnnee(annee);
+// La Battle oppose ARI et AIP et ne concerne que la classe IG3 (seule à avoir des spécialités).
+// L'identifiant reste `battle-AAAA-MM-JJ` (historique existant). Le paramètre `annee` est conservé
+// pour compatibilité mais ignoré : toute autre classe n'a pas de Battle.
+function computeBattleScores(users = {}, referenceDate = new Date(), _annee = 3) {
+  const wantedAnnee = 3;
   const bounds = getBattleWeekBounds(referenceDate);
-  if (wantedAnnee === 2) bounds.id = `${bounds.id}-a2`;
   const userList = Object.values(users || {}).filter(
-    (u) => normalizeAnnee(u.annee ?? u.state?.annee) === wantedAnnee,
+    (u) => (u.programme ?? u.state?.programme ?? 'IG') === 'IG' && normalizeAnnee(u.annee ?? u.state?.annee) === wantedAnnee,
   );
 
   let ariScore = 0;

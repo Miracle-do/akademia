@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { fetchBackendTheme } from '@/data/repo';
-import { themeForFiliere } from '@/lib/progress';
+import { SPECIALITES, specialitesFor, type Identity } from '@/lib/cursus';
 import type { BackendThemeId, FiliereId } from '@/lib/types';
+import { useIdentity } from './useAnnee';
 import { useStore } from './Store';
 
 export type ThemeId = BackendThemeId;
@@ -10,7 +10,6 @@ export type { FiliereId };
 export interface ThemeMeta {
   id: ThemeId;
   name: string;
-  subtitle: string;
   brandHex: string;
   mascotHex: string;
   ctaHex: string;
@@ -18,49 +17,30 @@ export interface ThemeMeta {
 }
 
 export const THEMES: ThemeMeta[] = [
-  {
-    id: 'ciel',
-    name: 'Bleu Azur (ARI)',
-    subtitle: 'Architecture des Réseaux & IoT',
-    brandHex: '#1D6FFF',
-    mascotHex: '#7EB6FF',
-    ctaHex: '#1D6FFF',
-    bgHex: '#FBF7EF',
-  },
-  {
-    id: 'violet',
-    name: 'Violet Royal & Or (AIP)',
-    subtitle: 'Automatique & Informatique Industrielle',
-    brandHex: '#7C3AED',
-    mascotHex: '#8B49F7',
-    ctaHex: '#FFD026',
-    bgHex: '#FBF7EF',
-  },
+  { id: 'ciel', name: 'Bleu Azur', brandHex: '#1D6FFF', mascotHex: '#7EB6FF', ctaHex: '#1D6FFF', bgHex: '#FBF7EF' },
+  { id: 'violet', name: 'Violet Royal & Or', brandHex: '#7C3AED', mascotHex: '#8B49F7', ctaHex: '#FFD026', bgHex: '#FBF7EF' },
+  { id: 'corail', name: 'Corail', brandHex: '#FF574A', mascotHex: '#FF7266', ctaHex: '#FF574A', bgHex: '#FBF7EF' },
+  { id: 'cyan', name: 'Cyan Polaire', brandHex: '#18B8E8', mascotHex: '#2DC6F5', ctaHex: '#18B8E8', bgHex: '#F4FAFC' },
+  { id: 'emeraude', name: 'Vert Émeraude', brandHex: '#0D945C', mascotHex: '#34BE82', ctaHex: '#0D945C', bgHex: '#F5FAF6' },
+  { id: 'ambre', name: 'Ambre Doré', brandHex: '#C86905', mascotHex: '#F59E0B', ctaHex: '#C86905', bgHex: '#FDF9F0' },
+  { id: 'rose', name: 'Rose Magenta', brandHex: '#DB2777', mascotHex: '#F472B6', ctaHex: '#DB2777', bgHex: '#FDF7F9' },
+  { id: 'ardoise', name: 'Bleu Ardoise', brandHex: '#47558C', mascotHex: '#818EC4', ctaHex: '#47558C', bgHex: '#F6F7FA' },
+  { id: 'bordeaux', name: 'Bordeaux', brandHex: '#9F1239', mascotHex: '#E8506E', ctaHex: '#9F1239', bgHex: '#FCF7F7' },
 ];
 
-export const FILIERES: { id: FiliereId; name: string; full: string; color: string; theme: ThemeId }[] = [
-  {
-    id: 'ARI',
-    name: 'ARI',
-    full: 'Architecture des Réseaux & IoT',
-    color: '#1D6FFF',
-    theme: 'ciel',
-  },
-  {
-    id: 'AIP',
-    name: 'AIP',
-    full: 'Automatique & Informatique Industrielle',
-    color: '#7C3AED',
-    theme: 'violet',
-  },
-];
+/** Spécialités d'IG3 (ARI / AIP), dérivées de content/cursus.json. */
+export const FILIERES: { id: FiliereId; name: string; full: string; color: string; theme: ThemeId }[] = (
+  Object.values(SPECIALITES) as { id: FiliereId; name: string; theme: ThemeId; color: string }[]
+).map((s) => ({ id: s.id, name: s.id, full: s.name, color: s.color, theme: s.theme }));
 
 interface ThemeContextValue {
   theme: ThemeId;
   themeMeta: ThemeMeta;
-  filiere: FiliereId;
-  rawFiliere: FiliereId | null;
-  hasFiliere: boolean;
+  identity: Identity;
+  /** Spécialité ARI/AIP (IG3 uniquement), sinon null. */
+  filiere: FiliereId | null;
+  /** Vrai si la classe a des spécialités et que l'étudiant n'a pas encore choisi la sienne (IG3). */
+  needsSpecialite: boolean;
   setFiliere(f: FiliereId): Promise<void>;
   customPseudo: string;
   setCustomPseudo(name: string): void;
@@ -69,9 +49,10 @@ interface ThemeContextValue {
 const Ctx = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { state, setUserFiliere } = useStore();
-  const rawFiliere: FiliereId | null = state.filiere === 'ARI' || state.filiere === 'AIP' ? state.filiere : null;
-  const [backendTheme, setBackendTheme] = useState<ThemeId>(() => themeForFiliere(rawFiliere));
+  const { setUserFiliere } = useStore();
+  const identity = useIdentity();
+  const theme = identity.theme;
+  const needsSpecialite = specialitesFor(identity.programme, identity.annee).length > 0 && !identity.filiere;
 
   const [customPseudo, setCustomPseudoState] = useState<string>(() => {
     try {
@@ -81,48 +62,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  // Synchronisation du thème avec le backend en fonction de la filière (ARI -> ciel, AIP -> violet, défaut -> ciel)
+  // Le thème découle de la filière (et de la spécialité en IG3) ; il est appliqué sur <html>.
   useEffect(() => {
-    let active = true;
-    const fallback = themeForFiliere(rawFiliere);
-    setBackendTheme(fallback);
-    fetchBackendTheme(rawFiliere)
-      .then((res) => {
-        if (active && (res.theme === 'ciel' || res.theme === 'violet')) {
-          setBackendTheme(res.theme);
-        }
-      })
-      .catch(() => {
-        if (active) setBackendTheme(fallback);
-      });
-    return () => {
-      active = false;
-    };
-  }, [rawFiliere]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', backendTheme);
+    document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.classList.remove('dark');
-    const metaInfo = THEMES.find((x) => x.id === backendTheme) ?? THEMES[0];
+    const metaInfo = THEMES.find((x) => x.id === theme) ?? THEMES[0];
     const metaTag = document.querySelector('meta[name="theme-color"]');
     if (metaTag && document.documentElement.getAttribute('data-mode') !== 'dark')
       metaTag.setAttribute('content', metaInfo.brandHex);
     try {
-      if (rawFiliere) {
-        localStorage.setItem('akademia:filiere', rawFiliere);
-      } else {
-        localStorage.removeItem('akademia:filiere');
-      }
-      localStorage.setItem('akademia:theme', backendTheme);
+      localStorage.setItem('akademia:theme', theme);
     } catch {
       /* ignore */
     }
-  }, [backendTheme, rawFiliere]);
+  }, [theme]);
 
   const setFiliere = useCallback(
     async (f: FiliereId) => {
-      const immediateTheme = themeForFiliere(f);
-      setBackendTheme(immediateTheme);
       await setUserFiliere(f);
     },
     [setUserFiliere],
@@ -138,17 +94,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const themeMeta = THEMES.find((t) => t.id === backendTheme) ?? THEMES[0];
-  const filiere: FiliereId = rawFiliere ?? 'ARI';
+  const themeMeta = THEMES.find((t) => t.id === theme) ?? THEMES[0];
 
   return (
     <Ctx.Provider
       value={{
-        theme: backendTheme,
+        theme,
         themeMeta,
-        filiere,
-        rawFiliere,
-        hasFiliere: rawFiliere !== null,
+        identity,
+        filiere: identity.filiere,
+        needsSpecialite,
         setFiliere,
         customPseudo,
         setCustomPseudo,

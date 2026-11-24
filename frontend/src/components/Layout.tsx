@@ -21,6 +21,7 @@ import { cn, fmtNum } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
 import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
+import { classLabel, isBattleClass } from '@/lib/cursus';
 import { Bar, Spinner } from './ui';
 import Celebrations, { fireConfetti } from './Celebrations';
 import { Mascot } from './Mascot';
@@ -112,15 +113,16 @@ function XpChip() {
  * Modale de premier choix de filière (ARI ou AIP) si l'utilisateur n'en a pas encore.
  */
 function FilierePromptModal() {
-  const { filiere, hasFiliere, setFiliere } = useTheme();
+  const { needsSpecialite, setFiliere } = useTheme();
   const { updateProfile } = useAuth();
   const { setUserFiliere } = useStore();
-  const [selected, setSelected] = useState<FiliereId>(filiere);
+  const [selected, setSelected] = useState<FiliereId | null>(null);
   const [saving, setSaving] = useState(false);
 
-  if (hasFiliere) return null;
+  if (!needsSpecialite) return null;
 
   const handleConfirm = async () => {
+    if (!selected) return;
     setSaving(true);
     try {
       await setFiliere(selected);
@@ -142,7 +144,7 @@ function FilierePromptModal() {
 
           <h3 className="h-display mt-3 text-2xl text-ink">Bienvenue sur Akademia !</h3>
           <p className="mt-2 text-sm font-semibold text-muted">
-            Choisis ta filière universitaire pour adapter le thème de ton application et faire gagner des points à ton département lors de la Battle hebdomadaire !
+            En 3ᵉ année d’Informatique de Gestion, choisis ta spécialité : elle adapte le thème de l’application et fait gagner des points à ton camp lors de la Battle hebdomadaire !
           </p>
 
           <div className="mt-5 grid w-full grid-cols-2 gap-3">
@@ -164,23 +166,23 @@ function FilierePromptModal() {
                     <span className="font-display text-lg font-extrabold">{f.id}</span>
                     {active && <Check size={18} className="text-brand" />}
                   </div>
-                  <span className="mt-1 text-xs font-semibold text-muted">{f.name}</span>
+                  <span className="mt-1 text-xs font-semibold text-muted">{f.full}</span>
                 </button>
               );
             })}
           </div>
 
           <p className="mt-3 text-[11px] font-bold text-muted">
-            Attention : la filière ne pourra plus être modifiée par la suite.
+            Attention : la spécialité ne pourra plus être modifiée par la suite.
           </p>
 
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={saving}
-            className="btn btn-primary btn-lg mt-5 w-full"
+            disabled={saving || !selected}
+            className="btn btn-primary btn-lg mt-5 w-full disabled:opacity-50"
           >
-            {saving ? 'Enregistrement…' : 'Confirmer ma filière'}
+            {saving ? 'Enregistrement…' : 'Confirmer ma spécialité'}
           </button>
         </div>
       </div>
@@ -191,7 +193,8 @@ function FilierePromptModal() {
 export default function Layout() {
   const { user, signOut } = useAuth();
   const { state, online, pendingSync, syncError } = useStore();
-  const { filiere, customPseudo } = useTheme();
+  const { filiere, identity, customPseudo } = useTheme();
+  const classe = classLabel(identity.programme, identity.annee, identity.filiere);
   const loc = useLocation();
   useEffect(() => {
     try {
@@ -206,7 +209,7 @@ export default function Layout() {
   const inReader = loc.pathname.includes('/lire/');
 
   const [battle, setBattle] = useState<WeeklyBattleInfo | null>(null);
-  const annee = useAnnee();
+  const inBattle = isBattleClass(identity.programme, identity.annee);
 
   // Raccourcis : « / » ou Ctrl/⌘ + K ouvrent la recherche (sauf pendant la saisie dans un champ).
   useEffect(() => {
@@ -224,8 +227,12 @@ export default function Layout() {
   }, [navigate]);
 
   useEffect(() => {
+    if (!inBattle) {
+      setBattle(null);
+      return;
+    }
     let alive = true;
-    fetchBattle(annee)
+    fetchBattle()
       .then((res) => {
         if (alive) setBattle(res.currentBattle);
       })
@@ -235,7 +242,7 @@ export default function Layout() {
     return () => {
       alive = false;
     };
-  }, [annee]);
+  }, [inBattle]);
 
   const modules = useMyModules();
   const totalChapters = modules.reduce((acc, m) => acc + m.chapters.length, 0);
@@ -263,7 +270,7 @@ export default function Layout() {
               <div className="truncate font-display text-sm font-extrabold text-ink">{displayName}</div>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
                 <span className="rounded-md bg-brand px-1.5 py-0.5 text-[10px] font-extrabold text-white">
-                  {filiere}
+                  {classe}
                 </span>
                 <span>Niv. {lp.level}</span>
               </div>
@@ -337,8 +344,8 @@ export default function Layout() {
           </div>
           <div className="hidden items-center gap-2 text-sm font-extrabold text-muted lg:flex">
             <span>
-              Salut <b className="text-ink">{displayName}</b> · Prêt à gagner de l'XP pour la filière{' '}
-              <b className="text-brand">{filiere}</b> ?
+              Salut <b className="text-ink">{displayName}</b> · Prêt à gagner de l'XP avec la classe{' '}
+              <b className="text-brand">{classe}</b> ?
             </span>
           </div>
           <div className="flex items-center gap-2">

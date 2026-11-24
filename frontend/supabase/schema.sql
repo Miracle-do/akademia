@@ -2,6 +2,7 @@
 -- Akademia - Schéma Supabase & Règles Métier Universitaires
 -- À exécuter dans la console Supabase : SQL Editor > New query > Run
 -- ============================================================
+-- IMPORTANT : après ce script, exécuter migration-cursus.sql (filières, années 1-3, spécialité IG3 et trigger d'inscription).
 
 -- 0) Optionnel : Nettoyage manuel des comptes de test (décommenter uniquement si souhaité)
 -- delete from auth.users;

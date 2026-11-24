@@ -6,11 +6,8 @@ import { BADGES, Ctx, XP, evaluateBadges, levelFromXp } from './gamification';
 import type { AnneeId, Attempt, AttemptKind, BackendThemeId, FiliereId, Formation, ReviewItem, Summary, UserState, XpLine } from './types';
 import { addDays, diffDays, todayKey, uid } from './utils';
 
-/** 2 ou 3 ; toute autre valeur (ou absence) = 3ᵉ année, pour les comptes existants. */
-export function normalizeAnnee(value: unknown): AnneeId {
-  const n = Number.parseInt(String(value ?? '').replace(/\D/g, ''), 10);
-  return n === 2 ? 2 : 3;
-}
+/** 1, 2 ou 3 ; toute autre valeur (ou absence) = 3ᵉ année, pour les comptes existants. */
+export { normalizeAnneeValue as normalizeAnnee } from './cursus';
 
 export function normalizeFiliere(value: unknown): FiliereId | null {
   if (typeof value !== 'string') return null;

@@ -13,15 +13,39 @@ import {
 } from '@/data/repo';
 import { supabase, cloudEnabled } from '@/data/supabase';
 import { disablePush } from '@/data/push';
-import { defaultState, normalizeAnnee, normalizeFiliere, normalizeState, themeForFiliere } from '@/lib/progress';
+import { defaultState, normalizeAnnee, normalizeFiliere, normalizeState } from '@/lib/progress';
+import { identityOf } from '@/lib/cursus';
+import type { ProgrammeId } from '@/lib/cursus';
 import type { AnneeId, BackendThemeId, FiliereId, UserState } from '@/lib/types';
+
+/** Identité demandée à l'inscription ou au changement de profil. */
+export interface IdentityPatch {
+  programme?: ProgrammeId;
+  annee?: AnneeId;
+  /** Spécialité ARI/AIP (IG3 uniquement). */
+  filiere?: FiliereId;
+}
+
+/** Réponse du backend pour un utilisateur. */
+interface ApiUser {
+  id: string;
+  email?: string;
+  username: string;
+  programme?: ProgrammeId;
+  filiere?: FiliereId | null;
+  annee?: AnneeId;
+  theme?: BackendThemeId;
+}
 
 export interface AuthUser {
   id: string;
   email?: string;
   username: string;
+  /** Filière (programme) : IG, GRH, GBA, GFC, GTL, GC, PLAN ou STAT. Absente = IG. */
+  programme?: ProgrammeId;
+  /** Spécialité ARI/AIP : uniquement pour la classe IG3, sinon null. */
   filiere?: FiliereId | null;
-  /** Année d'études (2 ou 3). Absente = 3ᵉ année. */
+  /** Année d'études (1, 2 ou 3). Absente = 3ᵉ année. */
   annee?: AnneeId;
   theme?: BackendThemeId;
   guest: boolean;
@@ -36,11 +60,10 @@ interface AuthApi {
     email: string,
     password: string,
     username: string,
-    filiere?: FiliereId,
-    annee?: AnneeId,
+    identity: IdentityPatch,
   ): Promise<{ error?: string; needsConfirmation?: boolean }>;
   signOut(): Promise<void>;
-  updateProfile(patch: { username?: string; filiere?: FiliereId; annee?: AnneeId }): Promise<string | null>;
+  updateProfile(patch: IdentityPatch & { username?: string }): Promise<string | null>;
   resetPassword(email: string, newPassword?: string): Promise<string | null>;
   /** Vrai quand l'utilisateur arrive depuis le lien « mot de passe oublié » et doit en choisir un nouveau. */
   recovery: boolean;
@@ -71,14 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cached = getStoredUser();
     const token = getStoredToken();
     if (cached && token) {
-      const filiere = normalizeFiliere(cached.filiere) ?? 'ARI';
       return {
         id: cached.id,
         email: cached.email,
         username: cached.username,
-        filiere,
-        annee: normalizeAnnee(cached.annee),
-        theme: themeForFiliere(filiere),
+        ...identityOf(cached),
         guest: false,
       };
     }
@@ -104,6 +124,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let annee: AnneeId = normalizeAnnee(
         sessionUser.user_metadata?.annee ?? (cached?.id === sessionUser.id ? cached.annee : undefined),
       );
+      let programme: ProgrammeId = identityOf({
+        programme: sessionUser.user_metadata?.programme ?? (cached?.id === sessionUser.id ? cached.programme : undefined),
+      }).programme;
 
       if (supabase) {
         try {
@@ -117,14 +140,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const profFiliere = normalizeFiliere((prof as { filiere?: unknown }).filiere);
             if (profFiliere) filiere = profFiliere;
           } else {
-            const targetFiliere = filiere ?? 'ARI';
+            // Sans spécialité (hors IG3) : on n'écrit pas de filière (le champ ne se retire plus ensuite).
             await supabase
               .from('profiles')
               .upsert(
                 {
                   id: sessionUser.id,
                   username,
-                  filiere: targetFiliere,
+                  ...(filiere ? { filiere } : {}),
                   updated_at: new Date().toISOString(),
                 },
                 { onConflict: 'id' },
@@ -144,32 +167,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           /* ignore */
         }
+        // Idem pour `programme` (migration-cursus.sql) : sans la colonne, tout le monde reste en IG.
+        try {
+          const { data: progRow, error: progErr } = await supabase
+            .from('profiles')
+            .select('programme')
+            .eq('id', sessionUser.id)
+            .maybeSingle();
+          if (!progErr && progRow) programme = identityOf({ programme: (progRow as { programme?: unknown }).programme }).programme;
+        } catch {
+          /* ignore */
+        }
       }
 
       try {
-        const me = await apiRequest<{
-          id: string;
-          email?: string;
-          username: string;
-          filiere?: FiliereId | null;
-          annee?: AnneeId;
-          theme?: BackendThemeId;
-        }>('/me');
+        const me = await apiRequest<ApiUser>('/me');
         if (me?.username) username = me.username;
         if (me?.filiere) filiere = normalizeFiliere(me.filiere) ?? filiere;
         if (me?.annee) annee = normalizeAnnee(me.annee);
+        if (me?.programme) programme = identityOf({ programme: me.programme }).programme;
       } catch {
         /* backend may be cold-starting; keep Supabase profile */
       }
 
-      const finalFiliere = filiere ?? 'ARI';
       const resolved: AuthUser = {
         id: sessionUser.id,
         email: sessionUser.email ?? undefined,
         username,
-        filiere: finalFiliere,
-        annee,
-        theme: themeForFiliere(finalFiliere),
+        ...identityOf({ programme, annee, filiere }),
         guest: false,
       };
       setStoredUser(resolved);
@@ -213,22 +238,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const me = await apiRequest<{
-        id: string;
-        email?: string;
-        username: string;
-        filiere?: FiliereId | null;
-        annee?: AnneeId;
-        theme?: BackendThemeId;
-      }>('/me');
-      const filiere = normalizeFiliere(me.filiere) ?? 'ARI';
+      const me = await apiRequest<ApiUser>('/me');
       const resolved: AuthUser = {
         id: me.id,
         email: me.email,
         username: me.username,
-        filiere,
-        annee: normalizeAnnee(me.annee),
-        theme: themeForFiliere(filiere),
+        ...identityOf(me),
         guest: false,
       };
       setStoredUser(resolved);
@@ -246,14 +261,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         const cached = getStoredUser();
         if (cached) {
-          const filiere = normalizeFiliere(cached.filiere) ?? 'ARI';
           setUser({
             id: cached.id,
             email: cached.email,
             username: cached.username,
-            filiere,
-            annee: normalizeAnnee(cached.annee),
-            theme: themeForFiliere(filiere),
+            ...identityOf(cached),
             guest: false,
           });
         }
@@ -321,14 +333,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             token: string;
             refreshToken?: string;
             state?: UserState;
-            user: {
-              id: string;
-              email?: string;
-              username: string;
-              filiere?: FiliereId | null;
-              annee?: AnneeId;
-              theme?: BackendThemeId;
-            };
+            user: ApiUser;
           }>('/auth/signin', {
             method: 'POST',
             body: JSON.stringify({ email: cleanEmail, password }),
@@ -340,14 +345,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .setSession({ access_token: res.token, refresh_token: res.refreshToken })
               .catch(() => {});
           }
-          const filiere = normalizeFiliere(res.user.filiere ?? res.state?.filiere) ?? 'ARI';
           const resolved: AuthUser = {
             id: res.user.id,
             email: res.user.email,
             username: res.user.username,
-            filiere,
-            annee: normalizeAnnee(res.user.annee),
-            theme: themeForFiliere(filiere),
+            ...identityOf({ ...res.user, filiere: res.user.filiere ?? res.state?.filiere }),
             guest: false,
           };
           if (res.state) {
@@ -364,12 +366,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      async signUp(email, password, username, filiere, annee) {
+      async signUp(email, password, username, wanted) {
         const cleanEmail = email.trim().toLowerCase();
         const cleanUsername = username.trim();
-        const normFiliere: FiliereId = normalizeFiliere(filiere) ?? 'ARI';
-        const normAnnee: AnneeId = normalizeAnnee(annee);
-        const initialTheme = themeForFiliere(normFiliere);
+        const identity = identityOf(wanted);
+        const normFiliere = identity.filiere;
+        const normAnnee: AnneeId = identity.annee;
+        const normProgramme: ProgrammeId = identity.programme;
+        const initialTheme = identity.theme;
         const initialState = normalizeState({
           ...defaultState(),
           filiere: normFiliere,
@@ -383,14 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             refreshToken?: string | null;
             needsConfirmation?: boolean;
             state?: UserState;
-            user: {
-              id: string;
-              email?: string;
-              username: string;
-              filiere?: FiliereId | null;
-              annee?: AnneeId;
-              theme?: BackendThemeId;
-            };
+            user: ApiUser;
           }>('/auth/signup', {
             method: 'POST',
             body: JSON.stringify({
@@ -399,6 +396,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               username: cleanUsername,
               filiere: normFiliere,
               annee: normAnnee,
+              programme: normProgramme,
             }),
           });
 
@@ -414,9 +412,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: res.user.id,
               email: res.user.email || cleanEmail,
               username: res.user.username || cleanUsername,
-              filiere: normalizeFiliere(res.user.filiere) ?? normFiliere,
-              annee: normalizeAnnee(res.user.annee ?? normAnnee),
-              theme: initialTheme,
+              ...identityOf({
+                programme: res.user.programme ?? normProgramme,
+                annee: res.user.annee ?? normAnnee,
+                filiere: res.user.filiere ?? normFiliere,
+              }),
               guest: false,
             };
             const targetState = normalizeState(res.state ?? initialState);
@@ -467,6 +467,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   username: cleanUsername,
                   filiere: normFiliere,
                   annee: normAnnee,
+                  programme: normProgramme,
                 },
               },
             });
@@ -483,7 +484,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   {
                     id: data.user.id,
                     username: cleanUsername,
-                    filiere: normFiliere,
+                    ...(normFiliere ? { filiere: normFiliere } : {}),
                     xp: 0,
                     level: 1,
                     streak: 0,
@@ -493,12 +494,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 );
               // À part : sans la colonne `annee` (schéma non migré), le profil ci-dessus reste créé.
               await supabase.from('profiles').update({ annee: normAnnee }).eq('id', data.user.id);
+              await supabase.from('profiles').update({ programme: normProgramme }).eq('id', data.user.id);
               writeSnapshot(data.user.id, { state: initialState, pending: [] });
               await saveStateToSupabaseDirect(data.user.id, initialState);
               const resolved: AuthUser = {
                 id: data.user.id,
                 email: data.user.email ?? cleanEmail,
                 username: cleanUsername,
+                programme: normProgramme,
                 filiere: normFiliere,
                 annee: normAnnee,
                 theme: initialTheme,
@@ -543,64 +546,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       async updateProfile(patch) {
         try {
-          const res = await apiRequest<{
-            user: {
-              id: string;
-              email?: string;
-              username: string;
-              filiere?: FiliereId | null;
-              annee?: AnneeId;
-              theme?: BackendThemeId;
-            };
-          }>('/me', {
+          const res = await apiRequest<{ user: ApiUser }>('/me', {
             method: 'PATCH',
             body: JSON.stringify(patch),
           });
-          const filiere = normalizeFiliere(res.user.filiere) ?? user?.filiere ?? 'ARI';
           const resolved: AuthUser = {
             id: res.user.id,
             email: res.user.email ?? user?.email,
             username: res.user.username,
-            filiere,
-            annee: normalizeAnnee(res.user.annee ?? patch.annee ?? user?.annee),
-            theme: themeForFiliere(filiere),
+            ...identityOf(res.user),
             guest: false,
           };
-          if (supabase && user) {
-            await supabase
-              .from('profiles')
-              .update({
-                ...(patch.username ? { username: patch.username.trim() } : {}),
-                ...(patch.filiere ? { filiere: patch.filiere } : {}),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', user.id);
-            if (patch.annee) await supabase.from('profiles').update({ annee: patch.annee }).eq('id', user.id);
-          }
           setStoredUser(resolved);
           setUser(resolved);
           return null;
         } catch (err) {
-          if (supabase && user) {
+          // Le serveur a refusé la demande (règle métier) : on n'essaie surtout pas de la contourner en direct.
+          const status =
+            typeof err === 'object' && err !== null && 'status' in err
+              ? Number((err as { status: number }).status)
+              : 0;
+          if (status === 400 || status === 409 || status === 422) {
+            return err instanceof Error ? err.message : 'Mise à jour impossible.';
+          }
+          // Serveur indisponible (veille, hors-ligne) : mise à jour directe du pseudo uniquement.
+          if (supabase && user && patch.username && !patch.programme && !patch.annee && !patch.filiere) {
             try {
               const { error } = await supabase
                 .from('profiles')
-                .update({
-                  ...(patch.username ? { username: patch.username.trim() } : {}),
-                  ...(patch.filiere ? { filiere: patch.filiere } : {}),
-                  updated_at: new Date().toISOString(),
-                })
+                .update({ username: patch.username.trim(), updated_at: new Date().toISOString() })
                 .eq('id', user.id);
               if (!error) {
-                if (patch.annee) await supabase.from('profiles').update({ annee: patch.annee }).eq('id', user.id);
-                const filiere = normalizeFiliere(patch.filiere ?? user.filiere) ?? 'ARI';
-                const resolved: AuthUser = {
-                  ...user,
-                  username: patch.username ? patch.username.trim() : user.username,
-                  annee: normalizeAnnee(patch.annee ?? user.annee),
-                  filiere,
-                  theme: themeForFiliere(filiere),
-                };
+                const resolved: AuthUser = { ...user, username: patch.username.trim() };
                 setStoredUser(resolved);
                 setUser(resolved);
                 return null;

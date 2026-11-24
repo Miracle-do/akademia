@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Check, ChevronLeft, GraduationHat, Lock, Mail, User } from '@getpapillon/papicons';
 import { useAuth } from '@/state/AuthContext';
 import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
+import { ANNEES, PROGRAMMES, programmeMeta, specialitesFor, themeFor, type ProgrammeId } from '@/lib/cursus';
 import type { AnneeId } from '@/lib/types';
 import { Mascot, PeekingMascot } from '@/components/Mascot';
 import { CornerClouds, CrossedSwordsIcon, FourPointStar } from '@/components/Decor';
@@ -34,7 +35,7 @@ const SLIDES = [
 
 export default function AuthPage() {
   const { user, signIn, signUp, resetPassword } = useAuth();
-  const { theme, filiere, hasFiliere, setCustomPseudo } = useTheme();
+  const { theme, setCustomPseudo } = useTheme();
   const nav = useNavigate();
 
   const returning = (() => {
@@ -51,8 +52,14 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [name, setName] = useState('');
-  const [selectedFiliere, setSelectedFiliere] = useState<FiliereId>(hasFiliere ? filiere : 'ARI');
-  const [selectedAnnee, setSelectedAnnee] = useState<AnneeId>(3);
+  // Classe choisie à l'inscription : filière, année, et spécialité (IG3 uniquement). Rien de présélectionné :
+  // une mauvaise classe par défaut fausserait le classement et les cours de l'étudiant.
+  const [selectedProgramme, setSelectedProgramme] = useState<ProgrammeId | null>(null);
+  const [selectedAnnee, setSelectedAnnee] = useState<AnneeId | null>(null);
+  const [selectedFiliere, setSelectedFiliere] = useState<FiliereId | null>(null);
+  const needsSpec = !!selectedProgramme && !!selectedAnnee && specialitesFor(selectedProgramme, selectedAnnee).length > 0;
+  const spec = needsSpec ? selectedFiliere : null;
+  const pickedTheme = themeFor(selectedProgramme ?? 'IG', selectedAnnee ?? 3, spec);
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -68,12 +75,11 @@ export default function AuthPage() {
   // Adaptation immédiate du thème selon la filière choisie à l'inscription (ARI -> bleu ciel, AIP -> violet)
   useEffect(() => {
     if (screen === 'join' && authMode === 'up') {
-      const targetTheme = selectedFiliere === 'AIP' ? 'violet' : 'ciel';
-      document.documentElement.setAttribute('data-theme', targetTheme);
+      document.documentElement.setAttribute('data-theme', pickedTheme);
     } else if (screen === 'join' && authMode === 'in') {
       document.documentElement.setAttribute('data-theme', 'ciel');
     }
-  }, [screen, authMode, selectedFiliere]);
+  }, [screen, authMode, pickedTheme]);
 
   if (user) {
     try {
@@ -100,8 +106,22 @@ export default function AuthPage() {
         setBusy(false);
         return;
       }
+      if (!selectedProgramme || !selectedAnnee) {
+        setMsg({ ok: false, t: 'Choisis ta filière et ton année d’études.' });
+        setBusy(false);
+        return;
+      }
+      if (needsSpec && !selectedFiliere) {
+        setMsg({ ok: false, t: 'Choisis ta spécialité : ARI ou AIP.' });
+        setBusy(false);
+        return;
+      }
       setCustomPseudo(cleanName);
-      const r = await signUp(email.trim(), pw, cleanName, selectedFiliere, selectedAnnee);
+      const r = await signUp(email.trim(), pw, cleanName, {
+        programme: selectedProgramme,
+        annee: selectedAnnee,
+        ...(spec ? { filiere: spec } : {}),
+      });
       if (r.error) setMsg({ ok: false, t: r.error });
       else if (r.needsConfirmation) {
         setAuthMode('in');
@@ -119,12 +139,7 @@ export default function AuthPage() {
   const inputCls =
     'w-full bg-transparent text-sm font-bold text-ink outline-none placeholder:text-muted/70';
 
-  const activeTheme =
-    screen === 'join' && authMode === 'up'
-      ? selectedFiliere === 'AIP'
-        ? 'violet'
-        : 'ciel'
-      : theme;
+  const activeTheme = screen === 'join' && authMode === 'up' ? pickedTheme : theme;
 
   return (
     <div
@@ -268,81 +283,114 @@ export default function AuthPage() {
               </h1>
               <p className="mt-1 text-sm font-bold text-muted">
                 {authMode === 'up'
-                  ? 'Inscris-toi avec ton e-mail et choisis ta filière'
+                  ? 'Inscris-toi avec ton e-mail et choisis ta classe'
                   : 'Connecte-toi avec ton e-mail et ton mot de passe'}
               </p>
             </div>
 
-            {/* Année d'études : détermine les modules et le classement affichés */}
+            {/* Ta classe : filière, année, et spécialité en IG3. Détermine les cours, le classement et le thème. */}
             {authMode === 'up' && (
-              <div className="mb-3 rounded-3xl bg-card p-3.5 shadow-card">
-                <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
-                  <span>Ton année d’études</span>
-                  <span className="text-brand">Modifiable plus tard</span>
+              <div className="mb-4 space-y-3 rounded-3xl bg-card p-3.5 shadow-card">
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
+                    <span>Ta filière</span>
+                    <span className="text-brand">Définit ton thème</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Filière">
+                    {PROGRAMMES.map((p) => {
+                      const active = selectedProgramme === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          title={p.name}
+                          onClick={() => {
+                            setSelectedProgramme(p.id);
+                            setSelectedFiliere(null);
+                          }}
+                          className={cn(
+                            'flex flex-col items-center gap-0.5 rounded-2xl border-2 py-2 font-display text-sm font-extrabold transition',
+                            active ? 'border-brand bg-soft/75 text-ink shadow-sm' : 'border-line bg-bg/60 text-muted hover:bg-soft/40',
+                          )}
+                        >
+                          <span className="text-lg leading-none" aria-hidden="true">{p.emoji}</span>
+                          {p.short}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 min-h-4 text-[11px] font-bold text-muted">
+                    {selectedProgramme ? programmeMeta(selectedProgramme).name : 'Touche ta filière.'}
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Année d’études">
-                  {([2, 3] as const).map((a) => {
-                    const active = selectedAnnee === a;
-                    return (
-                      <button
-                        key={a}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        onClick={() => setSelectedAnnee(a)}
-                        className={cn(
-                          'flex items-center justify-center gap-1.5 rounded-2xl border-2 py-2.5 font-display text-base font-extrabold transition',
-                          active
-                            ? 'border-brand bg-soft/75 text-ink shadow-sm'
-                            : 'border-line bg-bg/60 text-muted hover:bg-soft/40',
-                        )}
-                      >
-                        {a}ᵉ année
-                        {active && <Check size={14} className="text-brand" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
-            {/* Sélection de la filière universitaire (uniquement ARI -> Bleu et AIP -> Violet) */}
-            {authMode === 'up' && (
-              <div className="mb-4 rounded-3xl bg-card p-3.5 shadow-card">
-                <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
-                  <span>Ta filière universitaire</span>
-                  <span className="text-brand">Définit ton thème</span>
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
+                    <span>Ton année d’études</span>
+                    <span className="text-brand">Modifiable plus tard</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Année d’études">
+                    {ANNEES.map((a) => {
+                      const active = selectedAnnee === a;
+                      return (
+                        <button
+                          key={a}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => {
+                            setSelectedAnnee(a);
+                            setSelectedFiliere(null);
+                          }}
+                          className={cn(
+                            'flex items-center justify-center gap-1 rounded-2xl border-2 py-2.5 font-display text-sm font-extrabold transition',
+                            active ? 'border-brand bg-soft/75 text-ink shadow-sm' : 'border-line bg-bg/60 text-muted hover:bg-soft/40',
+                          )}
+                        >
+                          {a === 1 ? '1ʳᵉ' : `${a}ᵉ`} année
+                          {active && <Check size={14} className="text-brand" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {FILIERES.map((f) => {
-                    const active = selectedFiliere === f.id;
-                    return (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setSelectedFiliere(f.id)}
-                        className={cn(
-                          'relative flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition',
-                          active
-                            ? 'border-brand bg-soft/75 shadow-sm'
-                            : 'border-line bg-bg/60 hover:bg-soft/40',
-                        )}
-                        title={f.full}
-                      >
-                        <Mascot mood={active ? 'happy' : 'idle'} size={40} color={f.color} animate={false} />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1 font-display text-base font-extrabold text-ink">
-                            <span>{f.name}</span>
-                            {active && <Check size={14} className="text-brand" />}
-                          </div>
-                          <div className="truncate text-[10px] font-bold text-muted">
-                            {f.id === 'ARI' ? 'Thème Bleu' : 'Thème Violet'}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+
+                {needsSpec && (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-xs font-extrabold text-muted">
+                      <span>Ta spécialité</span>
+                      <span className="text-brand">Définitif</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {FILIERES.map((f) => {
+                        const active = selectedFiliere === f.id;
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setSelectedFiliere(f.id)}
+                            className={cn(
+                              'relative flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition',
+                              active ? 'border-brand bg-soft/75 shadow-sm' : 'border-line bg-bg/60 hover:bg-soft/40',
+                            )}
+                            title={f.full}
+                          >
+                            <Mascot mood={active ? 'happy' : 'idle'} size={40} color={f.color} animate={false} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1 font-display text-base font-extrabold text-ink">
+                                <span>{f.name}</span>
+                                {active && <Check size={14} className="text-brand" />}
+                              </div>
+                              <div className="truncate text-[10px] font-bold text-muted">{f.full}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

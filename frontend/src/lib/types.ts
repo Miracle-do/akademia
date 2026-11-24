@@ -21,8 +21,10 @@ export interface ModuleMeta {
   color: string;
   level: string;
   estimatedHours: number;
-  /** Année d'études du module (2 ou 3). Absent = 3ᵉ année. */
-  annee?: 2 | 3;
+  /** Classes destinataires, ex. ["IG3"], ["GRH1","GRH2"] ou ["IG3-ARI"] (spécialité). */
+  cursus?: string[];
+  /** Ancien format : année d'études d'IG (2 ou 3). Utilisé seulement si `cursus` est absent. */
+  annee?: AnneeId;
   parts: PartMeta[];
   chapters: ChapterMeta[];
   features: { quiz?: boolean; blitz?: boolean; exams?: boolean; flashcards?: boolean };
@@ -137,9 +139,10 @@ export interface ReviewItem {
   lapses?: number;
 }
 export type FiliereId = 'ARI' | 'AIP';
-/** Année d'études : 2 (L2) ou 3 (L3). Les comptes et modules sans année sont en 3ᵉ année. */
-export type AnneeId = 2 | 3;
-export type BackendThemeId = 'ciel' | 'violet';
+/** Année d'études : 1, 2 ou 3. Les comptes et modules sans année sont en 3ᵉ année. */
+export type AnneeId = 1 | 2 | 3;
+export type ThemeId = 'ciel' | 'violet' | 'corail' | 'cyan' | 'emeraude' | 'ambre' | 'rose' | 'ardoise' | 'bordeaux';
+export type BackendThemeId = ThemeId;
 
 export interface UserState {
   v: 1;

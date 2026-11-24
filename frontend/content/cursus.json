@@ -1,0 +1,17 @@
+{
+  "_doc": "Source unique des filières, années et spécialités. Lue par le frontend ET le backend. Une « classe » = filière + année (ex. IG3, GRH2). Seule IG3 se divise en spécialités (ARI / AIP) ; la Battle ne concerne qu'elle.",
+  "programmes": [
+    { "id": "IG", "short": "IG", "name": "Informatique de Gestion", "emoji": "💻", "theme": "ciel", "annees": [1, 2, 3], "specialites": { "3": ["ARI", "AIP"] } },
+    { "id": "GRH", "short": "GRH", "name": "Gestion des Ressources Humaines", "emoji": "🤝", "theme": "corail", "annees": [1, 2, 3] },
+    { "id": "GBA", "short": "GBA", "name": "Gestion des Banques et Assurances", "emoji": "🏦", "theme": "cyan", "annees": [1, 2, 3] },
+    { "id": "GFC", "short": "GFC", "name": "Gestion Financière et Comptable", "emoji": "📊", "theme": "emeraude", "annees": [1, 2, 3] },
+    { "id": "GTL", "short": "GTL", "name": "Gestion des Transports et Logistique", "emoji": "🚚", "theme": "ambre", "annees": [1, 2, 3] },
+    { "id": "GC", "short": "GC", "name": "Gestion Commerciale", "emoji": "🛍️", "theme": "rose", "annees": [1, 2, 3] },
+    { "id": "PLAN", "short": "PLAN", "name": "Planification", "emoji": "🗺️", "theme": "ardoise", "annees": [1, 2, 3] },
+    { "id": "STAT", "short": "STAT", "name": "Statistique", "emoji": "📈", "theme": "bordeaux", "annees": [1, 2, 3] }
+  ],
+  "specialites": {
+    "ARI": { "id": "ARI", "name": "Administration des Réseaux Informatiques", "theme": "ciel", "color": "#1D6FFF" },
+    "AIP": { "id": "AIP", "name": "Analyse Informatique et Programmation", "theme": "violet", "color": "#7C3AED" }
+  }
+}

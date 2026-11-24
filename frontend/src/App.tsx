@@ -28,6 +28,7 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const NotificationsPage = lazy(() => import('@/pages/NotificationsPage'));
 const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
+const ExplorePage = lazy(() => import('@/pages/ExplorePage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
 const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
 
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="profil" element={<ProfilePage />} />
         <Route path="recherche" element={<SearchPage />} />
         <Route path="modules" element={<ModulesPage />} />
+        <Route path="explorer" element={<ExplorePage />} />
         <Route path="m/:moduleId" element={<ModuleGate />}>
           <Route index element={<ModulePage />} />
           <Route path="lire/:chapterId" element={<ChapterPage />} />

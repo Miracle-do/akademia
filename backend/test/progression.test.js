@@ -247,24 +247,51 @@ test("normalizeAnnee : 2 ou 3, tout le reste retombe sur 3 (comptes existants)",
   assert.equal(normalizeAnnee('5'), 3);
 });
 
-test('la Battle oppose ARI et AIP au sein d’une même année', () => {
+test('la Battle ne concerne que IG3 : les autres classes et filières n’y comptent pas', () => {
   const users = {
     a: { filiere: 'ARI', annee: 3, xp: 100 },
-    b: { filiere: 'AIP', annee: 3, xp: 40 },
-    c: { filiere: 'AIP', annee: 2, xp: 500 },
-    d: { filiere: 'ARI', xp: 10 }, // sans année = 3ᵉ année
+    b: { filiere: 'AIP', annee: 3, programme: 'IG', xp: 40 },
+    c: { filiere: 'AIP', annee: 2, xp: 500 }, // IG2 : pas de Battle
+    d: { filiere: 'ARI', xp: 10 }, // sans année = 3ᵉ année, sans programme = IG
+    e: { filiere: 'ARI', annee: 3, programme: 'GRH', xp: 900 }, // autre filière : jamais dans la Battle
   };
   const ref = new Date('2026-11-04T10:00:00');
-  const y3 = progression.computeBattleScores(users, ref);
-  assert.equal(y3.ariScore, 110);
-  assert.equal(y3.aipScore, 40);
-  assert.equal(y3.id, 'battle-2026-11-02');
-  const y2 = progression.computeBattleScores(users, ref, 2);
-  assert.equal(y2.ariScore, 0);
-  assert.equal(y2.aipScore, 500);
-  assert.equal(y2.aipMembers, 1);
-  assert.equal(y2.id, 'battle-2026-11-02-a2');
-  assert.equal(y2.annee, 2);
+  const battle = progression.computeBattleScores(users, ref);
+  assert.equal(battle.ariScore, 110);
+  assert.equal(battle.aipScore, 40);
+  assert.equal(battle.aipMembers, 1);
+  assert.equal(battle.id, 'battle-2026-11-02');
+  // Le paramètre d'année est ignoré : même résultat
+  assert.equal(progression.computeBattleScores(users, ref, 2).ariScore, 110);
+});
+
+test('cursus : classes, spécialité IG3 uniquement, accès aux modules par classe', () => {
+  const c = require('../services/cursus');
+  assert.equal(c.classCode('grh', 2), 'GRH2');
+  assert.equal(c.normalizeProgramme('inconnue'), 'IG');
+  assert.equal(c.normalizeAnnee(1), 1);
+  assert.equal(c.normalizeAnnee(undefined), 3);
+  assert.equal(c.normalizeSpecialite('IG', 3, 'ari'), 'ARI');
+  assert.equal(c.normalizeSpecialite('IG', 2, 'ARI'), null); // IG1/IG2 : pas de spécialité
+  assert.equal(c.normalizeSpecialite('GRH', 3, 'ARI'), null);
+  assert.deepEqual(c.accessCodes('IG', 3, 'AIP'), ['IG3', 'IG3-AIP']);
+  assert.deepEqual(c.accessCodes('GBA', 1), ['GBA1']);
+  // Ancien format `annee` : 2 = IG2, absent = IG3
+  assert.deepEqual(c.moduleCodes({ annee: 2 }), ['IG2']);
+  assert.deepEqual(c.moduleCodes({}), ['IG3']);
+  assert.ok(c.moduleVisibleFor({ cursus: ['IG3'] }, 'IG', 3, 'ARI'));
+  assert.ok(!c.moduleVisibleFor({ cursus: ['IG3-AIP'] }, 'IG', 3, 'ARI'));
+  assert.ok(c.moduleVisibleFor({ cursus: ['IG3-AIP'] }, 'IG', 3, 'AIP'));
+  assert.ok(!c.moduleVisibleFor({ cursus: ['IG3'] }, 'GRH', 3, null));
+  assert.equal(c.themeFor('IG', 3, 'AIP'), 'violet');
+  assert.equal(c.themeFor('IG', 1, null), 'ciel');
+  assert.equal(c.themeFor('GRH', 2, null), 'corail');
+});
+
+test('identité d’un profil : filière inconnue ou spécialité manquante en IG3 refusées', async () => {
+  await assert.rejects(progressStore.signUpUser({ email: 'a@b.co', password: 'secret1', username: 'testeur', programme: 'XYZ', annee: 2 }), /Filière inconnue/);
+  await assert.rejects(progressStore.signUpUser({ email: 'a@b.co', password: 'secret1', username: 'testeur', programme: 'IG', annee: 3 }), /spécialité/);
+  await assert.rejects(progressStore.signUpUser({ email: 'a@b.co', password: 'secret1', username: 'testeur', programme: 'GRH', annee: 4 }), /Année invalide/);
 });
 
 test('spaced repetition: intervals grow on success, reset and lose ease on a miss', () => {

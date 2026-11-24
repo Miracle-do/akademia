@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronDown, Filter, Sparkles } from '@getpapillon/papicons';
 import { fetchLeaderboard, LeaderRow } from '@/data/repo';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
-import { useAnnee } from '@/state/useAnnee';
-import type { AnneeId } from '@/lib/types';
+import { useIdentity } from '@/state/useAnnee';
+import ClassPicker from '@/components/ClassPicker';
+import { classCode, classLabel, parseClassCode, programmeMeta } from '@/lib/cursus';
 import { FiliereId, useTheme } from '@/state/Theme';
 import { Mascot } from '@/components/Mascot';
 import { CustomAvatar } from '@/components/CustomAvatar';
@@ -17,7 +18,8 @@ import { renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 interface CampusEntry {
   id: string;
   username: string;
-  filiere: FiliereId;
+  /** Spécialité ARI/AIP (IG3 uniquement) ; sinon on affiche la classe. */
+  filiere: FiliereId | null;
   xp: number;
   level: number;
   streak: number;
@@ -35,17 +37,22 @@ function fmtK(xp: number): string {
 export default function LeaderboardPage() {
   const { user } = useAuth();
   const { state } = useStore();
-  const { theme, filiere } = useTheme();
-  const myAnnee = useAnnee();
-  // Classement d'une année : la sienne par défaut, l'autre en consultation seule.
-  const [viewAnnee, setViewAnnee] = useState<AnneeId>(myAnnee);
+  const { theme } = useTheme();
+  const mine = useIdentity();
+  // Classement d'une classe (filière + année) : la sienne par défaut ; les autres en consultation seule.
+  const [params, setParams] = useSearchParams();
+  const view = parseClassCode(params.get('classe')) ?? { programme: mine.programme, annee: mine.annee };
+  const viewAnnee = view.annee;
+  const viewProgramme = view.programme;
+  const viewingMine = viewProgramme === mine.programme && viewAnnee === mine.annee;
+  const viewLabel = classLabel(viewProgramme, viewAnnee);
   const [period, setPeriod] = useState<'week' | 'month' | 'all'>('week');
   const [remoteRows, setRemoteRows] = useState<LeaderRow[] | null>(null);
   const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    fetchLeaderboard(50, viewAnnee)
+    fetchLeaderboard(50, viewProgramme, viewAnnee)
       .then((rows) => {
         if (alive) setRemoteRows(rows);
       })
@@ -58,7 +65,7 @@ export default function LeaderboardPage() {
     return () => {
       alive = false;
     };
-  }, [state.xp, filiere, viewAnnee]);
+  }, [state.xp, mine.filiere, viewProgramme, viewAnnee]);
 
   const entries = useMemo<CampusEntry[]>(() => {
     if (!remoteRows) return [];
@@ -67,7 +74,7 @@ export default function LeaderboardPage() {
       .map((r) => ({
         id: r.id,
         username: r.username,
-        filiere: r.filiere === 'AIP' ? ('AIP' as const) : ('ARI' as const),
+        filiere: r.filiere === 'AIP' ? ('AIP' as const) : r.filiere === 'ARI' ? ('ARI' as const) : null,
         xp: Math.round(r.xp * (period === 'week' ? 1 : mult)),
         level: r.level,
         streak: r.streak,
@@ -132,35 +139,26 @@ export default function LeaderboardPage() {
         </button>
       </div>
 
-      {/* Choix de l'année : on peut consulter l'autre année, sans accéder à ses modules */}
-      <div className="flex items-center gap-2" role="radiogroup" aria-label="Année du classement">
-        {([2, 3] as const).map((a) => {
-          const active = viewAnnee === a;
-          return (
-            <button
-              key={a}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => {
-                if (a === viewAnnee) return;
-                setSwitching(true);
-                setViewAnnee(a);
-              }}
-              className={cn(
-                'rounded-full border-2 px-4 py-1.5 text-xs font-extrabold transition',
-                active ? 'border-brand bg-soft text-ink' : 'border-line bg-card text-muted hover:bg-soft/50',
-              )}
-            >
-              {a}ᵉ année{a === myAnnee ? ' · la tienne' : ''}
-            </button>
-          );
-        })}
-        {switching && <span className="text-[11px] font-bold text-muted">Chargement…</span>}
-      </div>
-      {viewAnnee !== myAnnee && (
+      {/* Choix de la classe : on peut consulter les autres filières et années, sans accéder à leurs modules */}
+      <ClassPicker
+        programme={viewProgramme}
+        annee={viewAnnee}
+        mine={{ programme: mine.programme, annee: mine.annee }}
+        onChange={(n) => {
+          setSwitching(true);
+          const next = classCode(n.programme, n.annee);
+          setParams(next === classCode(mine.programme, mine.annee) ? {} : { classe: next }, { replace: true });
+        }}
+      />
+      {switching && <p className="text-[11px] font-bold text-muted">Chargement…</p>}
+      {!viewingMine && (
         <p className="rounded-2xl bg-soft px-4 py-2 text-xs font-bold text-muted">
-          Tu consultes le classement de la {viewAnnee}ᵉ année. Tu n’y apparais pas : tu es en {myAnnee}ᵉ année.
+          Tu consultes le classement de {viewLabel} ({programmeMeta(viewProgramme).name}). Tu n’y apparais pas : tu es en {classLabel(mine.programme, mine.annee, mine.filiere)}.
+        </p>
+      )}
+      {remoteRows.length === 0 && (
+        <p className="card p-5 text-center text-sm font-semibold text-muted">
+          Personne n’est encore inscrit en {viewLabel}. Invite tes camarades : le classement se remplit avec eux.
         </p>
       )}
 
@@ -183,7 +181,7 @@ export default function LeaderboardPage() {
                 )}
               >
                 <span className="h-display text-3xl font-extrabold text-brand">2</span>
-                <span className="mt-1 font-display text-base font-extrabold">{top2.filiere}</span>
+                <span className="mt-1 font-display text-base font-extrabold">{top2.filiere ?? viewProgramme}</span>
                 <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top2.username)}</span>
                 <span className="text-[11px] font-bold opacity-90">{fmtK(top2.xp)}</span>
               </div>
@@ -216,7 +214,7 @@ export default function LeaderboardPage() {
                 >
                   1
                 </span>
-                <span className="mt-1 font-display text-lg font-extrabold">{top1.filiere}</span>
+                <span className="mt-1 font-display text-lg font-extrabold">{top1.filiere ?? viewProgramme}</span>
                 <span className="truncate max-w-[100px] text-xs font-bold opacity-80">{renderWithAnimatedEmojis(top1.username)}</span>
                 <span className="text-xs font-extrabold opacity-95">{fmtK(top1.xp)}</span>
               </div>
@@ -237,7 +235,7 @@ export default function LeaderboardPage() {
                 )}
               >
                 <span className="h-display text-3xl font-extrabold text-brand">3</span>
-                <span className="mt-1 font-display text-base font-extrabold">{top3.filiere}</span>
+                <span className="mt-1 font-display text-base font-extrabold">{top3.filiere ?? viewProgramme}</span>
                 <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top3.username)}</span>
                 <span className="text-[11px] font-bold opacity-90">{fmtK(top3.xp)}</span>
               </div>
@@ -291,7 +289,7 @@ export default function LeaderboardPage() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-base font-extrabold">{row.filiere}</span>
+                    <span className="font-display text-base font-extrabold">{row.filiere ?? viewProgramme}</span>
                     <span
                       className={cn(
                         'truncate text-xs font-bold',

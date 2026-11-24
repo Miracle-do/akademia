@@ -7,7 +7,7 @@
   "color": "#E76F51",
   "level": "Licence 3 / Master 1",
   "estimatedHours": 16,
-  "annee": 3,
+  "cursus": ["IG3"],
   "parts": [
     {
       "id": "p1",

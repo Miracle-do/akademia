@@ -18,19 +18,22 @@ import {
 } from '@/components/Decor';
 import { Spinner } from '@/components/ui';
 import { useTheme } from '@/state/Theme';
-import { useAnnee } from '@/state/useAnnee';
+import { useIdentity } from '@/state/useAnnee';
+import { isBattleClass } from '@/lib/cursus';
 import { cn } from '@/lib/utils';
 
 export default function FeedPage() {
   const { filiere } = useTheme();
-  const annee = useAnnee();
+  const identity = useIdentity();
+  // La Battle ARI contre AIP ne concerne que IG3 ; les autres classes la suivent en spectateurs.
+  const competes = isBattleClass(identity.programme, identity.annee) && !!filiere;
   const [loading, setLoading] = useState(true);
   const [currentBattle, setCurrentBattle] = useState<WeeklyBattleInfo | null>(null);
   const [history, setHistory] = useState<BattleHistoryItem[]>([]);
 
   useEffect(() => {
     let alive = true;
-    fetchBattle(annee)
+    fetchBattle()
       .then((data) => {
         if (!alive) return;
         setCurrentBattle(data.currentBattle);
@@ -45,7 +48,7 @@ export default function FeedPage() {
     return () => {
       alive = false;
     };
-  }, [annee]);
+  }, []);
 
   if (loading || !currentBattle) {
     return <Spinner label="Chargement des battles universitaires…" />;
@@ -75,6 +78,14 @@ export default function FeedPage() {
         </p>
       </div>
 
+      {!competes && (
+        <p className="rounded-2xl bg-soft px-4 py-3 text-xs font-bold text-muted">
+          La Battle oppose les spécialités ARI et AIP de la 3ᵉ année d’Informatique de Gestion. Tu la suis en spectateur :
+          ta classe a son propre{' '}
+          <Link to="/classement" className="text-brand underline">classement</Link>.
+        </p>
+      )}
+
       {/* ==================== CARTE BATTLE DE LA SEMAINE EN COURS ==================== */}
       <section className="card relative overflow-hidden p-5 sm:p-6 shadow-pop">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
@@ -84,7 +95,7 @@ export default function FeedPage() {
             </span>
             <div>
               <div className="font-display text-sm font-black text-ink">{currentBattle.weekLabel}</div>
-              <div className="text-[11px] font-bold text-muted">Battle de la semaine · {annee}ᵉ année</div>
+              <div className="text-[11px] font-bold text-muted">Battle de la semaine · IG3</div>
             </div>
           </div>
 
@@ -180,7 +191,7 @@ export default function FeedPage() {
         )}
 
         {/* Bouton d'action pour contribuer */}
-        {!currentBattle.isFinished && (
+        {!currentBattle.isFinished && competes && (
           <div className="mt-5 pt-2">
             <Link
               to="/modules"

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, Folder, GraduationHat, Lock } from '@getpapillon/papicons';
+import { ArrowRight, Clock, Folder, GraduationHat } from '@getpapillon/papicons';
 import { Bar, PageTitle } from '@/components/ui';
-import { modules as allModules } from '@/lib/content';
-import { useAnnee, useMyModules } from '@/state/useAnnee';
+import { classLabel } from '@/lib/cursus';
+import { useIdentity, useMyModules } from '@/state/useAnnee';
 import { moduleRatio, readCount } from '@/lib/stats';
 import { useStore } from '@/state/Store';
 import { Mascot } from '@/components/Mascot';
@@ -10,14 +10,14 @@ import { renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
 
 export default function ModulesPage() {
   const { state } = useStore();
-  const annee = useAnnee();
+  const identity = useIdentity();
+  const classe = classLabel(identity.programme, identity.annee, identity.filiere);
   const modules = useMyModules();
-  const others = allModules.filter((m) => !modules.includes(m));
   return (
     <>
       <PageTitle
         title="Modules universitaires"
-        sub={`Programme de ${annee}ᵉ année : lis le cours, lance un QCM, un défi éclair ou une épreuve.`}
+        sub={`Programme de ${classe} : lis le cours, lance un QCM, un défi éclair ou une épreuve.`}
         icon={<Folder size={30} />}
       />
       <div className="grid gap-5 sm:grid-cols-2">
@@ -67,46 +67,21 @@ export default function ModulesPage() {
         })}
         {modules.length === 0 && (
           <p className="card p-6 text-sm font-semibold text-muted sm:col-span-2">
-            Les modules de {annee}ᵉ année arrivent bientôt. En attendant, tu peux suivre le classement de ton année.
+            Les modules de {classe} arrivent bientôt. Tu seras prévenu dès qu’ils sont publiés ; en attendant, suis le classement de ta classe ou explore les autres filières.
           </p>
         )}
       </div>
 
-      {others.length > 0 && (
-        <section className="mt-10">
-          <h2 className="h-display mb-1 flex items-center gap-2 text-xl">
-            <Lock size={20} className="text-muted" />
-            <span>Autres années</span>
-          </h2>
-          <p className="mb-4 text-xs font-bold text-muted">
-            Réservés à l’autre année d’études. L’accès sera proposé en option payante.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {others.map((m) => (
-              <div
-                key={m.id}
-                className="card flex items-center gap-3 p-4 opacity-70"
-                aria-label={`${m.title}, module d’une autre année, verrouillé`}
-              >
-                <span
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl"
-                  style={{ background: m.color + '26' }}
-                  aria-hidden
-                >
-                  {m.emoji}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-display text-base font-extrabold">{m.title}</div>
-                  <div className="text-[11px] font-bold text-muted">
-                    {m.annee === 2 ? '2ᵉ' : '3ᵉ'} année · {m.chapters.length} chapitres
-                  </div>
-                </div>
-                <Lock size={18} className="shrink-0 text-muted" />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <Link
+        to="/explorer"
+        className="card mt-8 flex items-center justify-between gap-3 p-4 transition hover:border-brand/40"
+      >
+        <div>
+          <div className="font-display text-base font-extrabold">Explorer les autres filières et années</div>
+          <div className="text-xs font-bold text-muted">Programmes, modules et classements des autres classes.</div>
+        </div>
+        <ArrowRight size={18} className="shrink-0 text-brand" />
+      </Link>
     </>
   );
 }

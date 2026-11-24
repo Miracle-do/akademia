@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const pushService = require('./pushService');
 const contentService = require('./contentService');
+const cursus = require('./cursus');
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -129,9 +130,9 @@ function snapshotContent() {
   const modules = {};
   const formations = {};
   for (const m of contentService.getModules()) {
-    modules[m.id] = { title: m.title, annee: m.annee === 2 ? 2 : 3 };
+    modules[m.id] = { title: m.title, cursus: cursus.moduleCodes(m) };
     for (const f of contentService.getFormations(m.id)) {
-      formations[`${m.id}:${f.id}`] = { title: f.title, tagline: f.tagline || '', moduleId: m.id, id: f.id, annee: modules[m.id].annee };
+      formations[`${m.id}:${f.id}`] = { title: f.title, tagline: f.tagline || '', moduleId: m.id, id: f.id, cursus: modules[m.id].cursus };
     }
   }
   return { modules, formations };
@@ -146,28 +147,32 @@ function diffContent(previous, current) {
   };
 }
 
-/** Transforme les nouveautés en notifications : { annees: [2|3], kind, title, body, url, tag }. */
+/**
+ * Transforme les nouveautés en notifications : { cursus: [codes de classe visés], kind, title, body, url, tag }.
+ * Une nouveauté ne notifie que les étudiants à qui le contenu est destiné (ex. un module IG2 ne notifie que IG2).
+ */
 function announcementsFor(diff) {
   const out = [];
   const total = diff.modules.length + diff.formations.length;
   if (total === 0) return out;
+  const codesOf = cursus.moduleCodes;
   if (total > 3) {
-    for (const annee of [2, 3]) {
-      const mods = diff.modules.filter((m) => m.annee === annee).length;
-      const forms = diff.formations.filter((f) => f.annee === annee).length;
-      if (!mods && !forms) continue;
+    const classes = [...new Set([...diff.modules, ...diff.formations].flatMap(codesOf))].sort();
+    for (const code of classes) {
+      const mods = diff.modules.filter((m) => codesOf(m).includes(code)).length;
+      const forms = diff.formations.filter((f) => codesOf(f).includes(code)).length;
       const parts = [];
       if (mods) parts.push(`${mods} module${mods > 1 ? 's' : ''}`);
       if (forms) parts.push(`${forms} formation${forms > 1 ? 's' : ''}`);
-      out.push({ annee, kind: 'content', title: 'Du nouveau sur Akademia ✨', body: `${parts.join(' et ')} ajouté${mods + forms > 1 ? 's' : ''} pour ta promotion.`, url: '/modules', tag: `content-${annee}` });
+      out.push({ cursus: [code], kind: 'content', title: 'Du nouveau sur Akademia ✨', body: `${parts.join(' et ')} ajouté${mods + forms > 1 ? 's' : ''} pour ta classe.`, url: '/modules', tag: `content-${code}` });
     }
     return out;
   }
   for (const m of diff.modules) {
-    out.push({ annee: m.annee, kind: 'content', title: `Nouveau module : ${m.title}`, body: `Le cours est disponible. Viens le découvrir !`, url: `/m/${m.id}`, tag: `module-${m.id}` });
+    out.push({ cursus: codesOf(m), kind: 'content', title: `Nouveau module : ${m.title}`, body: `Le cours est disponible. Viens le découvrir !`, url: `/m/${m.id}`, tag: `module-${m.id}` });
   }
   for (const f of diff.formations) {
-    out.push({ annee: f.annee, kind: 'content', title: `Nouvelle formation : ${f.title}`, body: f.tagline || 'Une nouvelle formation guidée avec Nimbo t’attend.', url: `/m/${f.moduleId}/formation/${f.id}`, tag: `formation-${f.moduleId}-${f.id}` });
+    out.push({ cursus: codesOf(f), kind: 'content', title: `Nouvelle formation : ${f.title}`, body: f.tagline || 'Une nouvelle formation guidée avec Nimbo t’attend.', url: `/m/${f.moduleId}/formation/${f.id}`, tag: `formation-${f.moduleId}-${f.id}` });
   }
   return out;
 }
@@ -186,11 +191,17 @@ async function saveKv(key, value) {
   });
 }
 
-async function userYears() {
-  const rows = (await db('/rest/v1/profiles?select=id,annee&limit=5000')) || [];
-  const byYear = { 2: [], 3: [] };
-  for (const r of rows) byYear[r.annee === 2 ? 2 : 3].push(r.id);
-  return byYear;
+/** Profils avec leurs codes d'accès (classe, et classe-spécialité pour IG3). */
+async function userAudiences() {
+  const rows = (await db('/rest/v1/profiles?select=id,programme,annee,filiere&limit=5000').catch(() =>
+    db('/rest/v1/profiles?select=id,annee,filiere&limit=5000'),
+  )) || [];
+  return rows.map((r) => ({ id: r.id, codes: cursus.accessCodes(r.programme, r.annee, r.filiere) }));
+}
+
+/** Identifiants des étudiants concernés par une annonce visant ces codes de classe. */
+function audienceIds(audiences, codes) {
+  return audiences.filter((u) => u.codes.some((c) => codes.includes(c))).map((u) => u.id);
 }
 
 /** Compare le contenu actuel à celui déjà connu ; notifie les nouveautés. La toute première exécution mémorise sans notifier. */
@@ -211,10 +222,10 @@ async function announceNewContent() {
   const diff = diffContent(previous, current);
   if (!diff.modules.length && !diff.formations.length) return { added: 0 };
   await saveKv('content_snapshot', current); // enregistré avant l'envoi : jamais deux fois la même annonce
-  const years = await userYears();
+  const audiences = await userAudiences();
   let sent = 0;
   for (const a of announcementsFor(diff)) {
-    const result = await notifyUsers(years[a.annee] || [], a);
+    const result = await notifyUsers(audienceIds(audiences, a.cursus), a);
     sent += result.inbox;
   }
   return { added: diff.modules.length + diff.formations.length, sent };
@@ -337,6 +348,7 @@ async function runScheduledJobs(nowMs = Date.now()) {
 module.exports = {
   announceNewContent,
   announcementsFor,
+  audienceIds,
   climbMessage,
   diffContent,
   inQuietHours,

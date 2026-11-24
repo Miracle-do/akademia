@@ -190,7 +190,6 @@ async function getAdminStats() {
   const remoteUsers = await progressService.listUsersForAdmin();
   const usersList = remoteUsers || Object.values(rawDb.users || {});
   const battleData = await progressService.getBattleData(new Date(), 3).catch(() => ({ currentBattle: null, history: [] }));
-  const battleData2 = await progressService.getBattleData(new Date(), 2).catch(() => ({ currentBattle: null, history: [] }));
   const modulesList = contentService.getModules();
 
   // 1. MODULES & CONTENT STATS (100% REAL VALID DATA, ZERO MOCK)
@@ -306,9 +305,15 @@ async function getAdminStats() {
 
   // Sanitized detailed user list (NO PASSWORD HASHES)
   const allUsers = usersList.map((user) => {
-    const filiere = (user.filiere || user.state?.filiere || 'ARI').toUpperCase();
-    if (filiere === 'ARI') ariUsersCount++;
-    else if (filiere === 'AIP') aipUsersCount++;
+    // « Classe » lisible : IG3 · ARI, GRH2… (la spécialité n'existe qu'en IG3 ; les autres comptent dans « autres »).
+    const identity = progressService.identityOf({
+      programme: user.programme ?? user.state?.programme,
+      annee: user.annee ?? user.state?.annee,
+      filiere: user.filiere || user.state?.filiere,
+    });
+    const filiere = `${identity.programme}${identity.annee}${identity.filiere ? ` · ${identity.filiere}` : ''}`;
+    if (identity.filiere === 'ARI') ariUsersCount++;
+    else if (identity.filiere === 'AIP') aipUsersCount++;
     else otherUsersCount++;
 
     const xp = Number(user.xp ?? user.state?.xp) || 0;
@@ -450,12 +455,12 @@ async function getAdminStats() {
     },
     {
       id: 'inter-filiere-battle',
-      name: 'Battle Inter-Filieres (ARI vs AIP, par annee)',
+      name: 'Battle Inter-Filieres (ARI vs AIP, IG3 uniquement)',
       iconName: 'Globe',
       status: 'operational',
       statusLabel: battleData.currentBattle?.isFinished ? 'Cloturee' : 'En cours',
       description: 'Duel hebdomadaire du lundi 00h au samedi 18h avec calcul dynamique des scores de filieres.',
-      metrics: `Semaine ${battleData.currentBattle?.weekLabel || 'Active'} - 3e annee: ARI ${battleData.currentBattle?.ariScore || 0} pts vs AIP ${battleData.currentBattle?.aipScore || 0} pts - 2e annee: ARI ${battleData2.currentBattle?.ariScore || 0} pts vs AIP ${battleData2.currentBattle?.aipScore || 0} pts`,
+      metrics: `Semaine ${battleData.currentBattle?.weekLabel || 'Active'} - IG3: ARI ${battleData.currentBattle?.ariScore || 0} pts vs AIP ${battleData.currentBattle?.aipScore || 0} pts`,
     },
     {
       id: 'leaderboard-ranking',
@@ -1603,7 +1608,7 @@ function renderAdminHtml(rawStats) {
                 <div class="font-mono" style="font-size:0.75rem; color:var(--muted);">${u.id}</div>
               </td>
               <td>
-                <span class="badge ${u.filiere === 'AIP' ? 'badge-brand' : 'badge-gold'} font-mono">${u.filiere}</span>
+                <span class="badge ${String(u.filiere).includes('AIP') ? 'badge-brand' : 'badge-gold'} font-mono">${u.filiere}</span>
               </td>
               <td>
                 <span class="badge badge-brand font-mono">Niv. ${u.level}</span>
@@ -1684,7 +1689,7 @@ function renderAdminHtml(rawStats) {
                 </div>
               </td>
               <td>
-                <span class="badge ${u.filiere === 'AIP' ? 'badge-brand' : 'badge-gold'} font-mono">${u.filiere}</span>
+                <span class="badge ${String(u.filiere).includes('AIP') ? 'badge-brand' : 'badge-gold'} font-mono">${u.filiere}</span>
               </td>
               <td>
                 <div style="display:flex; flex-direction:column; gap:2px;">

@@ -56,13 +56,13 @@ test('diffContent détecte les nouveaux modules et formations seulement', () => 
   assert.deepEqual(d.formations.map((f) => f.id), ['f2']);
 });
 
-test('annonces : détail jusqu’à 3 nouveautés, résumé au-delà, ciblées par année', () => {
+test('annonces : détail jusqu’à 3 nouveautés, résumé au-delà, ciblées par classe', () => {
   const few = n.announcementsFor({
     modules: [{ id: 'web', title: 'Programmation web', annee: 2 }],
     formations: [{ moduleId: 'bdd', id: 'ddl', title: 'DDL', tagline: 'Créer sa base', annee: 3 }],
   });
   assert.equal(few.length, 2);
-  assert.equal(few[0].annee, 2);
+  assert.deepEqual(few[0].cursus, ['IG2']);
   assert.equal(few[0].url, '/m/web');
   assert.equal(few[1].url, '/m/bdd/formation/ddl');
   const forms = Array.from({ length: 5 }, (_, i) => ({ moduleId: 'm', id: `f${i}`, title: `F${i}`, annee: 3 }));
@@ -84,5 +84,19 @@ test('montée au classement : seulement n°1 ou entrée sur le podium', () => {
 test('le contenu réel du dépôt produit un instantané cohérent', () => {
   const s = n.snapshotContent();
   assert.ok(Object.keys(s.modules).length > 0);
-  for (const f of Object.values(s.formations)) assert.ok([2, 3].includes(f.annee));
+  for (const f of Object.values(s.formations)) assert.ok(Array.isArray(f.cursus) && f.cursus.length > 0);
+});
+
+test('une annonce ne vise que les classes concernées (spécialité IG3 comprise)', () => {
+  const cursus = require('../services/cursus');
+  const audiences = [
+    { id: 'ig2', codes: cursus.accessCodes('IG', 2, null) },
+    { id: 'ari', codes: cursus.accessCodes('IG', 3, 'ARI') },
+    { id: 'aip', codes: cursus.accessCodes('IG', 3, 'AIP') },
+    { id: 'grh2', codes: cursus.accessCodes('GRH', 2, null) },
+  ];
+  assert.deepEqual(n.audienceIds(audiences, ['IG3']).sort(), ['aip', 'ari']);
+  assert.deepEqual(n.audienceIds(audiences, ['IG3-ARI']), ['ari']);
+  assert.deepEqual(n.audienceIds(audiences, ['GRH2']), ['grh2']);
+  assert.deepEqual(n.audienceIds(audiences, ['STAT1']), []);
 });

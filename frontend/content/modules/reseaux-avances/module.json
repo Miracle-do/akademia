@@ -7,7 +7,7 @@
   "color": "#1C7ED6",
   "level": "Licence 3",
   "estimatedHours": 12,
-  "annee": 3,
+  "cursus": ["IG3"],
   "parts": [
     {
       "id": "ch1",
