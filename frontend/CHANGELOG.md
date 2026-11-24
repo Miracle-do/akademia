@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.20.0] — 2026-11-24
+
+### Ajouté
+- Page de présentation `/bienvenue` avant l'inscription : fonctionnement en 3 étapes, aperçus de la révision et du classement, filières, Battle et avantages. Les nouveaux visiteurs y arrivent d'abord ; les habitués vont droit à la connexion.
+
 ## [1.19.0] — 2026-11-24
 
 ### Ajouté
