@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, ChevronLeft, GraduationHat, Lock, Mail, User } from '@getpapillon/papicons';
 import { useAuth } from '@/state/AuthContext';
 import { FILIERES, FiliereId, useTheme } from '@/state/Theme';
@@ -45,9 +45,12 @@ export default function AuthPage() {
       return false;
     }
   })();
-  const [screen, setScreen] = useState<'splash' | 'welcome' | 'join'>(returning ? 'join' : 'splash');
+  // ?mode=up|in vient de la page de présentation : on va directement au formulaire.
+  const [params] = useSearchParams();
+  const fromLanding = params.get('mode') === 'up' || params.get('mode') === 'in';
+  const [screen, setScreen] = useState<'splash' | 'welcome' | 'join'>(returning || fromLanding ? 'join' : 'splash');
   const [slide, setSlide] = useState(0);
-  const [authMode, setAuthMode] = useState<'up' | 'in'>(returning ? 'in' : 'up');
+  const [authMode, setAuthMode] = useState<'up' | 'in'>(fromLanding ? (params.get('mode') as 'up' | 'in') : returning ? 'in' : 'up');
 
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');

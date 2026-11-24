@@ -28,6 +28,7 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const NotificationsPage = lazy(() => import('@/pages/NotificationsPage'));
 const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const ExplorePage = lazy(() => import('@/pages/ExplorePage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
 const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
@@ -36,7 +37,12 @@ function Gate() {
   const { user, ready } = useAuth();
   const { ready: storeReady } = useStore();
   if (!ready) return <Spinner />;
-  if (!user) return <Navigate to="/connexion" replace />;
+  if (!user) {
+    // Première visite : on présente la plateforme avant l'inscription ; les habitués vont droit à la connexion.
+    let seen = false;
+    try { seen = localStorage.getItem('akademia:seen') === '1'; } catch { /* ignore */ }
+    return <Navigate to={seen ? '/connexion' : '/bienvenue'} replace />;
+  }
   if (!storeReady) return <Spinner label="Synchronisation…" />;
   return <Layout />;
 }
@@ -44,6 +50,7 @@ function Gate() {
 export default function App() {
   return (
     <Routes>
+      <Route path="/bienvenue" element={<Suspense fallback={<Spinner />}><LandingPage /></Suspense>} />
       <Route path="/connexion" element={<Suspense fallback={<Spinner />}><AuthPage /></Suspense>} />
       <Route element={<Gate />}>
         <Route index element={<Dashboard />} />
