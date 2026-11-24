@@ -5,6 +5,12 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.21.0] — 2026-11-24
+
+### Modifié
+- Interface plus sobre : les émojis du contenu et de l'interface sont masqués (interrupteur `SHOW_EMOJIS` dans `AnimatedEmoji.tsx`). Les modules sont représentés par une pastille d'initiales. Les messages et pseudos écrits par les étudiants gardent leurs émojis.
+- Thème clair par défaut ; Auto et Sombre restent des choix dans les paramètres.
+
 ## [1.20.1] — 2026-11-24
 
 ### Modifié
