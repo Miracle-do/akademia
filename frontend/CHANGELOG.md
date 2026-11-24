@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.23.0] — 2026-11-25
+
+### Ajouté
+- Module « Réseaux avancés », chapitre 5.6 (Sécurité Wi-Fi) : section « Comprendre les attaques en détail » — mécanique du cassage WPA2-PSK (handshake, PBKDF2, dictionnaire hors ligne), désauthentification forgée, faille WPS, et pourquoi WPA3/SAE y résiste. 6 questions de QCM et 6 cartes mémoire. Pas de commandes d'exploitation : uniquement le principe, pour comprendre la défense.
+
 ## [1.22.0] — 2026-11-24
 
 ### Ajouté
