@@ -2,12 +2,14 @@
   "id": "reseaux-avances",
   "title": "Réseaux avancés",
   "subtitle": "Adressage, subnetting, routage, OSPF, VLAN, NAT · ENEAM",
-  "description": "Cours complet de réseaux : modèles OSI/TCP-IP, IPv4/IPv6, subnetting et VLSM, résumé de routes, routage statique et OSPF, VLAN, DHCP, DNS, NAT, ACL, Linux et Docker, avec exercices corrigés et 24 épreuves dont le sujet réel.",
+  "description": "Cours complet de réseaux : modèles OSI/TCP-IP, IPv4/IPv6, subnetting et VLSM, résumé de routes, routage statique et OSPF, VLAN, DHCP, DNS, NAT, ACL, Linux, Docker, services réseau (SSH, bastion, VPN, supervision Prometheus/Grafana), avec exercices corrigés et 24 épreuves dont le sujet réel.",
   "emoji": "🌐",
   "color": "#1C7ED6",
   "level": "Licence 3",
-  "estimatedHours": 12,
-  "cursus": ["IG3"],
+  "estimatedHours": 13,
+  "cursus": [
+    "IG3"
+  ],
   "parts": [
     {
       "id": "ch1",
@@ -46,7 +48,8 @@
         "4-1-vlan-commutation",
         "4-2-dhcp-dns-nat",
         "4-3-acl-securite",
-        "4-4-linux-docker-outils"
+        "4-4-linux-docker-outils",
+        "4-5-services-reseau-linux"
       ]
     },
     {
@@ -199,6 +202,14 @@
       "summary": "ip, netplan, docker -p, tcpdump, Wireshark.",
       "minutes": 7,
       "file": "4-4-linux-docker-outils.md"
+    },
+    {
+      "id": "4-5-services-reseau-linux",
+      "number": "4.5",
+      "title": "Services réseau sous Linux",
+      "summary": "SSH, bastion, VPN, DHCP/DNS/NTP Linux, FTP/NFS/SAMBA, Prometheus et Grafana.",
+      "minutes": 9,
+      "file": "4-5-services-reseau-linux.md"
     },
     {
       "id": "5-1-radio-categories",
