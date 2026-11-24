@@ -5,6 +5,24 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.19.0] — 2026-11-24
+
+### Ajouté
+- Structure multi-filières : IG, GRH, GBA, GFC, GTL, GC, PLAN, STAT, chacune en années 1 à 3. Seule IG3 se divise en spécialités ARI et AIP. Source unique : `content/cursus.json`.
+- Inscription : choix de la filière, de l'année et, pour IG3, de la spécialité. Section « Ma classe » dans les paramètres.
+- Un classement par classe (IG1, IG2, IG3, GRH1…), avec sélecteur de classe.
+- Page « Explorer » : voir les modules et le classement d'une autre classe. Ses modules s'affichent en aperçu (drapeau `OPEN_OTHER_CLASSES` pour les ouvrir).
+- Cinq nouveaux thèmes (émeraude, ambre, rose, ardoise, bordeaux), en clair et en sombre.
+- Modules rattachés aux classes par `"cursus": ["GRH2"]` ; validation dans `validate-content`.
+- Migration `supabase/migration-cursus.sql` à exécuter une fois.
+
+### Modifié
+- La Battle ARI contre AIP ne concerne plus que IG3 ; les autres classes la suivent en spectateurs.
+- Les comptes existants restent en IG avec leur année et leur spécialité.
+
+### Corrigé
+- Le profil ne contourne plus les refus du serveur en écrivant directement dans Supabase.
+
 ## [1.18.0] — 2026-11-23
 
 ### Ajouté
