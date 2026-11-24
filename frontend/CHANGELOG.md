@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.22.0] — 2026-11-24
+
+### Ajouté
+- Module « Réseaux avancés » : nouveau chapitre 4.5 « Services réseau sous Linux » (SSH, bastion SSH, OpenVPN/WireGuard, DHCP/DNS/NTP côté Linux, DNSSEC, FTP/NFS/SAMBA, supervision Prometheus/Grafana) avec 15 questions de QCM et 10 cartes mémoire.
+
 ## [1.21.0] — 2026-11-24
 
 ### Modifié
