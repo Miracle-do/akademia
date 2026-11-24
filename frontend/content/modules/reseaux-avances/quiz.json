@@ -5976,5 +5976,89 @@
   ],
   "answer": 1,
   "explain": "Sans authentification native, n'importe qui pourrait lire l'état détaillé des machines surveillées."
+ },
+ {
+  "id": "rx-q428",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "Pourquoi le 4-way handshake WPA2 peut-il être capturé par un attaquant qui n'est pas authentifié ?",
+  "options": [
+   "Il n'existe pas en WPA2",
+   "Il s'échange en clair sur les ondes, seul son contenu est protégé",
+   "Il n'est émis qu'une fois par jour",
+   "Il nécessite un accès physique à l'AP"
+  ],
+  "answer": 1,
+  "explain": "N'importe qui à portée radio peut capturer les quatre trames ; c'est le calcul derrière qui protège le mot de passe, pas l'échange lui-même."
+ },
+ {
+  "id": "rx-q429",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "Après avoir capturé un handshake WPA2, que fait concrètement un dictionnaire hors ligne ?",
+  "options": [
+   "Il déchiffre directement le mot de passe stocké sur l'AP",
+   "Il recalcule PBKDF2 pour chaque mot candidat et compare au résultat capturé",
+   "Il envoie le mot de passe à l'AP un par un",
+   "Il modifie le firmware de l'AP"
+  ],
+  "answer": 1,
+  "explain": "C'est une attaque par comparaison de calculs, pas une lecture directe du mot de passe."
+ },
+ {
+  "id": "rx-q430",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "Pourquoi PBKDF2 impose-t-il 4096 itérations de hachage pour dériver la PMK ?",
+  "options": [
+   "Par erreur de conception",
+   "Pour ralentir volontairement chaque tentative d'un dictionnaire hors ligne",
+   "Pour économiser la batterie des appareils",
+   "Ce n'est pas le cas en WPA2"
+  ],
+  "answer": 1,
+  "explain": "Chaque candidat testé coûte 4096 hachages : un mot de passe aléatoire long devient alors hors de portée en temps raisonnable."
+ },
+ {
+  "id": "rx-q431",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "Pourquoi une trame de désauthentification forgée permet-elle d'accélérer la capture d'un handshake ?",
+  "options": [
+   "Elle révèle directement le mot de passe",
+   "Elle force un client déjà connecté à se reconnecter, donc à rejouer le handshake sous écoute",
+   "Elle redémarre l'AP",
+   "Elle désactive le chiffrement AES"
+  ],
+  "answer": 1,
+  "explain": "Les trames de gestion non protégées peuvent être forgées ; PMF (802.11w) les signe et empêche cette attaque."
+ },
+ {
+  "id": "rx-q432",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "La faille historique du PIN WPS vient du fait qu'il est vérifié :",
+  "options": [
+   "En une seule fois sur 8 chiffres",
+   "En deux moitiés indépendantes de 4 chiffres, réduisant l'espace de recherche",
+   "Par un serveur RADIUS externe",
+   "Uniquement via Bluetooth"
+  ],
+  "answer": 1,
+  "explain": "Vérifier séparément deux groupes de 4 chiffres ramène la recherche à environ 10⁴+10⁴ essais au lieu de 10⁸."
+ },
+ {
+  "id": "rx-q433",
+  "chapter": "5-6-securite-wifi",
+  "difficulty": 2,
+  "q": "Pourquoi WPA3/SAE rend-il un dictionnaire hors ligne inopérant ?",
+  "options": [
+   "Parce qu'il interdit tout mot de passe",
+   "Parce que chaque tentative exige une interaction en direct avec l'AP, qui peut la limiter",
+   "Parce qu'il désactive le Wi-Fi la nuit",
+   "Parce qu'il remplace le Wi-Fi par de l'Ethernet"
+  ],
+  "answer": 1,
+  "explain": "SAE ne permet plus de vérifier un candidat sans interagir avec l'AP : il n'y a plus rien à calculer hors ligne sur une capture passive."
  }
 ]

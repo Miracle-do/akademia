@@ -772,5 +772,41 @@
   "front": "node_exporter",
   "back": "Expose les métriques système d'une machine sur le port 9100.",
   "tag": "Services Linux"
+ },
+ {
+  "id": "rx-f130",
+  "front": "Handshake WPA2 capturable",
+  "back": "S'échange en clair sur les ondes : son contenu est protégé, pas l'échange lui-même.",
+  "tag": "Sécurité Wi-Fi"
+ },
+ {
+  "id": "rx-f131",
+  "front": "Dictionnaire hors ligne WPA2",
+  "back": "Recalcule PBKDF2 (4096 itérations) pour chaque mot candidat et compare au handshake capturé.",
+  "tag": "Sécurité Wi-Fi"
+ },
+ {
+  "id": "rx-f132",
+  "front": "Pourquoi PBKDF2 est lent exprès",
+  "back": "Ralentit volontairement chaque tentative d'un dictionnaire hors ligne.",
+  "tag": "Sécurité Wi-Fi"
+ },
+ {
+  "id": "rx-f133",
+  "front": "Désauthentification forgée",
+  "back": "Force un client connecté à se reconnecter pour rejouer le handshake sous écoute ; bloquée par PMF.",
+  "tag": "Sécurité Wi-Fi"
+ },
+ {
+  "id": "rx-f134",
+  "front": "Faille WPS",
+  "back": "PIN vérifié en 2 moitiés de 4 chiffres : espace de recherche ~10⁴+10⁴ au lieu de 10⁸.",
+  "tag": "Sécurité Wi-Fi"
+ },
+ {
+  "id": "rx-f135",
+  "front": "Pourquoi WPA3/SAE résiste au dictionnaire",
+  "back": "Chaque tentative exige une interaction en direct avec l'AP, qui peut la limiter.",
+  "tag": "Sécurité Wi-Fi"
  }
 ]
