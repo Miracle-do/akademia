@@ -75,7 +75,6 @@ export default function FormationsListPage() {
                 to={`/m/${f.moduleId}/formation/${f.id}`}
                 className="flex items-center gap-3 rounded-2xl bg-card p-3 transition hover:shadow-card"
               >
-                <span className="shrink-0"><AnimatedEmoji emoji={f.emoji} size="1.6rem" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-extrabold">{f.title}</span>
                   <span className="text-[11px] font-bold text-muted">
@@ -142,7 +141,6 @@ export default function FormationsListPage() {
               }`}
               style={isSelected ? { background: m.color } : undefined}
             >
-              <span>{renderWithAnimatedEmojis(m.emoji)}</span>
               <span>{m.title}</span>
               <span
                 className={`text-[10px] rounded-full px-1.5 py-0.2 ${
@@ -172,16 +170,12 @@ export default function FormationsListPage() {
               <div>
                 {/* Module discret */}
                 <div className="flex items-center gap-1.5 text-xs font-bold text-muted mb-3">
-                  <span>{renderWithAnimatedEmojis(f.moduleEmoji)}</span>
                   <span className="truncate">{f.moduleTitle}</span>
                 </div>
 
                 {/* Titre de la formation */}
                 <Link to={`/m/${f.moduleId}/formation/${f.id}`} className="block">
                   <h3 className="h-display text-xl leading-snug text-ink group-hover:text-brand transition flex items-center gap-2.5">
-                    <span className="text-2xl shrink-0">
-                      <AnimatedEmoji emoji={f.emoji} size="1.8rem" />
-                    </span>
                     <span>{f.title}</span>
                   </h3>
                 </Link>

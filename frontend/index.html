@@ -16,7 +16,7 @@
     <script>
       (function () {
         try {
-          var p = localStorage.getItem('akademia:mode') || 'auto';
+          var p = localStorage.getItem('akademia:mode') || 'light';
           var dark = p === 'dark' || (p === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
           var t = localStorage.getItem('akademia:theme');
           if (t) document.documentElement.setAttribute('data-theme', t);

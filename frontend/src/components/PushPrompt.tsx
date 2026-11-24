@@ -78,7 +78,7 @@ export default function PushPrompt() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-display text-sm font-extrabold text-ink">
-            {done ? 'Notifications activées !' : 'Ne rate plus rien 🔔'}
+            {done ? 'Notifications activées !' : 'Ne rate plus rien'}
           </p>
           <p className="mt-0.5 text-xs font-semibold text-muted">
             {done

@@ -112,7 +112,7 @@ export default function ProfilePage() {
             <CustomAvatar name={publicProfile.username} size={88} showBadge />
           </div>
 
-          <h2 className="h-display mt-3 text-2xl text-ink">{renderWithAnimatedEmojis(publicProfile.username)}</h2>
+          <h2 className="h-display mt-3 text-2xl text-ink">{renderWithAnimatedEmojis(publicProfile.username, true)}</h2>
           <div className="mt-1 flex items-center gap-2">
             <span className="rounded-full bg-brand px-3 py-1 text-xs font-extrabold text-white">
               Niveau {publicLp.level}
@@ -199,7 +199,7 @@ export default function ProfilePage() {
           <CustomAvatar name={displayName} filiere={filiere} size={96} showBadge />
         </div>
 
-        <h2 className="h-display mt-3 text-3xl text-ink">{renderWithAnimatedEmojis(displayName)}</h2>
+        <h2 className="h-display mt-3 text-3xl text-ink">{renderWithAnimatedEmojis(displayName, true)}</h2>
 
         <div className="mt-1.5 flex items-center gap-2">
           <span

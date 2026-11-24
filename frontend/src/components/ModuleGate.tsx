@@ -1,3 +1,4 @@
+import { ModuleMark } from '@/components/ModuleMark';
 import { Link, Outlet, useParams } from 'react-router-dom';
 import { getModule } from '@/lib/content';
 import { moduleCodes, OPEN_OTHER_CLASSES, moduleVisibleFor } from '@/lib/cursus';
@@ -22,7 +23,7 @@ export default function ModuleGate() {
     <div className="mx-auto max-w-2xl space-y-5">
       <section className="card space-y-3 p-6">
         <div className="flex items-start gap-3">
-          <span className="text-4xl" aria-hidden="true">{m.emoji}</span>
+          <ModuleMark title={m.title} color={m.color} size={48} />
           <div className="min-w-0">
             <h1 className="h-display text-2xl">{m.title}</h1>
             <p className="text-sm font-semibold text-muted">{m.subtitle}</p>
@@ -35,7 +36,7 @@ export default function ModuleGate() {
         </div>
         <p className="text-sm text-ink/80">{m.description}</p>
         <div className="rounded-2xl border border-line/70 bg-soft/60 p-4 text-sm font-semibold">
-          🔒 Ce module n’est pas dans ta classe. Tu peux le parcourir ici ; l’accès complet aux autres classes sera
+          Ce module n’est pas dans ta classe. Tu peux le parcourir ici ; l’accès complet aux autres classes sera
           proposé en option.
         </div>
       </section>

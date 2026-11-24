@@ -13,7 +13,8 @@ export function readPref(): ModePref {
   } catch {
     /* ignore */
   }
-  return 'auto';
+  // Clair par défaut ; « Auto » et « Sombre » restent des choix explicites de l'étudiant.
+  return 'light';
 }
 
 function systemMode(): Mode {

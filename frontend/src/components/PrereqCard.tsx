@@ -37,7 +37,6 @@ export function PrereqCard({ r, moduleId, returnTo, hideWhenDone, className = ''
 
   return (
     <div className={`card flex flex-wrap items-center gap-3 p-3.5 ${className}`} style={{ borderLeft: `5px solid ${target.color}` }}>
-      <span className="text-3xl" aria-hidden><AnimatedEmoji emoji={target.emoji} /></span>
       <div className="min-w-0 flex-1">
         <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted">Formation prérequise</p>
         <p className="font-display text-base font-extrabold leading-tight">{target.title}</p>

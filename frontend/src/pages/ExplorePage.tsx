@@ -1,3 +1,4 @@
+import { ModuleMark } from '@/components/ModuleMark';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Clock, Grades, Lock } from '@getpapillon/papicons';
 import ClassPicker from '@/components/ClassPicker';
@@ -61,13 +62,7 @@ export default function ExplorePage() {
                 to={`/m/${m.id}`}
                 className="card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-pop"
               >
-                <span
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl"
-                  style={{ background: m.color + '26' }}
-                  aria-hidden="true"
-                >
-                  {m.emoji}
-                </span>
+                <ModuleMark title={m.title} color={m.color} size={48} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-display text-base font-extrabold">{m.title}</div>
                   <div className="flex flex-wrap items-center gap-x-2 text-[11px] font-bold text-muted">

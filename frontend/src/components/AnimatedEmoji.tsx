@@ -44,8 +44,17 @@ export function getAnimatedEmojiUrl(emoji: string): string {
   return `https://fonts.gstatic.com/s/e/notoemoji/latest/${resolvedCode}/512.webp`;
 }
 
+/**
+ * Interrupteur central : les émojis du contenu et de l'interface sont masqués (rendu plus sobre).
+ * Les textes écrits par les étudiants (messages, pseudos) les conservent via `keep`.
+ * Passer à `true` pour les réafficher partout.
+ */
+export const SHOW_EMOJIS = false;
+
 export interface AnimatedEmojiProps {
+  /** Affiche l'émoji même quand SHOW_EMOJIS est faux (texte écrit par un utilisateur). */
   emoji: string;
+  keep?: boolean;
   className?: string;
   title?: string;
   size?: string;
@@ -60,12 +69,14 @@ export interface AnimatedEmojiProps {
  */
 export const AnimatedEmoji = memo(function AnimatedEmoji({
   emoji,
+  keep = false,
   className = '',
   title,
   size = '1.3em',
 }: AnimatedEmojiProps) {
   const [hasError, setHasError] = useState(false);
   const trimmed = emoji.trim();
+  if (!SHOW_EMOJIS && !keep) return null;
 
   if (!trimmed || hasError) {
     return <span className={`inline-block select-none ${className}`}>{emoji}</span>;
@@ -94,16 +105,26 @@ export const AnimatedEmoji = memo(function AnimatedEmoji({
  * Parcourt une chaîne de caractères et transforme tous les émojis en composants AnimatedEmoji.
  * Utile pour les titres, énoncés de cartes mémoire, questions de quiz, etc.
  */
-export function renderWithAnimatedEmojis(text: string): ReactNode {
+export function renderWithAnimatedEmojis(text: string, keep = false): ReactNode {
   if (!text) return text;
+  if (!SHOW_EMOJIS && !keep) return stripEmojis(text);
   const parts = text.split(EMOJI_REGEX);
   if (parts.length <= 1) return text;
 
   return parts.map((part, index) => {
     if (!part) return null;
     if (EMOJI_REGEX.test(part)) {
-      return <AnimatedEmoji key={index} emoji={part} />;
+      return <AnimatedEmoji key={index} emoji={part} keep={keep} />;
     }
     return part;
   });
+}
+
+/** Retire les émojis d'un texte et ressert les espaces autour. */
+export function stripEmojis(text: string): string {
+  return text
+    .replace(new RegExp(EMOJI_REGEX.source, 'gu'), '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/^[ \t]+/, '')
+    .replace(/\s+([!?:;,.])/g, '$1');
 }

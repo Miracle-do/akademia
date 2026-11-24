@@ -182,7 +182,7 @@ export default function LeaderboardPage() {
               >
                 <span className="h-display text-3xl font-extrabold text-brand">2</span>
                 <span className="mt-1 font-display text-base font-extrabold">{top2.filiere ?? viewProgramme}</span>
-                <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top2.username)}</span>
+                <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top2.username, true)}</span>
                 <span className="text-[11px] font-bold opacity-90">{fmtK(top2.xp)}</span>
               </div>
             </Link>
@@ -215,7 +215,7 @@ export default function LeaderboardPage() {
                   1
                 </span>
                 <span className="mt-1 font-display text-lg font-extrabold">{top1.filiere ?? viewProgramme}</span>
-                <span className="truncate max-w-[100px] text-xs font-bold opacity-80">{renderWithAnimatedEmojis(top1.username)}</span>
+                <span className="truncate max-w-[100px] text-xs font-bold opacity-80">{renderWithAnimatedEmojis(top1.username, true)}</span>
                 <span className="text-xs font-extrabold opacity-95">{fmtK(top1.xp)}</span>
               </div>
             </Link>
@@ -236,7 +236,7 @@ export default function LeaderboardPage() {
               >
                 <span className="h-display text-3xl font-extrabold text-brand">3</span>
                 <span className="mt-1 font-display text-base font-extrabold">{top3.filiere ?? viewProgramme}</span>
-                <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top3.username)}</span>
+                <span className="truncate max-w-[85px] text-[10px] font-bold opacity-75">{renderWithAnimatedEmojis(top3.username, true)}</span>
                 <span className="text-[11px] font-bold opacity-90">{fmtK(top3.xp)}</span>
               </div>
             </Link>
@@ -296,7 +296,7 @@ export default function LeaderboardPage() {
                         highlighted && theme === 'violet' ? 'text-white/85' : 'text-muted',
                       )}
                     >
-                      · {renderWithAnimatedEmojis(row.username)}
+                      · {renderWithAnimatedEmojis(row.username, true)}
                       {row.isMe ? ' (Toi)' : ''}
                     </span>
                   </div>

@@ -73,7 +73,7 @@ export default function FormationShowcase({ module: m, formations }: { module: M
             </p>
             <div key={f.id} className="title-swap">
               <h3 className="h-display mt-1 text-2xl leading-tight sm:text-3xl">
-                <AnimatedEmoji emoji={f.emoji} className="mr-1.5" />« {f.title} »
+                « {f.title} »
               </h3>
               <p className="mt-1 text-sm font-semibold text-muted">{f.tagline}</p>
             </div>
@@ -145,7 +145,7 @@ function FormationChat({ module: m, formations, startAt, onClose, onPick }: {
       if (token !== run.current) return;
       setTyping(true); await wait(700); setTyping(false);
       if (token !== run.current) return;
-      setMsgs((x) => [...x, { id: Math.random(), who: 'coach', text: 'Alors, on se lance ensemble ? 😊' }]);
+      setMsgs((x) => [...x, { id: Math.random(), who: 'coach', text: 'Alors, on se lance ensemble ?' }]);
       setReady(true);
     })();
     return () => { run.current++; };
@@ -160,7 +160,7 @@ function FormationChat({ module: m, formations, startAt, onClose, onPick }: {
   const start = async () => {
     const token = ++run.current;
     setReady(false);
-    setMsgs((x) => [...x, { id: Math.random(), who: 'me', text: 'Oui, on commence ! 🚀' }]);
+    setMsgs((x) => [...x, { id: Math.random(), who: 'me', text: 'Oui, on commence !' }]);
     await wait(500);
     if (token !== run.current) return;
     await say(token, 'Excellent choix ! Installe-toi, c’est parti…');
@@ -170,7 +170,7 @@ function FormationChat({ module: m, formations, startAt, onClose, onPick }: {
   const other = async () => {
     const token = ++run.current;
     setReady(false);
-    setMsgs((x) => [...x, { id: Math.random(), who: 'me', text: 'Tu as une autre formation ? 👀' }]);
+    setMsgs((x) => [...x, { id: Math.random(), who: 'me', text: 'Tu as une autre formation ?' }]);
     await wait(450);
     if (token !== run.current) return;
     if (!(await say(token, 'Bien sûr, regarde celle-ci !'))) return;
@@ -193,7 +193,6 @@ function FormationChat({ module: m, formations, startAt, onClose, onPick }: {
 
         <div ref={scroller} className="flex-1 space-y-3 overflow-y-auto px-4 py-5">
           <div className="rise-in rounded-3xl p-4 text-center" style={{ background: `${f.color}1f` }}>
-            <div className="text-4xl"><AnimatedEmoji emoji={f.emoji} size="2.5rem" /></div>
             <h3 className="h-display text-xl">{f.title}</h3>
             <p className="text-xs font-bold text-muted">{f.lessons.length} leçons · ~{f.minutes} min · {f.level}</p>
           </div>
@@ -220,8 +219,8 @@ function FormationChat({ module: m, formations, startAt, onClose, onPick }: {
         <footer className="flex flex-wrap items-center gap-2 border-t border-line/70 bg-card/70 p-3">
           {ready ? (
             <>
-              <button type="button" onClick={start} className="btn btn-primary btn-lg flex-1 shine-sweep rise-in"><AnimatedEmoji emoji="🚀" /> On commence !</button>
-              {formations.length > 1 && <button type="button" onClick={other} className="btn btn-soft rise-in"><AnimatedEmoji emoji="👀" /> Une autre formation</button>}
+              <button type="button" onClick={start} className="btn btn-primary btn-lg flex-1 shine-sweep rise-in"><AnimatedEmoji emoji="" /> On commence !</button>
+              {formations.length > 1 && <button type="button" onClick={other} className="btn btn-soft rise-in"><AnimatedEmoji emoji="" /> Une autre formation</button>}
               <FormationShareAction formation={f} moduleTitle={m.title} moduleEmoji={m.emoji} moduleColor={f.color} />
               <button type="button" onClick={onClose} className="btn btn-ghost rise-in">Plus tard</button>
             </>

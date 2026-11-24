@@ -216,7 +216,7 @@ export default function ConversationPage() {
                 }`}
               >
                 <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-relaxed">
-                  {renderWithAnimatedEmojis(message.body)}
+                  {renderWithAnimatedEmojis(message.body, true)}
                 </p>
                 <p
                   className={`mt-1 text-right text-[10px] font-bold ${

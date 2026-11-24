@@ -97,7 +97,7 @@ export default function SearchPage() {
           <option value="">Tous les modules</option>
           {modules.map((m) => (
             <option key={m.id} value={m.id}>
-              {m.emoji} {m.title}
+              {m.title}
             </option>
           ))}
         </select>
@@ -114,7 +114,7 @@ export default function SearchPage() {
         <div className="mb-4 flex flex-wrap gap-2">
           {moduleMatches.map((m) => (
             <Link key={m.id} to={`/m/${m.id}`} className="rounded-2xl border border-line bg-card px-3 py-2 text-sm font-extrabold text-ink shadow-card hover:border-brand/40">
-              {m.emoji} Module · {m.title}
+              Module · {m.title}
             </Link>
           ))}
         </div>
@@ -133,7 +133,7 @@ export default function SearchPage() {
                 <li key={`${item.m}/${item.c}`}>
                   <Link to={`/m/${item.m}/lire/${item.c}`} className="card block p-4 transition hover:-translate-y-0.5 hover:shadow-pop">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide text-brand">
-                      <span>{mod?.emoji} {mod?.title ?? item.m}</span>
+                      <span>{mod?.title ?? item.m}</span>
                       {item.n && <span className="text-muted">· Chapitre {item.n}</span>}
                     </div>
                     <h2 className="mt-1 font-display text-lg font-extrabold text-ink">

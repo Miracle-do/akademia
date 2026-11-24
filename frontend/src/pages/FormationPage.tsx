@@ -55,7 +55,7 @@ export default function FormationPage() {
         <div className="relative z-10 flex flex-col items-center">
           <GlassesCloud size={150} color={f.color} />
           <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-muted">Formation · {f.level} · ~{f.minutes} min</p>
-          <h1 className="h-display mt-1 text-3xl"><AnimatedEmoji emoji={f.emoji} /> {f.title}</h1>
+          <h1 className="h-display mt-1 text-3xl">{f.title}</h1>
           <p className="mt-1 max-w-md font-semibold text-muted">{f.tagline}</p>
           <div className="mt-4 h-3 w-full max-w-sm overflow-hidden rounded-full bg-soft">
             <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct * 100}%`, background: f.color }} />
@@ -100,7 +100,7 @@ export default function FormationPage() {
                     {isDone ? <Check size={22} /> : i + 1}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-display text-lg font-extrabold leading-tight"><AnimatedEmoji emoji={l.emoji} /> {l.title}</span>
+                    <span className="block font-display text-lg font-extrabold leading-tight">{l.title}</span>
                     <span className="text-xs font-bold text-muted">~{l.minutes} min · {l.steps.filter((s) => s.type === 'exercise').length} exercice(s)</span>
                   </span>
                   <ArrowRight size={18} className="text-muted transition group-hover:translate-x-1" />
