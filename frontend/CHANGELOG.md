@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.25.0] — 2026-11-25
+
+### Ajouté
+- Module « Administration sous Linux » : 6 schémas illustrés (arborescence FHS, décomposition des permissions rwx, séquence de démarrage, étages LVM, authentification SSH par clés, flux stdin/stdout/stderr et pipe), insérés dans les chapitres correspondants.
+
 ## [1.24.0] — 2026-11-25
 
 ### Ajouté
