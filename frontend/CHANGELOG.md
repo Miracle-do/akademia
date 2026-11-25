@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.24.0] — 2026-11-25
+
+### Ajouté
+- Module « Réseaux avancés » : 6 schémas illustrés (OSI/TCP-IP, encapsulation IP/TCP, subnetting, table de routage, VLAN/trunking, dialogue DHCP DORA), insérés dans les chapitres correspondants.
+
 ## [1.23.0] — 2026-11-25
 
 ### Ajouté
