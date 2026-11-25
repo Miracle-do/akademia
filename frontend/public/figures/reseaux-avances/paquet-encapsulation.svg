@@ -1,0 +1,20 @@
+<svg width="620" height="235" viewBox="0 0 620 235" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Encapsulation : trame Ethernet, paquet IP, segment TCP</title>
+<rect x="0" y="0" width="620" height="235" fill="#ffffff"/>
+<text x="310" y="20" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="700" font-size="12" fill="rgb(90,100,120)" style="">Encapsulation : chaque couche enveloppe la précédente</text>
+<rect x="20" y="40" width="580" height="150" rx="10" ry="10" fill="#ffe8cc" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="30" y="58" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="10.5" fill="rgb(10,22,38)" style="">Trame Ethernet</text>
+<text x="590" y="58" text-anchor="end" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="600" font-size="8.7" fill="rgb(90,100,120)" style="">en-tête + données + FCS</text>
+<rect x="45" y="72" width="530" height="102" rx="9" ry="9" fill="#d7e8ff" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="55" y="88" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="10" fill="rgb(10,22,38)" style="">Paquet IP</text>
+<text x="585" y="88" text-anchor="end" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="600" font-size="8.5" fill="rgb(90,100,120)" style="">version, TTL, src/dst IP, protocole</text>
+<rect x="68" y="100" width="484" height="56" rx="8" ry="8" fill="#eef3fb" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="78" y="115" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9.8" fill="rgb(10,22,38)" style="">Segment TCP / UDP</text>
+<text x="542" y="115" text-anchor="end" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="600" font-size="8.3" fill="rgb(90,100,120)" style="">ports src/dst, séquence, flags</text>
+<rect x="90" y="126" width="440" height="24" rx="6" ry="6" fill="#ffffff" stroke="rgb(170,180,195)" stroke-width="1.3"/>
+<text x="310.0" y="142.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9" fill="rgb(10,22,38)">Données applicatives (HTTP, DNS...)</text>
+<text x="30" y="212" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9.5" fill="#1C7ED6" style="">IP :</text>
+<text x="55" y="212" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="500" font-size="9" fill="rgb(90,100,120)" style="">version · longueur d'en-tête · TTL · protocole · IP source · IP destination</text>
+<text x="30" y="225" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9.5" fill="#1C7ED6" style="">TCP :</text>
+<text x="60" y="225" text-anchor="start" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="500" font-size="9" fill="rgb(90,100,120)" style="">port source · port destination · n° de séquence · n° d'accusé · fanions (SYN, ACK, FIN...)</text>
+</svg>

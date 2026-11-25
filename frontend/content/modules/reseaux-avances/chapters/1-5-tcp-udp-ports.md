@@ -46,6 +46,8 @@ Le **client** choisit un port source éphémère aléatoire ; le **serveur** éc
 | RDP | 3389 | TCP |
 | RADIUS | 1812, 1813 | UDP |
 
+![Encapsulation : une trame Ethernet contient un paquet IP, qui contient un segment TCP/UDP, qui contient les données applicatives](/figures/reseaux-avances/paquet-encapsulation.svg)
+
 ## 1.5.3 TCP en détail
 
 ### L'en-tête TCP

@@ -25,6 +25,8 @@ default via 192.168.1.1 dev eth0
 192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.10
 ```
 
+![Un routeur choisit toujours la route au masque le plus long (le plus spécifique), jamais la plus courte](/figures/reseaux-avances/table-routage.svg)
+
 ## 3.1.3 Les trois questions du routeur
 
 Pour **chaque paquet** reçu, un routeur fait toujours :

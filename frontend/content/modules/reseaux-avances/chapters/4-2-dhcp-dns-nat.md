@@ -35,6 +35,8 @@ Le DISCOVER est une diffusion : il ne franchit pas un routeur. Pour centraliser 
 
 Sous Linux : `isc-dhcp-server`, `dnsmasq`, ou `kea`. En IPv6, deux approches : **SLAAC** (le préfixe annoncé par RA) et **DHCPv6** (avec état ou sans état).
 
+![Le dialogue DORA : DISCOVER, OFFER, REQUEST, ACK entre le client et le serveur DHCP](/figures/reseaux-avances/dhcp-dora.svg)
+
 ## 4.2.2 DNS : le service d'annuaire
 
 Le **DNS** traduit un **nom** (`www.eneam.bj`) en **adresse IP**. Port **53** (UDP pour les requêtes, TCP pour les transferts de zone). C'est une base **hiérarchique et distribuée** : racine (`.`), domaines de premier niveau (`.bj`, `.com`), domaines (`eneam.bj`), machines.

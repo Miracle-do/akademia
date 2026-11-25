@@ -6,6 +6,8 @@ Un grand réseau unique pose trois problèmes : trop de **diffusions** (broadcas
 
 Si on emprunte `s` bits, on obtient **2^s sous-réseaux** ; il reste `h = 32 − n − s` bits pour les hôtes, soit **2^h − 2** hôtes utilisables par sous-réseau.
 
+![192.168.1.0/24 découpé en 4 sous-réseaux /26, avec leur plage d'hôtes et leur adresse de diffusion](/figures/reseaux-avances/subnetting.svg)
+
 ## 2.1.2 La méthode universelle en 5 étapes
 
 1. **Identifier le bloc de départ** : adresse et masque (ex. `192.168.10.0/24`).

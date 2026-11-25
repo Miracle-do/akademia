@@ -12,6 +12,8 @@ Ce découpage apporte trois avantages concrets :
 
 Au milieu des années 1970, l'agence américaine **ARPA** développe un réseau à commutation de paquets conçu pour résister à des pannes massives. Chaque constructeur avait alors sa propre pile (SNA d'IBM, DECnet de DEC, DSA de Bull). Pour les interconnecter, l'**ISO** publie le modèle **OSI**, tandis que la pile **TCP/IP**, née du réseau ARPA, s'impose dans les faits. Elle n'appartient à aucun constructeur : l'**IETF** (ingénierie à court et moyen terme) et l'**IRTF** (recherche), sous l'**IAB**, publient des documents appelés **RFC** (*Request For Comments*), numérotés séquentiellement. Exemples à connaître : RFC 791 (IP), RFC 768 (UDP), RFC 1918 (adresses privées).
 
+![Le modèle OSI à 7 couches comparé au modèle TCP/IP à 4 couches, avec la correspondance entre les deux](/figures/reseaux-avances/osi-tcpip.svg)
+
 ## 1.1.2 Le modèle OSI en 7 couches
 
 | N° | Couche | Rôle | Unité de données | Exemples |

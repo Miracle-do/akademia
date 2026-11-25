@@ -23,6 +23,8 @@ Un VLAN permet de :
 
 Sur un trunk, 4 octets sont insérés dans la trame Ethernet, entre l'adresse MAC source et l'EtherType : le **TPID** (`0x8100`) et le **TCI** (priorité sur 3 bits, bit DEI, **identifiant de VLAN sur 12 bits**). Un VLAN-ID va donc de **1 à 4094** (0 et 4095 réservés). La taille maximale de la trame passe de 1518 à 1522 octets.
 
+![Deux commutateurs reliés par un lien trunk 802.1Q transportant plusieurs VLAN, chacun avec ses ports access](/figures/reseaux-avances/vlan-trunking.svg)
+
 ## 4.1.3 Configuration Cisco
 
 ```text
