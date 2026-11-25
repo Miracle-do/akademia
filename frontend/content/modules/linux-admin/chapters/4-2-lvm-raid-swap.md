@@ -29,6 +29,8 @@ Les numéros réels dépendent de votre machine ; dans la suite, on suppose `/de
 
 Les LV sont découpés en **extents logiques** (LE) qui correspondent aux **extents physiques** (PE) des PV : un LV de 5 Go fait 1 280 extents de 4 Mo. Le noyau les expose via le *device mapper* : `/dev/mapper/vg_data-lv_web`, aussi accessible par `/dev/vg_data/lv_web` (deux noms, même volume).
 
+![LVM : des disques physiques (PV) regroupés en volume group (VG), puis découpés en volumes logiques (LV)](/figures/linux-admin/lvm-etages.svg)
+
 ### Création complète
 
 ```bash

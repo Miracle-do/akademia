@@ -1,0 +1,29 @@
+<svg width="640" height="272" viewBox="0 0 640 272" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>LVM : les trois étages, PV, VG, LV</title>
+<rect x="0" y="0" width="640" height="272" fill="#ffffff"/>
+<text x="320" y="20" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="700" font-size="12" fill="rgb(90,100,120)" style="">LVM : du disque physique aux volumes logiques</text>
+<rect x="70" y="44" width="140" height="44" rx="8" ry="8" fill="#eef3fb" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="140.0" y="64.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="10" fill="rgb(10,22,38)">/dev/sda1</text>
+<text x="140.0" y="79.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="8.3" fill="rgb(90,100,120)">PV</text>
+<defs><marker id="ah4" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="rgb(150,160,180)"/></marker></defs>
+<line x1="140" y1="88" x2="320" y2="116" stroke="rgb(150,160,180)" stroke-width="1.3" marker-end="url(#ah4)"/>
+<rect x="240" y="44" width="140" height="44" rx="8" ry="8" fill="#eef3fb" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="310.0" y="64.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="10" fill="rgb(10,22,38)">/dev/sdb1</text>
+<text x="310.0" y="79.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="8.3" fill="rgb(90,100,120)">PV</text>
+<defs><marker id="ah9" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="rgb(150,160,180)"/></marker></defs>
+<line x1="310" y1="88" x2="320" y2="116" stroke="rgb(150,160,180)" stroke-width="1.3" marker-end="url(#ah9)"/>
+<rect x="220" y="116" width="200" height="48" rx="9" ry="9" fill="#d7e8ff" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="320.0" y="138.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="11" fill="rgb(10,22,38)">vg_data</text>
+<text x="320.0" y="153.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="8.6" fill="rgb(90,100,120)">VG — réserve commune</text>
+<defs><marker id="ah14" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="rgb(150,160,180)"/></marker></defs>
+<line x1="300" y1="164" x2="160" y2="196" stroke="rgb(150,160,180)" stroke-width="1.3" marker-end="url(#ah14)"/>
+<defs><marker id="ah16" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="rgb(150,160,180)"/></marker></defs>
+<line x1="340" y1="164" x2="480" y2="196" stroke="rgb(150,160,180)" stroke-width="1.3" marker-end="url(#ah16)"/>
+<rect x="40" y="196" width="230" height="40" rx="8" ry="8" fill="#ffe8cc" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="155.0" y="214.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9.6" fill="rgb(10,22,38)">lv_web</text>
+<text x="155.0" y="229.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="8" fill="rgb(90,100,120)">150 Mo, ext4</text>
+<rect x="360" y="196" width="230" height="40" rx="8" ry="8" fill="#ffe8cc" stroke="rgb(10,22,38)" stroke-width="1.3"/>
+<text x="475.0" y="214.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="9.6" fill="rgb(10,22,38)">lv_db</text>
+<text x="475.0" y="229.0" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="8" fill="rgb(90,100,120)">le reste du VG</text>
+<text x="320" y="258" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="500" font-size="8.6" fill="rgb(90,100,120)" style="">PV = les briques · VG = le tas de briques · LV = les pièces construites dans ce tas</text>
+</svg>

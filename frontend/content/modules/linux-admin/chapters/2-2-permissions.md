@@ -2,6 +2,8 @@
 
 Sur un système multi-utilisateur, il faut décider **qui peut faire quoi** sur chaque fichier. Pensez à un immeuble : la porte de chaque appartement a une serrure, certaines pièces communes sont ouvertes à tous, le local technique est réservé au gardien. Linux applique ce principe avec trois catégories de personnes et trois types d'action. Ce modèle de base s'appelle **DAC** (*Discretionary Access Control* : le propriétaire décide des droits de ses fichiers).
 
+![Décomposition des permissions Linux : type, propriétaire (u), groupe (g), autres (o)](/figures/linux-admin/permissions-linux.svg)
+
 ### Lire la sortie de `ls -l`
 
 ```bash

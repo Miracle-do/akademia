@@ -77,6 +77,8 @@ mot=$(tr 'a-z' 'A-Z' <<< "bonjour")   # here-string : une chaîne sur stdin
 echo "$mot"                            # BONJOUR
 ```
 
+![stdin, stdout, stderr et le pipe entre deux commandes](/figures/linux-admin/stdin-stdout-pipe.svg)
+
 ## 1.4.3 Les tubes (pipes)
 
 Le tube `|` branche le `stdout` d'une commande sur le `stdin` de la suivante. Philosophie Unix : petits outils, enchaînés.

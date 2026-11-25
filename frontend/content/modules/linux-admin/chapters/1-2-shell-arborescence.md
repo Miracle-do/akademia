@@ -2,6 +2,8 @@
 
 Sous Windows, chaque disque a sa lettre (`C:`, `D:`). Sous Linux, il n'y a **qu'un seul arbre**, dont la racine est `/`. Les disques, clés USB et partitions sont **montés** (« greffés ») sur un répertoire de cet arbre (voir 4.1). L'organisation des répertoires suit une convention, le **FHS** (Filesystem Hierarchy Standard), identique d'une distribution à l'autre : une fois apprise, elle sert partout.
 
+![Arborescence Linux : les principaux répertoires depuis la racine /](/figures/linux-admin/arborescence-linux.svg)
+
 | Répertoire | Contenu |
 |---|---|
 | `/` | Racine de l'arbre ; tout part d'ici |

@@ -94,6 +94,8 @@ Host interne
 
 Il suffit désormais de `ssh srv-eneam` ; `ssh interne` passe automatiquement par la machine **bastion** `srv-eneam` (option `ProxyJump`, équivalent en ligne de commande : `ssh -J alice@192.168.1.50 alice@10.0.0.20`). Le fichier doit être en `600`.
 
+![Authentification SSH par clés : la clé privée ne quitte jamais le poste du client](/figures/linux-admin/ssh-authentification.svg)
+
 ## 4.4.4 Tunnels et transferts
 
 | Option | Nom | Effet | Exemple |

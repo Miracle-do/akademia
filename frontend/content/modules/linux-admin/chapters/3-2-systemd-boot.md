@@ -86,6 +86,8 @@ exit
 
 `touch /.autorelabel` demande à SELinux de réétiqueter les fichiers au démarrage suivant ; sans cela, la connexion peut échouer après le changement de mot de passe.
 
+![Séquence de démarrage Linux : firmware, GRUB2, noyau, systemd, target](/figures/linux-admin/sequence-demarrage.svg)
+
 ## 3.2.2 Les anciens runlevels SysV et leurs équivalents systemd
 
 Avant systemd, le processus `init` (PID 1) lisait `/etc/inittab` et passait d'un **niveau d'exécution** (runlevel) à un autre.
