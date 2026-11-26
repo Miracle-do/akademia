@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.26.0] — 2026-11-26
+
+### Ajouté
+- Module « Administration sous Linux » : 70 questions de QCM et 51 cartes mémoire supplémentaires, réparties sur les 10 chapitres les moins couverts (Unix/Linux, Vim, sudo/PAM, planification et journaux, paquets, dépannage, disques, LVM/RAID/swap, réseau, sauvegarde), pour rapprocher la densité de questions par chapitre de celle du module « Réseaux avancés ».
+
 ## [1.25.0] — 2026-11-25
 
 ### Ajouté
