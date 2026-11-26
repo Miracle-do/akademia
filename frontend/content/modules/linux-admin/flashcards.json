@@ -766,5 +766,311 @@
   "front": "Moyenne d'une colonne",
   "back": "`awk -F, 'NR>1{s+=$3;n++} END{print s/n}' f`",
   "tag": "Texte"
+ },
+ {
+  "id": "lx-f129",
+  "front": "Linux vs GNU/Linux vs distribution",
+  "back": "Linux = le noyau seul ; GNU/Linux = noyau + outils GNU ; une distribution (Ubuntu, Fedora…) assemble le tout avec un gestionnaire de paquets.",
+  "tag": "Fondamentaux"
+ },
+ {
+  "id": "lx-f130",
+  "front": "Trouver une commande par mot-clé",
+  "back": "`apropos mot` ou `man -k mot` cherchent dans les descriptions courtes des pages de manuel.",
+  "tag": "Aide"
+ },
+ {
+  "id": "lx-f131",
+  "front": "man 5 vs man 1",
+  "back": "`man 5 passwd` = format du fichier ; `man 1 passwd` (ou `man passwd`) = la commande.",
+  "tag": "Aide"
+ },
+ {
+  "id": "lx-f132",
+  "front": "who, w, whoami, id",
+  "back": "whoami = mon compte ; id = mes UID/GID/groupes ; who = qui est connecté ; w = who + ce que chacun fait + charge.",
+  "tag": "Fondamentaux"
+ },
+ {
+  "id": "lx-f133",
+  "front": "Vim : quitter sans enregistrer",
+  "back": "`Échap` puis `:q!` — le `!` force l'abandon des modifications.",
+  "tag": "Vim"
+ },
+ {
+  "id": "lx-f134",
+  "front": "Vim : remplacer partout dans le fichier",
+  "back": "`:%s/ancien/nouveau/g` — % = tout le fichier, g = toutes les occurrences de chaque ligne.",
+  "tag": "Vim"
+ },
+ {
+  "id": "lx-f135",
+  "front": "Vim : rendre un réglage permanent",
+  "back": "Ajouter la ligne (sans « : ») dans `~/.vimrc`, ex. `set number`.",
+  "tag": "Vim"
+ },
+ {
+  "id": "lx-f136",
+  "front": "Vim : opérateur + déplacement",
+  "back": "d (supprimer), y (copier), c (remplacer) se combinent avec un déplacement : dw, d$, yy, cw…",
+  "tag": "Vim"
+ },
+ {
+  "id": "lx-f137",
+  "front": "su contre sudo",
+  "back": "su demande le mot de passe de la CIBLE ; sudo demande le VÔTRE et journalise chaque commande.",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "lx-f138",
+  "front": "Toujours éditer sudoers avec…",
+  "back": "`visudo` — vérifie la syntaxe et verrouille le fichier avant d'écrire, pour ne jamais casser sudo pour tout le monde.",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "lx-f139",
+  "front": "Pourquoi `sudo echo x > /etc/f` échoue",
+  "back": "La redirection `>` est faite par le shell AVANT sudo ; solution : `echo x | sudo tee /etc/f`.",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "lx-f140",
+  "front": "PAM : les 4 types de lignes",
+  "back": "auth (identité), account (compte valide ?), password (règles de changement), session (avant/après la session).",
+  "tag": "Sécurité"
+ },
+ {
+  "id": "lx-f141",
+  "front": "Crontab : les 5 champs",
+  "back": "minute, heure, jour du mois, mois, jour de semaine (0 et 7 = dimanche).",
+  "tag": "Planification"
+ },
+ {
+  "id": "lx-f142",
+  "front": "crontab -r : danger",
+  "back": "Supprime TOUTE la table cron sans confirmation — sauvegarder avec `crontab -l > sauve.txt` avant de toucher à sa crontab.",
+  "tag": "Planification"
+ },
+ {
+  "id": "lx-f143",
+  "front": "Pourquoi cron échoue alors que ça marche en terminal",
+  "back": "Environnement minimal : PATH réduit, pas de .bashrc — utiliser des chemins absolus et rediriger la sortie en 2>&1.",
+  "tag": "Planification"
+ },
+ {
+  "id": "lx-f144",
+  "front": "flock -n dans une crontab",
+  "back": "Empêche deux exécutions de se chevaucher : abandonne immédiatement si le verrou est déjà pris.",
+  "tag": "Planification"
+ },
+ {
+  "id": "lx-f145",
+  "front": "Journal d'authentification (Debian/Ubuntu)",
+  "back": "`/var/log/auth.log` (sudo, ssh, su) — `/var/log/secure` sur RHEL.",
+  "tag": "Planification"
+ },
+ {
+  "id": "lx-f146",
+  "front": "UUID plutôt que /dev/sdX dans fstab",
+  "back": "Le nom /dev/sdX dépend de l'ordre de détection et peut changer après un redémarrage ; l'UUID est fixe.",
+  "tag": "Disques"
+ },
+ {
+  "id": "lx-f147",
+  "front": "df vs df -i",
+  "back": "df -h compte les OCTETS libres ; df -i compte les INODES libres — un FS peut être « plein » des deux façons.",
+  "tag": "Disques"
+ },
+ {
+  "id": "lx-f148",
+  "front": "ext4 contre XFS : réduction",
+  "back": "ext4 peut être réduit (resize2fs) ; XFS peut seulement être agrandi (xfs_growfs), jamais réduit.",
+  "tag": "Disques"
+ },
+ {
+  "id": "lx-f149",
+  "front": "Jamais fsck sur un FS monté",
+  "back": "Démonter d'abord : réparer un FS en cours d'utilisation corrompt les données.",
+  "tag": "Disques"
+ },
+ {
+  "id": "lx-f150",
+  "front": "Fichier supprimé, espace non libéré",
+  "back": "`lsof +L1` liste les fichiers supprimés mais encore ouverts par un processus — l'espace n'est rendu qu'à sa fermeture.",
+  "tag": "Disques"
+ },
+ {
+  "id": "lx-f151",
+  "front": "Chaîne LVM",
+  "back": "pvcreate (PV) → vgcreate (VG) → lvcreate (LV) → mkfs → mount. Agrandir à chaud : lvextend -r.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f152",
+  "front": "Capacité utile RAID 5 / RAID 6",
+  "back": "RAID 5 : (N-1) × taille disque, 1 panne tolérée. RAID 6 : (N-2) × taille, 2 pannes tolérées.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f153",
+  "front": "[UU] vs [U_] dans /proc/mdstat",
+  "back": "[UU] = les deux disques sont sains ; [U_] = un disque manque, RAID dégradé mais encore lisible.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f154",
+  "front": "RAID n'est pas une sauvegarde",
+  "back": "Une suppression ou un virus est répliqué instantanément sur tous les disques du RAID — il faut des sauvegardes séparées.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f155",
+  "front": "chmod 600 sur un fichier swap",
+  "back": "Obligatoire : le swap contient des fragments de mémoire de tous les processus, donc des données potentiellement sensibles.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f156",
+  "front": "Quota : limite souple vs dure",
+  "back": "La limite souple (soft) tolère un délai de grâce (7 j par défaut) ; la limite dure (hard) bloque immédiatement l'écriture.",
+  "tag": "LVM/RAID"
+ },
+ {
+  "id": "lx-f157",
+  "front": "Calcul du nombre d'hôtes en CIDR",
+  "back": "2^(32 - préfixe) - 2 (on retire l'adresse réseau et l'adresse de diffusion). /26 → 62 hôtes.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f158",
+  "front": "ip, équivalents modernes",
+  "back": "ifconfig → ip a ; route -n → ip r ; arp -n → ip neigh ; netstat -tulnp → ss -tulnp.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f159",
+  "front": "0.0.0.0 contre 127.0.0.1 à l'écoute",
+  "back": "0.0.0.0 = toutes les interfaces ; 127.0.0.1 = accessible seulement depuis la machine elle-même (important pour la sécurité d'une base de données).",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f160",
+  "front": "dig contre getent hosts",
+  "back": "dig interroge directement un serveur DNS et ignore /etc/hosts ; getent hosts suit nsswitch.conf, donc montre ce que voient vraiment les programmes.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f161",
+  "front": "netplan try",
+  "back": "Applique la config réseau puis l'ANNULE seule après 120 s sans confirmation — filet de sécurité pour l'administration à distance par SSH.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f162",
+  "front": "Diagnostic réseau, ordre des couches",
+  "back": "Du bas vers le haut : interface/câble → adresse IP → route → passerelle → DNS → service.",
+  "tag": "Réseau"
+ },
+ {
+  "id": "lx-f163",
+  "front": "Règle 3-2-1 de sauvegarde",
+  "back": "3 copies des données, sur 2 supports différents, dont 1 copie hors site.",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f164",
+  "front": "Incrémentale vs différentielle",
+  "back": "Incrémentale = changements depuis la DERNIÈRE sauvegarde ; différentielle = changements depuis la dernière COMPLÈTE.",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f165",
+  "front": "RPO et RTO",
+  "back": "RPO = combien de données on accepte de perdre (fréquence des sauvegardes) ; RTO = combien de temps on accepte d'être indisponible.",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f166",
+  "front": "rsync : le piège du slash final",
+  "back": "`rsync -a src/ dst/` copie le CONTENU de src dans dst ; `rsync -a src dst/` copie le DOSSIER src dans dst (dst/src/...).",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f167",
+  "front": "rsync --delete : précaution",
+  "back": "Toujours simuler d'abord avec -n : si la source est vide ou démontée par erreur, --delete peut vider toute la destination.",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f168",
+  "front": "dd, le « disk destroyer »",
+  "back": "if= et of= inversés, ou mauvais périphérique visé, écrasent des données sans confirmation ni corbeille — toujours vérifier avec lsblk avant.",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f169",
+  "front": "Vérifier l'intégrité d'une sauvegarde",
+  "back": "`sha256sum -c archive.sha256` détecte toute corruption invisible à l'œil nu (réseau, disque).",
+  "tag": "Sauvegarde"
+ },
+ {
+  "id": "lx-f170",
+  "front": "apt contre dpkg",
+  "back": "dpkg = bas niveau, installe un .deb local sans dépendances ; apt = haut niveau, consulte les dépôts et résout les dépendances.",
+  "tag": "Paquets"
+ },
+ {
+  "id": "lx-f171",
+  "front": "apt update contre apt upgrade",
+  "back": "update rafraîchit le catalogue des dépôts ; upgrade installe réellement les mises à jour. Toujours les deux, dans cet ordre.",
+  "tag": "Paquets"
+ },
+ {
+  "id": "lx-f172",
+  "front": "Trouver le paquet d'un fichier",
+  "back": "`dpkg -S /chemin/fichier` (Debian) ou `rpm -qf /chemin/fichier` (RHEL).",
+  "tag": "Paquets"
+ },
+ {
+  "id": "lx-f173",
+  "front": "Pourquoi signer les paquets (GPG) ?",
+  "back": "Installer exécute du code en root ; la signature garantit l'origine et l'intégrité — ne jamais désactiver la vérification.",
+  "tag": "Paquets"
+ },
+ {
+  "id": "lx-f174",
+  "front": "Réparer un dpkg interrompu",
+  "back": "`sudo dpkg --configure -a` puis `sudo apt -f install` récupèrent un paquet laissé à moitié installé.",
+  "tag": "Paquets"
+ },
+ {
+  "id": "lx-f175",
+  "front": "Méthode USE (Brendan Gregg)",
+  "back": "Pour chaque ressource : Utilisation (%), Saturation (file d'attente), Erreurs — à appliquer CPU, mémoire, disque, réseau.",
+  "tag": "Dépannage"
+ },
+ {
+  "id": "lx-f176",
+  "front": "No space left malgré df -h bas",
+  "back": "Vérifier df -i : les inodes peuvent être épuisés par des millions de petits fichiers avant que les octets ne manquent.",
+  "tag": "Dépannage"
+ },
+ {
+  "id": "lx-f177",
+  "front": "Système en emergency mode après fstab",
+  "back": "`mount -o remount,rw /` d'abord (racine en lecture seule), corriger fstab, tester avec `mount -a` avant de redémarrer.",
+  "tag": "Dépannage"
+ },
+ {
+  "id": "lx-f178",
+  "front": "ping 8.8.8.8 OK mais pas ping google.com",
+  "back": "Le réseau IP fonctionne : c'est le DNS qui est en cause (resolvectl status, /etc/resolv.conf).",
+  "tag": "Dépannage"
+ },
+ {
+  "id": "lx-f179",
+  "front": "Permission denied mystérieux",
+  "back": "`namei -l /chemin/complet` révèle souvent un bit x manquant sur un RÉPERTOIRE intermédiaire, pas sur le fichier final.",
+  "tag": "Dépannage"
  }
 ]

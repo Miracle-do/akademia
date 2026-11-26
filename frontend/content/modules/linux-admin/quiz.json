@@ -2952,5 +2952,985 @@
   ],
   "answer": 3,
   "explain": "L'IP est joignable, seul le nom ne se résout pas."
+ },
+ {
+  "id": "lx-q212",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 1,
+  "q": "Qui a créé le noyau Linux, et en quelle année ?",
+  "options": [
+   "Richard Stallman, 1983",
+   "Ken Thompson, 1969",
+   "Linus Torvalds, 1991",
+   "Dennis Ritchie, 1972"
+  ],
+  "answer": 2,
+  "explain": "Linus Torvalds, étudiant finlandais, publie son noyau en 1991 ; le projet GNU de Stallman (1983) fournissait les outils mais pas le noyau."
+ },
+ {
+  "id": "lx-q213",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 2,
+  "q": "Pourquoi un programme de l'userland ne peut-il pas écrire directement sur le disque ?",
+  "options": [
+   "Les disques modernes sont trop lents",
+   "Il doit passer par un appel système géré par le noyau",
+   "Seul root a accès au disque",
+   "C'est interdit par le shell"
+  ],
+  "answer": 1,
+  "explain": "Le noyau est seul à parler au matériel ; l'userland demande des services via des appels système (open, read, write), ce qui protège le système."
+ },
+ {
+  "id": "lx-q214",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 1,
+  "q": "Quelle commande affiche le format de fichier de /etc/passwd (section 5 du manuel), et non la commande passwd ?",
+  "options": [
+   "man passwd",
+   "man 1 passwd",
+   "man 5 passwd",
+   "man -k passwd"
+  ],
+  "answer": 2,
+  "explain": "man 5 passwd ouvre la section « formats de fichiers » ; man 1 passwd (ou man passwd) documenterait la commande."
+ },
+ {
+  "id": "lx-q215",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 2,
+  "q": "Vous ne connaissez pas le nom de la commande qui copie des fichiers. Que tapez-vous ?",
+  "options": [
+   "whatis cp",
+   "man -k copy (ou apropos copy)",
+   "help copy",
+   "info copy"
+  ],
+  "answer": 1,
+  "explain": "apropos (ou man -k) cherche un mot-clé dans les descriptions courtes de toutes les pages de manuel."
+ },
+ {
+  "id": "lx-q216",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 1,
+  "q": "Quelle commande interne du shell (sans page man propre) s'obtient avec « help » ?",
+  "options": [
+   "ls",
+   "cd",
+   "grep",
+   "ssh"
+  ],
+  "answer": 1,
+  "explain": "cd est une commande interne du shell ; son aide s'obtient avec help cd (ou man bash)."
+ },
+ {
+  "id": "lx-q217",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 2,
+  "q": "Que montre le load average de la commande uptime ?",
+  "options": [
+   "Le pourcentage de RAM utilisée",
+   "Le nombre moyen de processus en attente du CPU sur 1, 5 et 15 minutes",
+   "La température du processeur",
+   "Le nombre d'utilisateurs connectés"
+  ],
+  "answer": 1,
+  "explain": "Les trois chiffres sont les charges moyennes sur 1, 5 et 15 minutes ; on les compare au nombre de cœurs pour juger de la saturation."
+ },
+ {
+  "id": "lx-q218",
+  "chapter": "1-1-unix-linux",
+  "difficulty": 1,
+  "q": "Quel fichier texte, présent sur toutes les distributions, donne le nom et la version exacts du système (champ PRETTY_NAME) ?",
+  "options": [
+   "/etc/distro",
+   "/etc/os-release",
+   "/etc/version",
+   "/proc/version-info"
+  ],
+  "answer": 1,
+  "explain": "/etc/os-release est lisible par les scripts et présent partout ; lsb_release -a demande un paquet supplémentaire."
+ },
+ {
+  "id": "lx-q219",
+  "chapter": "1-5-vim",
+  "difficulty": 1,
+  "q": "Dans quel mode de Vim les touches comme dd, yy ou x suppriment/copient du texte ?",
+  "options": [
+   "Mode insertion",
+   "Mode normal",
+   "Mode ligne de commande",
+   "Mode visuel"
+  ],
+  "answer": 1,
+  "explain": "Le mode normal (mode commande) interprète les touches comme des ordres de déplacement, suppression ou copie."
+ },
+ {
+  "id": "lx-q220",
+  "chapter": "1-5-vim",
+  "difficulty": 2,
+  "q": "Quelle commande remplace TOUTES les occurrences de « udp » par « UDP » dans tout le fichier ?",
+  "options": [
+   ":s/udp/UDP/",
+   ":s/udp/UDP/g",
+   ":%s/udp/UDP/g",
+   ":%s/udp/UDP/"
+  ],
+  "answer": 2,
+  "explain": "Le % étend la commande à tout le fichier, et g à toutes les occurrences de chaque ligne ; sans les deux, seule la première occurrence de la ligne courante serait changée."
+ },
+ {
+  "id": "lx-q221",
+  "chapter": "1-5-vim",
+  "difficulty": 1,
+  "q": "Vous avez modifié un fichier par erreur et voulez quitter Vim SANS enregistrer. Que tapez-vous ?",
+  "options": [
+   ":wq",
+   ":q!",
+   ":x",
+   "ZZ"
+  ],
+  "answer": 1,
+  "explain": ":q! force la sortie en abandonnant les modifications ; :wq et :x (et ZZ) enregistrent avant de quitter."
+ },
+ {
+  "id": "lx-q222",
+  "chapter": "1-5-vim",
+  "difficulty": 2,
+  "q": "Quelle touche entre en mode insertion EN FIN de la ligne courante ?",
+  "options": [
+   "i",
+   "a",
+   "A",
+   "I"
+  ],
+  "answer": 2,
+  "explain": "A (majuscule) place le curseur en fin de ligne puis entre en insertion ; I fait l'inverse (début de ligne), a insère juste après le curseur."
+ },
+ {
+  "id": "lx-q223",
+  "chapter": "1-5-vim",
+  "difficulty": 2,
+  "q": "Quelle paire de commandes copie la dernière ligne du fichier puis la colle au tout début ?",
+  "options": [
+   "G, yy, gg, P",
+   "gg, dd, G, p",
+   "G, dd, gg, p",
+   "yy, G, gg, P"
+  ],
+  "answer": 0,
+  "explain": "G va à la dernière ligne, yy la copie, gg revient au début, P colle AVANT la ligne courante (donc en tête de fichier)."
+ },
+ {
+  "id": "lx-q224",
+  "chapter": "1-5-vim",
+  "difficulty": 1,
+  "q": "Comment rendre permanent le réglage « afficher les numéros de ligne » (:set number) ?",
+  "options": [
+   "Il l'est déjà par défaut",
+   "En l'ajoutant (sans les « : ») dans ~/.vimrc",
+   "En tapant :set number! deux fois",
+   "En créant /etc/vimrc.conf"
+  ],
+  "answer": 1,
+  "explain": "Les réglages tapés en session disparaissent à la fermeture de Vim ; ~/.vimrc les réapplique à chaque ouverture."
+ },
+ {
+  "id": "lx-q225",
+  "chapter": "1-5-vim",
+  "difficulty": 3,
+  "q": "Pourquoi dit-on que Vim utilise un langage « opérateur + déplacement » pour d (supprimer) ?",
+  "options": [
+   "d supprime toujours une ligne entière",
+   "d combiné à un déplacement (dw, d$, d0…) supprime jusqu'à ce déplacement",
+   "d ne fonctionne qu'avec la souris",
+   "d est réservé au mode visuel"
+  ],
+  "answer": 1,
+  "explain": "d seul ne fait rien : associé à un déplacement (dw = jusqu'au mot suivant, d$ = jusqu'à la fin de ligne, d0 = jusqu'au début), il définit la portée de la suppression."
+ },
+ {
+  "id": "lx-q226",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 1,
+  "q": "Quelle est la différence essentielle entre su et sudo concernant le mot de passe demandé ?",
+  "options": [
+   "su ne demande jamais de mot de passe",
+   "su demande le mot de passe de la CIBLE, sudo demande le VÔTRE",
+   "sudo demande toujours celui de root",
+   "Les deux demandent le même mot de passe"
+  ],
+  "answer": 1,
+  "explain": "Cette différence permet de déléguer des droits sans jamais communiquer le mot de passe de root ; chaque sudo est en plus journalisé."
+ },
+ {
+  "id": "lx-q227",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 2,
+  "q": "Pourquoi édite-t-on toujours /etc/sudoers avec visudo plutôt qu'un éditeur ordinaire ?",
+  "options": [
+   "visudo est plus rapide",
+   "visudo vérifie la syntaxe avant d'enregistrer et verrouille le fichier",
+   "visudo chiffre automatiquement le fichier",
+   "Ce n'est qu'une habitude, sans conséquence"
+  ],
+  "answer": 1,
+  "explain": "Une erreur de syntaxe dans sudoers rend sudo inutilisable pour tout le monde ; visudo refuse d'enregistrer un fichier invalide."
+ },
+ {
+  "id": "lx-q228",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 2,
+  "q": "Pourquoi `sudo echo \"x\" > /etc/fichier` échoue-t-il alors que la commande est précédée de sudo ?",
+  "options": [
+   "echo n'existe pas sous sudo",
+   "La redirection > est réalisée par le shell, AVANT que sudo ne démarre, avec vos droits",
+   "Le fichier /etc est toujours protégé",
+   "sudo bloque toute redirection par sécurité"
+  ],
+  "answer": 1,
+  "explain": "Solution : echo \"x\" | sudo tee /etc/fichier, où c'est tee (avec les droits root) qui écrit, pas la redirection du shell."
+ },
+ {
+  "id": "lx-q229",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 3,
+  "q": "Pourquoi autoriser `sudo less fichier` à un utilisateur équivaut-il presque à lui donner tous les droits root ?",
+  "options": [
+   "less consomme trop de mémoire en root",
+   "Dans less, la commande !sh ouvre un shell avec les droits de root",
+   "less modifie les fichiers qu'il affiche",
+   "Ce n'est pas un problème, less est en lecture seule"
+  ],
+  "answer": 1,
+  "explain": "De nombreux programmes interactifs (less, vi, find...) permettent d'échapper vers un shell ; le remède est NOEXEC: ou sudoedit, et des règles sudoers précises."
+ },
+ {
+  "id": "lx-q230",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 1,
+  "q": "Quel type de ligne PAM répond à la question « le compte est-il valide, non expiré ? » ?",
+  "options": [
+   "auth",
+   "account",
+   "password",
+   "session"
+  ],
+  "answer": 1,
+  "explain": "auth vérifie l'identité, account la validité du compte, password les règles de changement de mot de passe, session ce qu'il faut faire autour de la session."
+ },
+ {
+  "id": "lx-q231",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 2,
+  "q": "Dans /etc/security/faillock.conf, que règlent deny et unlock_time ?",
+  "options": [
+   "La longueur minimale du mot de passe",
+   "Le nombre d'échecs tolérés et la durée du blocage qui suit",
+   "Le délai d'expiration du compte",
+   "Le nombre de groupes autorisés"
+  ],
+  "answer": 1,
+  "explain": "deny = 3 et unlock_time = 600 bloquent un compte après 3 échecs pendant 10 minutes, via pam_faillock."
+ },
+ {
+  "id": "lx-q232",
+  "chapter": "2-3-sudo-pam",
+  "difficulty": 2,
+  "q": "Comment autoriser bob à relancer nginx (systemctl restart nginx) SANS mot de passe, et rien d'autre ?",
+  "options": [
+   "bob ALL=(ALL) ALL dans sudoers",
+   "bob ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx",
+   "usermod -aG sudo bob",
+   "Ajouter bob à /etc/cron.allow"
+  ],
+  "answer": 1,
+  "explain": "La règle précise la commande exacte avec son chemin absolu ; NOPASSWD: dispense du mot de passe pour cette commande seulement."
+ },
+ {
+  "id": "lx-q233",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 1,
+  "q": "Que signifie la ligne crontab `*/15 8-18 * * 1-5 /usr/local/bin/verif.sh` ?",
+  "options": [
+   "Toutes les 15 secondes, en semaine",
+   "Toutes les 15 minutes, de 8h à 18h45, du lundi au vendredi",
+   "Une fois à 15h, chaque jour ouvré",
+   "Toutes les 15 heures"
+  ],
+  "answer": 1,
+  "explain": "Les 5 champs sont minute, heure, jour du mois, mois, jour de semaine ; */15 sur les minutes, 8-18 sur les heures, 1-5 = lundi à vendredi."
+ },
+ {
+  "id": "lx-q234",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 2,
+  "q": "Une commande fonctionne dans votre terminal mais échoue silencieusement sous cron. Quelle est la cause la plus fréquente ?",
+  "options": [
+   "cron est désactivé par défaut",
+   "cron utilise un PATH minimal et ne lit pas votre .bashrc : il faut des chemins absolus",
+   "Les tâches cron ne peuvent pas écrire de fichiers",
+   "cron ne fonctionne que pour root"
+  ],
+  "answer": 1,
+  "explain": "cron s'exécute avec un environnement minimal (PATH réduit, pas de profil) : il faut des chemins absolus et rediriger la sortie (2>&1) pour diagnostiquer."
+ },
+ {
+  "id": "lx-q235",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 1,
+  "q": "Quelle commande affiche sa propre table cron sans la modifier ?",
+  "options": [
+   "crontab -r",
+   "crontab -e",
+   "crontab -l",
+   "cat /etc/crontab"
+  ],
+  "answer": 2,
+  "explain": "crontab -l liste ; -e édite ; -r SUPPRIME toute la table sans confirmation (touches voisines de e, piège classique)."
+ },
+ {
+  "id": "lx-q236",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 2,
+  "q": "Quel outil exécute une commande UNE SEULE FOIS à une date donnée, puis disparaît ?",
+  "options": [
+   "cron",
+   "at",
+   "logrotate",
+   "journald"
+  ],
+  "answer": 1,
+  "explain": "at (service atd) planifie une exécution unique (at 23:30, at now + 10 minutes) ; cron est pour les tâches récurrentes."
+ },
+ {
+  "id": "lx-q237",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 2,
+  "q": "À quoi sert `flock -n` devant une commande lancée par cron toutes les 5 minutes ?",
+  "options": [
+   "À chiffrer la sortie",
+   "À empêcher deux exécutions de se chevaucher si la tâche dure plus longtemps que l'intervalle",
+   "À accélérer l'exécution",
+   "À envoyer un courriel de confirmation"
+  ],
+  "answer": 1,
+  "explain": "flock pose un verrou sur un fichier ; -n abandonne immédiatement la 2e instance si le verrou est déjà pris par la première."
+ },
+ {
+  "id": "lx-q238",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 1,
+  "q": "Dans quel fichier journal (Debian/Ubuntu) trouve-t-on les authentifications sudo, ssh et su ?",
+  "options": [
+   "/var/log/syslog",
+   "/var/log/auth.log",
+   "/var/log/kern.log",
+   "/var/log/dmesg"
+  ],
+  "answer": 1,
+  "explain": "auth.log (secure sur RHEL) consigne les authentifications ; syslog contient les messages généraux du système."
+ },
+ {
+  "id": "lx-q239",
+  "chapter": "3-3-planification-journaux",
+  "difficulty": 2,
+  "q": "Quelle directive logrotate garde 8 archives et ne compresse qu'à la rotation SUIVANTE (le fichier le plus récent reste lisible immédiatement) ?",
+  "options": [
+   "rotate 8 + compress seul",
+   "rotate 8 + delaycompress",
+   "rotate 8 + missingok",
+   "notifempty + rotate 8"
+  ],
+  "answer": 1,
+  "explain": "delaycompress retarde la compression d'un cycle, pour qu'un outil encore en train d'écrire (ou un administrateur) puisse lire le fichier .1 en clair."
+ },
+ {
+  "id": "lx-q240",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 1,
+  "q": "Pourquoi monte-t-on une partition par son UUID plutôt que par son nom (/dev/sdb1) dans /etc/fstab ?",
+  "options": [
+   "L'UUID est plus court à taper",
+   "Le nom /dev/sdX dépend de l'ordre de détection et peut changer après un redémarrage",
+   "Les UUID sont obligatoires sur ext4",
+   "C'est une exigence du noyau Linux"
+  ],
+  "answer": 1,
+  "explain": "Un disque peut passer de sdb à sdc selon l'ordre de détection ; l'UUID, lui, est fixe et identifie le système de fichiers lui-même."
+ },
+ {
+  "id": "lx-q241",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 2,
+  "q": "`df -h` montre 18% d'utilisation mais l'écriture échoue avec « No space left on device ». Quelle est la cause probable ?",
+  "options": [
+   "Le disque est défectueux",
+   "Les inodes sont épuisés (df -i montrerait IFree = 0)",
+   "Le cache RAM est plein",
+   "Le fichier est en lecture seule"
+  ],
+  "answer": 1,
+  "explain": "Un FS a un nombre fixe d'inodes créé à la construction ; des millions de petits fichiers peuvent les épuiser avant que les octets ne manquent."
+ },
+ {
+  "id": "lx-q242",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 2,
+  "q": "Quelle commande affiche directement l'UUID et le type de système de fichiers d'une partition, en lisant ses métadonnées ?",
+  "options": [
+   "fdisk -l",
+   "blkid",
+   "du -sh",
+   "mount -a"
+  ],
+  "answer": 1,
+  "explain": "blkid lit les métadonnées du FS (UUID, type, label) ; c'est la commande de référence pour « trouver l'UUID d'une partition »."
+ },
+ {
+  "id": "lx-q243",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 1,
+  "q": "Entre ext4 et XFS, lequel peut être RÉDUIT (pas seulement agrandi) ?",
+  "options": [
+   "Les deux",
+   "Seulement XFS",
+   "Seulement ext4",
+   "Aucun des deux"
+  ],
+  "answer": 2,
+  "explain": "ext4 se réduit avec resize2fs après e2fsck -f ; XFS ne sait pas libérer des groupes d'allocation et ne se réduit jamais."
+ },
+ {
+  "id": "lx-q244",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 2,
+  "q": "`umount /mnt/data` répond « target is busy ». Quelle commande identifie le processus en cause ?",
+  "options": [
+   "df -h /mnt/data",
+   "sudo fuser -vm /mnt/data",
+   "sudo mkfs.ext4 /mnt/data",
+   "sudo resize2fs /mnt/data"
+  ],
+  "answer": 1,
+  "explain": "fuser -vm (ou lsof +f) liste les processus qui utilisent le point de montage ; c'est souvent son propre shell resté dans le dossier (cd ~ règle le problème)."
+ },
+ {
+  "id": "lx-q245",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 3,
+  "q": "Quelle règle absolue respecter avant de lancer e2fsck ou xfs_repair sur un système de fichiers ?",
+  "options": [
+   "Lancer la commande en root uniquement",
+   "Le démonter d'abord : jamais fsck sur un FS monté",
+   "Le formater d'abord",
+   "Désactiver le swap"
+  ],
+  "answer": 1,
+  "explain": "Réparer un FS en cours d'utilisation corrompt les données, car le noyau et fsck modifient les mêmes structures en même temps."
+ },
+ {
+  "id": "lx-q246",
+  "chapter": "4-1-disques-fs",
+  "difficulty": 2,
+  "q": "Un fichier de log de 20 Go a été supprimé (rm) mais l'espace disque n'est pas libéré. Pourquoi, et comment le voir ?",
+  "options": [
+   "Le disque est corrompu ; lancer fsck",
+   "Un processus l'a encore ouvert ; `lsof +L1` le montre",
+   "rm ne supprime jamais vraiment les gros fichiers",
+   "Il faut redémarrer la machine, aucune commande ne le montre"
+  ],
+  "answer": 1,
+  "explain": "rm retire le nom, mais l'espace n'est rendu que lorsque plus aucun processus n'a le fichier ouvert ; lsof +L1 liste ces fichiers « supprimés mais ouverts »."
+ },
+ {
+  "id": "lx-q247",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 1,
+  "q": "Dans la chaîne LVM, quel est l'ordre correct de création ?",
+  "options": [
+   "lvcreate, vgcreate, pvcreate",
+   "pvcreate, vgcreate, lvcreate",
+   "vgcreate, lvcreate, pvcreate",
+   "pvcreate, lvcreate, vgcreate"
+  ],
+  "answer": 1,
+  "explain": "On prépare d'abord les disques en PV (pvcreate), on les regroupe en VG (vgcreate), puis on taille des LV dedans (lvcreate)."
+ },
+ {
+  "id": "lx-q248",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 2,
+  "q": "Quel est LE bénéfice principal de LVM par rapport à des partitions classiques ?",
+  "options": [
+   "Il est plus rapide en lecture/écriture",
+   "On peut agrandir un volume logique à chaud, sans redémarrage",
+   "Il ne demande pas de système de fichiers",
+   "Il protège automatiquement contre les pannes de disque"
+  ],
+  "answer": 1,
+  "explain": "lvextend -r agrandit le volume ET le système de fichiers en une commande, pendant que le volume reste monté et utilisé."
+ },
+ {
+  "id": "lx-q249",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 2,
+  "q": "Avec 4 disques de 2 To, quelle est la capacité utile d'un RAID 5 ?",
+  "options": [
+   "8 To",
+   "2 To",
+   "6 To",
+   "4 To"
+  ],
+  "answer": 2,
+  "explain": "RAID 5 réserve l'équivalent d'un disque pour la parité : (N-1) x s = 3 x 2 To = 6 To, avec tolérance à 1 panne."
+ },
+ {
+  "id": "lx-q250",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 1,
+  "q": "Que signifie `[U_]` dans la sortie de `cat /proc/mdstat` pour un RAID 1 ?",
+  "options": [
+   "Le tableau est parfaitement sain",
+   "Un disque manque : le RAID est dégradé mais lisible",
+   "Une synchronisation est en cours",
+   "Le RAID est hors ligne"
+  ],
+  "answer": 1,
+  "explain": "[UU] = les deux disques sont Up ; [U_] montre qu'un disque est tombé : les données restent lisibles mais sans redondance."
+ },
+ {
+  "id": "lx-q251",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 3,
+  "q": "Pourquoi dit-on que « RAID n'est pas une sauvegarde » ?",
+  "options": [
+   "Le RAID est trop lent pour sauvegarder",
+   "Une suppression ou un virus est répliqué instantanément sur tous les disques du RAID",
+   "Le RAID ne fonctionne pas avec ext4",
+   "Le RAID nécessite toujours une connexion réseau"
+  ],
+  "answer": 1,
+  "explain": "Le RAID protège d'une panne matérielle, pas d'une erreur de manipulation, d'un rançongiciel ou d'un incendie : il faut des sauvegardes séparées."
+ },
+ {
+  "id": "lx-q252",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 2,
+  "q": "Pourquoi `chmod 600` est-il obligatoire sur un fichier swap avant `swapon` ?",
+  "options": [
+   "Par convention esthétique seulement",
+   "Le swap contient des fragments de la mémoire de tous les processus : un accès trop ouvert est une fuite de sécurité",
+   "Sinon mkswap refuse de formater le fichier",
+   "C'est exigé uniquement sur les serveurs RHEL"
+  ],
+  "answer": 1,
+  "explain": "swapon avertit (« insecure permissions ») si le fichier n'est pas restreint au propriétaire, car son contenu peut révéler des données sensibles d'autres processus."
+ },
+ {
+  "id": "lx-q253",
+  "chapter": "4-2-lvm-raid-swap",
+  "difficulty": 2,
+  "q": "Dans un quota disque, quelle est la différence entre la limite souple (soft) et la limite dure (hard) ?",
+  "options": [
+   "Il n'y a aucune différence pratique",
+   "La limite souple peut être dépassée pendant un délai de grâce ; la limite dure ne l'est jamais",
+   "La limite dure s'applique seulement aux groupes",
+   "La limite souple concerne les inodes, la dure les octets"
+  ],
+  "answer": 1,
+  "explain": "Le dépassement de la limite soft déclenche un délai de grâce (7 jours par défaut) ; au-delà de la limite hard, l'écriture échoue immédiatement (Disk quota exceeded)."
+ },
+ {
+  "id": "lx-q254",
+  "chapter": "4-3-reseau",
+  "difficulty": 1,
+  "q": "Combien d'adresses machines utilisables offre un réseau en /26 ?",
+  "options": [
+   "256",
+   "126",
+   "62",
+   "30"
+  ],
+  "answer": 2,
+  "explain": "2^(32-26) - 2 = 64 - 2 = 62 (on retire l'adresse réseau et l'adresse de diffusion)."
+ },
+ {
+  "id": "lx-q255",
+  "chapter": "4-3-reseau",
+  "difficulty": 2,
+  "q": "Quelle est la commande MODERNE équivalente à l'ancien `route -n` pour afficher la table de routage ?",
+  "options": [
+   "ip a",
+   "ip r",
+   "ss -tulnp",
+   "ip neigh"
+  ],
+  "answer": 1,
+  "explain": "ip r (ip route) remplace route -n ; ip a remplace ifconfig, ip neigh remplace arp -n, ss remplace netstat."
+ },
+ {
+  "id": "lx-q256",
+  "chapter": "4-3-reseau",
+  "difficulty": 2,
+  "q": "`ss -tulnp` montre un service en écoute sur `127.0.0.1:5432`. Que signifie cette adresse par rapport à `0.0.0.0:5432` ?",
+  "options": [
+   "Le service écoute sur toutes les interfaces",
+   "Le service n'est accessible que depuis la machine elle-même",
+   "Le service est désactivé",
+   "C'est une erreur de configuration systématique"
+  ],
+  "answer": 1,
+  "explain": "127.0.0.1 restreint l'écoute à la boucle locale ; 0.0.0.0 écoute sur toutes les interfaces. Une base de données ne devrait pas écouter sur 0.0.0.0 sans raison précise."
+ },
+ {
+  "id": "lx-q257",
+  "chapter": "4-3-reseau",
+  "difficulty": 1,
+  "q": "`ping 192.168.1.1` échoue. Cela prouve-t-il que la machine distante est éteinte ?",
+  "options": [
+   "Oui, toujours",
+   "Non : un pare-feu peut bloquer l'ICMP sans que la machine soit éteinte",
+   "Oui, mais seulement sur les réseaux Wi-Fi",
+   "Non, ping ne teste jamais la connectivité"
+  ],
+  "answer": 1,
+  "explain": "ping utilise ICMP, souvent filtré par un pare-feu ; pour tester un service, nc -zv sur le port concerné est plus fiable."
+ },
+ {
+  "id": "lx-q258",
+  "chapter": "4-3-reseau",
+  "difficulty": 2,
+  "q": "Pourquoi `dig www.site.bj` peut répondre correctement alors que `getent hosts www.site.bj` échoue (ou inversement) ?",
+  "options": [
+   "dig interroge directement un serveur DNS et ignore /etc/hosts ; getent suit nsswitch.conf (donc /etc/hosts aussi)",
+   "Ce sont deux noms de la même commande",
+   "getent ne fonctionne que sur RHEL",
+   "dig est obsolète et ne doit plus être utilisé"
+  ],
+  "answer": 0,
+  "explain": "Si les deux divergent, cherchez du côté de /etc/hosts ou de nsswitch.conf : getent montre ce que verront réellement les programmes de la machine."
+ },
+ {
+  "id": "lx-q259",
+  "chapter": "4-3-reseau",
+  "difficulty": 2,
+  "q": "Avec netplan, quelle commande applique une nouvelle configuration réseau mais l'ANNULE automatiquement après 120 secondes si on ne confirme pas ?",
+  "options": [
+   "netplan apply",
+   "netplan generate",
+   "netplan try",
+   "netplan rollback"
+  ],
+  "answer": 2,
+  "explain": "netplan try est le filet de sécurité pour l'administration à distance : une mauvaise adresse ou passerelle ne vous enferme pas dehors."
+ },
+ {
+  "id": "lx-q260",
+  "chapter": "4-3-reseau",
+  "difficulty": 1,
+  "q": "Dans le diagnostic réseau « couche par couche », que vérifie-t-on EN PREMIER ?",
+  "options": [
+   "Le DNS",
+   "Le service distant (curl)",
+   "L'interface et le câble (ip -br link)",
+   "La passerelle"
+  ],
+  "answer": 2,
+  "explain": "On procède du bas vers le haut : interface UP et câble branché, puis adresse IP, puis route, puis passerelle, puis DNS, puis le service."
+ },
+ {
+  "id": "lx-q261",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 1,
+  "q": "Que signifie le « 1 » de la règle de sauvegarde 3-2-1 ?",
+  "options": [
+   "Une seule sauvegarde suffit",
+   "Au moins une copie doit être conservée HORS SITE",
+   "Une sauvegarde par semaine",
+   "Un seul utilisateur autorisé à sauvegarder"
+  ],
+  "answer": 1,
+  "explain": "3 copies, sur 2 supports différents, dont 1 copie hors site (autre bâtiment, serveur distant) pour survivre à un incendie ou un vol local."
+ },
+ {
+  "id": "lx-q262",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 2,
+  "q": "Quelle est la différence entre une sauvegarde incrémentale et différentielle ?",
+  "options": [
+   "Aucune, ce sont des synonymes",
+   "L'incrémentale copie les changements depuis la DERNIÈRE sauvegarde (quelle qu'elle soit) ; la différentielle depuis la dernière COMPLÈTE",
+   "La différentielle est toujours plus rapide à créer",
+   "L'incrémentale ne fonctionne qu'avec tar"
+  ],
+  "answer": 1,
+  "explain": "La différentielle se restaure plus vite (complète + une seule différentielle) mais grossit chaque jour ; l'incrémentale est compacte mais exige toute la chaîne dans l'ordre."
+ },
+ {
+  "id": "lx-q263",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 1,
+  "q": "Dans `rsync -a src/ dst/` (avec un slash final après src), que se passe-t-il ?",
+  "options": [
+   "Le dossier src est copié dans dst (dst/src/...)",
+   "Le CONTENU de src est copié directement dans dst (dst/docs/...)",
+   "Rien, c'est une erreur de syntaxe",
+   "Seuls les fichiers cachés sont copiés"
+  ],
+  "answer": 1,
+  "explain": "Le slash final change tout : sans lui, rsync -a src dst/ aurait copié le dossier src lui-même dans dst (dst/src/...)."
+ },
+ {
+  "id": "lx-q264",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 2,
+  "q": "Pourquoi faut-il toujours tester `rsync --delete` avec `-n` (dry-run) avant de l'exécuter pour de vrai ?",
+  "options": [
+   "-n accélère le transfert réel",
+   "Si la source est vide ou démontée par erreur, --delete peut vider toute la destination pour lui ressembler",
+   "-n chiffre automatiquement le transfert",
+   "Ce n'est qu'une bonne pratique esthétique, sans risque réel"
+  ],
+  "answer": 1,
+  "explain": "Un disque source démonté, un mauvais chemin ou une faute de frappe peut faire croire à rsync que tout a été supprimé à la source, et --delete répercute cette suppression sur la destination."
+ },
+ {
+  "id": "lx-q265",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 2,
+  "q": "Quel est le principal danger de la commande `dd` ?",
+  "options": [
+   "Elle est très lente",
+   "Inverser if= et of=, ou viser le mauvais périphérique, écrase des données SANS confirmation ni corbeille",
+   "Elle ne fonctionne pas sur les clés USB",
+   "Elle demande toujours une connexion réseau"
+  ],
+  "answer": 1,
+  "explain": "dd copie bloc par bloc sans rien demander ; on vérifie toujours le périphérique avec lsblk avant d'appuyer sur Entrée."
+ },
+ {
+  "id": "lx-q266",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 1,
+  "q": "À quoi sert `sha256sum -c archive.tar.gz.sha256` après une sauvegarde ?",
+  "options": [
+   "À compresser l'archive davantage",
+   "À vérifier que l'archive n'a pas été corrompue depuis le calcul de la somme",
+   "À la chiffrer",
+   "À la renommer automatiquement"
+  ],
+  "answer": 1,
+  "explain": "Une copie corrompue ressemble à une bonne copie jusqu'à la restauration ; comparer la somme de contrôle détecte toute altération."
+ },
+ {
+  "id": "lx-q267",
+  "chapter": "5-2-sauvegarde",
+  "difficulty": 3,
+  "q": "Un collègue dit : « Nos données sont sur un RAID 1, donc pas besoin de sauvegarde. » Quel est le défaut de ce raisonnement ?",
+  "options": [
+   "Le RAID 1 est trop coûteux pour être une vraie protection",
+   "Le RAID 1 réplique INSTANTANÉMENT une suppression ou une corruption sur les deux disques ; il ne protège ni du vol ni du feu ni d'un historique de versions",
+   "Le RAID 1 ne fonctionne qu'en lecture seule",
+   "Il a raison, le RAID 1 remplace la sauvegarde"
+  ],
+  "answer": 1,
+  "explain": "Le RAID protège d'une panne de disque, pas d'une erreur humaine, d'un rançongiciel ou d'un sinistre physique : il faut une sauvegarde séparée, dans le temps et dans l'espace."
+ },
+ {
+  "id": "lx-q268",
+  "chapter": "3-4-paquets",
+  "difficulty": 1,
+  "q": "Quelle commande installe un paquet ET résout automatiquement ses dépendances manquantes ?",
+  "options": [
+   "dpkg -i paquet.deb",
+   "apt install paquet",
+   "rpm -i paquet.rpm (seul)",
+   "Aucune, il faut toujours les installer à la main"
+  ],
+  "answer": 1,
+  "explain": "apt (outil de haut niveau) consulte les dépôts et installe les dépendances ; dpkg (bas niveau) installe un .deb local sans aller les chercher."
+ },
+ {
+  "id": "lx-q269",
+  "chapter": "3-4-paquets",
+  "difficulty": 2,
+  "q": "`sudo dpkg -i monlogiciel.deb` échoue avec « dependency problems ». Quelle commande répare la situation ?",
+  "options": [
+   "sudo dpkg -r monlogiciel",
+   "sudo apt -f install",
+   "sudo apt update",
+   "sudo dpkg --purge monlogiciel"
+  ],
+  "answer": 1,
+  "explain": "apt -f install (ou apt --fix-broken install) récupère les dépendances manquantes du paquet laissé « décompressé mais non configuré »."
+ },
+ {
+  "id": "lx-q270",
+  "chapter": "3-4-paquets",
+  "difficulty": 1,
+  "q": "Quelle commande répond à la question : « à quel paquet appartient le fichier /usr/bin/ssh ? »",
+  "options": [
+   "dpkg -L openssh-client",
+   "dpkg -S /usr/bin/ssh",
+   "apt show ssh",
+   "dpkg -l ssh"
+  ],
+  "answer": 1,
+  "explain": "dpkg -S cherche le paquet propriétaire d'un fichier installé ; dpkg -L fait l'inverse (fichiers d'un paquet donné). Équivalent RPM : rpm -qf."
+ },
+ {
+  "id": "lx-q271",
+  "chapter": "3-4-paquets",
+  "difficulty": 2,
+  "q": "Quelle est la différence entre `apt upgrade` et `apt full-upgrade` ?",
+  "options": [
+   "Aucune différence",
+   "upgrade ne supprime jamais de paquets ; full-upgrade peut en supprimer ou en ajouter pour résoudre des conflits",
+   "full-upgrade ne met à jour que le noyau",
+   "upgrade nécessite toujours un redémarrage"
+  ],
+  "answer": 1,
+  "explain": "full-upgrade (ancien dist-upgrade) va plus loin qu'upgrade : il accepte de retirer ou d'ajouter des paquets si c'est nécessaire pour satisfaire les dépendances."
+ },
+ {
+  "id": "lx-q272",
+  "chapter": "3-4-paquets",
+  "difficulty": 2,
+  "q": "Pourquoi la signature GPG d'un dépôt est-elle importante avant d'installer un paquet ?",
+  "options": [
+   "Elle accélère le téléchargement",
+   "Installer un paquet exécute du code en root ; la signature garantit qu'il vient bien de l'éditeur et n'a pas été altéré",
+   "Elle sert uniquement à compresser l'archive",
+   "Elle n'a aucun effet pratique, c'est une formalité"
+  ],
+  "answer": 1,
+  "explain": "Le gestionnaire vérifie la signature (clé publique importée) avant d'installer ; ne jamais désactiver cette vérification (gpgcheck=0, --allow-unauthenticated) pour « faire passer » une erreur."
+ },
+ {
+  "id": "lx-q273",
+  "chapter": "3-4-paquets",
+  "difficulty": 1,
+  "q": "Quelle commande télécharge SEULEMENT les index des dépôts, sans rien installer ni mettre à jour ?",
+  "options": [
+   "apt upgrade",
+   "apt update",
+   "apt install",
+   "apt autoremove"
+  ],
+  "answer": 1,
+  "explain": "apt update rafraîchit le catalogue local ; sans lui, apt install peut échouer avec « Unable to locate package » ou installer une version ancienne."
+ },
+ {
+  "id": "lx-q274",
+  "chapter": "3-4-paquets",
+  "difficulty": 2,
+  "q": "Dans la sortie de `dpkg -l`, que signifie le statut `rc` devant un paquet ?",
+  "options": [
+   "Installé et fonctionnel",
+   "Supprimé (removed), mais sa configuration est encore conservée",
+   "En cours d'installation",
+   "Erreur critique"
+  ],
+  "answer": 1,
+  "explain": "ii = installé ; rc = removed + config conservée (il reste des fichiers de configuration) ; un dpkg -P (purge) ou apt purge retire aussi ces fichiers."
+ },
+ {
+  "id": "lx-q275",
+  "chapter": "5-3-depannage",
+  "difficulty": 1,
+  "q": "Dans la méthode USE (Brendan Gregg), que vérifie-t-on pour chaque ressource (CPU, mémoire, disque, réseau) ?",
+  "options": [
+   "Utilisation, Sécurité, Efficacité",
+   "Utilisation, Saturation, Erreurs",
+   "Uptime, Statut, État",
+   "Usage, Service, Événements"
+  ],
+  "answer": 1,
+  "explain": "U = pourcentage occupé, S = du travail attend-il (saturation), E = y a-t-il des erreurs. On applique ça ressource par ressource."
+ },
+ {
+  "id": "lx-q276",
+  "chapter": "5-3-depannage",
+  "difficulty": 2,
+  "q": "« No space left on device » mais `df -h` montre seulement 18% d'utilisation. Quelle commande confirme le vrai problème ?",
+  "options": [
+   "df -i (inodes épuisés)",
+   "du -sh /",
+   "mount -a",
+   "fsck -n"
+  ],
+  "answer": 0,
+  "explain": "Un FS peut manquer d'inodes avant de manquer d'octets ; df -i avec IFree = 0 confirme le diagnostic, à corriger en supprimant les petits fichiers en excès."
+ },
+ {
+  "id": "lx-q277",
+  "chapter": "5-3-depannage",
+  "difficulty": 2,
+  "q": "Après une modification de /etc/fstab, le système démarre en « emergency mode ». Quelle est la première commande pour pouvoir corriger le fichier ?",
+  "options": [
+   "reboot immédiatement",
+   "mount -o remount,rw / (le système racine est monté en lecture seule)",
+   "mkfs.ext4 /",
+   "dd if=/dev/zero of=/dev/sda"
+  ],
+  "answer": 1,
+  "explain": "En mode urgence, / est souvent en lecture seule : il faut d'abord le remonter en lecture-écriture pour éditer fstab, puis tester avec mount -a avant de redémarrer."
+ },
+ {
+  "id": "lx-q278",
+  "chapter": "5-3-depannage",
+  "difficulty": 1,
+  "q": "Un service ne démarre pas. Quelle commande teste la SYNTAXE de sa configuration sans le redémarrer (exemple nginx) ?",
+  "options": [
+   "systemctl restart nginx",
+   "nginx -t",
+   "journalctl -f",
+   "ss -tulnp"
+  ],
+  "answer": 1,
+  "explain": "nginx -t (ou sshd -t, apachectl configtest) valide la configuration avant de relancer le service, pour éviter de couper le service en production avec une erreur de syntaxe."
+ },
+ {
+  "id": "lx-q279",
+  "chapter": "5-3-depannage",
+  "difficulty": 2,
+  "q": "`ping 8.8.8.8` réussit mais `ping google.com` échoue. Où se situe le problème ?",
+  "options": [
+   "La passerelle est absente",
+   "Le câble réseau est débranché",
+   "Le DNS",
+   "Le pare-feu bloque tout le trafic ICMP"
+  ],
+  "answer": 2,
+  "explain": "L'IP est joignable (donc la couche réseau fonctionne), seule la résolution de nom échoue : il faut regarder resolvectl status et /etc/resolv.conf."
+ },
+ {
+  "id": "lx-q280",
+  "chapter": "5-3-depannage",
+  "difficulty": 3,
+  "q": "Vous avez perdu le mot de passe root sur un système Ubuntu. Quelle est la procédure de récupération au démarrage ?",
+  "options": [
+   "Réinstaller le système, c'est la seule solution",
+   "Au menu GRUB, éditer la ligne linux pour ajouter rw init=/bin/bash, puis utiliser passwd root",
+   "Démarrer en mode normal et taper sudo su -",
+   "Contacter Canonical pour un mot de passe maître"
+  ],
+  "answer": 1,
+  "explain": "À l'appui sur « e » dans GRUB, on ajoute rw init=/bin/bash à la ligne linux puis Ctrl+X ; dans le shell obtenu, passwd root change le mot de passe avant exec /sbin/init ou redémarrage."
+ },
+ {
+  "id": "lx-q281",
+  "chapter": "5-3-depannage",
+  "difficulty": 2,
+  "q": "Une commande renvoie « Permission denied » de façon mystérieuse alors que les droits du fichier semblent corrects. Quelle commande identifie le vrai problème le long du CHEMIN complet ?",
+  "options": [
+   "chmod -R 777 /chemin",
+   "namei -l /chemin/complet",
+   "lsof +L1 /chemin",
+   "du -sh /chemin"
+  ],
+  "answer": 1,
+  "explain": "namei -l affiche les droits de chaque élément du chemin ; il manque souvent le bit x (exécution/traversée) sur un répertoire intermédiaire, pas sur le fichier final."
  }
 ]
