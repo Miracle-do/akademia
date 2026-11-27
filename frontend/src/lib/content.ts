@@ -4,7 +4,7 @@
  * tandis que le système local reste en fallback pour garder l’application fonctionnelle.
  */
 import { classCode, moduleCodes, moduleVisibleFor } from './cursus';
-import type { ChapterMeta, Exam, Formation, ExamIndexItem, Flashcard, ModuleMeta, Question } from './types';
+import type { ChapterMeta, Exam, Formation, ExamIndexItem, Flashcard, ModuleMeta, Question, Quest } from './types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api';
 
@@ -15,6 +15,7 @@ const cardLoaders = import.meta.glob('/content/modules/*/flashcards.json', { imp
 const examIndexLoaders = import.meta.glob('/content/modules/*/exams-index.json', { import: 'default' }) as Record<string, () => Promise<ExamIndexItem[]>>;
 const formationLoaders = import.meta.glob('/content/modules/*/formations/*.json', { import: 'default' }) as Record<string, () => Promise<Formation>>;
 const examLoaders = import.meta.glob('/content/modules/*/exams/*.json', { import: 'default' }) as Record<string, () => Promise<Exam>>;
+const questLoaders = import.meta.glob('/content/modules/*/quests/*.json', { import: 'default' }) as Record<string, () => Promise<Quest>>;
 
 const OFFLINE_KEY = 'akademia-offline-build';
 const idle = () => new Promise<void>((r) => ('requestIdleCallback' in window ? (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => r()) : setTimeout(r, 120)));
@@ -35,7 +36,7 @@ export async function prepareOfflineContent(): Promise<void> {
     if (res.ok) files = (await res.json()) as string[];
   } catch { /* indisponible (mode dev) */ }
   if (!files.length) {
-    const loaders = [...Object.values(chapterLoaders), ...Object.values(quizLoaders), ...Object.values(cardLoaders), ...Object.values(examIndexLoaders), ...Object.values(examLoaders), ...Object.values(formationLoaders)];
+    const loaders = [...Object.values(chapterLoaders), ...Object.values(quizLoaders), ...Object.values(cardLoaders), ...Object.values(examIndexLoaders), ...Object.values(examLoaders), ...Object.values(formationLoaders), ...Object.values(questLoaders)];
     for (let i = 0; i < loaders.length; i += 4) {
       if (!navigator.onLine) return;
       await Promise.allSettled(loaders.slice(i, i + 4).map((load) => load()));
@@ -187,6 +188,29 @@ export const loadFormations = (moduleId: string) =>
       list = await readLocalFormations(moduleId);
     }
     return list.map((f) => ({ ...f, moduleId }));
+  });
+
+/** Quêtes d'un module lues depuis les fichiers embarqués. */
+async function readLocalQuests(moduleId: string): Promise<Quest[]> {
+  const prefix = `/content/modules/${moduleId}/quests/`;
+  const list = await Promise.all(
+    Object.entries(questLoaders)
+      .filter(([p]) => p.startsWith(prefix))
+      .map(([, load]) => load()),
+  );
+  return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+}
+
+/** Quêtes d'un module (API puis repli local). */
+export const loadQuests = (moduleId: string) =>
+  memo(`quests:${moduleId}`, async () => {
+    let list: Quest[];
+    try {
+      list = await apiGet<Quest[]>(`/modules/${encodeURIComponent(moduleId)}/quests`);
+    } catch {
+      list = await readLocalQuests(moduleId);
+    }
+    return list.map((q) => ({ ...q, moduleId }));
   });
 
 export interface FormationWithModule extends Formation {

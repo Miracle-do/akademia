@@ -35,6 +35,7 @@ const XP = {
   chapterRead: 25,
   formationLesson: 20,
   formationDone: 60,
+  questDone: 90,
   perfectQuiz: 30,
   goodQuiz: 15,
   badge: 20,
@@ -77,12 +78,13 @@ function defaultState() {
     dailyGoal: XP.dailyGoal,
     chaptersRead: {},
     formations: {},
+    quests: {},
     attempts: [],
     badges: {},
     review: {},
     chapterStats: {},
     examBest: {},
-    counters: { quizzes: 0, perfectQuizzes: 0, blitzBest: 0, maxCombo: 0, cardsKnown: 0, exams: 0, formations: 0 },
+    counters: { quizzes: 0, perfectQuizzes: 0, blitzBest: 0, maxCombo: 0, cardsKnown: 0, exams: 0, formations: 0, quests: 0 },
   };
 }
 
@@ -94,7 +96,7 @@ function normalizeState(raw) {
   state.theme = themeForFiliere(state.filiere);
   state.daily = { ...base.daily, ...(raw.daily || {}) };
   state.counters = { ...base.counters, ...(raw.counters || {}) };
-  for (const key of ['chaptersRead', 'formations', 'attempts', 'badges', 'review', 'chapterStats', 'examBest']) {
+  for (const key of ['chaptersRead', 'formations', 'quests', 'attempts', 'badges', 'review', 'chapterStats', 'examBest']) {
     if (!raw[key] || typeof raw[key] !== 'object') state[key] = base[key];
   }
   if (!Array.isArray(state.attempts)) state.attempts = [];
@@ -112,7 +114,7 @@ function badgeIds(state, modules) {
     ['combo-20', state.counters.maxCombo >= 20], ['blitz-10', state.counters.blitzBest >= 10], ['blitz-20', state.counters.blitzBest >= 20],
     ['exam-1', state.counters.exams >= 1], ['exam-5', state.counters.exams >= 5], ['exam-14', bestExamRatio >= 0.7],
     ['exam-16', bestExamRatio >= 0.8], ['cards-50', state.counters.cardsKnown >= 50], ['streak-3', state.bestStreak >= 3],
-    ['streak-7', state.bestStreak >= 7], ['streak-30', state.bestStreak >= 30], ['formation-1', (state.counters.formations || 0) >= 1], ['formation-3', (state.counters.formations || 0) >= 3], ['level-5', levelFromXp(state.xp) >= 5],
+    ['streak-7', state.bestStreak >= 7], ['streak-30', state.bestStreak >= 30], ['formation-1', (state.counters.formations || 0) >= 1], ['formation-3', (state.counters.formations || 0) >= 3], ['quest-1', (state.counters.quests || 0) >= 1], ['quest-3', (state.counters.quests || 0) >= 3], ['level-5', levelFromXp(state.xp) >= 5],
     ['level-10', levelFromXp(state.xp) >= 10], ['level-20', levelFromXp(state.xp) >= 20],
   ];
   return candidates.filter(([id, earned]) => earned && !state.badges[id]).map(([id]) => id);
@@ -219,6 +221,22 @@ function applyFormationLesson(state, modules, input, content) {
     counters: { ...state.counters, formations: (state.counters.formations || 0) + (finished ? 1 : 0) },
   };
   return finish(next, modules, { score: nextDone.length, max: formation.lessons.length }, lines, gain);
+}
+
+function applyQuest(state, modules, input, content) {
+  requireModule(input.moduleId, content);
+  const quest = content.getQuests(input.moduleId).find((item) => item.id === input.questId);
+  if (!quest) throw new Error('Quête invalide');
+  const done = (state.quests || {})[input.moduleId] || [];
+  if (done.includes(quest.id)) return { state, summary: null };
+  const nextDone = [...done, quest.id];
+  const total = content.getQuests(input.moduleId).length;
+  const next = {
+    ...state,
+    quests: { ...(state.quests || {}), [input.moduleId]: nextDone },
+    counters: { ...state.counters, quests: (state.counters.quests || 0) + 1 },
+  };
+  return finish(next, modules, { score: nextDone.length, max: total }, [{ label: `Mission « ${quest.title} » accomplie`, xp: XP.questDone }], XP.questDone);
 }
 
 function applyQuiz(state, modules, input, content) {
@@ -347,6 +365,7 @@ function applyAction(rawState, input, content) {
   if (input.type === 'set-filiere') return applySetFiliere(state, input.filiere);
   if (input.type === 'chapter-read') return applyChapterRead(state, modules, input.moduleId, input.chapterId, content);
   if (input.type === 'formation-lesson') return applyFormationLesson(state, modules, input, content);
+  if (input.type === 'quest') return applyQuest(state, modules, input, content);
   if (input.type === 'quiz') return applyQuiz(state, modules, input, content);
   if (input.type === 'exam') return applyExam(state, modules, input, content);
   if (input.type === 'cards') return applyCards(state, modules, input, content);

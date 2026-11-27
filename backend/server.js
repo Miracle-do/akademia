@@ -234,6 +234,10 @@ app.get('/api/modules/:moduleId/formations', (req, res) => {
   res.json(contentService.getFormations(req.params.moduleId));
 });
 
+app.get('/api/modules/:moduleId/quests', (req, res) => {
+  res.json(contentService.getQuests(req.params.moduleId));
+});
+
 app.get('/api/modules/:moduleId/exams-index', (req, res) => {
   res.json(contentService.getExamIndex(req.params.moduleId));
 });

@@ -143,6 +143,67 @@ export interface Formation {
   lessons: FormationLesson[];
 }
 
+// ---------- Quêtes (missions professionnelles, définies dans /content/modules/<id>/quests) ----------
+export type QuestCell = string | number | null;
+/** Critère d'acceptation évalué sur l'état de la base ou sur ce que l'étudiant a exécuté pendant l'étape. */
+export type QuestCheck =
+  | { t: 'table'; label: string; name: string; columns?: { name: string; type?: string; notNull?: boolean }[]; pk?: string[]; fks?: { cols: string[]; ref: string }[]; unique?: string[][]; checks?: number }
+  | { t: 'query'; label: string; sql: string; scalar?: QuestCell; rows?: QuestCell[][]; ordered?: boolean; committed?: boolean }
+  | { t: 'result'; label: string; rows: QuestCell[][]; ordered?: boolean }
+  | { t: 'error'; label: string; code: string }
+  | { t: 'ran'; label: string; pattern: string }
+  | { t: 'committed'; label: string };
+export interface QuestStepBase {
+  id: string;
+  title: string;
+  /** Consigne du ticket (Markdown léger : **gras**, `code`). */
+  task: string;
+  hints?: string[];
+  /** Ce qu'il faut retenir une fois l'étape réussie. */
+  explain: string;
+}
+export interface QuestSqlStep extends QuestStepBase { kind: 'sql'; checks: QuestCheck[]; solution: string }
+export interface QuestPlsqlStep extends QuestStepBase {
+  kind: 'plsql';
+  template?: string;
+  review: { label: string; pattern: string }[];
+  solution: string;
+}
+export interface QuestChoiceStep extends QuestStepBase { kind: 'choice'; options: string[]; answer: number }
+export type QuestStep = QuestSqlStep | QuestPlsqlStep | QuestChoiceStep;
+export type QuestPriority = 'Normale' | 'Haute' | 'Critique';
+export interface Quest {
+  id: string;
+  /** Renseigné au chargement */
+  moduleId: string;
+  order?: number;
+  title: string;
+  /** Numéro de ticket fictif, ex. « DBA-2041 ». */
+  ticket: string;
+  priority: QuestPriority;
+  client: string;
+  minutes: number;
+  level: string;
+  /** Chapitres du cours à connaître. */
+  chapters?: string[];
+  /** Message court de l'apparition du contact (« j'ai besoin de toi pour une mission »). */
+  teaser: string;
+  /** Dialogue d'introduction du contact ; {user} est remplacé par le nom de l'étudiant. */
+  dialogue: string[];
+  /** Dernier message du contact quand la mission est réussie. */
+  outro: string;
+  /** Dossier de mission : paragraphes de mise en situation ({user} remplacé par le nom de l'étudiant). */
+  context: string[];
+  objectives: string[];
+  /** Ordres SQL exécutés et validés à l'ouverture (environnement de départ). */
+  setup?: string[];
+  /** Ordres exécutés ensuite, sans COMMIT (transaction laissée ouverte par un collègue). */
+  setupPending?: string[];
+  reference?: { title: string; sql: string }[];
+  steps: QuestStep[];
+  debrief: string[];
+}
+
 // ---------- Progression de l'utilisateur ----------
 export type AttemptKind = 'qcm' | 'blitz' | 'review' | 'exam' | 'cards';
 
@@ -186,6 +247,8 @@ export interface UserState {
   chaptersRead: Record<string, string[]>;
   /** Leçons de formation terminées, clé « moduleId:formationId » */
   formations: Record<string, string[]>;
+  /** Quêtes terminées par module : { moduleId: [questId, …] } */
+  quests?: Record<string, string[]>;
   attempts: Attempt[];
   badges: Record<string, string>;
   review: Record<string, ReviewItem>;
@@ -199,6 +262,7 @@ export interface UserState {
     cardsKnown: number;
     exams: number;
     formations: number;
+    quests?: number;
   };
 }
 

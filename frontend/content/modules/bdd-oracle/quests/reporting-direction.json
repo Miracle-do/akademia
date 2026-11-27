@@ -1,0 +1,258 @@
+{
+  "id": "reporting-direction",
+  "order": 4,
+  "title": "Reporting pour la direction commerciale",
+  "ticket": "DBA-2150",
+  "priority": "Normale",
+  "client": "Sahel Distribution",
+  "minutes": 30,
+  "level": "Intermédiaire",
+  "chapters": [
+    "1-2-requetes"
+  ],
+  "context": [
+    "La direction commerciale prépare son comité de fin d'année et réclame des chiffres fiables, tirés directement de la base. Aucune extraction toute faite n'existe : il faut écrire les requêtes.",
+    "{user}, tu interroges la base de production. Tables disponibles : clients, categories, produits, commandes et commande_produits. Tout ce que tu écris doit rendre exactement les lignes demandées, pas une de plus."
+  ],
+  "objectives": [
+    "Trier et limiter un résultat (Top-N)",
+    "Joindre et agréger : jointure, GROUP BY, SUM",
+    "Trouver ce qui manque : anti-jointure avec NOT EXISTS",
+    "Comparer à une valeur calculée : sous-requête",
+    "Archiver : copier puis supprimer, puis valider"
+  ],
+  "setup": [
+    "CREATE TABLE categories (id NUMBER(4) CONSTRAINT pk_categories PRIMARY KEY, nom VARCHAR2(40) NOT NULL)",
+    "CREATE TABLE produits (id NUMBER(6) CONSTRAINT pk_produits PRIMARY KEY, nom VARCHAR2(60) NOT NULL, prix NUMBER(10,2) NOT NULL CONSTRAINT ck_produits_prix CHECK (prix >= 0), categorie_id NUMBER(4), stock NUMBER(6) DEFAULT 0 NOT NULL, CONSTRAINT fk_produits_categories FOREIGN KEY (categorie_id) REFERENCES categories(id))",
+    "CREATE TABLE clients (id NUMBER(6) CONSTRAINT pk_clients PRIMARY KEY, nom VARCHAR2(60) NOT NULL, email VARCHAR2(80), date_inscription DATE)",
+    "CREATE TABLE commandes (id NUMBER(6) CONSTRAINT pk_commandes PRIMARY KEY, client_id NUMBER(6) NOT NULL, date_commande DATE NOT NULL, montant NUMBER(12,2) NOT NULL, CONSTRAINT fk_commandes_clients FOREIGN KEY (client_id) REFERENCES clients(id))",
+    "CREATE TABLE commande_produits (commande_id NUMBER(6) NOT NULL, produit_id NUMBER(6) NOT NULL, quantite NUMBER(4) NOT NULL, CONSTRAINT pk_commande_produits PRIMARY KEY (commande_id, produit_id), CONSTRAINT fk_cp_commandes FOREIGN KEY (commande_id) REFERENCES commandes(id), CONSTRAINT fk_cp_produits FOREIGN KEY (produit_id) REFERENCES produits(id))",
+    "INSERT INTO categories (id, nom) VALUES (1, 'Alimentaire')",
+    "INSERT INTO categories (id, nom) VALUES (2, 'Boissons')",
+    "INSERT INTO categories (id, nom) VALUES (3, 'Hygiène')",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (1, 'Riz 25 kg', 18500, 1, 40)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (2, 'Huile 5 L', 6500, 1, 25)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (3, 'Sucre 1 kg', 800, 1, 120)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (4, 'Eau minérale 1,5 L', 400, 2, 300)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (5, 'Jus ananas 1 L', 1200, 2, 80)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (6, 'Savon 200 g', 350, 3, 150)",
+    "INSERT INTO clients (id, nom, email, date_inscription) VALUES (1, 'Adjovi Koffi', 'a.koffi@mail.bj', TO_DATE('12/01/2025','DD/MM/YYYY'))",
+    "INSERT INTO clients (id, nom, email, date_inscription) VALUES (2, 'Bio Tchané', 'b.tchane@mail.bj', TO_DATE('03/02/2025','DD/MM/YYYY'))",
+    "INSERT INTO clients (id, nom, email, date_inscription) VALUES (3, 'Carine Houngbo', 'c.houngbo@mail.bj', TO_DATE('20/03/2025','DD/MM/YYYY'))",
+    "INSERT INTO clients (id, nom, email, date_inscription) VALUES (4, 'Didier Soglo', 'd.soglo@mail.bj', TO_DATE('08/05/2025','DD/MM/YYYY'))",
+    "INSERT INTO clients (id, nom, email, date_inscription) VALUES (5, 'Estelle Agbo', 'e.agbo@mail.bj', TO_DATE('15/06/2025','DD/MM/YYYY'))",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (1, 1, TO_DATE('05/09/2025','DD/MM/YYYY'), 25000)",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (2, 1, TO_DATE('12/10/2025','DD/MM/YYYY'), 4000)",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (3, 2, TO_DATE('20/10/2025','DD/MM/YYYY'), 5400)",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (4, 3, TO_DATE('02/11/2025','DD/MM/YYYY'), 37000)",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (5, 3, TO_DATE('15/11/2025','DD/MM/YYYY'), 20200)",
+    "INSERT INTO commandes (id, client_id, date_commande, montant) VALUES (6, 4, TO_DATE('28/12/2024','DD/MM/YYYY'), 8000)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (1, 1, 1)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (1, 2, 1)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (2, 4, 10)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (3, 3, 5)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (3, 6, 4)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (4, 1, 2)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (5, 5, 6)",
+    "INSERT INTO commande_produits (commande_id, produit_id, quantite) VALUES (5, 2, 2)",
+    "COMMIT"
+  ],
+  "reference": [
+    {
+      "title": "Top-N",
+      "sql": "SELECT ... ORDER BY col DESC FETCH FIRST 3 ROWS ONLY;"
+    },
+    {
+      "title": "Jointure et agrégat",
+      "sql": "SELECT a.nom, SUM(b.val)\nFROM a JOIN b ON b.a_id = a.id\nGROUP BY a.nom;"
+    },
+    {
+      "title": "Anti-jointure",
+      "sql": "SELECT ... FROM a\nWHERE NOT EXISTS (SELECT 1 FROM b WHERE b.a_id = a.id);"
+    },
+    {
+      "title": "Archivage",
+      "sql": "CREATE TABLE t_archive AS SELECT * FROM t WHERE ...;\nDELETE FROM t WHERE ...;\nCOMMIT;"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "sql",
+      "title": "Les produits les plus chers",
+      "task": "Affiche le **nom** et le **prix** des **3 produits les plus chers**, du plus cher au moins cher.",
+      "hints": [
+        "ORDER BY prix DESC pour classer du plus grand au plus petit.",
+        "Pour ne garder que 3 lignes : FETCH FIRST 3 ROWS ONLY en fin de requête."
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Le résultat contient les 3 produits les plus chers, dans l'ordre décroissant",
+          "rows": [
+            [
+              "Riz 25 kg",
+              18500
+            ],
+            [
+              "Huile 5 L",
+              6500
+            ],
+            [
+              "Jus ananas 1 L",
+              1200
+            ]
+          ],
+          "ordered": true
+        }
+      ],
+      "solution": "SELECT nom, prix FROM produits ORDER BY prix DESC FETCH FIRST 3 ROWS ONLY;",
+      "explain": "Le tri doit précéder la limitation. FETCH FIRST n ROWS ONLY (Oracle 12c et plus) remplace l'ancien filtre ROWNUM, qui s'appliquait avant le tri."
+    },
+    {
+      "id": "s2",
+      "kind": "sql",
+      "title": "Chiffre d'affaires par client",
+      "task": "Affiche, pour chaque client ayant commandé, son **nom** et le **total de ses commandes** (colonne `montant`), du plus élevé au plus faible.",
+      "hints": [
+        "Il faut relier clients et commandes : JOIN ... ON commandes.client_id = clients.id.",
+        "SUM(montant) avec GROUP BY sur le nom du client.",
+        "ORDER BY sur le total, décroissant."
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Un total par client ayant commandé, classé du plus élevé au plus faible",
+          "rows": [
+            [
+              "Carine Houngbo",
+              57200
+            ],
+            [
+              "Adjovi Koffi",
+              29000
+            ],
+            [
+              "Didier Soglo",
+              8000
+            ],
+            [
+              "Bio Tchané",
+              5400
+            ]
+          ],
+          "ordered": true
+        }
+      ],
+      "solution": "SELECT c.nom, SUM(o.montant) AS ca\nFROM clients c\nJOIN commandes o ON o.client_id = c.id\nGROUP BY c.nom\nORDER BY ca DESC;",
+      "explain": "Toute colonne du SELECT qui n'est pas dans une fonction d'agrégation doit figurer dans le GROUP BY. Une jointure interne ne garde que les clients ayant au moins une commande."
+    },
+    {
+      "id": "s3",
+      "kind": "sql",
+      "title": "Les clients sans commande",
+      "task": "Affiche le **nom** des clients qui n'ont **jamais commandé**.",
+      "hints": [
+        "Il s'agit de trouver les lignes qui n'ont pas de correspondance : une anti-jointure.",
+        "WHERE NOT EXISTS (SELECT 1 FROM commandes WHERE ...)."
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Seul le client sans commande est affiché",
+          "rows": [
+            [
+              "Estelle Agbo"
+            ]
+          ]
+        }
+      ],
+      "solution": "SELECT c.nom\nFROM clients c\nWHERE NOT EXISTS (SELECT 1 FROM commandes o WHERE o.client_id = c.id);",
+      "explain": "NOT EXISTS est la forme la plus sûre de l'anti-jointure : contrairement à NOT IN, elle ne se comporte pas de façon surprenante en présence de valeurs NULL."
+    },
+    {
+      "id": "s4",
+      "kind": "sql",
+      "title": "Produits au-dessus de la moyenne",
+      "task": "Affiche le **nom** des produits dont le prix est **strictement supérieur au prix moyen** de tous les produits.",
+      "hints": [
+        "Le prix moyen se calcule par une sous-requête : (SELECT AVG(prix) FROM produits).",
+        "WHERE prix > (sous-requête)."
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Seuls les produits plus chers que la moyenne sont affichés",
+          "rows": [
+            [
+              "Riz 25 kg"
+            ],
+            [
+              "Huile 5 L"
+            ]
+          ]
+        }
+      ],
+      "solution": "SELECT nom FROM produits WHERE prix > (SELECT AVG(prix) FROM produits);",
+      "explain": "Une sous-requête qui renvoie une seule valeur peut s'utiliser comme n'importe quelle constante. La moyenne est ici 4625 : elle est recalculée à chaque exécution, sans valeur écrite en dur."
+    },
+    {
+      "id": "s5",
+      "kind": "sql",
+      "title": "Archiver les anciennes commandes",
+      "task": "Les commandes **antérieures au 01/01/2025** doivent quitter la table active. Copie-les dans une table **commandes_archive** (même structure), supprime-les de **commandes**, puis **valide**.",
+      "hints": [
+        "CREATE TABLE commandes_archive AS SELECT * FROM commandes WHERE ...;",
+        "Compare la date avec TO_DATE('01/01/2025', 'DD/MM/YYYY').",
+        "Ordre : d'abord copier, ensuite supprimer, enfin COMMIT."
+      ],
+      "checks": [
+        {
+          "t": "query",
+          "label": "La commande ancienne est dans commandes_archive",
+          "sql": "SELECT COUNT(*) FROM commandes_archive WHERE id = 6",
+          "scalar": 1
+        },
+        {
+          "t": "query",
+          "label": "Il reste 5 commandes dans la table active",
+          "sql": "SELECT COUNT(*) FROM commandes",
+          "scalar": 5
+        },
+        {
+          "t": "committed",
+          "label": "L'opération est validée"
+        }
+      ],
+      "solution": "CREATE TABLE commandes_archive AS\n  SELECT * FROM commandes WHERE date_commande < TO_DATE('01/01/2025', 'DD/MM/YYYY');\nDELETE FROM commandes WHERE date_commande < TO_DATE('01/01/2025', 'DD/MM/YYYY');\nCOMMIT;",
+      "explain": "On copie avant de supprimer : si la copie échoue, rien n'est perdu. Le critère de la copie et celui de la suppression doivent rester identiques."
+    },
+    {
+      "id": "s6",
+      "kind": "choice",
+      "title": "Revue de méthode",
+      "task": "Pourquoi exécuter la copie vers la table d'archive **avant** le DELETE, et pas l'inverse ?",
+      "options": [
+        "Si la copie échoue, les données sources sont encore intactes",
+        "Parce que DELETE est plus rapide après une copie",
+        "Parce qu'Oracle interdit de supprimer avant de copier",
+        "Pour libérer de l'espace plus vite"
+      ],
+      "answer": 0,
+      "explain": "Supprimer d'abord et copier ensuite expose à une perte de données si la copie échoue ou si la session s'interrompt. Copier, contrôler, supprimer, puis valider est la séquence prudente."
+    }
+  ],
+  "debrief": [
+    "ORDER BY avant FETCH FIRST : on trie, puis on limite.",
+    "Jointure + GROUP BY pour agréger ; NOT EXISTS pour trouver l'absence ; sous-requête pour comparer à une valeur calculée.",
+    "Archiver = copier, contrôler, supprimer, valider."
+  ],
+  "teaser": "La direction cache des chiffres. Aide-moi à les sortir de la base.",
+  "dialogue": [
+    "{user}, la direction prépare un comité à huis clos. Les chiffres qu'elle présentera ne sont pas tous exacts.",
+    "Je veux les vrais : les meilleurs produits, les clients qui comptent, les clients oubliés, les produits au-dessus de la moyenne.",
+    "Tout est dans la base. Il suffit de poser les bonnes questions, avec les bonnes requêtes.",
+    "Avant de partir, tu archiveras les vieilles commandes. Il ne faut rien laisser traîner."
+  ],
+  "outro": "Les chiffres sont propres et les archives rangées. Ils ne pourront plus les maquiller."
+}

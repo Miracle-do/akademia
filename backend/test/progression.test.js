@@ -317,3 +317,17 @@ test('spaced repetition: legacy Leitner items still work and long intervals grad
   let item = { box: 5, due: '2026-11-23', seen: 9, ivl: 45, ease: 2.8, lapses: 0 };
   assert.equal(progression.promote(item, '2026-11-23'), null);
 });
+
+test('quest completion is validated against server content and rewarded once', () => {
+  const quest = content.getQuests('bdd-oracle')[0];
+  assert.ok(quest, 'bdd-oracle doit avoir au moins une quête');
+  const first = progression.applyAction(progression.defaultState(), { type: 'quest', moduleId: 'bdd-oracle', questId: quest.id }, content);
+  const again = progression.applyAction(first.state, { type: 'quest', moduleId: 'bdd-oracle', questId: quest.id }, content);
+  assert.equal(first.summary.lines[0].xp, 90);
+  assert.deepEqual(first.state.quests['bdd-oracle'], [quest.id]);
+  assert.equal(first.state.counters.quests, 1);
+  assert.ok(first.state.badges['quest-1']);
+  assert.equal(again.summary, null);
+  assert.equal(again.state.xp, first.state.xp);
+  assert.throws(() => progression.applyAction(first.state, { type: 'quest', moduleId: 'bdd-oracle', questId: 'inexistante' }, content), /Quête invalide/);
+});

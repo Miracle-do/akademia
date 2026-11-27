@@ -6,6 +6,7 @@ import {
   applyChapterRead,
   applyExam,
   applyFormationLesson,
+  applyQuest,
   applyQuiz,
   applySetFiliere,
   CardsInput,
@@ -14,7 +15,7 @@ import {
   QuizInput,
   themeForFiliere,
 } from '@/lib/progress';
-import type { FiliereId, Formation, Summary, UserState } from '@/lib/types';
+import type { FiliereId, Formation, Quest, Summary, UserState } from '@/lib/types';
 import { useAuth } from './AuthContext';
 
 export type CelebrationEvent =
@@ -33,6 +34,7 @@ interface StoreApi {
   setUserFiliere(filiere: FiliereId): Promise<void>;
   chapterRead(moduleId: string, chapterId: string): Promise<Summary | null>;
   finishFormationLesson(f: Formation, lessonId: string): Promise<Summary | null>;
+  finishQuest(q: Quest, total: number): Promise<Summary | null>;
   finishQuiz(inp: QuizInput): Promise<Summary>;
   finishExam(inp: ExamInput): Promise<Summary>;
   finishCards(inp: CardsInput): Promise<Summary>;
@@ -188,6 +190,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dispatch(
           { type: 'formation-lesson', moduleId: f.moduleId, formationId: f.id, lessonId },
           () => applyFormationLesson(ref.current, progressCtx, f, lessonId),
+        ),
+      finishQuest: async (q, total) =>
+        dispatch(
+          { type: 'quest', moduleId: q.moduleId, questId: q.id },
+          () => applyQuest(ref.current, progressCtx, q, total),
         ),
       finishQuiz: async (input) => {
         const result = await dispatch(

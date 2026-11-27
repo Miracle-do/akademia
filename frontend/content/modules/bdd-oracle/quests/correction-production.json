@@ -1,0 +1,251 @@
+{
+  "id": "correction-production",
+  "order": 3,
+  "title": "Correction en production : UPDATE sans WHERE",
+  "ticket": "DBA-2133",
+  "priority": "Critique",
+  "client": "Sahel Distribution",
+  "minutes": 25,
+  "level": "Intermédiaire",
+  "chapters": [
+    "1-1-ddl-dml"
+  ],
+  "context": [
+    "Alerte critique : tous les prix du catalogue s'affichent à 0 sur le site. Un collègue a lancé `UPDATE produits SET prix = 0` dans une session SQL*Plus, sans clause WHERE, puis a quitté son poste sans fermer sa session.",
+    "{user}, tu reprends la main sur cette session. L'indicateur de transaction (en haut de la console) montre que des modifications sont **en attente**. Tu dois rétablir les prix, appliquer correctement la hausse de 10 % demandée sur les boissons, puis valider."
+  ],
+  "objectives": [
+    "Évaluer l'étendue des dégâts avant d'agir",
+    "Utiliser ROLLBACK pour annuler une transaction non validée",
+    "Écrire un UPDATE ciblé par une clause WHERE",
+    "Distinguer DELETE (annulable) et TRUNCATE (non annulable)"
+  ],
+  "setup": [
+    "CREATE TABLE categories (id NUMBER(4) CONSTRAINT pk_categories PRIMARY KEY, nom VARCHAR2(40) NOT NULL)",
+    "CREATE TABLE produits (id NUMBER(6) CONSTRAINT pk_produits PRIMARY KEY, nom VARCHAR2(60) NOT NULL, prix NUMBER(10,2) NOT NULL CONSTRAINT ck_produits_prix CHECK (prix >= 0), categorie_id NUMBER(4), stock NUMBER(6) DEFAULT 0 NOT NULL, CONSTRAINT fk_produits_categories FOREIGN KEY (categorie_id) REFERENCES categories(id))",
+    "INSERT INTO categories (id, nom) VALUES (1, 'Alimentaire')",
+    "INSERT INTO categories (id, nom) VALUES (2, 'Boissons')",
+    "INSERT INTO categories (id, nom) VALUES (3, 'Hygiène')",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (1, 'Riz 25 kg', 18500, 1, 40)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (2, 'Huile 5 L', 6500, 1, 25)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (3, 'Sucre 1 kg', 800, 1, 120)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (4, 'Eau minérale 1,5 L', 400, 2, 300)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (5, 'Jus ananas 1 L', 1200, 2, 80)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (6, 'Savon 200 g', 350, 3, 150)",
+    "CREATE TABLE journal_tmp (id NUMBER(4) PRIMARY KEY, message VARCHAR2(80))",
+    "INSERT INTO journal_tmp VALUES (1, 'Import du 01/11')",
+    "INSERT INTO journal_tmp VALUES (2, 'Import du 02/11')",
+    "INSERT INTO journal_tmp VALUES (3, 'Import du 03/11')",
+    "COMMIT"
+  ],
+  "setupPending": [
+    "UPDATE produits SET prix = 0"
+  ],
+  "reference": [
+    {
+      "title": "Annuler / valider",
+      "sql": "ROLLBACK;   -- annule depuis le dernier COMMIT\nCOMMIT;     -- valide définitivement"
+    },
+    {
+      "title": "UPDATE ciblé",
+      "sql": "UPDATE t SET col = col * 1.05 WHERE critere;"
+    },
+    {
+      "title": "Vider une table",
+      "sql": "DELETE FROM t;      -- annulable (DML)\nTRUNCATE TABLE t;   -- non annulable (DDL)"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "sql",
+      "title": "Mesurer les dégâts",
+      "task": "Combien de produits ont un prix **égal à 0** en ce moment ? Écris la requête qui renvoie ce nombre.",
+      "hints": [
+        "SELECT COUNT(*) FROM produits WHERE ...;"
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Le résultat affiché est le nombre de produits à prix 0",
+          "rows": [
+            [
+              6
+            ]
+          ]
+        }
+      ],
+      "solution": "SELECT COUNT(*) FROM produits WHERE prix = 0;",
+      "explain": "Les 6 produits sont touchés : l'UPDATE sans WHERE a modifié toutes les lignes. Dans ta session tu vois les modifications non validées de cette même transaction."
+    },
+    {
+      "id": "s2",
+      "kind": "sql",
+      "title": "Annuler la transaction",
+      "task": "Les modifications du collègue n'ont **jamais été validées**. Rétablis les prix d'origine sans rien réécrire à la main.",
+      "hints": [
+        "Une seule commande suffit.",
+        "ROLLBACK annule tout ce qui a été fait depuis le dernier COMMIT."
+      ],
+      "checks": [
+        {
+          "t": "ran",
+          "label": "Un ROLLBACK a été exécuté",
+          "pattern": "^rollback"
+        },
+        {
+          "t": "query",
+          "label": "Aucun produit n'est plus à 0",
+          "sql": "SELECT COUNT(*) FROM produits WHERE prix = 0",
+          "scalar": 0
+        },
+        {
+          "t": "query",
+          "label": "Les prix d'origine sont restaurés (somme = 27750)",
+          "sql": "SELECT SUM(prix) FROM produits",
+          "scalar": 27750
+        },
+        {
+          "t": "committed",
+          "label": "Plus aucune transaction en cours"
+        }
+      ],
+      "solution": "ROLLBACK;",
+      "explain": "Tant qu'un COMMIT n'a pas eu lieu, ROLLBACK restaure l'état précédent. C'est la raison d'être des transactions : on peut défaire une série de modifications comme un seul bloc."
+    },
+    {
+      "id": "s3",
+      "kind": "sql",
+      "title": "Appliquer la hausse demandée",
+      "task": "Le service commercial demande **+10 %** sur le prix des produits de la catégorie **2** (Boissons) uniquement. Applique la modification, puis vérifie le résultat avant de valider.",
+      "hints": [
+        "UPDATE produits SET prix = prix * ... WHERE ...;",
+        "Pour +10 %, le coefficient est 1.10.",
+        "La clause WHERE cible la catégorie : categorie_id = 2."
+      ],
+      "checks": [
+        {
+          "t": "query",
+          "label": "Seuls les produits de la catégorie 2 ont changé de prix",
+          "sql": "SELECT id, prix FROM produits ORDER BY id",
+          "rows": [
+            [
+              1,
+              18500
+            ],
+            [
+              2,
+              6500
+            ],
+            [
+              3,
+              800
+            ],
+            [
+              4,
+              440
+            ],
+            [
+              5,
+              1320
+            ],
+            [
+              6,
+              350
+            ]
+          ],
+          "ordered": true
+        }
+      ],
+      "solution": "UPDATE produits SET prix = prix * 1.10 WHERE categorie_id = 2;",
+      "explain": "La clause WHERE est ce qui sépare une correction d'une catastrophe. Réflexe de DBA : écrire d'abord le SELECT avec le même WHERE, contrôler les lignes concernées, puis seulement transformer en UPDATE."
+    },
+    {
+      "id": "s4",
+      "kind": "sql",
+      "title": "Valider la correction",
+      "task": "Le résultat est conforme : rends la modification **définitive**.",
+      "hints": [
+        "Une seule commande."
+      ],
+      "checks": [
+        {
+          "t": "committed",
+          "label": "La transaction est validée (COMMIT)"
+        },
+        {
+          "t": "query",
+          "label": "Le prix du jus d'ananas est bien de 1320",
+          "sql": "SELECT prix FROM produits WHERE id = 5",
+          "scalar": 1320,
+          "committed": true
+        }
+      ],
+      "solution": "COMMIT;",
+      "explain": "Après COMMIT, plus de retour en arrière par ROLLBACK : les autres sessions voient les nouveaux prix. Valide uniquement après avoir contrôlé."
+    },
+    {
+      "id": "s5",
+      "kind": "sql",
+      "title": "DELETE ou TRUNCATE ?",
+      "task": "La table `journal_tmp` (3 lignes) doit être vidée. Teste les deux méthodes pour constater la différence : **DELETE** suivi de **ROLLBACK** (les lignes reviennent), puis **TRUNCATE** suivi de **ROLLBACK**. À la fin, la table doit être vide.",
+      "hints": [
+        "Vérifie avec SELECT COUNT(*) FROM journal_tmp; après chaque étape.",
+        "DELETE FROM journal_tmp; puis ROLLBACK;",
+        "TRUNCATE TABLE journal_tmp; puis ROLLBACK; : observe le résultat."
+      ],
+      "checks": [
+        {
+          "t": "ran",
+          "label": "Un DELETE sur journal_tmp a été exécuté",
+          "pattern": "^delete from journal_tmp"
+        },
+        {
+          "t": "ran",
+          "label": "Un TRUNCATE sur journal_tmp a été exécuté",
+          "pattern": "^truncate table journal_tmp"
+        },
+        {
+          "t": "ran",
+          "label": "Un ROLLBACK a été exécuté",
+          "pattern": "^rollback"
+        },
+        {
+          "t": "query",
+          "label": "La table journal_tmp est vide malgré le ROLLBACK",
+          "sql": "SELECT COUNT(*) FROM journal_tmp",
+          "scalar": 0
+        }
+      ],
+      "solution": "DELETE FROM journal_tmp;\nROLLBACK;\nSELECT COUNT(*) FROM journal_tmp;\nTRUNCATE TABLE journal_tmp;\nROLLBACK;\nSELECT COUNT(*) FROM journal_tmp;",
+      "explain": "DELETE est une opération DML : elle est journalisée ligne par ligne et annulable tant qu'elle n'est pas validée. TRUNCATE est un ordre DDL : il valide implicitement, libère l'espace et ne peut pas être annulé."
+    },
+    {
+      "id": "s6",
+      "kind": "choice",
+      "title": "Prévenir la récidive",
+      "task": "Quelle pratique aurait évité l'incident initial ?",
+      "options": [
+        "Contrôler l'ordre avec un SELECT et la même clause WHERE avant de le lancer, et ne valider qu'après vérification",
+        "Exécuter les mises à jour avec TRUNCATE pour aller plus vite",
+        "Toujours valider immédiatement après chaque ordre",
+        "Désactiver les transactions"
+      ],
+      "answer": 0,
+      "explain": "Un SELECT préalable avec le même WHERE montre exactement les lignes concernées. Combiné à une validation différée (COMMIT seulement après contrôle), l'erreur reste rattrapable par un simple ROLLBACK."
+    }
+  ],
+  "debrief": [
+    "Un UPDATE ou un DELETE sans WHERE touche toutes les lignes : contrôler d'abord par un SELECT avec la même condition.",
+    "Tant qu'il n'y a pas eu de COMMIT, ROLLBACK annule la transaction entière.",
+    "TRUNCATE et tout ordre DDL valident implicitement : ils ne s'annulent pas."
+  ],
+  "teaser": "Code rouge. Quelqu'un a saboté les prix, et sa session est encore ouverte.",
+  "dialogue": [
+    "Code rouge, {user}. Tous les prix du catalogue sont tombés à zéro.",
+    "Un collègue a lancé un UPDATE sans condition, puis il est parti en laissant sa session ouverte. Ou alors il l'a fait exprès.",
+    "Rien n'a été validé pour l'instant. Si tu vas assez vite, on peut tout rattraper. Sinon, c'est définitif.",
+    "Mesure les dégâts, annule ce qui peut l'être, puis applique la hausse demandée. Une erreur de plus et on ne remonte plus."
+  ],
+  "outro": "Les prix sont revenus. Quelqu'un se demandera qui a réparé ça. Ce ne sera pas moi."
+}

@@ -1,0 +1,204 @@
+{
+  "id": "automatisation-plsql",
+  "order": 5,
+  "title": "Automatiser avec des blocs PL/SQL",
+  "ticket": "DBA-2164",
+  "priority": "Normale",
+  "client": "Sahel Distribution",
+  "minutes": 30,
+  "level": "Intermédiaire",
+  "chapters": [
+    "2-1-blocs-variables",
+    "2-2-controle-curseurs",
+    "2-3-erreurs"
+  ],
+  "context": [
+    "Les contrôles de fin de journée sont encore faits à la main : on interroge, on regarde, on décide. L'équipe veut des blocs PL/SQL fiables, qui lisent la base, parcourent les stocks et réagissent proprement quand une donnée manque.",
+    "{user}, tu écris les blocs dans l'éditeur PL/SQL. Ils sont relus par un contrôle qui vérifie la structure du code (déclarations, lecture, gestion d'erreurs) : le simulateur n'exécute pas PL/SQL, tout comme une revue de code avant mise en production."
+  ],
+  "objectives": [
+    "Déclarer des variables liées au schéma avec %TYPE",
+    "Lire une ligne avec SELECT ... INTO",
+    "Gérer l'absence de données avec la section EXCEPTION",
+    "Parcourir un jeu de lignes avec un curseur FOR",
+    "Lever une erreur applicative avec RAISE_APPLICATION_ERROR"
+  ],
+  "reference": [
+    {
+      "title": "Structure d'un bloc",
+      "sql": "DECLARE\n  v_nom clients.nom%TYPE;\nBEGIN\n  SELECT nom INTO v_nom FROM clients WHERE id = 1;\n  DBMS_OUTPUT.PUT_LINE(v_nom);\nEXCEPTION\n  WHEN NO_DATA_FOUND THEN ...\nEND;\n/"
+    },
+    {
+      "title": "Boucle sur un curseur",
+      "sql": "FOR r IN (SELECT ... FROM t WHERE ...) LOOP\n  ... r.colonne ...\nEND LOOP;"
+    },
+    {
+      "title": "Erreur applicative",
+      "sql": "RAISE_APPLICATION_ERROR(-20001, 'message');"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "plsql",
+      "title": "Premier bloc : lire un client",
+      "task": "Écris un bloc anonyme qui lit le **nom du client n°1** dans une variable déclarée avec **%TYPE**, puis l'affiche avec `DBMS_OUTPUT.PUT_LINE`.",
+      "hints": [
+        "Variable : v_nom clients.nom%TYPE;",
+        "SELECT nom INTO v_nom FROM clients WHERE id = 1;",
+        "N'oublie pas END; puis / sur la dernière ligne."
+      ],
+      "template": "DECLARE\n  -- variables\nBEGIN\n  -- traitement\nEND;\n/",
+      "review": [
+        {
+          "label": "Une variable est déclarée avec %TYPE",
+          "pattern": "declare\\s+\\w+\\s+\\w+\\.\\w+%type\\s*;"
+        },
+        {
+          "label": "Le nom est lu par SELECT ... INTO ... FROM clients",
+          "pattern": "select\\s+[\\w\\s,*]+\\s+into\\s+\\w+\\s+from\\s+clients"
+        },
+        {
+          "label": "La lecture est filtrée sur le client n°1",
+          "pattern": "where\\s+id\\s*=\\s*1\\b"
+        },
+        {
+          "label": "Le résultat est affiché avec DBMS_OUTPUT.PUT_LINE",
+          "pattern": "dbms_output\\.put_line\\s*\\("
+        },
+        {
+          "label": "Le bloc a la forme DECLARE ... BEGIN ... END;",
+          "pattern": "declare\\s.*\\sbegin\\s.*\\send\\s*;"
+        }
+      ],
+      "solution": "DECLARE\n  v_nom clients.nom%TYPE;\nBEGIN\n  SELECT nom INTO v_nom FROM clients WHERE id = 1;\n  DBMS_OUTPUT.PUT_LINE('Client : ' || v_nom);\nEND;\n/",
+      "explain": "%TYPE copie le type de la colonne : si la colonne change, le bloc suit. SELECT ... INTO exige exactement une ligne : zéro ligne ou plusieurs lignes déclenchent une exception."
+    },
+    {
+      "id": "s2",
+      "kind": "plsql",
+      "title": "Gérer le client introuvable",
+      "task": "Le même contrôle, cette fois sur le client **n°999**, qui n'existe pas : le bloc planterait avec ORA-01403. Ajoute une section **EXCEPTION** qui gère `NO_DATA_FOUND` et affiche « Client introuvable ».",
+      "hints": [
+        "EXCEPTION se place avant le END; final du bloc.",
+        "WHEN NO_DATA_FOUND THEN suivi d'un affichage."
+      ],
+      "template": "DECLARE\n  v_nom clients.nom%TYPE;\nBEGIN\n  SELECT nom INTO v_nom FROM clients WHERE id = 999;\n  DBMS_OUTPUT.PUT_LINE('Client : ' || v_nom);\nEND;\n/",
+      "review": [
+        {
+          "label": "Le bloc interroge le client n°999",
+          "pattern": "where\\s+id\\s*=\\s*999\\b"
+        },
+        {
+          "label": "Une section EXCEPTION précède le END final",
+          "pattern": "exception\\s+when\\s.*\\send\\s*;"
+        },
+        {
+          "label": "L'exception NO_DATA_FOUND est gérée",
+          "pattern": "when\\s+no_data_found\\s+then"
+        },
+        {
+          "label": "Un message est affiché dans le gestionnaire",
+          "pattern": "no_data_found\\s+then\\s+dbms_output\\.put_line\\s*\\("
+        }
+      ],
+      "solution": "DECLARE\n  v_nom clients.nom%TYPE;\nBEGIN\n  SELECT nom INTO v_nom FROM clients WHERE id = 999;\n  DBMS_OUTPUT.PUT_LINE('Client : ' || v_nom);\nEXCEPTION\n  WHEN NO_DATA_FOUND THEN\n    DBMS_OUTPUT.PUT_LINE('Client introuvable');\nEND;\n/",
+      "explain": "Une erreur non gérée remonte à l'appelant et interrompt tout. La section EXCEPTION transforme un incident technique en comportement maîtrisé. L'équivalent pour plusieurs lignes est TOO_MANY_ROWS."
+    },
+    {
+      "id": "s3",
+      "kind": "plsql",
+      "title": "Surveiller les stocks bas",
+      "task": "Écris un bloc qui parcourt, avec une **boucle FOR sur un curseur**, les produits dont le **stock est inférieur à 30**. Affiche le nom de chacun, **compte** les produits concernés dans une variable, puis affiche le total après la boucle.",
+      "hints": [
+        "FOR p IN (SELECT nom, stock FROM produits WHERE stock < 30) LOOP",
+        "Une variable compteur : v_nb NUMBER := 0; puis v_nb := v_nb + 1; dans la boucle.",
+        "Ferme la boucle par END LOOP; avant d'afficher le total."
+      ],
+      "template": "DECLARE\n  v_nb NUMBER := 0;\nBEGIN\n  -- boucle sur les produits à stock bas\nEND;\n/",
+      "review": [
+        {
+          "label": "Boucle FOR sur un curseur",
+          "pattern": "for\\s+\\w+\\s+in\\s+(\\(\\s*select|\\w+)"
+        },
+        {
+          "label": "Le filtre porte sur un stock inférieur à 30",
+          "pattern": "stock\\s*<\\s*30"
+        },
+        {
+          "label": "Un compteur est incrémenté dans la boucle",
+          "pattern": "(\\w+)\\s*:=\\s*\\1\\s*\\+\\s*1\\s*;"
+        },
+        {
+          "label": "La boucle est fermée par END LOOP",
+          "pattern": "end\\s+loop\\s*;"
+        },
+        {
+          "label": "Le total est affiché après la boucle",
+          "pattern": "end\\s+loop\\s*;.*dbms_output\\.put_line"
+        }
+      ],
+      "solution": "DECLARE\n  v_nb NUMBER := 0;\nBEGIN\n  FOR p IN (SELECT nom, stock FROM produits WHERE stock < 30) LOOP\n    DBMS_OUTPUT.PUT_LINE('A réapprovisionner : ' || p.nom || ' (' || p.stock || ')');\n    v_nb := v_nb + 1;\n  END LOOP;\n  DBMS_OUTPUT.PUT_LINE(v_nb || ' produit(s) à réapprovisionner');\nEND;\n/",
+      "explain": "La boucle FOR sur un curseur ouvre, lit et ferme le curseur à ta place : moins de code, moins d'oublis qu'un curseur explicite (OPEN, FETCH, CLOSE)."
+    },
+    {
+      "id": "s4",
+      "kind": "plsql",
+      "title": "Refuser une donnée invalide",
+      "task": "Écris un bloc qui lit le **prix du produit n°1** dans une variable `%TYPE`. S'il est **nul ou négatif**, interromps le traitement avec `RAISE_APPLICATION_ERROR(-20001, 'Prix invalide')` ; sinon, affiche-le.",
+      "hints": [
+        "v_prix produits.prix%TYPE;",
+        "IF v_prix <= 0 THEN ... END IF;",
+        "Les codes applicatifs vont de -20000 à -20999."
+      ],
+      "template": "DECLARE\n  -- variable\nBEGIN\n  -- lecture et contrôle\nEND;\n/",
+      "review": [
+        {
+          "label": "La variable est typée par %TYPE sur produits.prix",
+          "pattern": "\\w+\\s+produits\\.prix%type"
+        },
+        {
+          "label": "Un test compare la variable à 0",
+          "pattern": "if\\s+\\w+\\s*<=\\s*0\\s+then"
+        },
+        {
+          "label": "RAISE_APPLICATION_ERROR est appelée avec un code -20xxx",
+          "pattern": "raise_application_error\\s*\\(\\s*-20\\d{3}\\s*,"
+        },
+        {
+          "label": "Le test est fermé par END IF",
+          "pattern": "end\\s+if\\s*;"
+        }
+      ],
+      "solution": "DECLARE\n  v_prix produits.prix%TYPE;\nBEGIN\n  SELECT prix INTO v_prix FROM produits WHERE id = 1;\n  IF v_prix <= 0 THEN\n    RAISE_APPLICATION_ERROR(-20001, 'Prix invalide');\n  END IF;\n  DBMS_OUTPUT.PUT_LINE('Prix contrôlé : ' || v_prix);\nEND;\n/",
+      "explain": "RAISE_APPLICATION_ERROR renvoie à l'appelant une erreur choisie, avec son code et son message : c'est la façon de refuser proprement une situation que le métier juge invalide."
+    },
+    {
+      "id": "s5",
+      "kind": "choice",
+      "title": "Lecture d'incident",
+      "task": "Un bloc sans section EXCEPTION exécute `SELECT nom INTO v_nom FROM clients WHERE id = 999;` et aucune ligne n'est trouvée. Que se passe-t-il ?",
+      "options": [
+        "L'erreur ORA-01403 (NO_DATA_FOUND) remonte à l'appelant et interrompt le bloc",
+        "v_nom reçoit NULL et le bloc continue normalement",
+        "Le bloc se termine sans erreur",
+        "Oracle choisit la ligne la plus proche"
+      ],
+      "answer": 0,
+      "explain": "SELECT INTO n'accepte ni zéro ni plusieurs lignes. Sans gestionnaire, l'exception se propage : les instructions suivantes ne sont pas exécutées."
+    }
+  ],
+  "debrief": [
+    "%TYPE lie les variables au schéma ; SELECT INTO exige exactement une ligne.",
+    "Toujours prévoir NO_DATA_FOUND et TOO_MANY_ROWS autour d'un SELECT INTO.",
+    "La boucle FOR sur curseur est la forme la plus simple pour parcourir des lignes ; RAISE_APPLICATION_ERROR refuse une situation invalide."
+  ],
+  "teaser": "J'ai besoin de robots discrets : des blocs PL/SQL qui surveillent à ma place.",
+  "dialogue": [
+    "{user}, je ne peux plus tout surveiller à la main.",
+    "J'ai besoin de petits programmes qui lisent la base, surveillent les stocks et réagissent seuls quand une donnée manque.",
+    "Ils s'écrivent en PL/SQL et ne pardonnent aucune erreur : une exception oubliée et tout s'arrête.",
+    "Ils seront relus par le contrôle de code avant d'être déployés. Écris-les proprement."
+  ],
+  "outro": "Les blocs sont prêts et surveillent la base sans bruit. Je savais que je pouvais compter sur toi."
+}

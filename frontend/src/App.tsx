@@ -31,6 +31,8 @@ const ModulesPage = lazy(() => import('@/pages/ModulesPage'));
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const ExplorePage = lazy(() => import('@/pages/ExplorePage'));
 const QuizPage = lazy(() => import('@/pages/QuizPage'));
+const QuestMapPage = lazy(() => import('@/pages/QuestMapPage'));
+const QuestPage = lazy(() => import('@/pages/QuestPage'));
 const ResultsPage = lazy(() => import('@/pages/ResultsPage'));
 
 function Gate() {
@@ -70,6 +72,8 @@ export default function App() {
           <Route path="formation/:fid" element={<FormationPage />} />
           <Route path="formation/:fid/:lessonId" element={<FormationLessonPage />} />
           <Route path="cartes" element={<FlashcardsPage />} />
+          <Route path="quetes" element={<QuestMapPage />} />
+          <Route path="quetes/:questId" element={<QuestPage />} />
         </Route>
         <Route path="resultats" element={<ResultsPage />} />
         <Route path="succes" element={<BadgesPage />} />

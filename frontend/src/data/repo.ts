@@ -439,6 +439,7 @@ export type ProgressAction =
       results: { id: string; answerIndex: number; elapsedSeconds: number }[];
     }
   | { type: 'formation-lesson'; moduleId: string; formationId: string; lessonId: string }
+  | { type: 'quest'; moduleId: string; questId: string }
   | { type: 'exam'; moduleId: string; n: number; score: number }
   | { type: 'cards'; moduleId: string; known: string[]; unknown: string[] }
   | { type: 'reset' };

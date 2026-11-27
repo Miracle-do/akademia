@@ -44,6 +44,7 @@ export const XP = {
   chapterRead: 25,
   formationLesson: 20,
   formationDone: 60,
+  questDone: 90,
   perfectQuiz: 30,
   goodQuiz: 15, // >= 80 %
   badge: 20,
@@ -110,6 +111,8 @@ export const BADGES: BadgeDef[] = [
   { id: 'streak-30', name: 'Légende du mois', desc: '30 jours d’affilée.', rarity: 'légendaire', check: (s) => s.bestStreak >= 30, progress: (s) => prog(s.bestStreak, 30) },
   { id: 'formation-1', name: 'Élève coaché', desc: 'Terminer une formation complète.', rarity: 'rare', check: (s) => (s.counters.formations ?? 0) >= 1 },
   { id: 'formation-3', name: 'Diplômé du coaching', desc: 'Terminer 3 formations.', rarity: 'épique', check: (s) => (s.counters.formations ?? 0) >= 3, progress: (s) => prog(s.counters.formations ?? 0, 3) },
+  { id: 'quest-1', name: 'Premier contact', desc: 'Accomplir une première mission secrète.', rarity: 'rare', check: (s) => (s.counters.quests ?? 0) >= 1 },
+  { id: 'quest-3', name: 'Agent de l’ombre', desc: 'Accomplir 3 missions secrètes.', rarity: 'épique', check: (s) => (s.counters.quests ?? 0) >= 3, progress: (s) => prog(s.counters.quests ?? 0, 3) },
   { id: 'level-5', name: 'Ampoule allumée', desc: 'Atteindre le niveau 5.', rarity: 'commun', check: (s) => levelFromXp(s.xp) >= 5 },
   { id: 'level-10', name: 'Moteur lancé', desc: 'Atteindre le niveau 10.', rarity: 'rare', check: (s) => levelFromXp(s.xp) >= 10 },
   { id: 'level-20', name: 'Fusion nucléaire', desc: 'Atteindre le niveau 20.', rarity: 'légendaire', check: (s) => levelFromXp(s.xp) >= 20 },

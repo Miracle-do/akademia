@@ -1,0 +1,254 @@
+{
+  "id": "schema-commercial",
+  "order": 1,
+  "title": "Mise en service du schéma commercial",
+  "ticket": "DBA-2101",
+  "priority": "Normale",
+  "client": "Sahel Distribution",
+  "minutes": 25,
+  "level": "Fondamental",
+  "chapters": [
+    "1-1-ddl-dml"
+  ],
+  "context": [
+    "Sahel Distribution, grossiste basé à Cotonou, lance sa plateforme de vente en ligne. {user}, tu rejoins l'équipe base de données comme DBA junior. Le responsable technique te confie la création du schéma Oracle de pré-production.",
+    "Tu travailles dans une session SQL*Plus connectée à la base. Règles de l'équipe : toute table a une clé primaire, les colonnes obligatoires sont déclarées NOT NULL, les règles métier simples sont portées par des contraintes CHECK et les relations par des clés étrangères."
+  ],
+  "objectives": [
+    "Créer les tables categories et produits avec leurs contraintes",
+    "Générer les identifiants avec une séquence",
+    "Faire évoluer le schéma sans perdre les données existantes",
+    "Valider un jeu de données initial avec COMMIT"
+  ],
+  "reference": [
+    {
+      "title": "Créer une table",
+      "sql": "CREATE TABLE t (\n  id  NUMBER(4) PRIMARY KEY,\n  nom VARCHAR2(40) NOT NULL UNIQUE\n);"
+    },
+    {
+      "title": "Contraintes de table",
+      "sql": "prix NUMBER(10,2) CHECK (prix > 0),\nc_id NUMBER(4) REFERENCES parent(id)"
+    },
+    {
+      "title": "Séquence",
+      "sql": "CREATE SEQUENCE seq START WITH 1000 INCREMENT BY 1;\nINSERT INTO t (id) VALUES (seq.NEXTVAL);"
+    },
+    {
+      "title": "Modifier une table",
+      "sql": "ALTER TABLE t ADD (colonne NUMBER(6) DEFAULT 0 NOT NULL);"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "sql",
+      "title": "Table des catégories",
+      "task": "Crée la table **categories** : `id` (NUMBER(4), clé primaire) et `nom` (VARCHAR2(40), obligatoire et unique).",
+      "hints": [
+        "Une colonne se déclare ainsi : nom puis type, puis ses contraintes.",
+        "L'unicité se déclare avec UNIQUE, le caractère obligatoire avec NOT NULL.",
+        "CREATE TABLE categories (id NUMBER(4) ..., nom VARCHAR2(40) ...);"
+      ],
+      "checks": [
+        {
+          "t": "table",
+          "label": "La table CATEGORIES existe avec ID (NUMBER) et NOM (VARCHAR2, obligatoire)",
+          "name": "categories",
+          "columns": [
+            {
+              "name": "id",
+              "type": "number"
+            },
+            {
+              "name": "nom",
+              "type": "varchar2",
+              "notNull": true
+            }
+          ]
+        },
+        {
+          "t": "table",
+          "label": "ID est la clé primaire",
+          "name": "categories",
+          "pk": [
+            "id"
+          ]
+        },
+        {
+          "t": "table",
+          "label": "NOM est unique",
+          "name": "categories",
+          "unique": [
+            [
+              "nom"
+            ]
+          ]
+        }
+      ],
+      "solution": "CREATE TABLE categories (\n  id  NUMBER(4) PRIMARY KEY,\n  nom VARCHAR2(40) NOT NULL UNIQUE\n);",
+      "explain": "PRIMARY KEY impose déjà l'unicité et NOT NULL. UNIQUE interdit deux catégories de même nom : Oracle crée un index pour la faire respecter."
+    },
+    {
+      "id": "s2",
+      "kind": "sql",
+      "title": "Table des produits",
+      "task": "Crée la table **produits** : `id` (NUMBER(6), clé primaire), `nom` (VARCHAR2(60), obligatoire), `prix` (NUMBER(10,2), strictement positif) et `categorie_id` (NUMBER(4)) qui référence **categories**.",
+      "hints": [
+        "La catégorie doit exister avant de pouvoir être référencée : c'est pourquoi tu as créé categories en premier.",
+        "Règle métier sur le prix : CHECK (prix > 0).",
+        "Clé étrangère : categorie_id NUMBER(4) REFERENCES categories(id)."
+      ],
+      "checks": [
+        {
+          "t": "table",
+          "label": "La table PRODUITS existe avec ID, NOM (obligatoire), PRIX et CATEGORIE_ID",
+          "name": "produits",
+          "columns": [
+            {
+              "name": "id",
+              "type": "number"
+            },
+            {
+              "name": "nom",
+              "type": "varchar2",
+              "notNull": true
+            },
+            {
+              "name": "prix",
+              "type": "number"
+            },
+            {
+              "name": "categorie_id",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "t": "table",
+          "label": "ID est la clé primaire",
+          "name": "produits",
+          "pk": [
+            "id"
+          ]
+        },
+        {
+          "t": "table",
+          "label": "CATEGORIE_ID référence CATEGORIES",
+          "name": "produits",
+          "fks": [
+            {
+              "cols": [
+                "categorie_id"
+              ],
+              "ref": "categories"
+            }
+          ]
+        },
+        {
+          "t": "table",
+          "label": "Le prix est protégé par une contrainte CHECK",
+          "name": "produits",
+          "checks": 1
+        }
+      ],
+      "solution": "CREATE TABLE produits (\n  id           NUMBER(6) PRIMARY KEY,\n  nom          VARCHAR2(60) NOT NULL,\n  prix         NUMBER(10,2) CHECK (prix > 0),\n  categorie_id NUMBER(4) REFERENCES categories(id)\n);",
+      "explain": "Les contraintes déplacent les règles métier dans la base : aucune application, script ou saisie manuelle ne pourra y déroger. Dans Oracle, créer une table qui référence une table absente échoue avec ORA-00942."
+    },
+    {
+      "id": "s3",
+      "kind": "sql",
+      "title": "Séquence et premier jeu de données",
+      "task": "Crée la séquence **seq_produit** (départ 1000, pas 1). Insère la catégorie `1` « Alimentaire », puis le produit « Riz parfumé 25 kg » à 18500 dans cette catégorie, avec un identifiant **généré par la séquence**. Valide le tout.",
+      "hints": [
+        "CREATE SEQUENCE seq_produit START WITH 1000 INCREMENT BY 1;",
+        "Dans le INSERT, la valeur de l'identifiant est seq_produit.NEXTVAL.",
+        "Sans COMMIT, les autres sessions ne voient pas tes données."
+      ],
+      "checks": [
+        {
+          "t": "ran",
+          "label": "La séquence SEQ_PRODUIT est créée",
+          "pattern": "^create sequence seq_produit"
+        },
+        {
+          "t": "ran",
+          "label": "L'identifiant du produit vient de la séquence (NEXTVAL)",
+          "pattern": "^insert into produits.*seq_produit\\.nextval"
+        },
+        {
+          "t": "query",
+          "label": "Le produit 1000 existe, au prix de 18500, dans la catégorie 1",
+          "sql": "SELECT COUNT(*) FROM produits WHERE id = 1000 AND prix = 18500 AND categorie_id = 1",
+          "scalar": 1
+        },
+        {
+          "t": "committed",
+          "label": "Les données sont validées (COMMIT)"
+        }
+      ],
+      "solution": "CREATE SEQUENCE seq_produit START WITH 1000 INCREMENT BY 1;\nINSERT INTO categories (id, nom) VALUES (1, 'Alimentaire');\nINSERT INTO produits (id, nom, prix, categorie_id) VALUES (seq_produit.NEXTVAL, 'Riz parfumé 25 kg', 18500, 1);\nCOMMIT;",
+      "explain": "Une séquence fournit des identifiants uniques sans verrouiller la table. Elle n'est jamais annulée par un ROLLBACK : des « trous » dans la numérotation sont normaux."
+    },
+    {
+      "id": "s4",
+      "kind": "sql",
+      "title": "Faire évoluer la table en production",
+      "task": "Le service logistique veut suivre le stock. Ajoute à **produits** la colonne `stock` (NUMBER(6)), obligatoire, valant **0** par défaut. Le produit déjà présent doit avoir un stock de 0.",
+      "hints": [
+        "ALTER TABLE produits ADD (...);",
+        "DEFAULT 0 s'écrit avant NOT NULL.",
+        "Un ajout de colonne obligatoire sur une table non vide exige une valeur par défaut."
+      ],
+      "checks": [
+        {
+          "t": "table",
+          "label": "La colonne STOCK (NUMBER, obligatoire) existe dans PRODUITS",
+          "name": "produits",
+          "columns": [
+            {
+              "name": "stock",
+              "type": "number",
+              "notNull": true
+            }
+          ]
+        },
+        {
+          "t": "query",
+          "label": "Les lignes existantes ont reçu la valeur par défaut 0",
+          "sql": "SELECT stock FROM produits WHERE id = 1000",
+          "scalar": 0
+        }
+      ],
+      "solution": "ALTER TABLE produits ADD (stock NUMBER(6) DEFAULT 0 NOT NULL);",
+      "explain": "Sans DEFAULT, Oracle refuserait NOT NULL (ORA-01758) car la ligne existante n'aurait aucune valeur. L'ALTER TABLE est un ordre DDL : il valide implicitement la transaction en cours."
+    },
+    {
+      "id": "s5",
+      "kind": "choice",
+      "title": "Revue de conception",
+      "task": "Un collègue propose de ne pas déclarer la clé étrangère de produits vers categories « pour gagner du temps à l'insertion ». Quel est le risque principal ?",
+      "options": [
+        "Des produits peuvent référencer une catégorie qui n'existe pas (données orphelines)",
+        "Les requêtes SELECT deviennent impossibles",
+        "La table produits ne peut plus avoir de clé primaire",
+        "La séquence cesse de fonctionner"
+      ],
+      "answer": 0,
+      "explain": "Sans clé étrangère, rien n'empêche d'insérer categorie_id = 99 alors que cette catégorie n'existe pas. Le coût de vérification à l'insertion est très faible comparé au nettoyage de données incohérentes."
+    }
+  ],
+  "debrief": [
+    "Créer les tables parents avant les tables enfants, avec clés primaires, NOT NULL, CHECK et clés étrangères.",
+    "Utiliser une séquence pour générer les identifiants ; ses valeurs ne sont jamais rendues par un ROLLBACK.",
+    "Un ordre DDL (CREATE, ALTER, DROP, TRUNCATE) valide implicitement la transaction : on ne peut pas l'annuler."
+  ],
+  "teaser": "Chut. J'ai besoin de toi pour une mission secrète.",
+  "dialogue": [
+    "Chut. Ne dis rien à voix haute, {user}.",
+    "Je suis un contact interne chez Sahel Distribution. Je ne peux pas te donner mon vrai nom.",
+    "Leur plateforme ouvre demain et la base de données n'existe pas encore. Personne d'autre ne doit la construire : trop de gens regardent.",
+    "J'ai besoin que tu montes le schéma proprement : tables, clés, contraintes. S'il est bâclé, tout ce qui sera stocké sera corrompu.",
+    "Une session est ouverte sur la pré-production. Tu es prêt(e) ?"
+  ],
+  "outro": "Schéma en place, données validées. Personne n'a rien vu. Je te recontacte bientôt."
+}

@@ -1,0 +1,192 @@
+{
+  "id": "incident-integrite",
+  "order": 2,
+  "title": "Incident : suppression de catégorie impossible",
+  "ticket": "DBA-2118",
+  "priority": "Haute",
+  "client": "Sahel Distribution",
+  "minutes": 20,
+  "level": "Fondamental",
+  "chapters": [
+    "1-1-ddl-dml"
+  ],
+  "context": [
+    "Ticket ouvert par l'équipe commerciale : « Impossible de supprimer la catégorie Boissons depuis l'application, une erreur s'affiche. » {user}, le dossier t'est assigné, en priorité haute.",
+    "Tu disposes d'un accès à la base de production en lecture et écriture. Avant toute modification, tu dois reproduire l'incident, comprendre sa cause, puis appliquer une correction qui ne détruit aucune donnée."
+  ],
+  "objectives": [
+    "Lire et interpréter un code d'erreur ORA-xxxxx",
+    "Mesurer l'impact avec une requête avant de modifier les données",
+    "Corriger proprement : rattacher les enfants puis supprimer le parent",
+    "Vérifier que la base protège bien contre les références invalides"
+  ],
+  "setup": [
+    "CREATE TABLE categories (id NUMBER(4) CONSTRAINT pk_categories PRIMARY KEY, nom VARCHAR2(40) NOT NULL)",
+    "CREATE TABLE produits (id NUMBER(6) CONSTRAINT pk_produits PRIMARY KEY, nom VARCHAR2(60) NOT NULL, prix NUMBER(10,2) NOT NULL CONSTRAINT ck_produits_prix CHECK (prix >= 0), categorie_id NUMBER(4), stock NUMBER(6) DEFAULT 0 NOT NULL, CONSTRAINT fk_produits_categories FOREIGN KEY (categorie_id) REFERENCES categories(id))",
+    "INSERT INTO categories (id, nom) VALUES (1, 'Alimentaire')",
+    "INSERT INTO categories (id, nom) VALUES (2, 'Boissons')",
+    "INSERT INTO categories (id, nom) VALUES (3, 'Hygiène')",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (1, 'Riz 25 kg', 18500, 1, 40)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (2, 'Huile 5 L', 6500, 1, 25)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (3, 'Sucre 1 kg', 800, 1, 120)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (4, 'Eau minérale 1,5 L', 400, 2, 300)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (5, 'Jus ananas 1 L', 1200, 2, 80)",
+    "INSERT INTO produits (id, nom, prix, categorie_id, stock) VALUES (6, 'Savon 200 g', 350, 3, 150)",
+    "COMMIT"
+  ],
+  "reference": [
+    {
+      "title": "Erreurs d'intégrité fréquentes",
+      "sql": "ORA-00001  contrainte unique violée\nORA-02291  clé parent introuvable (INSERT/UPDATE d'un enfant)\nORA-02292  enregistrement fils existant (DELETE d'un parent)"
+    },
+    {
+      "title": "Compter",
+      "sql": "SELECT COUNT(*) FROM table WHERE condition;"
+    },
+    {
+      "title": "Transaction",
+      "sql": "UPDATE ... ;\nDELETE ... ;\nCOMMIT;"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "sql",
+      "title": "Reproduire l'incident",
+      "task": "Reproduis l'erreur signalée : tente de supprimer la catégorie **2** (Boissons) de la table `categories`.",
+      "hints": [
+        "DELETE FROM categories WHERE ...;",
+        "Le critère est l'identifiant de la catégorie."
+      ],
+      "checks": [
+        {
+          "t": "error",
+          "label": "L'erreur ORA-02292 a été reproduite",
+          "code": "ORA-02292"
+        }
+      ],
+      "solution": "DELETE FROM categories WHERE id = 2;",
+      "explain": "Reproduire un incident avant de le corriger confirme que l'on traite la bonne cause. La base a refusé l'ordre : aucune donnée n'a été modifiée."
+    },
+    {
+      "id": "s2",
+      "kind": "choice",
+      "title": "Interpréter le message",
+      "task": "Le message cite la contrainte `FK_PRODUITS_CATEGORIES` et parle d'« enregistrement fils existant ». Que signifie-t-il ?",
+      "options": [
+        "Des lignes de la table produits référencent encore la catégorie 2",
+        "L'utilisateur n'a pas le privilège DELETE",
+        "La table categories est verrouillée par un autre utilisateur",
+        "La catégorie 2 n'existe pas"
+      ],
+      "answer": 0,
+      "explain": "ORA-02292 : on supprime un parent alors que des enfants le référencent. Le nom de la contrainte (FK_PRODUITS_CATEGORIES) indique la table enfant concernée : produits."
+    },
+    {
+      "id": "s3",
+      "kind": "sql",
+      "title": "Mesurer l'impact",
+      "task": "Avant de décider quoi faire, écris la requête qui donne le **nombre de produits** rattachés à la catégorie 2 (une seule valeur).",
+      "hints": [
+        "SELECT COUNT(*) FROM ... WHERE ...;",
+        "Le lien entre les deux tables est la colonne categorie_id."
+      ],
+      "checks": [
+        {
+          "t": "result",
+          "label": "Le résultat affiché est le nombre de produits de la catégorie 2",
+          "rows": [
+            [
+              2
+            ]
+          ]
+        }
+      ],
+      "solution": "SELECT COUNT(*) FROM produits WHERE categorie_id = 2;",
+      "explain": "Mesurer l'impact avant d'agir est un réflexe de DBA : ici 2 produits dépendent de la catégorie. Supprimer en cascade les aurait détruits."
+    },
+    {
+      "id": "s4",
+      "kind": "sql",
+      "title": "Corriger sans perdre de données",
+      "task": "Décision du métier : la catégorie « Boissons » est fusionnée dans « Alimentaire » (id 1). **Rattache** ses produits à la catégorie 1, **supprime** la catégorie 2, puis **valide**. Aucun produit ne doit disparaître.",
+      "hints": [
+        "Ordre des opérations : d'abord les enfants (UPDATE), ensuite le parent (DELETE).",
+        "UPDATE produits SET categorie_id = ... WHERE categorie_id = ...;",
+        "Termine par COMMIT pour rendre la correction définitive."
+      ],
+      "checks": [
+        {
+          "t": "query",
+          "label": "La catégorie 2 n'existe plus",
+          "sql": "SELECT COUNT(*) FROM categories WHERE id = 2",
+          "scalar": 0
+        },
+        {
+          "t": "query",
+          "label": "Les 6 produits sont toujours présents",
+          "sql": "SELECT COUNT(*) FROM produits",
+          "scalar": 6
+        },
+        {
+          "t": "query",
+          "label": "5 produits sont rattachés à la catégorie 1",
+          "sql": "SELECT COUNT(*) FROM produits WHERE categorie_id = 1",
+          "scalar": 5
+        },
+        {
+          "t": "committed",
+          "label": "La correction est validée (COMMIT)"
+        }
+      ],
+      "solution": "UPDATE produits SET categorie_id = 1 WHERE categorie_id = 2;\nDELETE FROM categories WHERE id = 2;\nCOMMIT;",
+      "explain": "Pour supprimer un parent : traiter d'abord ses enfants (les rattacher ou les supprimer), puis le parent. Le COMMIT final rend la correction visible pour tous."
+    },
+    {
+      "id": "s5",
+      "kind": "sql",
+      "title": "Vérifier la protection inverse",
+      "task": "Vérifie que la base empêche aussi l'inverse : tente d'insérer un produit (id 7, « Test », 1000) rattaché à la catégorie **99**, qui n'existe pas.",
+      "hints": [
+        "INSERT INTO produits (id, nom, prix, categorie_id) VALUES (...);",
+        "Observe le code d'erreur obtenu : ce n'est pas le même que tout à l'heure."
+      ],
+      "checks": [
+        {
+          "t": "error",
+          "label": "L'erreur ORA-02291 (clé parent introuvable) a été obtenue",
+          "code": "ORA-02291"
+        }
+      ],
+      "solution": "INSERT INTO produits (id, nom, prix, categorie_id) VALUES (7, 'Test', 1000, 99);",
+      "explain": "ORA-02291 protège les enfants (insertion avec parent absent), ORA-02292 protège les parents (suppression avec enfants présents) : une clé étrangère garantit la cohérence dans les deux sens."
+    },
+    {
+      "id": "s6",
+      "kind": "choice",
+      "title": "Revue de la correction",
+      "task": "Un développeur suggère de recréer la clé étrangère avec `ON DELETE CASCADE` pour « ne plus jamais avoir cette erreur ». Quelle est la conséquence ?",
+      "options": [
+        "Supprimer une catégorie supprimerait silencieusement tous ses produits",
+        "Les produits seraient automatiquement rattachés à une autre catégorie",
+        "La suppression serait annulée mais sans message d'erreur",
+        "Les produits passeraient à NULL dans toute la table"
+      ],
+      "answer": 0,
+      "explain": "ON DELETE CASCADE supprime les enfants avec le parent, sans avertissement. C'est pertinent pour des données réellement dépendantes (lignes d'une commande), dangereux pour un catalogue produits. ON DELETE SET NULL est l'autre option."
+    }
+  ],
+  "debrief": [
+    "ORA-02292 : on supprime un parent qui a encore des enfants ; ORA-02291 : on insère ou modifie un enfant dont le parent n'existe pas.",
+    "Mesurer l'impact par une requête avant de modifier, puis agir dans le bon ordre : enfants, parent, COMMIT.",
+    "Le choix ON DELETE CASCADE / SET NULL / aucun est une décision métier, pas un contournement d'erreur."
+  ],
+  "teaser": "Alerte. Une suppression est bloquée, et ce n'est pas un hasard.",
+  "dialogue": [
+    "{user}, on a un problème. Les commerciaux n'arrivent plus à supprimer la catégorie Boissons.",
+    "Je ne crois pas à une panne. Quand la base refuse, c'est qu'elle protège quelque chose.",
+    "Reproduis l'erreur, lis ce qu'elle dit vraiment, puis répare sans détruire une seule ligne.",
+    "Une suppression de trop et des produits disparaissent. Avance prudemment."
+  ],
+  "outro": "Catégorie fusionnée, aucun produit perdu. Tu lis les erreurs mieux que la plupart des administrateurs."
+}

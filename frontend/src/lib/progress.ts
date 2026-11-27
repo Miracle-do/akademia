@@ -3,7 +3,7 @@
  * Facile à tester et indépendante du stockage (local ou Supabase).
  */
 import { BADGES, Ctx, XP, evaluateBadges, levelFromXp } from './gamification';
-import type { AnneeId, Attempt, AttemptKind, BackendThemeId, FiliereId, Formation, ReviewItem, Summary, UserState, XpLine } from './types';
+import type { AnneeId, Attempt, AttemptKind, BackendThemeId, FiliereId, Formation, ReviewItem, Summary, UserState, XpLine, Quest } from './types';
 import { addDays, diffDays, todayKey, uid } from './utils';
 
 /** 1, 2 ou 3 ; toute autre valeur (ou absence) = 3ᵉ année, pour les comptes existants. */
@@ -23,8 +23,8 @@ export function defaultState(): UserState {
   return {
     v: 1, filiere: null, theme: 'ciel', xp: 0, streak: 0, bestStreak: 0, lastActive: null,
     daily: { date: todayKey(), xp: 0 }, dailyGoal: XP.dailyGoal,
-    chaptersRead: {}, formations: {}, attempts: [], badges: {}, review: {}, chapterStats: {}, examBest: {},
-    counters: { quizzes: 0, perfectQuizzes: 0, blitzBest: 0, maxCombo: 0, cardsKnown: 0, exams: 0, formations: 0 },
+    chaptersRead: {}, formations: {}, quests: {}, attempts: [], badges: {}, review: {}, chapterStats: {}, examBest: {},
+    counters: { quizzes: 0, perfectQuizzes: 0, blitzBest: 0, maxCombo: 0, cardsKnown: 0, exams: 0, formations: 0, quests: 0 },
   };
 }
 
@@ -39,7 +39,7 @@ export function normalizeState(raw: unknown): UserState {
     theme: themeForFiliere(filiere),
     daily: { ...d.daily, ...(r.daily ?? {}) },
     counters: { ...d.counters, ...(r.counters ?? {}) },
-    chaptersRead: r.chaptersRead ?? {}, formations: r.formations ?? {}, attempts: r.attempts ?? [], badges: r.badges ?? {},
+    chaptersRead: r.chaptersRead ?? {}, formations: r.formations ?? {}, quests: r.quests ?? {}, attempts: r.attempts ?? [], badges: r.badges ?? {},
     review: r.review ?? {}, chapterStats: r.chapterStats ?? {}, examBest: r.examBest ?? {},
   };
 }
@@ -176,6 +176,21 @@ export function applyFormationLesson(s: UserState, ctx: Ctx, f: Formation, lesso
     counters: { ...s.counters, formations: (s.counters.formations ?? 0) + (finished ? 1 : 0) },
   };
   const r = finish(next, ctx, { score: nextDone.length, max: f.lessons.length }, lines, gain);
+  return { state: r.state, summary: r.summary };
+}
+
+/** Mission (quête) terminée : récompense unique par mission. */
+export function applyQuest(s: UserState, ctx: Ctx, q: Quest, total: number) {
+  const done = s.quests?.[q.moduleId] ?? [];
+  if (done.includes(q.id)) return { state: s, summary: null as Summary | null };
+  const nextDone = [...done, q.id];
+  const next: UserState = {
+    ...s,
+    quests: { ...(s.quests ?? {}), [q.moduleId]: nextDone },
+    counters: { ...s.counters, quests: (s.counters.quests ?? 0) + 1 },
+  };
+  const lines: XpLine[] = [{ label: `Mission « ${q.title} » accomplie`, xp: XP.questDone }];
+  const r = finish(next, ctx, { score: nextDone.length, max: total }, lines, XP.questDone);
   return { state: r.state, summary: r.summary };
 }
 

@@ -81,8 +81,21 @@ function getFormations(moduleId) {
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
+function getQuests(moduleId) {
+  if (!moduleExists(moduleId)) return [];
+  const dir = path.join(contentRoot, moduleId, 'quests');
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .sort()
+    .map((file) => readJson(path.join(dir, file)))
+    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+}
+
 module.exports = {
   getFormations,
+  getQuests,
   getModules,
   getModule,
   getChapter,

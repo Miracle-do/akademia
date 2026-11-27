@@ -1,0 +1,189 @@
+{
+  "id": "objets-stockes",
+  "order": 6,
+  "title": "Objets stockés : fonction, procédure et trigger d'audit",
+  "ticket": "DBA-2179",
+  "priority": "Haute",
+  "client": "Sahel Distribution",
+  "minutes": 35,
+  "level": "Avancé",
+  "chapters": [
+    "3-1-procedures-fonctions",
+    "3-2-triggers"
+  ],
+  "context": [
+    "Après plusieurs changements de prix inexpliqués, la direction exige une traçabilité complète : chaque modification de prix doit laisser une trace dans la table journal, et la logique de calcul des prix doit vivre dans la base, pas dans les applications.",
+    "{user}, tu livres trois objets : une fonction de calcul du prix TTC, une procédure d'augmentation par catégorie et un trigger d'audit. Ils sont relus par le contrôle de code, qui vérifie leur structure."
+  ],
+  "objectives": [
+    "Créer une fonction stockée avec paramètre et valeur de retour",
+    "Créer une procédure paramétrée qui modifie des données",
+    "Journaliser automatiquement avec un trigger FOR EACH ROW",
+    "Savoir quand préférer une contrainte à un trigger"
+  ],
+  "reference": [
+    {
+      "title": "Fonction",
+      "sql": "CREATE OR REPLACE FUNCTION f (p IN NUMBER) RETURN NUMBER IS\nBEGIN\n  RETURN p * 2;\nEND f;\n/"
+    },
+    {
+      "title": "Procédure",
+      "sql": "CREATE OR REPLACE PROCEDURE p (x IN NUMBER) IS\nBEGIN\n  UPDATE t SET c = c + x;\n  IF SQL%ROWCOUNT = 0 THEN ... END IF;\nEND p;\n/"
+    },
+    {
+      "title": "Trigger par ligne",
+      "sql": "CREATE OR REPLACE TRIGGER trg\nAFTER UPDATE OF col ON t\nFOR EACH ROW\nBEGIN\n  INSERT INTO journal (...) VALUES (:OLD.col, :NEW.col);\nEND;\n/"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "plsql",
+      "title": "Fonction de calcul du prix TTC",
+      "task": "Crée la fonction **prix_ttc** : elle reçoit un prix hors taxe `p_prix` (NUMBER) et **retourne** ce prix majoré de **18 %** (NUMBER).",
+      "hints": [
+        "CREATE OR REPLACE FUNCTION prix_ttc (p_prix IN NUMBER) RETURN NUMBER IS",
+        "Dans le corps : RETURN p_prix * 1.18;",
+        "Termine par END prix_ttc; puis /"
+      ],
+      "template": "CREATE OR REPLACE FUNCTION prix_ttc\nBEGIN\n  NULL;\nEND;\n/",
+      "review": [
+        {
+          "label": "La fonction PRIX_TTC est créée avec CREATE OR REPLACE",
+          "pattern": "create\\s+(or\\s+replace\\s+)?function\\s+prix_ttc"
+        },
+        {
+          "label": "Elle reçoit le paramètre p_prix de type NUMBER",
+          "pattern": "\\(\\s*p_prix\\s+(in\\s+)?number\\s*\\)"
+        },
+        {
+          "label": "Son type de retour est NUMBER",
+          "pattern": "return\\s+number\\s+(is|as)"
+        },
+        {
+          "label": "Elle retourne le prix majoré de 18 %",
+          "pattern": "begin\\s+return\\s+[^;]*(1\\.18|1\\s*\\+\\s*0?\\.18)"
+        }
+      ],
+      "solution": "CREATE OR REPLACE FUNCTION prix_ttc (p_prix IN NUMBER) RETURN NUMBER IS\nBEGIN\n  RETURN p_prix * 1.18;\nEND prix_ttc;\n/",
+      "explain": "Une fonction retourne toujours une valeur et s'utilise dans un SELECT : SELECT nom, prix_ttc(prix) FROM produits. Le calcul est écrit une fois, au même endroit pour toutes les applications."
+    },
+    {
+      "id": "s2",
+      "kind": "plsql",
+      "title": "Procédure d'augmentation par catégorie",
+      "task": "Crée la procédure **augmenter_prix** avec deux paramètres, `p_categorie` et `p_taux` (en pourcentage), qui augmente le prix de tous les produits de la catégorie. Si **aucun produit** n'est modifié, elle lève l'erreur `-20010`.",
+      "hints": [
+        "UPDATE produits SET prix = prix * (1 + p_taux / 100) WHERE categorie_id = p_categorie;",
+        "SQL%ROWCOUNT donne le nombre de lignes touchées par le dernier ordre DML.",
+        "IF SQL%ROWCOUNT = 0 THEN RAISE_APPLICATION_ERROR(-20010, '...'); END IF;"
+      ],
+      "template": "CREATE OR REPLACE PROCEDURE augmenter_prix\nBEGIN\n  NULL;\nEND;\n/",
+      "review": [
+        {
+          "label": "La procédure AUGMENTER_PRIX est créée",
+          "pattern": "create\\s+(or\\s+replace\\s+)?procedure\\s+augmenter_prix"
+        },
+        {
+          "label": "Elle reçoit deux paramètres NUMBER",
+          "pattern": "\\(\\s*\\w+\\s+(in\\s+)?number\\s*,\\s*\\w+\\s+(in\\s+)?number\\s*\\)"
+        },
+        {
+          "label": "L'UPDATE est limité à la catégorie reçue",
+          "pattern": "update\\s+produits\\s+set\\s+prix\\s*=.*where\\s+categorie_id\\s*=\\s*\\w+"
+        },
+        {
+          "label": "Le nombre de lignes modifiées est testé avec SQL%ROWCOUNT",
+          "pattern": "sql%rowcount"
+        },
+        {
+          "label": "Une erreur applicative -20xxx est levée si rien n'est modifié",
+          "pattern": "raise_application_error\\s*\\(\\s*-20\\d{3}\\s*,"
+        }
+      ],
+      "solution": "CREATE OR REPLACE PROCEDURE augmenter_prix (p_categorie IN NUMBER, p_taux IN NUMBER) IS\nBEGIN\n  UPDATE produits SET prix = prix * (1 + p_taux / 100) WHERE categorie_id = p_categorie;\n  IF SQL%ROWCOUNT = 0 THEN\n    RAISE_APPLICATION_ERROR(-20010, 'Aucun produit dans cette catégorie');\n  END IF;\nEND augmenter_prix;\n/",
+      "explain": "Une procédure agit (elle modifie des données) mais ne retourne pas de valeur. La procédure ne valide pas elle-même : l'appelant garde la maîtrise du COMMIT et peut annuler en cas de problème."
+    },
+    {
+      "id": "s3",
+      "kind": "plsql",
+      "title": "Trigger d'audit des prix",
+      "task": "Crée le trigger **trg_audit_prix** : **après** chaque modification de la colonne `prix` de **produits**, et **pour chaque ligne**, il insère dans `journal` une ligne (table_nom, operation, ligne_id, details) contenant l'ancien et le nouveau prix.",
+      "hints": [
+        "AFTER UPDATE OF prix ON produits FOR EACH ROW",
+        "Les valeurs de la ligne se lisent avec :OLD.prix et :NEW.prix.",
+        "INSERT INTO journal (table_nom, operation, ligne_id, details) VALUES (...);"
+      ],
+      "template": "CREATE OR REPLACE TRIGGER trg_audit_prix\nBEGIN\n  NULL;\nEND;\n/",
+      "review": [
+        {
+          "label": "Le trigger TRG_AUDIT_PRIX est créé",
+          "pattern": "create\\s+(or\\s+replace\\s+)?trigger\\s+trg_audit_prix"
+        },
+        {
+          "label": "Il se déclenche après un UPDATE sur produits",
+          "pattern": "(before|after)\\s+update\\s+(of\\s+prix\\s+)?on\\s+produits"
+        },
+        {
+          "label": "Il s'exécute pour chaque ligne (FOR EACH ROW)",
+          "pattern": "for\\s+each\\s+row"
+        },
+        {
+          "label": "Il insère dans la table journal",
+          "pattern": "insert\\s+into\\s+journal"
+        },
+        {
+          "label": "L'ancien prix est lu avec :OLD",
+          "pattern": ":old\\.prix"
+        },
+        {
+          "label": "Le nouveau prix est lu avec :NEW",
+          "pattern": ":new\\.prix"
+        }
+      ],
+      "solution": "CREATE OR REPLACE TRIGGER trg_audit_prix\nAFTER UPDATE OF prix ON produits\nFOR EACH ROW\nBEGIN\n  INSERT INTO journal (table_nom, operation, ligne_id, details)\n  VALUES ('PRODUITS', 'UPDATE', :OLD.id, 'Prix ' || :OLD.prix || ' -> ' || :NEW.prix);\nEND;\n/",
+      "explain": ":OLD et :NEW n'existent que dans un trigger FOR EACH ROW. Le trigger s'exécute quelle que soit l'origine de la modification (application, script, procédure) : c'est ce qui rend l'audit fiable."
+    },
+    {
+      "id": "s4",
+      "kind": "choice",
+      "title": "Incident : table en mutation",
+      "task": "Un développeur ajoute dans `trg_audit_prix` un `SELECT MAX(prix) FROM produits`. À la première mise à jour, Oracle renvoie **ORA-04091 : la table PRODUITS est en mutation**. Pourquoi ?",
+      "options": [
+        "Un trigger FOR EACH ROW ne peut pas lire la table même qui est en cours de modification",
+        "Le trigger n'a pas le droit d'écrire dans journal",
+        "MAX est interdite dans les triggers",
+        "Le trigger est AFTER au lieu de BEFORE"
+      ],
+      "answer": 0,
+      "explain": "Pendant l'exécution d'un trigger par ligne, la table qui l'a déclenché est dans un état intermédiaire : Oracle interdit de l'interroger ou de la modifier. Les solutions classiques : trigger par ordre (instruction), ou déplacer la logique dans une procédure."
+    },
+    {
+      "id": "s5",
+      "kind": "choice",
+      "title": "Revue d'architecture",
+      "task": "Pour interdire qu'un prix soit négatif, faut-il écrire un trigger ou une contrainte ?",
+      "options": [
+        "Une contrainte CHECK (prix >= 0) : plus simple, plus rapide, garantie par le moteur",
+        "Un trigger, car une contrainte CHECK est trop lente",
+        "Une procédure appelée par l'application",
+        "Ni l'un ni l'autre : l'application s'en charge"
+      ],
+      "answer": 0,
+      "explain": "Règle de bon sens : une contrainte déclarative quand elle suffit, un trigger seulement pour ce qu'elle ne sait pas exprimer (audit, calculs, règles inter-tables)."
+    }
+  ],
+  "debrief": [
+    "Fonction : retourne une valeur, s'emploie dans un SELECT. Procédure : exécute une action, appelée par EXEC ou depuis un bloc.",
+    ":OLD et :NEW n'existent que dans un trigger FOR EACH ROW ; lire la table en mutation provoque ORA-04091.",
+    "Contrainte déclarative d'abord, trigger quand la contrainte ne suffit pas."
+  ],
+  "teaser": "Quelqu'un modifie les prix en cachette. Je veux le prendre la main dans le sac.",
+  "dialogue": [
+    "{user}, des prix changent sans que personne ne sache qui ni quand.",
+    "On ne peut plus faire confiance aux applications. Il faut piéger la modification au cœur de la base.",
+    "Une fonction pour le calcul des prix, une procédure pour les augmentations, et surtout un trigger qui note tout dans le journal.",
+    "Ce trigger sera notre témoin silencieux. Tu es prêt(e) ?"
+  ],
+  "outro": "Le piège est en place. Dès que quelqu'un touchera aux prix, le journal parlera pour nous."
+}

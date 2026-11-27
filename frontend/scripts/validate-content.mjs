@@ -127,6 +127,29 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
       console.log(`  formation « ${f.id} » : ${(f.lessons ?? []).length} leçons, ${exos} exercices`);
     }
   }
+  const qdir = path.join(base, 'quests');
+  if (fs.existsSync(qdir)) {
+    const qids = new Set();
+    for (const file of fs.readdirSync(qdir).filter((x) => x.endsWith('.json'))) {
+      const q = readJson(path.join(qdir, file)); if (!q) continue;
+      if (q.id !== file.replace(/\.json$/, '')) err(`quête ${file} : id "${q.id}" ≠ nom du fichier`);
+      if (qids.has(q.id)) err(`quête dupliquée : ${q.id}`); qids.add(q.id);
+      for (const k of ['title', 'priority', 'client', 'minutes', 'level', 'teaser', 'dialogue', 'outro', 'context', 'objectives', 'steps', 'debrief']) if (q[k] === undefined) err(`quête ${q.id} : champ "${k}" manquant`);
+      if (!['Normale', 'Haute', 'Critique'].includes(q.priority)) err(`quête ${q.id} : priorité invalide "${q.priority}"`);
+      for (const c of q.chapters ?? []) if (!fs.existsSync(path.join(base, 'chapters', `${c}.md`))) err(`quête ${q.id} : chapitre "${c}" introuvable`);
+      const sids = new Set();
+      (q.steps ?? []).forEach((st, i) => {
+        const where = `quête ${q.id} étape ${i + 1}`;
+        if (sids.has(st.id)) err(`${where} : id dupliqué ${st.id}`); sids.add(st.id);
+        if (!st.title || !st.task || !st.explain) err(`${where} : title, task ou explain manquant`);
+        if (st.kind === 'sql') { if (!st.checks?.length || !st.solution) err(`${where} : étape SQL sans critères ou sans solution`); }
+        else if (st.kind === 'plsql') { if (!st.review?.length || !st.solution) err(`${where} : étape PL/SQL sans revue ou sans solution`); }
+        else if (st.kind === 'choice') { if (!Array.isArray(st.options) || st.options.length < 2 || !Number.isInteger(st.answer) || st.answer < 0 || st.answer >= st.options.length) err(`${where} : choix invalide`); }
+        else err(`${where} : type inconnu "${st.kind}"`);
+      });
+      console.log(`  quête « ${q.id} » : ${(q.steps ?? []).length} étapes`);
+    }
+  }
 }
 // Prérequis : les formations citées existent, pas de boucle
 for (const r of allFormationRefs) {

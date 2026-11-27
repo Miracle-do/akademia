@@ -11,10 +11,12 @@ import {
   Tasks,
 } from '@getpapillon/papicons';
 import { Bar } from '@/components/ui';
-import { getModule, loadFormations } from '@/lib/content';
+import { getModule, loadFormations, loadQuests } from '@/lib/content';
+import { QuestEncounter } from '@/components/quest/QuestEncounter';
+import { HoodedFigure } from '@/components/quest/HoodedFigure';
 import FormationShowcase from '@/components/FormationShowcase';
 import { useEffect, useState } from 'react';
-import type { Formation } from '@/lib/types';
+import type { Formation, Quest } from '@/lib/types';
 import { dueCardIds, dueQuestionIds } from '@/lib/progress';
 import { chapterAccuracy, moduleRatio, nextChapter } from '@/lib/stats';
 import { useStore } from '@/state/Store';
@@ -28,10 +30,17 @@ export default function ModulePage() {
   const { state } = useStore();
   const [params, setParams] = useSearchParams();
   const [formations, setFormations] = useState<Formation[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
   useEffect(() => {
     if (!moduleId) return;
     let alive = true;
     loadFormations(moduleId).then((x) => alive && x.length && setFormations(x)).catch(() => undefined);
+    return () => { alive = false; };
+  }, [moduleId]);
+  useEffect(() => {
+    if (!moduleId) return;
+    let alive = true;
+    loadQuests(moduleId).then((x) => alive && setQuests(x)).catch(() => undefined);
     return () => { alive = false; };
   }, [moduleId]);
   if (!m) return <Navigate to="/modules" replace />;
@@ -79,6 +88,7 @@ export default function ModulePage() {
     { id: 'cours', label: 'Cours', count: m.chapters.length },
     { id: 'entrainement', label: "S'entraîner", count: dueQ + dueC || undefined },
     ...(formations.length > 0 ? [{ id: 'formations', label: 'Formations', count: formations.length }] : []),
+    ...(quests.length > 0 ? [{ id: 'quetes', label: 'Quêtes', count: quests.length }] : []),
   ];
   const wanted = params.get('tab') ?? 'cours';
   const tab = tabs.some((t) => t.id === wanted) ? wanted : 'cours';
@@ -143,6 +153,22 @@ export default function ModulePage() {
       </div>
 
       {tab === 'formations' && formations.length > 0 && <FormationShowcase module={m} formations={formations} />}
+
+      {tab === 'quetes' && quests.length > 0 && (
+        <section className="card flex flex-wrap items-center gap-5 overflow-hidden p-6 sm:p-8" style={{ background: 'linear-gradient(160deg,#0a0620,#1b0942)' }}>
+          <HoodedFigure size={110} />
+          <div className="min-w-0 flex-1 text-white">
+            <h2 className="h-display text-2xl">Missions secrètes</h2>
+            <p className="mt-1 max-w-xl text-sm font-semibold text-white/80">
+              Un contact anonyme te confie des situations réelles d’administrateur de bases de données : incidents, corrections en production, objets stockés. Tu travailles dans une vraie console SQL.
+            </p>
+            <p className="mt-2 text-sm font-extrabold text-white/90">
+              {(state.quests?.[m.id] ?? []).length}/{quests.length} missions accomplies
+            </p>
+            <Link to={`/m/${m.id}/quetes`} className="btn btn-primary mt-3 inline-flex">Voir les missions</Link>
+          </div>
+        </section>
+      )}
 
       {/* Modes d'entraînement gamifiés */}
       {tab === 'entrainement' && (
@@ -235,6 +261,7 @@ export default function ModulePage() {
         </div>
       </section>
       )}
+      {quests.length > 0 && <QuestEncounter moduleId={m.id} />}
     </div>
   );
 }
