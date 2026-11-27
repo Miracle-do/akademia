@@ -537,6 +537,91 @@
    ]
   },
   {
+   "id": "atelier",
+   "title": "Atelier pratique : ton premier dossier de projet",
+   "emoji": "🧰",
+   "minutes": 10,
+   "steps": [
+    {
+     "type": "say",
+     "text": "Assez de théorie : place à un vrai mini-terminal. Tout ce que tu tapes ci-dessous s'exécute pour de vrai sur un petit système de fichiers simulé — tu vas créer un dossier de projet, un fichier, et régler ses droits, étape par étape."
+    },
+    {
+     "type": "terminal",
+     "intro": "Objectif : organiser un petit projet nommé « rapport » dans ton dossier personnel, puis protéger tes notes.",
+     "missions": [
+      {
+       "prompt": "Déplace-toi dans le dossier `projets`, déjà présent dans ton dossier personnel.",
+       "hint": "cd projets",
+       "explain": "`cd projets` (chemin relatif) te déplace depuis `~` vers `~/projets`.",
+       "check": {
+        "cwd": "~/projets"
+       }
+      },
+      {
+       "prompt": "Crée un dossier nommé `rapport`.",
+       "hint": "mkdir rapport",
+       "explain": "`mkdir` crée un nouveau dossier vide dans le répertoire courant.",
+       "check": {
+        "filePresent": "rapport"
+       }
+      },
+      {
+       "prompt": "Entre dans ce nouveau dossier `rapport`.",
+       "hint": "cd rapport",
+       "explain": "Te voilà dans `~/projets/rapport`.",
+       "check": {
+        "cwd": "~/projets/rapport"
+       }
+      },
+      {
+       "prompt": "Crée un fichier vide nommé `notes.txt`.",
+       "hint": "touch notes.txt",
+       "explain": "`touch` crée un fichier vide (ou met à jour sa date s'il existe déjà).",
+       "check": {
+        "filePresent": "notes.txt"
+       }
+      },
+      {
+       "prompt": "Écris le texte `Premier jour` dans `notes.txt`, en remplaçant tout contenu existant.",
+       "hint": "echo \"Premier jour\" > notes.txt",
+       "explain": "`>` redirige la sortie d'`echo` vers le fichier, en écrasant son contenu précédent (`>>` l'aurait ajouté à la suite).",
+       "check": {
+        "fileEquals": {
+         "path": "notes.txt",
+         "value": "Premier jour"
+        }
+       }
+      },
+      {
+       "prompt": "Vérifie le contenu du fichier en l'affichant dans le terminal.",
+       "hint": "cat notes.txt",
+       "explain": "`cat` affiche le contenu d'un fichier texte directement dans le terminal.",
+       "check": {
+        "commandPattern": "^cat +notes\\.txt$",
+        "mustError": false
+       }
+      },
+      {
+       "prompt": "Ces notes sont personnelles : retire tous les droits au groupe et aux autres, en ne gardant que lecture + écriture pour toi (mode `600`).",
+       "hint": "chmod 600 notes.txt",
+       "explain": "`chmod 600` donne lecture+écriture (6 = 4+2) au propriétaire, et aucun droit (0) au groupe et aux autres.",
+       "check": {
+        "fileMode": {
+         "path": "notes.txt",
+         "value": "600"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "say",
+     "text": "Regarde ce que tu viens de faire : naviguer, créer un dossier et un fichier, y écrire du texte par redirection, le relire, puis verrouiller ses droits. C'est exactement le réflexe qu'un administrateur répète cent fois par jour."
+    }
+   ]
+  },
+  {
    "id": "defi",
    "title": "Défi final : le terminal",
    "emoji": "🏆",

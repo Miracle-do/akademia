@@ -75,12 +75,41 @@ export interface Exam {
 }
 
 // ---------- Formations (parcours coachés thématiques) ----------
+/** Condition déclarative vérifiée après une commande, dans un atelier terminal (toutes doivent être vraies). */
+export interface TerminalCheck {
+  /** Expression régulière testée sur la dernière commande tapée (espaces normalisés). */
+  commandPattern?: string;
+  /** La dernière commande doit (ou ne doit pas) avoir produit une erreur. */
+  mustError?: boolean;
+  /** Répertoire courant attendu (chemin absolu). */
+  cwd?: string;
+  /** Un fichier/dossier doit exister à ce chemin. */
+  filePresent?: string;
+  /** Un fichier/dossier ne doit plus exister à ce chemin. */
+  fileAbsent?: string;
+  /** Contenu exact attendu (après trim) pour le fichier à ce chemin. */
+  fileEquals?: { path: string; value: string };
+  /** Le contenu du fichier à ce chemin doit contenir cette sous-chaîne. */
+  fileContains?: { path: string; value: string };
+  /** Mode (droits) exact attendu, en octal à 3 chiffres (ex. "600"). */
+  fileMode?: { path: string; value: string };
+}
+export interface TerminalMission {
+  /** Énoncé de la mission. */
+  prompt: string;
+  /** Indice optionnel, révélé après un échec. */
+  hint?: string;
+  /** Explication affichée une fois la mission réussie. */
+  explain: string;
+  check: TerminalCheck;
+}
 export type FormationStep =
   | { type: 'say'; text: string; mood?: string }
   | { type: 'code'; title?: string; lang?: string; sql: string; note?: string }
   | { type: 'choice'; q: string; options: string[]; answer: number; explain: string }
   | { type: 'prereq'; formation: string; moduleId?: string; why?: string }
-  | { type: 'exercise'; q: string; table?: string; placeholder?: string; caseSensitive?: boolean; hints: string[]; accept: string[]; solution: string; explain: string };
+  | { type: 'exercise'; q: string; table?: string; placeholder?: string; caseSensitive?: boolean; hints: string[]; accept: string[]; solution: string; explain: string }
+  | { type: 'terminal'; intro?: string; missions: TerminalMission[] };
 /** Renvoi vers une autre formation (par défaut du même module). */
 export interface FormationRef {
   formation: string;

@@ -8,6 +8,7 @@ import { Inline } from '@/components/Markdown';
 import { PrereqCard } from '@/components/PrereqCard';
 import { fireConfetti } from '@/components/Celebrations';
 import { AnimatedEmoji, renderWithAnimatedEmojis } from '@/components/AnimatedEmoji';
+import { TerminalMissionView } from '@/components/TerminalMissionView';
 import { getModule, loadFormations } from '@/lib/content';
 import type { Formation, FormationStep, Summary } from '@/lib/types';
 import { useStore } from '@/state/Store';
@@ -39,7 +40,7 @@ export function normalizeShell(cmd: string): string {
 }
 
 const delayFor = (s: FormationStep) => (s.type === 'say' ? Math.min(1500, 500 + s.text.length * 9) : 550);
-const isInteractive = (s: FormationStep) => s.type === 'choice' || s.type === 'exercise';
+const isInteractive = (s: FormationStep) => s.type === 'choice' || s.type === 'exercise' || s.type === 'terminal';
 
 type Result = { ok: boolean; picked?: number; tries: number; text?: string };
 
@@ -100,7 +101,7 @@ function Player({ f, lessonId, moduleTitle }: { f: Formation; lessonId: string; 
   }, [finished, finishFormationLesson, f, lessonId]);
 
   const answer = (idx: number, r: Result) => setResults((x) => ({ ...x, [idx]: r }));
-  const exoCount = steps.filter((s) => s.type === 'exercise' || s.type === 'choice').length;
+  const exoCount = steps.filter((s) => s.type === 'exercise' || s.type === 'choice' || s.type === 'terminal').length;
   const exoOk = Object.values(results).filter((r) => r.ok && r.tries <= 1).length;
   const streak = useMemo(() => {
     let s = 0;
@@ -132,7 +133,7 @@ function Player({ f, lessonId, moduleTitle }: { f: Formation; lessonId: string; 
 
       <div className="flex-1 space-y-3.5 pb-6">
         {steps.slice(0, pos).map((s, i) => {
-          const prevCoach = i > 0 && steps[i - 1].type !== 'choice' && steps[i - 1].type !== 'exercise';
+          const prevCoach = i > 0 && steps[i - 1].type !== 'choice' && steps[i - 1].type !== 'exercise' && steps[i - 1].type !== 'terminal';
           return <StepView key={i} s={s} showAvatar={!prevCoach} color={f.color} moduleId={f.moduleId} returnTo={returnTo} result={results[i]} onResult={(r) => answer(i, r)} />;
         })}
         {typing && (
@@ -203,6 +204,10 @@ function StepView({ s, showAvatar, color, moduleId, returnTo, result, onResult }
   }
   if (s.type === 'prereq') return <div className="bubble-in ml-[3.4rem]"><PrereqCard r={s} moduleId={moduleId} returnTo={returnTo} /></div>;
   if (s.type === 'choice') return <ChoiceView s={s} color={color} result={result} onResult={onResult} />;
+  if (s.type === 'terminal') {
+    if (result) return <UserBubble className="font-mono text-xs">Atelier terminé en {result.tries} commande(s).</UserBubble>;
+    return <TerminalMissionView intro={s.intro} missions={s.missions} color={color} onResult={onResult} />;
+  }
   return <ExerciseView s={s} color={color} result={result} onResult={onResult} />;
 }
 

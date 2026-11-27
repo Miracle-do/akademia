@@ -111,6 +111,16 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
           else if (st.type === 'choice') { if (!Array.isArray(st.options) || st.options.length < 2 || !Number.isInteger(st.answer) || st.answer < 0 || st.answer >= st.options.length) err(`${where} : choix invalide`); if (!st.explain) err(`${where} : explication manquante`); }
           else if (st.type === 'exercise') { exos++; if (!st.solution || !st.hints?.length || !st.explain) err(`${where} : exercice incomplet (solution, hints, explain)`); }
           else if (st.type === 'prereq') { if (!st.formation) err(`${where} : prereq sans "formation"`); else allFormationRefs.push({ where, mod: st.moduleId ?? dir.name, id: st.formation }); }
+          else if (st.type === 'terminal') {
+            if (!Array.isArray(st.missions) || !st.missions.length) err(`${where} : atelier terminal sans mission`);
+            else {
+              exos++;
+              st.missions.forEach((ms, mi) => {
+                if (!ms.prompt || !ms.explain) err(`${where} mission ${mi + 1} : énoncé ou explication manquant`);
+                if (!ms.check || typeof ms.check !== 'object' || !Object.keys(ms.check).length) err(`${where} mission ${mi + 1} : condition de vérification manquante`);
+              });
+            }
+          }
           else if (!['say', 'code'].includes(st.type)) err(`${where} : type inconnu "${st.type}"`);
         });
       }
