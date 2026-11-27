@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.28.0] — 2026-11-27
+
+### Ajouté
+- **Quêtes** : un nouveau système indépendant des formations coachées, avec son propre contact — un personnage encapuchonné (effet 3D illustré, ambiance néon) qui propose des missions secrètes. Accessible via une section dédiée (« Quêtes » dans la navigation), avec une ambiance visuelle distincte (sombre, suspense) pour toute la section : briefing façon dialogue avant d'accepter une mission, puis parcours de la mission dans le même mini-terminal simulé que les ateliers pratiques. Première quête publiée : « Le signal perdu » (module Linux), qui réutilise entièrement le moteur de progression et d'XP existant (aucun changement côté serveur).
+
 ## [1.27.0] — 2026-11-27
 
 ### Ajouté
