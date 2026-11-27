@@ -5,6 +5,11 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.27.0] — 2026-11-27
+
+### Ajouté
+- Nouveau type d'étape « atelier terminal » dans les formations coachées : un vrai mini-terminal simulé (système de fichiers en mémoire, commandes `cd`, `ls`, `mkdir`, `touch`, `cat`, `echo`, redirections, `chmod`…), avec des missions vérifiées sur l'état réel du shell plutôt que sur un texte figé. Pilote intégré dans la formation « Dompter le terminal » du module Linux (nouvelle leçon « Atelier pratique »).
+
 ## [1.26.0] — 2026-11-26
 
 ### Ajouté
