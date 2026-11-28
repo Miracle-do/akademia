@@ -1,0 +1,147 @@
+{
+ "id": "signal-perdu",
+ "order": 1,
+ "title": "Le signal perdu",
+ "ticket": "OPS-0417",
+ "priority": "Haute",
+ "client": "Source anonyme",
+ "minutes": 12,
+ "level": "Intermédiaire",
+ "chapters": [
+  "1-2-shell-arborescence",
+  "1-3-fichiers",
+  "1-4-texte-redirections",
+  "2-2-permissions"
+ ],
+ "teaser": "J'ai un rendez-vous à organiser, et je ne peux pas laisser de traces. Ça te dit ?",
+ "dialogue": [
+  "Je ne vais pas me présenter. Disons juste que je t'ai repéré·e : tu sais te débrouiller dans un terminal, et ça, c'est rare.",
+  "J'ai un rendez-vous à préparer, mais je ne peux pas laisser de traces. Il me faut quelqu'un pour installer une planque, récupérer un indice, puis tout effacer derrière soi.",
+  "Rien d'illégal, rassure-toi — aucune attaque, aucun réseau piraté ici. Juste un peu de discrétion dans un terminal. Je te guide étape par étape, {user}.",
+  "Alors : tu embarques avec moi ?"
+ ],
+ "outro": "Propre. Aucune trace, l'indice est en sécurité. Je savais que tu étais la bonne personne pour ça.",
+ "context": [
+  "{user}, voici le dossier : un indice doit être récupéré discrètement, en deux fragments, puis protégé et effacé sans laisser la moindre trace derrière toi.",
+  "Tu travailles dans un vrai terminal simulé. Chaque commande compte : si tu t'y reprends trop de fois, la connexion risque d'être tracée."
+ ],
+ "objectives": [
+  "Naviguer dans l'arborescence et créer un dossier caché (cd, mkdir, noms en point)",
+  "Écrire et compléter un fichier avec les redirections > et >>",
+  "Rechercher du texte avec grep",
+  "Restreindre les droits d'accès avec chmod, puis nettoyer avec rm -r"
+ ],
+ "reference": [
+  { "title": "Dossier caché", "sql": "mkdir .ombre\ncd .ombre" },
+  { "title": "Écrire puis compléter un fichier", "sql": "echo \"PORTE\" > indice.txt\necho \"NORD\" >> indice.txt" },
+  { "title": "Chercher un mot (sans tenir compte de la casse)", "sql": "grep -i nord indice.txt" },
+  { "title": "Restreindre les droits, puis nettoyer", "sql": "chmod 600 indice.txt\ncd ..\nrm -r .ombre" }
+ ],
+ "steps": [
+  {
+   "id": "s1",
+   "kind": "shell",
+   "title": "Rejoindre le point de rendez-vous",
+   "task": "Rends-toi dans le dossier `/tmp`, commun à tout le système et parfait pour une planque de passage.",
+   "hints": ["cd /tmp"],
+   "checks": [{ "t": "cwd", "label": "Le dossier courant est /tmp", "path": "/tmp" }],
+   "solution": "cd /tmp",
+   "explain": "`/tmp` est un dossier commun à tout le système, idéal pour des fichiers temporaires — et pour une planque de passage."
+  },
+  {
+   "id": "s2",
+   "kind": "shell",
+   "title": "Installer une planque discrète",
+   "task": "Crée un dossier **caché** nommé `.ombre` (les noms commençant par un point sont masqués par défaut, invisibles à un simple `ls`).",
+   "hints": ["mkdir .ombre"],
+   "checks": [{ "t": "filePresent", "label": "Le dossier .ombre existe", "path": ".ombre" }],
+   "solution": "mkdir .ombre",
+   "explain": "Un nom commençant par `.` n'apparaît pas avec un simple `ls` — il faut `ls -a` pour le voir."
+  },
+  {
+   "id": "s3",
+   "kind": "shell",
+   "title": "Entrer dans la planque",
+   "task": "Déplace-toi dans `.ombre`.",
+   "hints": ["cd .ombre"],
+   "checks": [{ "t": "cwd", "label": "Le dossier courant est /tmp/.ombre", "path": "/tmp/.ombre" }],
+   "solution": "cd .ombre",
+   "explain": "Te voilà dans `/tmp/.ombre`, hors de vue."
+  },
+  {
+   "id": "s4",
+   "kind": "shell",
+   "title": "Créer le fichier de l'indice",
+   "task": "L'indice arrive en deux fragments. Crée d'abord le fichier vide `indice.txt`.",
+   "hints": ["touch indice.txt"],
+   "checks": [{ "t": "filePresent", "label": "Le fichier indice.txt existe", "path": "indice.txt" }],
+   "solution": "touch indice.txt",
+   "explain": "`touch` crée un fichier vide, prêt à recevoir le contenu."
+  },
+  {
+   "id": "s5",
+   "kind": "shell",
+   "title": "Premier fragment",
+   "task": "Écris `PORTE` dans `indice.txt`.",
+   "hints": ["echo \"PORTE\" > indice.txt"],
+   "checks": [{ "t": "fileEquals", "label": "indice.txt contient « PORTE »", "path": "indice.txt", "value": "PORTE" }],
+   "solution": "echo \"PORTE\" > indice.txt",
+   "explain": "`>` écrit (et écrase un éventuel contenu précédent) la sortie d'`echo` dans le fichier."
+  },
+  {
+   "id": "s6",
+   "kind": "shell",
+   "title": "Second fragment",
+   "task": "Ajoute `NORD` à la suite, **sans effacer** le premier fragment.",
+   "hints": ["echo \"NORD\" >> indice.txt"],
+   "checks": [{ "t": "fileEquals", "label": "indice.txt contient « PORTE » puis « NORD »", "path": "indice.txt", "value": "PORTE\nNORD" }],
+   "solution": "echo \"NORD\" >> indice.txt",
+   "explain": "`>>` ajoute à la fin du fichier au lieu d'écraser son contenu — indispensable pour accumuler plusieurs fragments."
+  },
+  {
+   "id": "s7",
+   "kind": "shell",
+   "title": "Vérifier l'indice",
+   "task": "Avant de valider, confirme que le mot `nord` est bien présent (recherche insensible à la casse).",
+   "hints": ["grep -i nord indice.txt"],
+   "checks": [{ "t": "ran", "label": "La recherche grep -i nord a été lancée", "pattern": "^grep +-i +nord +indice\\.txt$" }],
+   "solution": "grep -i nord indice.txt",
+   "explain": "`grep -i` recherche un motif dans un fichier sans tenir compte des majuscules/minuscules."
+  },
+  {
+   "id": "s8",
+   "kind": "shell",
+   "title": "Protéger l'indice",
+   "task": "L'indice est sensible : restreins l'accès à toi seul, en lecture et en écriture (mode `600`).",
+   "hints": ["chmod 600 indice.txt"],
+   "checks": [{ "t": "fileMode", "label": "indice.txt est en mode 600", "path": "indice.txt", "value": "600" }],
+   "solution": "chmod 600 indice.txt",
+   "explain": "`chmod 600` retire tout droit au groupe et aux autres : seul le propriétaire peut encore lire et écrire le fichier."
+  },
+  {
+   "id": "s9",
+   "kind": "shell",
+   "title": "Sortir de la planque",
+   "task": "Indice récupéré. Remonte d'un niveau, hors de la planque.",
+   "hints": ["cd .."],
+   "checks": [{ "t": "cwd", "label": "Le dossier courant est /tmp", "path": "/tmp" }],
+   "solution": "cd ..",
+   "explain": "`cd ..` fait remonter d'un dossier, ici de `/tmp/.ombre` vers `/tmp`."
+  },
+  {
+   "id": "s10",
+   "kind": "shell",
+   "title": "Effacer toute trace",
+   "task": "Dernière étape, la plus importante : supprime `.ombre` et tout son contenu.",
+   "hints": ["rm -r .ombre"],
+   "checks": [{ "t": "fileAbsent", "label": "Le dossier .ombre n'existe plus", "path": ".ombre" }],
+   "solution": "rm -r .ombre",
+   "explain": "`rm -r` supprime un dossier et tout ce qu'il contient, récursivement. Sans `-r`, `rm` refuse de supprimer un dossier."
+  }
+ ],
+ "debrief": [
+  "Un nom de fichier commençant par `.` est masqué par défaut (`ls -a` pour le voir), mais reste un fichier ordinaire — pas un vrai mécanisme de sécurité.",
+  "`>` écrase, `>>` ajoute : la confusion entre les deux est une des erreurs les plus fréquentes et les plus coûteuses en administration système.",
+  "`chmod 600` est le réflexe pour un fichier contenant une information sensible sur une machine partagée."
+ ]
+}

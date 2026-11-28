@@ -170,7 +170,17 @@ export interface QuestPlsqlStep extends QuestStepBase {
   solution: string;
 }
 export interface QuestChoiceStep extends QuestStepBase { kind: 'choice'; options: string[]; answer: number }
-export type QuestStep = QuestSqlStep | QuestPlsqlStep | QuestChoiceStep;
+/** Critère évalué sur l'état du mini-terminal simulé (voir vshell.ts) ou sur les commandes tapées pendant l'étape. */
+export type QuestShellCheck =
+  | { t: 'cwd'; label: string; path: string }
+  | { t: 'ran'; label: string; pattern: string; mustError?: boolean }
+  | { t: 'filePresent'; label: string; path: string }
+  | { t: 'fileAbsent'; label: string; path: string }
+  | { t: 'fileEquals'; label: string; path: string; value: string }
+  | { t: 'fileContains'; label: string; path: string; value: string }
+  | { t: 'fileMode'; label: string; path: string; value: string };
+export interface QuestShellStep extends QuestStepBase { kind: 'shell'; checks: QuestShellCheck[]; solution: string }
+export type QuestStep = QuestSqlStep | QuestPlsqlStep | QuestChoiceStep | QuestShellStep;
 export type QuestPriority = 'Normale' | 'Haute' | 'Critique';
 export interface Quest {
   id: string;

@@ -12,7 +12,6 @@ import {
 } from '@getpapillon/papicons';
 import { Bar } from '@/components/ui';
 import { getModule, loadFormations, loadQuests } from '@/lib/content';
-import { QuestEncounter } from '@/components/quest/QuestEncounter';
 import { HoodedFigure } from '@/components/quest/HoodedFigure';
 import FormationShowcase from '@/components/FormationShowcase';
 import { useEffect, useState } from 'react';
@@ -261,7 +260,6 @@ export default function ModulePage() {
         </div>
       </section>
       )}
-      {quests.length > 0 && <QuestEncounter moduleId={m.id} />}
     </div>
   );
 }

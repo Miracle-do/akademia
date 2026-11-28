@@ -5,16 +5,19 @@ import { fireConfetti } from '@/components/Celebrations';
 import { HoodedFigure } from '@/components/quest/HoodedFigure';
 import { SqlConsole } from '@/components/quest/SqlConsole';
 import type { LogEntry } from '@/components/quest/SqlConsole';
+import { ShellConsole } from '@/components/quest/ShellConsole';
 import { rich, sub } from '@/components/quest/rich';
 import '@/components/quest/quest.css';
 import { cue, isMuted, setMuted, startAmbience, stopAmbience } from '@/lib/ambience';
 import { getModule, loadQuests } from '@/lib/content';
 import { levelFromXp } from '@/lib/gamification';
 import type { OracleSession, StmtResult } from '@/lib/oracleSession';
-import { checkPlsqlStep, checkSqlStep } from '@/lib/questChecks';
+import { checkPlsqlStep, checkShellStep, checkSqlStep } from '@/lib/questChecks';
 import type { StepVerdict } from '@/lib/questChecks';
 import { newSession } from '@/lib/sqlRuntime';
 import type { Quest, QuestStep, Summary } from '@/lib/types';
+import { initialState, runLine } from '@/lib/vshell';
+import type { ShellState } from '@/lib/vshell';
 import { useAuth } from '@/state/AuthContext';
 import { useStore } from '@/state/Store';
 
@@ -86,6 +89,8 @@ function QuestRunner() {
   const session = useRef<OracleSession | null>(null);
   const baseline = useRef(0);
   const results = useRef<StmtResult[]>([]);
+  const shell = useRef<ShellState | null>(null);
+  const shellCmds = useRef<{ cmd: string; error: boolean }[]>([]);
   const nid = useRef(1);
   const audioOn = useRef(false);
   const storeKey = `akademia:quest:${user?.id ?? 'anon'}:${moduleId}:${questId}`;
@@ -122,6 +127,11 @@ function QuestRunner() {
         if (!alive) { s.close(); return; }
         session.current = s;
       }
+      if (quest.steps.some((s) => s.kind === 'shell')) {
+        let st = initialState(name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'agent');
+        if (saved?.accepted) for (const h of saved.history) st = runLine(st, h).state;
+        shell.current = st;
+      }
       if (!alive) return;
       if (saved?.accepted && saved.step < quest.steps.length) {
         setCode(saved.code ?? {});
@@ -154,6 +164,7 @@ function QuestRunner() {
 
   const beginStep = (i: number, first = false) => {
     results.current = [];
+    shellCmds.current = [];
     setStepIdx(i); setStepDone(false); setVerdict(null); setFails(0); setHints(0); setPicked([]); setRefOpen(false); setAlert((a) => (first ? 0 : a));
     const s = quest!.steps[i];
     say(`Étape ${i + 1} sur ${quest!.steps.length} : ${s.title}. ${pick(START)}`);
@@ -187,9 +198,30 @@ function QuestRunner() {
     tick((n) => n + 1);
   };
 
+  const executeShell = (line: string) => {
+    const st = shell.current;
+    if (!st) return;
+    const prompt = `$ ${line.trim()}`;
+    const { state: next, output, error } = runLine(st, line);
+    shell.current = next;
+    shellCmds.current.push({ cmd: line.trim(), error });
+    if (output === '\u0000CLEAR\u0000') {
+      setLog([]);
+    } else {
+      const entries: LogEntry[] = [{ id: nid.current++, kind: 'cmd', text: prompt }];
+      if (output) entries.push({ id: nid.current++, kind: error ? 'error' : 'text', text: output });
+      setLog((l) => [...l, ...entries]);
+    }
+    const cmdHistory = [...cmds, line.trim()];
+    setCmds(cmdHistory);
+    cue(error ? 'ko' : 'type');
+    save({ history: cmdHistory });
+    tick((n) => n + 1);
+  };
+
   const solved = (v: StepVerdict) => {
     setVerdict(v); setStepDone(true); setAlert((a) => Math.max(0, a - 20)); cue('ok'); say(pick(GOOD));
-    save({ step: stepIdx + 1, code, history: session.current?.history.slice(baseline.current) ?? [] });
+    save({ step: stepIdx + 1, code, history: session.current ? session.current.history.slice(baseline.current) : cmds });
   };
   const failed = (v: StepVerdict | null) => {
     setVerdict(v); setFails((f) => f + 1); cue('ko'); say(pick(BAD));
@@ -205,6 +237,9 @@ function QuestRunner() {
       v.pass ? solved(v) : failed(v);
     } else if (step.kind === 'plsql') {
       const v = checkPlsqlStep(step, code[step.id] ?? step.template ?? '');
+      v.pass ? solved(v) : failed(v);
+    } else if (step.kind === 'shell' && shell.current) {
+      const v = checkShellStep(shell.current, step, { cmds: shellCmds.current });
       v.pass ? solved(v) : failed(v);
     }
   };
@@ -323,6 +358,9 @@ function QuestRunner() {
 
             {step.kind === 'sql' && session.current && (
               <SqlConsole session={session.current} user={name} log={log} history={cmds} onExecute={execute} disabled={stepDone || traced} />
+            )}
+            {step.kind === 'shell' && shell.current && (
+              <ShellConsole state={shell.current} log={log} history={cmds} onExecute={executeShell} disabled={stepDone || traced} />
             )}
             {step.kind === 'plsql' && (
               <textarea

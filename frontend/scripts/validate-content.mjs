@@ -145,6 +145,7 @@ for (const dir of fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.
         if (st.kind === 'sql') { if (!st.checks?.length || !st.solution) err(`${where} : étape SQL sans critères ou sans solution`); }
         else if (st.kind === 'plsql') { if (!st.review?.length || !st.solution) err(`${where} : étape PL/SQL sans revue ou sans solution`); }
         else if (st.kind === 'choice') { if (!Array.isArray(st.options) || st.options.length < 2 || !Number.isInteger(st.answer) || st.answer < 0 || st.answer >= st.options.length) err(`${where} : choix invalide`); }
+        else if (st.kind === 'shell') { if (!st.checks?.length || !st.solution) err(`${where} : étape shell sans critères ou sans solution`); }
         else err(`${where} : type inconnu "${st.kind}"`);
       });
       console.log(`  quête « ${q.id} » : ${(q.steps ?? []).length} étapes`);

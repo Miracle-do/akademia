@@ -3,8 +3,9 @@
  * - étape SQL : critères évalués sur l'état de la base et sur ce qui a été exécuté pendant l'étape ;
  * - étape PL/SQL : revue de code (le simulateur n'exécute pas PL/SQL), chaque critère est un motif cherché dans le source.
  */
-import type { QuestCell, QuestCheck, QuestPlsqlStep, QuestSqlStep } from './types';
+import type { QuestCell, QuestCheck, QuestPlsqlStep, QuestShellCheck, QuestShellStep, QuestSqlStep } from './types';
 import type { OracleSession, StmtResult } from './oracleSession';
+import { getEntry, resolvePath, type ShellState } from './vshell';
 
 export interface CheckItem {
   ok: boolean;
@@ -100,4 +101,42 @@ export function checkPlsqlStep(step: QuestPlsqlStep, source: string): StepVerdic
   const code = normalizePlsql(source);
   const items = step.review.map((r) => ({ ok: new RegExp(r.pattern, 'i').test(code), label: r.label }));
   return { pass: code.length > 0 && items.every((i) => i.ok), items };
+}
+
+/** Ce qui s'est passé depuis le début de l'étape, pour une étape « shell » (mini-terminal simulé). */
+export interface ShellStepContext {
+  cmds: { cmd: string; error: boolean }[];
+}
+
+function evalShellCheck(state: ShellState, c: QuestShellCheck, ctx: ShellStepContext): boolean {
+  switch (c.t) {
+    case 'cwd':
+      return resolvePath(state, c.path) === state.cwd;
+    case 'ran': {
+      let re: RegExp;
+      try { re = new RegExp(c.pattern, 'i'); } catch { return false; }
+      return ctx.cmds.some((x) => (c.mustError ? x.error : !x.error) && re.test(x.cmd.replace(/\s+/g, ' ')));
+    }
+    case 'filePresent':
+      return !!getEntry(state, resolvePath(state, c.path));
+    case 'fileAbsent':
+      return !getEntry(state, resolvePath(state, c.path));
+    case 'fileEquals': {
+      const e = getEntry(state, resolvePath(state, c.path));
+      return !!e && e.kind === 'file' && e.content.trim() === c.value.trim();
+    }
+    case 'fileContains': {
+      const e = getEntry(state, resolvePath(state, c.path));
+      return !!e && e.kind === 'file' && e.content.includes(c.value);
+    }
+    case 'fileMode': {
+      const e = getEntry(state, resolvePath(state, c.path));
+      return !!e && e.mode === c.value;
+    }
+  }
+}
+
+export function checkShellStep(state: ShellState, step: QuestShellStep, ctx: ShellStepContext): StepVerdict {
+  const items = step.checks.map((c) => ({ ok: evalShellCheck(state, c, ctx), label: c.label }));
+  return { pass: items.every((i) => i.ok), items };
 }
