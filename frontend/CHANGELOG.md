@@ -5,10 +5,18 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.29.0] — 2026-11-28
+
+### Ajouté
+- **Quêtes — missions en mini-terminal** : les Quêtes peuvent désormais proposer des étapes en ligne de commande (mini-terminal simulé avec vrai système de fichiers), en plus des étapes SQL/PL-SQL existantes. Première quête de ce type : « Le signal perdu » (module Linux), une enquête discrète en ligne de commande (dossier caché, fragments de fichier, droits d'accès, nettoyage des traces).
+
+### Changé
+- **Quêtes** : retrait de l'apparition aléatoire du contact encapuchonné sur la page d'un module ; les missions restent accessibles uniquement via la section dédiée « Missions secrètes » de chaque module, pour éviter les interruptions non sollicitées.
+
 ## [1.28.0] — 2026-11-27
 
 ### Ajouté
-- **Quêtes** : un nouveau système indépendant des formations coachées, avec son propre contact — un personnage encapuchonné (effet 3D illustré, ambiance néon) qui propose des missions secrètes. Accessible via une section dédiée (« Quêtes » dans la navigation), avec une ambiance visuelle distincte (sombre, suspense) pour toute la section : briefing façon dialogue avant d'accepter une mission, puis parcours de la mission dans le même mini-terminal simulé que les ateliers pratiques. Première quête publiée : « Le signal perdu » (module Linux), qui réutilise entièrement le moteur de progression et d'XP existant (aucun changement côté serveur).
+- **Quêtes** : un nouveau système indépendant des formations coachées, avec son propre contact — un personnage encapuchonné qui confie des missions secrètes sous forme de tickets fictifs. Accessible via une section dédiée de chaque module (jamais en pop-up), avec une ambiance visuelle distincte (sombre, suspense, sonore) : dialogue de briefing avant d'accepter une mission, puis parcours de la mission dans une vraie console SQL/PL-SQL simulée. Premières quêtes publiées : six missions pour le module Base de données (Bel-bg).
 
 ## [1.27.0] — 2026-11-27
 
