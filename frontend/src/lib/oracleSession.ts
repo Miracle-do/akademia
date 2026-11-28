@@ -192,6 +192,8 @@ export class OracleSession {
   private constraints: ConstraintRec[] = [];
   private sequences = new Map<string, { next: number; inc: number; cur: number | null }>();
   private sysC = 0;
+  /** Triggers de numérotation (BEFORE INSERT ... :NEW.col := seq.NEXTVAL), par table. */
+  private autoIds = new Map<string, { column: string; seq: string; name: string }>();
   /** Commandes exécutées avec succès, pour pouvoir rejouer la session. */
   readonly history: string[] = [];
 
@@ -209,6 +211,7 @@ export class OracleSession {
     this.changes = 0;
     this.constraints = [];
     this.sequences.clear();
+    this.autoIds.clear();
     this.sysC = 0;
     this.history.length = 0;
   }
@@ -223,9 +226,16 @@ export class OracleSession {
     return this.inTx ? this.changes : 0;
   }
 
+  /** Un trigger de numérotation est-il actif sur cette table (et cette colonne) ? */
+  hasAutoId(table: string, column?: string, seq?: string): boolean {
+    const r = this.autoIds.get(table.toLowerCase());
+    return !!r && (!column || r.column === column.toLowerCase()) && (!seq || r.seq === seq.toLowerCase());
+  }
+
   // ---------- Exécution ----------
 
   run(script: string): StmtResult[] {
+    if (/^\s*create\s+(or\s+replace\s+)?trigger\b/i.test(script)) return [this.trigger(script)];
     const plsql = /^\s*(declare|begin|create\s+(or\s+replace\s+)?(procedure|function|trigger|package))\b/i.test(script);
     if (plsql) {
       return [{
@@ -267,6 +277,52 @@ export class OracleSession {
     return { columns, rows };
   }
 
+  /**
+   * Seul type de trigger exécuté par le simulateur : la numérotation automatique, l'équivalent Oracle d'AUTO_INCREMENT.
+   * Oracle n'incrémente rien tout seul : une séquence fournit les valeurs, un trigger BEFORE INSERT les affecte.
+   */
+  private trigger(script: string): StmtResult {
+    const sql = script.trim();
+    const src = script.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/--.*$/gm, ' ').replace(/\s+/g, ' ').trim().replace(/\s*\/$/, '').trim();
+    const m = src.match(
+      /^create (?:or replace )?trigger (\w+) before insert on (\w+)(?: for each row)? begin (?:if :new\.\w+ is null then )?(?::new\.(\w+) := (\w+)\.nextval ?;|select (\w+)\.nextval into :new\.(\w+) from dual ?;) (?:end if ?; )?end(?: \w+)? ?;?$/i,
+    );
+    if (!m) {
+      return {
+        sql, kind: 'info', ok: false,
+        text: 'Ce simulateur exécute un seul type de trigger : la numérotation automatique (BEFORE INSERT ... FOR EACH ROW, avec :NEW.colonne := séquence.NEXTVAL). Les autres triggers se soumettent dans l’éditeur PL/SQL des étapes prévues.',
+      };
+    }
+    const [, name, table] = m;
+    const column = (m[3] ?? m[6]).toLowerCase();
+    const seq = (m[4] ?? m[5]).toLowerCase();
+    const fail = (code: string, text: string): StmtResult => ({ sql, kind: 'error', ok: false, code, text });
+    this.endTx(true);
+    if (!this.tableExists(table.toLowerCase())) return fail('ORA-00942', 'ERREUR :\nORA-00942: Table ou vue inexistante');
+    if (!this.sequences.has(seq))
+      return fail('PLS-00201', `Avertissement : Trigger créé avec erreurs de compilation.\nPLS-00201: l'identificateur '${up(seq)}' doit être déclaré`);
+    if (!this.tableInfo(table).columns.some((c) => c.name === column))
+      return fail('PLS-00049', `Avertissement : Trigger créé avec erreurs de compilation.\nPLS-00049: variable de lien incorrecte 'NEW.${up(column)}'`);
+    this.autoIds.set(table.toLowerCase(), { column, seq, name: up(name) });
+    this.history.push(sql);
+    return { sql, kind: 'ddl', ok: true, text: 'Trigger créé.' };
+  }
+
+  /** Applique le trigger de numérotation : si l'identifiant n'est pas fourni (ou NULL), il vient de la séquence. */
+  private applyAutoId(stmt: string): string {
+    const m = stmt.match(/^insert\s+into\s+(\w+)\s*\(([^)]*)\)\s*values\s*\(([\s\S]*)\)\s*$/i);
+    const rule = m ? this.autoIds.get(m[1].toLowerCase()) : undefined;
+    if (!m || !rule) return stmt;
+    const cols = colList(m[2]);
+    const vals = splitTop(m[3]);
+    const i = cols.indexOf(rule.column);
+    if (i >= 0 && !/^null$/i.test((vals[i] ?? '').trim())) return stmt;
+    const next = this.useSequences(`${rule.seq}.NEXTVAL`);
+    if (i >= 0) vals[i] = next;
+    else { cols.push(rule.column); vals.push(next); }
+    return `INSERT INTO ${m[1]} (${cols.join(', ')}) VALUES (${vals.join(', ')})`;
+  }
+
   private select(stmt: string): StmtResult {
     const { columns, rows } = this.query(stmt);
     const n = rows.length;
@@ -276,7 +332,7 @@ export class OracleSession {
 
   private dml(stmt: string, verb: string): StmtResult {
     this.begin();
-    this.db.run(this.translate(this.useSequences(stmt)));
+    this.db.run(this.translate(this.useSequences(verb === 'insert' ? this.applyAutoId(stmt) : stmt)));
     const n = this.db.getRowsModified();
     this.changes += n;
     const text =
@@ -363,6 +419,7 @@ export class OracleSession {
 
     if (verb === 'drop' && object === 'table') {
       this.constraints = this.constraints.filter((c) => c.table !== name && c.refTable !== name);
+      this.autoIds.delete(name);
       return done('Table supprimée.');
     }
     if (verb === 'drop' && object === 'view') return done('Vue supprimée.');

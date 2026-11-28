@@ -13,12 +13,12 @@
   ],
   "context": [
     "Après plusieurs changements de prix inexpliqués, la direction exige une traçabilité complète : chaque modification de prix doit laisser une trace dans la table journal, et la logique de calcul des prix doit vivre dans la base, pas dans les applications.",
-    "{user}, tu livres trois objets : une fonction de calcul du prix TTC, une procédure d'augmentation par catégorie et un trigger d'audit. Ils sont relus par le contrôle de code, qui vérifie leur structure."
+    "{user}, tu livres trois objets : une fonction de calcul du prix TTC, une procédure d'augmentation par catégorie et un trigger d'audit. Ils sont relus par le contrôle de code, qui vérifie leur structure. Rappel : la clé de la table journal ne se numérote pas toute seule, elle est alimentée par la séquence existante seq_journal."
   ],
   "objectives": [
     "Créer une fonction stockée avec paramètre et valeur de retour",
     "Créer une procédure paramétrée qui modifie des données",
-    "Journaliser automatiquement avec un trigger FOR EACH ROW",
+    "Journaliser automatiquement avec un trigger FOR EACH ROW, en numérotant la clé avec une séquence",
     "Savoir quand préférer une contrainte à un trigger"
   ],
   "reference": [
@@ -108,11 +108,11 @@
       "id": "s3",
       "kind": "plsql",
       "title": "Trigger d'audit des prix",
-      "task": "Crée le trigger **trg_audit_prix** : **après** chaque modification de la colonne `prix` de **produits**, et **pour chaque ligne**, il insère dans `journal` une ligne (table_nom, operation, ligne_id, details) contenant l'ancien et le nouveau prix.",
+      "task": "Crée le trigger **trg_audit_prix** : **après** chaque modification de la colonne `prix` de **produits**, et **pour chaque ligne**, il insère dans `journal` une ligne (id, table_nom, operation, ligne_id, details) contenant l'ancien et le nouveau prix. Sous Oracle la clé `id` ne s'auto-incrémente pas : prends sa valeur dans la séquence **seq_journal**.",
       "hints": [
         "AFTER UPDATE OF prix ON produits FOR EACH ROW",
         "Les valeurs de la ligne se lisent avec :OLD.prix et :NEW.prix.",
-        "INSERT INTO journal (table_nom, operation, ligne_id, details) VALUES (...);"
+        "INSERT INTO journal (id, table_nom, operation, ligne_id, details) VALUES (seq_journal.NEXTVAL, ...);"
       ],
       "template": "CREATE OR REPLACE TRIGGER trg_audit_prix\nBEGIN\n  NULL;\nEND;\n/",
       "review": [
@@ -133,6 +133,10 @@
           "pattern": "insert\\s+into\\s+journal"
         },
         {
+          "label": "L'identifiant du journal vient de la séquence seq_journal (pas d'auto-incrément sous Oracle)",
+          "pattern": "insert\\s+into\\s+journal\\s*\\(\\s*id\\s*,.*values\\s*\\(\\s*seq_journal\\.nextval"
+        },
+        {
           "label": "L'ancien prix est lu avec :OLD",
           "pattern": ":old\\.prix"
         },
@@ -141,7 +145,7 @@
           "pattern": ":new\\.prix"
         }
       ],
-      "solution": "CREATE OR REPLACE TRIGGER trg_audit_prix\nAFTER UPDATE OF prix ON produits\nFOR EACH ROW\nBEGIN\n  INSERT INTO journal (table_nom, operation, ligne_id, details)\n  VALUES ('PRODUITS', 'UPDATE', :OLD.id, 'Prix ' || :OLD.prix || ' -> ' || :NEW.prix);\nEND;\n/",
+      "solution": "CREATE OR REPLACE TRIGGER trg_audit_prix\nAFTER UPDATE OF prix ON produits\nFOR EACH ROW\nBEGIN\n  INSERT INTO journal (id, table_nom, operation, ligne_id, details)\n  VALUES (seq_journal.NEXTVAL, 'PRODUITS', 'UPDATE', :OLD.id, 'Prix ' || :OLD.prix || ' -> ' || :NEW.prix);\nEND;\n/",
       "explain": ":OLD et :NEW n'existent que dans un trigger FOR EACH ROW. Le trigger s'exécute quelle que soit l'origine de la modification (application, script, procédure) : c'est ce qui rend l'audit fiable."
     },
     {

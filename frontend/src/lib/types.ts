@@ -152,6 +152,7 @@ export type QuestCheck =
   | { t: 'result'; label: string; rows: QuestCell[][]; ordered?: boolean }
   | { t: 'error'; label: string; code: string }
   | { t: 'ran'; label: string; pattern: string }
+  | { t: 'autoid'; label: string; table: string; column?: string; sequence?: string }
   | { t: 'committed'; label: string };
 export interface QuestStepBase {
   id: string;

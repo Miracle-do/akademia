@@ -5,18 +5,18 @@
   "ticket": "DBA-2101",
   "priority": "Normale",
   "client": "Sahel Distribution",
-  "minutes": 25,
+  "minutes": 35,
   "level": "Fondamental",
   "chapters": [
     "1-1-ddl-dml"
   ],
   "context": [
     "Sahel Distribution, grossiste basé à Cotonou, lance sa plateforme de vente en ligne. {user}, tu rejoins l'équipe base de données comme DBA junior. Le responsable technique te confie la création du schéma Oracle de pré-production.",
-    "Tu travailles dans une session SQL*Plus connectée à la base. Règles de l'équipe : toute table a une clé primaire, les colonnes obligatoires sont déclarées NOT NULL, les règles métier simples sont portées par des contraintes CHECK et les relations par des clés étrangères."
+    "Tu travailles dans une session SQL*Plus connectée à la base. Règles de l'équipe : toute table a une clé primaire, les colonnes obligatoires sont déclarées NOT NULL, les règles métier simples sont portées par des contraintes CHECK et les relations par des clés étrangères. Et sous Oracle, la clé primaire ne se numérote pas toute seule : l'auto-incrément se construit avec une séquence et un trigger."
   ],
   "objectives": [
     "Créer les tables categories et produits avec leurs contraintes",
-    "Générer les identifiants avec une séquence",
+    "Construire l'auto-incrément Oracle : séquence + trigger BEFORE INSERT",
     "Faire évoluer le schéma sans perdre les données existantes",
     "Valider un jeu de données initial avec COMMIT"
   ],
@@ -30,8 +30,12 @@
       "sql": "prix NUMBER(10,2) CHECK (prix > 0),\nc_id NUMBER(4) REFERENCES parent(id)"
     },
     {
-      "title": "Séquence",
-      "sql": "CREATE SEQUENCE seq START WITH 1000 INCREMENT BY 1;\nINSERT INTO t (id) VALUES (seq.NEXTVAL);"
+      "title": "Auto-incrément : la séquence",
+      "sql": "CREATE SEQUENCE seq START WITH 1000 INCREMENT BY 1;"
+    },
+    {
+      "title": "Auto-incrément : le trigger",
+      "sql": "CREATE OR REPLACE TRIGGER trg_t_id\nBEFORE INSERT ON t\nFOR EACH ROW\nBEGIN\n  :NEW.id := seq.NEXTVAL;\nEND;\n/"
     },
     {
       "title": "Modifier une table",
@@ -86,7 +90,7 @@
         }
       ],
       "solution": "CREATE TABLE categories (\n  id  NUMBER(4) PRIMARY KEY,\n  nom VARCHAR2(40) NOT NULL UNIQUE\n);",
-      "explain": "PRIMARY KEY impose déjà l'unicité et NOT NULL. UNIQUE interdit deux catégories de même nom : Oracle crée un index pour la faire respecter."
+      "explain": "PRIMARY KEY impose l'unicité et NOT NULL, mais ne fournit aucune valeur : sous Oracle, rien ne s'incrémente tout seul. La numérotation automatique se construit à part, tu le fais aux étapes 3 et 4."
     },
     {
       "id": "s2",
@@ -157,27 +161,68 @@
     {
       "id": "s3",
       "kind": "sql",
-      "title": "Séquence et premier jeu de données",
-      "task": "Crée la séquence **seq_produit** (départ 1000, pas 1). Insère la catégorie `1` « Alimentaire », puis le produit « Riz parfumé 25 kg » à 18500 dans cette catégorie, avec un identifiant **généré par la séquence**. Valide le tout.",
+      "title": "Auto-incrément, première partie : la séquence",
+      "task": "Les identifiants de produits doivent se numéroter seuls, à partir de **1000**. Oracle n'a pas d'auto-incrément : il faut une **séquence**. Crée **seq_produit** (départ 1000, pas 1).",
       "hints": [
-        "CREATE SEQUENCE seq_produit START WITH 1000 INCREMENT BY 1;",
-        "Dans le INSERT, la valeur de l'identifiant est seq_produit.NEXTVAL.",
+        "CREATE SEQUENCE seq_produit START WITH ... INCREMENT BY ...;",
+        "Ne l'utilise pas encore : la première valeur (1000) doit revenir au premier produit."
+      ],
+      "checks": [
+        {
+          "t": "ran",
+          "label": "La séquence SEQ_PRODUIT est créée avec START WITH 1000",
+          "pattern": "^create sequence seq_produit .*start with 1000"
+        }
+      ],
+      "solution": "CREATE SEQUENCE seq_produit START WITH 1000 INCREMENT BY 1;",
+      "explain": "Une séquence est un objet autonome qui fournit des nombres uniques, sans verrouiller la table. Elle ne fait rien toute seule : il faut encore la brancher sur la colonne, ce que fait un trigger."
+    },
+    {
+      "id": "s4",
+      "kind": "sql",
+      "title": "Auto-incrément, seconde partie : le trigger",
+      "task": "Branche la séquence sur la clé : crée le trigger **trg_produits_id**, de type **BEFORE INSERT** sur `produits`, **FOR EACH ROW**, qui affecte `:NEW.id` avec la valeur suivante de `seq_produit`. Dans la console, termine le bloc par une ligne contenant seulement `/`.",
+      "hints": [
+        "CREATE OR REPLACE TRIGGER trg_produits_id BEFORE INSERT ON produits FOR EACH ROW",
+        "Dans le corps : :NEW.id := seq_produit.NEXTVAL;",
+        "Un bloc se termine par END; puis, sur une nouvelle ligne, un /."
+      ],
+      "checks": [
+        {
+          "t": "ran",
+          "label": "Un trigger a été créé",
+          "pattern": "^create (or replace )?trigger trg_produits_id"
+        },
+        {
+          "t": "autoid",
+          "label": "Il numérote produits.id avec seq_produit",
+          "table": "produits",
+          "column": "id",
+          "sequence": "seq_produit"
+        }
+      ],
+      "solution": "CREATE OR REPLACE TRIGGER trg_produits_id\nBEFORE INSERT ON produits\nFOR EACH ROW\nBEGIN\n  :NEW.id := seq_produit.NEXTVAL;\nEND;\n/",
+      "explain": "Le trigger se déclenche avant chaque INSERT et remplit :NEW.id : l'application n'a plus à fournir l'identifiant. C'est le schéma classique d'auto-incrément sous Oracle (depuis la 12c, une colonne IDENTITY fait la même chose en interne)."
+    },
+    {
+      "id": "s5",
+      "kind": "sql",
+      "title": "Premier jeu de données",
+      "task": "Insère la catégorie `1` « Alimentaire », puis le produit « Riz parfumé 25 kg » à 18500 dans cette catégorie, **sans fournir d'identifiant** : c'est le trigger qui le donne. Valide le tout.",
+      "hints": [
+        "INSERT INTO produits (nom, prix, categorie_id) VALUES (...);",
+        "N'écris pas la colonne id dans l'INSERT.",
         "Sans COMMIT, les autres sessions ne voient pas tes données."
       ],
       "checks": [
         {
           "t": "ran",
-          "label": "La séquence SEQ_PRODUIT est créée",
-          "pattern": "^create sequence seq_produit"
-        },
-        {
-          "t": "ran",
-          "label": "L'identifiant du produit vient de la séquence (NEXTVAL)",
-          "pattern": "^insert into produits.*seq_produit\\.nextval"
+          "label": "Le produit est inséré sans identifiant fourni",
+          "pattern": "^insert into produits \\((?!.*\\bid\\b)"
         },
         {
           "t": "query",
-          "label": "Le produit 1000 existe, au prix de 18500, dans la catégorie 1",
+          "label": "Le produit a reçu l'identifiant 1000, premier numéro de la séquence",
           "sql": "SELECT COUNT(*) FROM produits WHERE id = 1000 AND prix = 18500 AND categorie_id = 1",
           "scalar": 1
         },
@@ -186,11 +231,11 @@
           "label": "Les données sont validées (COMMIT)"
         }
       ],
-      "solution": "CREATE SEQUENCE seq_produit START WITH 1000 INCREMENT BY 1;\nINSERT INTO categories (id, nom) VALUES (1, 'Alimentaire');\nINSERT INTO produits (id, nom, prix, categorie_id) VALUES (seq_produit.NEXTVAL, 'Riz parfumé 25 kg', 18500, 1);\nCOMMIT;",
-      "explain": "Une séquence fournit des identifiants uniques sans verrouiller la table. Elle n'est jamais annulée par un ROLLBACK : des « trous » dans la numérotation sont normaux."
+      "solution": "INSERT INTO categories (id, nom) VALUES (1, 'Alimentaire');\nINSERT INTO produits (nom, prix, categorie_id) VALUES ('Riz parfumé 25 kg', 18500, 1);\nCOMMIT;",
+      "explain": "L'identifiant 1000 vient de la séquence via le trigger. La séquence n'est jamais annulée par un ROLLBACK : des trous dans la numérotation sont normaux et sans danger."
     },
     {
-      "id": "s4",
+      "id": "s6",
       "kind": "sql",
       "title": "Faire évoluer la table en production",
       "task": "Le service logistique veut suivre le stock. Ajoute à **produits** la colonne `stock` (NUMBER(6)), obligatoire, valant **0** par défaut. Le produit déjà présent doit avoir un stock de 0.",
@@ -223,31 +268,31 @@
       "explain": "Sans DEFAULT, Oracle refuserait NOT NULL (ORA-01758) car la ligne existante n'aurait aucune valeur. L'ALTER TABLE est un ordre DDL : il valide implicitement la transaction en cours."
     },
     {
-      "id": "s5",
+      "id": "s7",
       "kind": "choice",
       "title": "Revue de conception",
-      "task": "Un collègue propose de ne pas déclarer la clé étrangère de produits vers categories « pour gagner du temps à l'insertion ». Quel est le risque principal ?",
+      "task": "Un collègue venu de MySQL te demande pourquoi `id NUMBER PRIMARY KEY` ne suffit pas à numéroter les produits. Quelle réponse est exacte ?",
       "options": [
-        "Des produits peuvent référencer une catégorie qui n'existe pas (données orphelines)",
-        "Les requêtes SELECT deviennent impossibles",
-        "La table produits ne peut plus avoir de clé primaire",
-        "La séquence cesse de fonctionner"
+        "PRIMARY KEY garantit l'unicité et le NOT NULL, mais ne génère aucune valeur : il faut une séquence, et un trigger BEFORE INSERT pour l'appliquer automatiquement",
+        "PRIMARY KEY n'existe pas sous Oracle",
+        "Oracle numérote automatiquement toute colonne NUMBER qui est clé primaire",
+        "Il suffit d'ajouter AUTO_INCREMENT après le type de la colonne"
       ],
       "answer": 0,
-      "explain": "Sans clé étrangère, rien n'empêche d'insérer categorie_id = 99 alors que cette catégorie n'existe pas. Le coût de vérification à l'insertion est très faible comparé au nettoyage de données incohérentes."
+      "explain": "AUTO_INCREMENT est une particularité de MySQL. Sous Oracle, on associe une séquence et un trigger (ou une colonne IDENTITY à partir de la 12c). La clé primaire, elle, ne fait que garantir l'unicité et l'absence de NULL."
     }
   ],
   "debrief": [
+    "Sous Oracle, PRIMARY KEY garantit l'unicité mais ne numérote pas : l'auto-incrément se construit avec une séquence et un trigger BEFORE INSERT.",
     "Créer les tables parents avant les tables enfants, avec clés primaires, NOT NULL, CHECK et clés étrangères.",
-    "Utiliser une séquence pour générer les identifiants ; ses valeurs ne sont jamais rendues par un ROLLBACK.",
-    "Un ordre DDL (CREATE, ALTER, DROP, TRUNCATE) valide implicitement la transaction : on ne peut pas l'annuler."
+    "Les valeurs d'une séquence ne sont jamais rendues par un ROLLBACK ; un ordre DDL (CREATE, ALTER, DROP, TRUNCATE) valide implicitement la transaction."
   ],
   "teaser": "Chut. J'ai besoin de toi pour une mission secrète.",
   "dialogue": [
     "Chut. Ne dis rien à voix haute, {user}.",
     "Je suis un contact interne chez Sahel Distribution. Je ne peux pas te donner mon vrai nom.",
     "Leur plateforme ouvre demain et la base de données n'existe pas encore. Personne d'autre ne doit la construire : trop de gens regardent.",
-    "J'ai besoin que tu montes le schéma proprement : tables, clés, contraintes. S'il est bâclé, tout ce qui sera stocké sera corrompu.",
+    "J'ai besoin que tu montes le schéma proprement : tables, clés, contraintes, et la numérotation automatique des identifiants. S'il est bâclé, tout ce qui sera stocké sera corrompu.",
     "Une session est ouverte sur la pré-production. Tu es prêt(e) ?"
   ],
   "outro": "Schéma en place, données validées. Personne n'a rien vu. Je te recontacte bientôt."

@@ -34,6 +34,8 @@ export function SqlConsole({
     setHi(-1);
     area.current?.focus();
   };
+  /** Un trigger ou un bloc PL/SQL contient des « ; » : il se termine par une ligne « / », comme dans SQL*Plus. */
+  const isBlock = /^\s*(create\s+(or\s+replace\s+)?(trigger|procedure|function|package)|declare|begin)\b/i.test(text);
   const pending = session.pendingChanges;
   const name = user.replace(/\s+/g, '_').toUpperCase().slice(0, 18);
 
@@ -76,10 +78,10 @@ export function SqlConsole({
         autoCapitalize="off"
         autoCorrect="off"
         aria-label="Ordre SQL à exécuter"
-        placeholder="Tape ton ordre SQL, termine par ; puis Entrée (Maj+Entrée : nouvelle ligne)"
+        placeholder="Ordre SQL terminé par ; puis Entrée. Trigger : termine par une ligne / (Maj+Entrée : nouvelle ligne)"
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || (!e.shiftKey && /;\s*$/.test(text)))) { e.preventDefault(); submit(); }
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || (!e.shiftKey && (isBlock ? /(^|\n)\s*\/\s*$/.test(text) : /;\s*$/.test(text))))) { e.preventDefault(); submit(); }
           else if (e.key === 'ArrowUp' && !text.includes('\n') && history.length) {
             e.preventDefault();
             const n = Math.min(hi + 1, history.length - 1);

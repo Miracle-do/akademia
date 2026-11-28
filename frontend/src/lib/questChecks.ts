@@ -72,6 +72,8 @@ function evalCheck(session: OracleSession, c: QuestCheck, ctx: StepContext): boo
         const re = new RegExp(c.pattern, 'i');
         return ctx.results.some((r) => r.ok && re.test(r.sql.replace(/\s+/g, ' ')));
       }
+      case 'autoid':
+        return session.hasAutoId(c.table, c.column, c.sequence);
       case 'committed':
         return session.pendingChanges === 0 && ctx.results.some((r) => r.ok && r.kind !== 'select');
     }
