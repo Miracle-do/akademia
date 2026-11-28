@@ -5,13 +5,19 @@ Les nouveautés en cours s'écrivent sous « Non publié » ; la commande `npm r
 
 ## [Non publié]
 
+## [1.30.0] — 2026-11-28
+
+### Ajouté
+- **Quêtes Linux — 4 nouvelles missions** : « Nouvelle recrue » (comptes, groupes, droits, bonnes pratiques SSH), « Script de sauvegarde » (écriture pas-à-pas d'un script bash avec variables, redirections, droit d'exécution), « Processus fantôme » (incident en direct : journal système, `ps`, `kill`, crontab fautive) et « Mise à jour du parc » (paquets, `sudo`, `find`, nettoyage de configuration obsolète). Avec « Le signal perdu », le module Linux compte désormais 5 quêtes couvrant l'essentiel du cours (arborescence, fichiers, droits, utilisateurs/groupes, scripts, processus, planification, paquets) et des situations réalistes de terrain. Les notions les plus difficiles à simuler fidèlement (LVM/RAID, réseau, SSH, vim) sont abordées via des questions de réflexion intégrées aux tickets plutôt qu'en mini-terminal, par souci d'honnêteté sur ce qui est réellement simulé.
+- **Mini-terminal des Quêtes — moteur étendu** : variables shell (`VAR=valeur`, `$VAR`, `export`), recherche de fichiers (`find -name`), exécution de scripts (`bash script.sh`, `./script.sh` avec vérification du droit d'exécution), gestion des utilisateurs et groupes (`useradd`, `groupadd`, `usermod -aG`, `id`, `groups`, `passwd`), processus (`ps`, `kill`), planification (`crontab -l/-r/<fichier>`) et paquets (`apt`/`dpkg` avec catalogue simulé). Nouveau champ optionnel `setupShell` sur une Quête, pour personnaliser l'état de départ du terminal (fichiers, crontab déjà en place) selon le scénario.
+
+### Changé
+- **Quêtes** : réapparition de l'irruption aléatoire du contact encapuchonné sur la page d'un module (en plus de la section dédiée « Missions secrètes »).
+
 ## [1.29.0] — 2026-11-28
 
 ### Ajouté
 - **Quêtes — missions en mini-terminal** : les Quêtes peuvent désormais proposer des étapes en ligne de commande (mini-terminal simulé avec vrai système de fichiers), en plus des étapes SQL/PL-SQL existantes. Première quête de ce type : « Le signal perdu » (module Linux), une enquête discrète en ligne de commande (dossier caché, fragments de fichier, droits d'accès, nettoyage des traces).
-
-### Changé
-- **Quêtes** : retrait de l'apparition aléatoire du contact encapuchonné sur la page d'un module ; les missions restent accessibles uniquement via la section dédiée « Missions secrètes » de chaque module, pour éviter les interruptions non sollicitées.
 
 ## [1.28.0] — 2026-11-27
 
