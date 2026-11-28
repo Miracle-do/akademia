@@ -30,6 +30,11 @@ for (const mod of fs.readdirSync(root)) {
     for (const stmt of q.setup ?? []) for (const r of s.run(stmt)) if (!r.ok) fail(`setup : ${stmt.slice(0, 60)} → ${r.text}`);
     for (const stmt of q.setupPending ?? []) for (const r of s.run(stmt)) if (!r.ok) fail(`setupPending : ${stmt} → ${r.text}`);
     let shell: ShellState | null = q.steps.some((st) => st.kind === 'shell') ? initialState('agent') : null;
+    if (shell) for (const h of q.setupShell ?? []) {
+      const r = runLine(shell, h);
+      shell = r.state;
+      if (r.error) fail(`setupShell : ${h} → échec`);
+    }
     for (const step of q.steps) {
       const where = `${q.id}/${step.id}`;
       if (step.kind === 'choice') {

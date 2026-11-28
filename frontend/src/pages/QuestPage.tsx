@@ -129,6 +129,7 @@ function QuestRunner() {
       }
       if (quest.steps.some((s) => s.kind === 'shell')) {
         let st = initialState(name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'agent');
+        for (const h of quest.setupShell ?? []) st = runLine(st, h).state;
         if (saved?.accepted) for (const h of saved.history) st = runLine(st, h).state;
         shell.current = st;
       }

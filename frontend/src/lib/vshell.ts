@@ -23,6 +23,11 @@ export interface ShellState {
   host: string;
   lastCommand: string;
   lastError: boolean;
+  env: Record<string, string>;
+  users: Record<string, string[]>; // utilisateur -> liste de groupes (le premier est le groupe primaire)
+  groups: string[];
+  packages: string[]; // paquets installés
+  cron: string; // contenu de la crontab de l'utilisateur courant (une ligne par tâche)
 }
 
 export const dir = (children: Record<string, VEntry> = {}, mode = '755'): VDir => ({ kind: 'dir', children, mode });
@@ -127,23 +132,73 @@ function parseArgs(argv: string[]): { opts: Set<string>; pos: string[] } {
   return { opts, pos };
 }
 
-/** Tokenise une ligne en respectant les guillemets simples/doubles. */
-function tokenize(line: string): string[] {
+function expandOne(state: ShellState, name: string): string {
+  if (name === 'USER') return state.user;
+  if (name === 'HOME') return `/home/${state.user}`;
+  return state.env[name] ?? '';
+}
+
+const VAR_RE = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}|^\$([A-Za-z_][A-Za-z0-9_]*)/;
+
+/**
+ * Tokenise une ligne en respectant les guillemets simples/doubles. Les guillemets simples bloquent
+ * l'expansion des variables `$VAR` (comme en bash réel) ; les doubles et le texte nu l'autorisent.
+ */
+function tokenize(line: string, state?: ShellState): string[] {
   const out: string[] = [];
   let cur = '';
   let quote: '"' | "'" | null = null;
   for (let i = 0; i < line.length; i++) {
     const c = line[i];
-    if (quote) {
-      if (c === quote) quote = null;
+    if (quote === "'") {
+      if (c === "'") quote = null;
       else cur += c;
+      continue;
+    }
+    if (quote === '"') {
+      if (c === '"') { quote = null; continue; }
+      if (c === '$' && state) {
+        const m = VAR_RE.exec(line.slice(i));
+        if (m) { cur += expandOne(state, m[1] || m[2]); i += m[0].length - 1; continue; }
+      }
+      cur += c;
       continue;
     }
     if (c === '"' || c === "'") { quote = c; continue; }
     if (/\s/.test(c)) { if (cur) { out.push(cur); cur = ''; } continue; }
+    if (c === '$' && state) {
+      const m = VAR_RE.exec(line.slice(i));
+      if (m) { cur += expandOne(state, m[1] || m[2]); i += m[0].length - 1; continue; }
+    }
     cur += c;
   }
   if (cur) out.push(cur);
+  return out;
+}
+
+/** Expanse `$VAR` dans une valeur brute (ex. partie droite d'une affectation ou chemin de redirection), en respectant les guillemets. */
+function expandValue(state: ShellState, raw: string): string {
+  let out = '';
+  let quote: '"' | "'" | null = null;
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i];
+    if (quote === "'") { if (c === "'") quote = null; else out += c; continue; }
+    if (quote === '"') {
+      if (c === '"') { quote = null; continue; }
+      if (c === '$') {
+        const m = VAR_RE.exec(raw.slice(i));
+        if (m) { out += expandOne(state, m[1] || m[2]); i += m[0].length - 1; continue; }
+      }
+      out += c;
+      continue;
+    }
+    if (c === '"' || c === "'") { quote = c; continue; }
+    if (c === '$') {
+      const m = VAR_RE.exec(raw.slice(i));
+      if (m) { out += expandOne(state, m[1] || m[2]); i += m[0].length - 1; continue; }
+    }
+    out += c;
+  }
   return out;
 }
 
@@ -170,6 +225,34 @@ function applySymbolicChmod(mode: string, spec: string): string | null {
   }
   return digits.join('');
 }
+
+function scriptLines(content: string): string[] {
+  return content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'));
+}
+
+/** Exécute un script ligne à ligne en réutilisant runLine (gère donc redirections, pipes, variables...). */
+function runScript(state: ShellState, lines: string[]): Output {
+  let s = state;
+  const out: string[] = [];
+  let anyError = false;
+  for (const l of lines) {
+    const r = runLine(s, l);
+    s = r.state;
+    if (r.output) out.push(r.output);
+    if (r.error) anyError = true;
+  }
+  return { state: s, output: out.join('\n'), error: anyError };
+}
+
+function isExecutable(mode: string): boolean {
+  const d = Number(mode[0] ?? '0');
+  return !Number.isNaN(d) && (d & 1) === 1;
+}
+
+const PACKAGE_CATALOG = ['htop', 'curl', 'wget', 'git', 'vim', 'net-tools', 'telnet', 'rsync', 'unzip', 'tree', 'fail2ban'];
 
 function runSingle(state: ShellState, argv: string[], stdin: string | null): Output {
   const [cmd, ...rest] = argv;
@@ -357,8 +440,172 @@ function runSingle(state: ShellState, argv: string[], stdin: string | null): Out
     }
     case 'clear':
       return ok(state, '\u0000CLEAR\u0000');
-    default:
+    case 'export': {
+      let s = state;
+      for (const a of rest) {
+        const m = /^([A-Za-z_][A-Za-z0-9_]*)(=(.*))?$/.exec(a);
+        if (m && m[2] !== undefined) s = { ...s, env: { ...s.env, [m[1]]: expandValue(s, m[3]) } };
+      }
+      return ok(s, '');
+    }
+    case 'sudo': {
+      if (!rest.length) return err(state, 'sudo: une commande est attendue');
+      return runSingle(state, rest, stdin);
+    }
+    case 'find': {
+      const { pos } = parseArgs(rest);
+      const nameIdx = rest.indexOf('-name');
+      const typeIdx = rest.indexOf('-type');
+      const namePattern = nameIdx >= 0 ? rest[nameIdx + 1] : null;
+      const typeFilter = typeIdx >= 0 ? rest[typeIdx + 1] : null;
+      const startArg = pos.find((p) => p !== namePattern && p !== typeFilter) || '.';
+      const startAbs = resolvePath(state, startArg);
+      const startEntry = getEntry(state, startAbs);
+      if (!startEntry) return err(state, `find: ${startArg}: Aucun fichier ou dossier de ce type`);
+      const reGlob = namePattern
+        ? new RegExp('^' + namePattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$')
+        : null;
+      const results: string[] = [];
+      const walk = (e: VEntry, absPath: string, label: string) => {
+        const matchesType = !typeFilter || (typeFilter === 'f' && e.kind === 'file') || (typeFilter === 'd' && e.kind === 'dir');
+        const name = absPath.split('/').pop() || absPath;
+        const matchesName = !reGlob || reGlob.test(name);
+        if (matchesType && matchesName) results.push(label);
+        if (e.kind === 'dir') {
+          for (const [childName, child] of Object.entries(e.children).sort((a, b) => a[0].localeCompare(b[0]))) {
+            walk(child, absPath === '/' ? `/${childName}` : `${absPath}/${childName}`, label === '.' ? `./${childName}` : `${label}/${childName}`);
+          }
+        }
+      };
+      walk(startEntry, startAbs, startArg);
+      return ok(state, results.join('\n'));
+    }
+    case 'useradd': {
+      const gIdx = rest.indexOf('-G');
+      const extraGroups = gIdx >= 0 && rest[gIdx + 1] ? rest[gIdx + 1].split(',').filter(Boolean) : [];
+      const skip = new Set(gIdx >= 0 ? [gIdx, gIdx + 1] : []);
+      const name = rest.find((a, i) => !skip.has(i) && !a.startsWith('-'));
+      if (!name) return err(state, 'useradd: nom d\'utilisateur attendu');
+      if (state.users[name]) return err(state, `useradd: l'utilisateur « ${name} » existe déjà`);
+      let s: ShellState = { ...state, users: { ...state.users, [name]: [name, ...extraGroups] }, groups: Array.from(new Set([...state.groups, name, ...extraGroups])) };
+      if (rest.includes('-m')) {
+        const home = `/home/${name}`;
+        if (!getEntry(s, home)) {
+          s = cloneAlong(s, home);
+          const pd = getParentDir(s, home)!;
+          pd.parent.children[pd.name] = dir({}, '755');
+        }
+      }
+      return ok(s, '');
+    }
+    case 'groupadd': {
+      const name = rest.find((a) => !a.startsWith('-'));
+      if (!name) return err(state, 'groupadd: nom de groupe attendu');
+      if (state.groups.includes(name)) return err(state, `groupadd: le groupe « ${name} » existe déjà`);
+      return ok({ ...state, groups: [...state.groups, name] }, '');
+    }
+    case 'usermod': {
+      const { pos } = parseArgs(rest.filter((a) => a !== '-aG'));
+      const gIdx = rest.indexOf('-aG');
+      if (gIdx < 0) return err(state, 'usermod: option -aG attendue');
+      const group = rest[gIdx + 1];
+      const name = pos[pos.length - 1];
+      if (!name || !state.users[name]) return err(state, `usermod: l'utilisateur « ${name} » n'existe pas`);
+      if (!state.groups.includes(group)) return err(state, `usermod: le groupe « ${group} » n'existe pas`);
+      const groups = Array.from(new Set([...state.users[name], group]));
+      return ok({ ...state, users: { ...state.users, [name]: groups } }, '');
+    }
+    case 'id': {
+      const name = rest.find((a) => !a.startsWith('-')) || state.user;
+      const groups = state.users[name];
+      if (!groups) return err(state, `id: « ${name} » : utilisateur inconnu`);
+      return ok(state, `uid=1000(${name}) gid=1000(${groups[0]}) groupes=${groups.map((g) => g).join(',')}`);
+    }
+    case 'groups': {
+      const name = rest.find((a) => !a.startsWith('-')) || state.user;
+      const groups = state.users[name];
+      if (!groups) return err(state, `groups: « ${name} » : utilisateur inconnu`);
+      return ok(state, `${name} : ${groups.join(' ')}`);
+    }
+    case 'passwd': {
+      const name = rest.find((a) => !a.startsWith('-')) || state.user;
+      if (!state.users[name]) return err(state, `passwd: « ${name} » : utilisateur inconnu`);
+      return ok(state, `passwd : mot de passe de ${name} mis à jour avec succès`);
+    }
+    case 'ps': {
+      const header = '  PID TTY          TIME CMD';
+      const rows = [
+        '    1 ?        00:00:02 systemd',
+        '  842 ?        00:00:00 sshd',
+        ' 1203 ?        00:00:01 cron',
+        ' 4821 ?        00:14:57 backup_old.sh',
+      ];
+      return ok(state, [header, ...rows].join('\n'));
+    }
+    case 'kill': {
+      const pid = rest.find((a) => /^\d+$/.test(a));
+      if (!pid) return err(state, 'kill: PID attendu');
+      return ok(state, '');
+    }
+    case 'crontab': {
+      if (rest.includes('-l')) return ok(state, state.cron || `pas de tâches planifiées pour ${state.user}`);
+      if (rest.includes('-r')) return ok({ ...state, cron: '' }, '');
+      const arg = rest.find((a) => !a.startsWith('-'));
+      let content: string;
+      if (!arg || arg === '-') {
+        content = stdin ?? '';
+      } else {
+        const target = resolvePath(state, arg);
+        const e = getEntry(state, target);
+        if (!e || e.kind !== 'file') return err(state, `crontab: ${arg}: Aucun fichier ou dossier de ce type`);
+        content = e.content;
+      }
+      return ok({ ...state, cron: content.trim() }, '');
+    }
+    case 'apt':
+    case 'apt-get':
+    case 'dpkg': {
+      const sub = rest[0];
+      if (cmd === 'dpkg' && sub === '-l') return ok(state, state.packages.sort().join('\n'));
+      if (sub === 'list' && rest.includes('--installed')) return ok(state, state.packages.sort().map((p) => `${p}/stable`).join('\n'));
+      if (sub === 'install') {
+        const pkg = rest[1];
+        if (!pkg) return err(state, 'apt: nom de paquet attendu');
+        if (!PACKAGE_CATALOG.includes(pkg) && !BASE_PACKAGES.includes(pkg)) return err(state, `E: Impossible de trouver le paquet ${pkg}`);
+        if (state.packages.includes(pkg)) return ok(state, `${pkg} est déjà la version la plus récente.`);
+        return ok({ ...state, packages: [...state.packages, pkg] }, `Installation de ${pkg} terminée avec succès.`);
+      }
+      if (sub === 'remove' || sub === 'purge') {
+        const pkg = rest[1];
+        if (!pkg || !state.packages.includes(pkg)) return err(state, `E: Le paquet ${pkg} n'est pas installé`);
+        return ok({ ...state, packages: state.packages.filter((p) => p !== pkg) }, `${pkg} supprimé avec succès.`);
+      }
+      if (sub === 'update') return ok(state, 'Listes de paquets à jour.');
+      return err(state, `${cmd}: sous-commande inconnue`);
+    }
+    case 'bash':
+    case 'sh': {
+      const { pos } = parseArgs(rest);
+      if (!pos[0]) return err(state, `${cmd}: nom de script attendu`);
+      const target = resolvePath(state, pos[0]);
+      const e = getEntry(state, target);
+      if (!e) return err(state, `${cmd}: ${pos[0]}: Aucun fichier ou dossier de ce type`);
+      if (e.kind !== 'file') return err(state, `${cmd}: ${pos[0]} : est un dossier`);
+      const r = runScript(state, scriptLines(e.content));
+      return { state: r.state, output: r.output, error: r.error };
+    }
+    default: {
+      if (/^(\.\/|\/)\S+$/.test(cmd)) {
+        const target = resolvePath(state, cmd);
+        const e = getEntry(state, target);
+        if (!e) return err(state, `${cmd}: Aucun fichier ou dossier de ce type`);
+        if (e.kind !== 'file') return err(state, `${cmd} : est un dossier`);
+        if (!isExecutable(e.mode)) return err(state, `${cmd}: Permission refusée`);
+        const r = runScript(state, scriptLines(e.content));
+        return { state: r.state, output: r.output, error: r.error };
+      }
       return err(state, `${cmd}: commande introuvable`);
+    }
   }
 }
 
@@ -367,6 +614,14 @@ export function runLine(state: ShellState, rawLine: string): Output {
   const line = rawLine.trim();
   if (!line) return ok(state, '');
 
+  // Affectation de variable : « NOM=valeur », seule sur la ligne (pas de pipe ni redirection).
+  const assignMatch = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(line);
+  if (assignMatch && !line.includes('|') && !/[<>]/.test(line)) {
+    const [, name, rawVal] = assignMatch;
+    const val = expandValue(state, rawVal);
+    return ok({ ...state, env: { ...state.env, [name]: val }, lastCommand: line }, '');
+  }
+
   let redirectAppend = false;
   let redirectPath: string | null = null;
   let body = line;
@@ -374,13 +629,14 @@ export function runLine(state: ShellState, rawLine: string): Output {
   const writeMatch = !appendMatch && /^(.*[^>])>\s*(\S+)\s*$/.exec(body);
   if (appendMatch) { body = appendMatch[1]; redirectAppend = true; redirectPath = appendMatch[2]; }
   else if (writeMatch) { body = writeMatch[1]; redirectPath = writeMatch[2]; }
+  if (redirectPath) redirectPath = expandValue(state, redirectPath);
 
   const stages = body.split('|').map((s) => s.trim()).filter(Boolean);
   let s = state;
   let pipeData: string | null = null;
   let anyError = false;
   for (const stage of stages) {
-    const argv = tokenize(stage);
+    const argv = tokenize(stage, s);
     const res = runSingle(s, argv, pipeData);
     s = res.state;
     pipeData = res.output;
@@ -402,8 +658,22 @@ export function runLine(state: ShellState, rawLine: string): Output {
   return { state: { ...s, lastCommand: line, lastError: anyError }, output: finalOutput, error: anyError };
 }
 
+const BASE_PACKAGES = ['bash', 'coreutils', 'openssh-server', 'cron', 'telnet'];
+
 export function initialState(user = 'awa', host = 'serveur'): ShellState {
-  return { root: defaultRoot(user), cwd: `/home/${user}`, user, host, lastCommand: '', lastError: false };
+  return {
+    root: defaultRoot(user),
+    cwd: `/home/${user}`,
+    user,
+    host,
+    lastCommand: '',
+    lastError: false,
+    env: {},
+    users: { [user]: [user] },
+    groups: [user],
+    packages: [...BASE_PACKAGES],
+    cron: '',
+  };
 }
 
 export function promptOf(state: ShellState): string {

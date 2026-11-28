@@ -135,6 +135,21 @@ function evalShellCheck(state: ShellState, c: QuestShellCheck, ctx: ShellStepCon
       const e = getEntry(state, resolvePath(state, c.path));
       return !!e && e.mode === c.value;
     }
+    case 'userExists':
+      return !!state.users[c.name];
+    case 'userInGroup':
+      return !!state.users[c.name]?.includes(c.group);
+    case 'packageInstalled':
+      return state.packages.includes(c.name);
+    case 'packageAbsent':
+      return !state.packages.includes(c.name);
+    case 'cronEmpty':
+      return state.cron.trim().length === 0;
+    case 'cronContains': {
+      let re: RegExp;
+      try { re = new RegExp(c.pattern); } catch { return false; }
+      return re.test(state.cron);
+    }
   }
 }
 

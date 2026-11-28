@@ -1,0 +1,116 @@
+{
+ "id": "mise-a-jour-du-parc",
+ "order": 5,
+ "title": "Mise à jour du parc",
+ "ticket": "SEC-0199",
+ "priority": "Haute",
+ "client": "RSSI",
+ "minutes": 14,
+ "level": "Intermédiaire",
+ "chapters": [
+  "3-4-paquets",
+  "2-3-sudo-pam",
+  "1-3-fichiers",
+  "4-1-disques-fs"
+ ],
+ "setupShell": [
+  "mkdir -p /etc/old-service.d",
+  "echo 'listen 23' > /etc/old-service.d/legacy.conf"
+ ],
+ "teaser": "L'audit de sécurité est tombé. Quelques paquets à corriger avant la fin de la semaine.",
+ "dialogue": [
+  "{user}, le rapport d'audit du RSSI est arrivé ce matin : rien de catastrophique, mais plusieurs points à corriger rapidement.",
+  "Un outil de supervision à installer, un vieux service non sécurisé à désinstaller, et des fichiers de configuration abandonnés à nettoyer.",
+  "Rien de spectaculaire, mais c'est exactement ce genre de ménage qui évite les mauvaises surprises plus tard.",
+  "On coche la liste ensemble ?"
+ ],
+ "outro": "Parc à jour, service vulnérable retiré, configuration abandonnée nettoyée. Le prochain audit n'aura plus grand-chose à signaler.",
+ "context": [
+  "{user}, trois actions demandées par le RSSI : installer `htop` pour mieux surveiller la charge, désinstaller `telnet` (protocole non chiffré, jugé vulnérable), et retrouver puis supprimer un fichier de configuration d'un service qu'on ne maintient plus.",
+  "Toute action d'administration passe par `sudo`, jamais en te connectant directement en root."
+ ],
+ "objectives": [
+  "Lister les paquets installés (apt list --installed)",
+  "Installer un paquet avec les droits d'administration (sudo apt install)",
+  "Désinstaller un paquet jugé vulnérable (sudo apt remove)",
+  "Rechercher des fichiers par motif de nom (find -name)",
+  "Supprimer un fichier de configuration obsolète en toute connaissance de cause"
+ ],
+ "reference": [
+  { "title": "Lister les paquets installés", "sql": "apt list --installed" },
+  { "title": "Installer puis désinstaller un paquet", "sql": "sudo apt install htop\nsudo apt remove telnet" },
+  { "title": "Rechercher des fichiers par motif", "sql": "find /etc -name \"*.conf\"" }
+ ],
+ "steps": [
+  {
+   "id": "s1",
+   "kind": "shell",
+   "title": "Auditer le parc installé",
+   "task": "Avant toute modification, dresse la liste des paquets actuellement installés.",
+   "hints": ["apt list --installed"],
+   "checks": [{ "t": "ran", "label": "apt list --installed a été exécuté", "pattern": "^apt +list +--installed$" }],
+   "solution": "apt list --installed",
+   "explain": "On ne modifie jamais un système « à l'aveugle » : un état des lieux avant action permet aussi de vérifier après coup que tout s'est bien passé."
+  },
+  {
+   "id": "s2",
+   "kind": "shell",
+   "title": "Installer l'outil de supervision",
+   "task": "Installe `htop`, demandé pour mieux surveiller la charge du serveur. Utilise `sudo`.",
+   "hints": ["sudo apt install htop"],
+   "checks": [{ "t": "packageInstalled", "label": "htop est installé", "name": "htop" }],
+   "solution": "sudo apt install htop",
+   "explain": "L'installation d'un paquet modifie le système pour tous les utilisateurs : elle requiert les droits d'administration, obtenus ici via `sudo` plutôt qu'en se connectant directement en root."
+  },
+  {
+   "id": "s3",
+   "kind": "shell",
+   "title": "Retirer le service non sécurisé",
+   "task": "`telnet` transmet tout en clair sur le réseau, mots de passe compris. Désinstalle-le.",
+   "hints": ["sudo apt remove telnet"],
+   "checks": [{ "t": "packageAbsent", "label": "telnet n'est plus installé", "name": "telnet" }],
+   "solution": "sudo apt remove telnet",
+   "explain": "Un service installé « par habitude » mais jamais utilisé reste une porte ouverte inutile : le retirer réduit la surface d'attaque du serveur, même sans incident connu."
+  },
+  {
+   "id": "s4",
+   "kind": "shell",
+   "title": "Retrouver la configuration abandonnée",
+   "task": "Un ancien service a laissé des fichiers de configuration dans `/etc`. Recherche tous les fichiers `.conf` à partir de ce dossier.",
+   "hints": ["find /etc -name \"*.conf\""],
+   "checks": [{ "t": "ran", "label": "find /etc -name *.conf a été exécuté", "pattern": "^find +/etc +-name +.?\\*\\.conf.?$" }],
+   "solution": "find /etc -name \"*.conf\"",
+   "explain": "`find <dossier> -name \"<motif>\"` parcourt récursivement toute une arborescence à la recherche de fichiers correspondant à un motif — bien plus puissant qu'un simple `ls` pour explorer un système entier."
+  },
+  {
+   "id": "s5",
+   "kind": "shell",
+   "title": "Nettoyer le fichier obsolète",
+   "task": "Le fichier `/etc/old-service.d/legacy.conf` appartient à un service qu'on ne maintient plus. Supprime-le.",
+   "hints": ["rm /etc/old-service.d/legacy.conf"],
+   "checks": [{ "t": "fileAbsent", "label": "legacy.conf n'existe plus", "path": "/etc/old-service.d/legacy.conf" }],
+   "solution": "rm /etc/old-service.d/legacy.conf",
+   "explain": "Un fichier de configuration abandonné peut encore être lu par un script oublié, ou induire en erreur le prochain administrateur qui tombe dessus — mieux vaut le supprimer une fois sa provenance confirmée."
+  },
+  {
+   "id": "s6",
+   "kind": "choice",
+   "title": "Avant de nettoyer les gros fichiers",
+   "task": "Le RSSI demande ensuite de libérer de l'espace disque en supprimant de vieux fichiers de log. Quelle commande vérifie, avant toute suppression, l'espace disque utilisé par partition ?",
+   "options": [
+    "df -h",
+    "ps aux",
+    "id",
+    "crontab -l"
+   ],
+   "answer": 0,
+   "explain": "`df -h` (disk free, format lisible) affiche l'espace utilisé et disponible sur chaque partition — un réflexe avant toute suppression massive, pour confirmer qu'elle est nécessaire et mesurer son effet."
+  }
+ ],
+ "debrief": [
+  "`sudo` élève ponctuellement les droits d'une seule commande — plus sûr qu'une session root permanente.",
+  "Un paquet installé « au cas où » et jamais retiré (comme telnet) est une vulnérabilité qui dort, pas un détail.",
+  "`find <dossier> -name \"<motif>\"` est l'outil de recherche de fichiers par excellence, bien au-delà de ce que `ls` permet.",
+  "`df -h` reste le réflexe pour mesurer l'espace disque avant toute opération de nettoyage à grande échelle."
+ ]
+}

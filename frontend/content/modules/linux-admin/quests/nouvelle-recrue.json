@@ -1,0 +1,129 @@
+{
+ "id": "nouvelle-recrue",
+ "order": 2,
+ "title": "Nouvelle recrue",
+ "ticket": "OPS-0502",
+ "priority": "Normale",
+ "client": "Service RH",
+ "minutes": 15,
+ "level": "Intermédiaire",
+ "chapters": [
+  "2-1-utilisateurs",
+  "2-2-permissions",
+  "2-3-sudo-pam",
+  "4-4-ssh-pare-feu"
+ ],
+ "teaser": "Une stagiaire arrive lundi. Il lui faut un compte avant 9h — tu peux t'en charger ?",
+ "dialogue": [
+  "Toujours là, {user}. Cette fois rien de clandestin : une nouvelle stagiaire, Bella, rejoint l'équipe lundi.",
+  "Il lui faut un compte, les bons groupes, un dossier personnel protégé, et un accès à distance qui ne traîne pas en clair dans un mail.",
+  "Rien d'exotique, mais si c'est bâclé, c'est toute l'équipe qui en paie le prix plus tard.",
+  "Tu t'en occupes, {user} ?"
+ ],
+ "outro": "Compte créé, droits posés, accès sécurisé. Bella peut commencer lundi sans attendre après toi.",
+ "context": [
+  "{user}, Bella rejoint l'équipe « stagiaires ». Elle a besoin d'un compte système, d'un dossier personnel à elle seule, et d'un moyen de se connecter au serveur sans mot de passe qui circule par mail.",
+  "On te fait confiance pour suivre la procédure standard, pas pour improviser."
+ ],
+ "objectives": [
+  "Créer un compte avec son dossier personnel et son groupe (useradd)",
+  "Vérifier l'identité et les groupes d'un utilisateur (id, groups)",
+  "Restreindre l'accès à un dossier personnel (chmod)",
+  "Ajouter un utilisateur à un groupe existant (groupadd, usermod -aG)",
+  "Connaître la bonne pratique d'accès distant sécurisé (clé SSH)"
+ ],
+ "reference": [
+  { "title": "Créer un compte avec dossier personnel et groupe", "sql": "useradd -m -G stagiaires bella" },
+  { "title": "Vérifier l'identité et les groupes", "sql": "id bella\ngroups bella" },
+  { "title": "Créer un groupe puis y ajouter un utilisateur", "sql": "groupadd audit\nusermod -aG audit bella" },
+  { "title": "Restreindre l'accès à un dossier", "sql": "chmod 700 /home/bella" }
+ ],
+ "steps": [
+  {
+   "id": "s1",
+   "kind": "shell",
+   "title": "Créer le compte",
+   "task": "Crée le compte **bella**, avec dossier personnel (`-m`), rattaché au groupe `stagiaires` (`-G`).",
+   "hints": ["useradd -m -G stagiaires bella"],
+   "checks": [
+    { "t": "userExists", "label": "L'utilisateur bella existe", "name": "bella" },
+    { "t": "userInGroup", "label": "bella appartient au groupe stagiaires", "name": "bella", "group": "stagiaires" }
+   ],
+   "solution": "useradd -m -G stagiaires bella",
+   "explain": "`useradd -m` crée le compte et son dossier personnel en une seule commande ; `-G` l'ajoute directement à un groupe secondaire."
+  },
+  {
+   "id": "s2",
+   "kind": "shell",
+   "title": "Vérifier l'identité",
+   "task": "Confirme que le compte est bien créé, avec les bons groupes.",
+   "hints": ["id bella"],
+   "checks": [{ "t": "ran", "label": "id bella a été exécuté", "pattern": "^id +bella$" }],
+   "solution": "id bella",
+   "explain": "`id` affiche l'UID, le GID et la liste des groupes d'un utilisateur — le réflexe de vérification après toute création de compte."
+  },
+  {
+   "id": "s3",
+   "kind": "shell",
+   "title": "Protéger le dossier personnel",
+   "task": "Le dossier personnel de Bella ne doit être accessible qu'à elle. Restreins les droits à `700`.",
+   "hints": ["chmod 700 /home/bella"],
+   "checks": [{ "t": "fileMode", "label": "/home/bella est en mode 700", "path": "/home/bella", "value": "700" }],
+   "solution": "chmod 700 /home/bella",
+   "explain": "Par défaut, un dossier personnel créé par `useradd -m` reste lisible par d'autres utilisateurs du système. `700` réserve l'accès au seul propriétaire."
+  },
+  {
+   "id": "s4",
+   "kind": "shell",
+   "title": "Créer le groupe d'audit",
+   "task": "L'équipe conformité demande que toute nouvelle recrue soit aussi dans un groupe `audit`, qui n'existe pas encore. Crée-le.",
+   "hints": ["groupadd audit"],
+   "checks": [{ "t": "ran", "label": "groupadd audit a été exécuté", "pattern": "^groupadd +audit$" }],
+   "solution": "groupadd audit",
+   "explain": "`groupadd` crée un nouveau groupe, indépendamment de tout utilisateur — on peut y ajouter des comptes ensuite."
+  },
+  {
+   "id": "s5",
+   "kind": "shell",
+   "title": "Ajouter bella au groupe audit",
+   "task": "Ajoute **bella** au groupe `audit`, sans la retirer de `stagiaires`.",
+   "hints": ["usermod -aG audit bella"],
+   "checks": [
+    { "t": "userInGroup", "label": "bella appartient au groupe audit", "name": "bella", "group": "audit" },
+    { "t": "userInGroup", "label": "bella appartient toujours à stagiaires", "name": "bella", "group": "stagiaires" }
+   ],
+   "solution": "usermod -aG audit bella",
+   "explain": "`-a` (append) est essentiel : sans lui, `usermod -G` **remplace** la liste des groupes secondaires au lieu d'y ajouter un groupe."
+  },
+  {
+   "id": "s6",
+   "kind": "shell",
+   "title": "Définir un mot de passe temporaire",
+   "task": "Attribue un mot de passe temporaire au compte, à changer dès la première connexion.",
+   "hints": ["passwd bella"],
+   "checks": [{ "t": "ran", "label": "passwd bella a été exécuté", "pattern": "^passwd +bella$" }],
+   "solution": "passwd bella",
+   "explain": "Un mot de passe temporaire reste une pratique courante à la création d'un compte, tant qu'il est changé rapidement et jamais transmis en clair par un canal non sécurisé."
+  },
+  {
+   "id": "s7",
+   "kind": "choice",
+   "title": "Accès distant sécurisé",
+   "task": "Bella devra se connecter au serveur depuis chez elle. Quelle est la bonne pratique pour un accès SSH à la fois pratique et sûr ?",
+   "options": [
+    "Générer une paire de clés SSH et déployer sa clé publique dans ~/.ssh/authorized_keys",
+    "Lui communiquer le mot de passe root par e-mail pour qu'elle se connecte directement en administrateur",
+    "Désactiver purement et simplement l'authentification sur le serveur",
+    "Ouvrir le port du service telnet, plus simple à configurer que SSH"
+   ],
+   "answer": 0,
+   "explain": "L'authentification par clé SSH évite la circulation de mots de passe et peut être révoquée instantanément en retirant la clé publique — contrairement à telnet, qui transmet tout en clair sur le réseau, y compris les mots de passe."
+  }
+ ],
+ "debrief": [
+  "`useradd -m -G groupe` crée en une commande un compte, son dossier personnel et son appartenance à un groupe secondaire.",
+  "`usermod -aG` sans le `-a` est une erreur classique : il écrase la liste des groupes secondaires au lieu d'y ajouter un nouveau groupe.",
+  "Un dossier personnel n'est pas protégé par défaut : `chmod 700` est le réflexe pour un compte qui doit rester privé.",
+  "SSH par clé publique remplace avantageusement le mot de passe pour un accès distant — et telnet n'a plus sa place sur un serveur en production."
+ ]
+}

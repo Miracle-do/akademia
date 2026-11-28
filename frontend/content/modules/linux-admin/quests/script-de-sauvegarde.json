@@ -1,0 +1,149 @@
+{
+ "id": "script-de-sauvegarde",
+ "order": 3,
+ "title": "Script de sauvegarde",
+ "ticket": "OPS-0588",
+ "priority": "Haute",
+ "client": "Direction technique",
+ "minutes": 18,
+ "level": "Avancé",
+ "chapters": [
+  "5-1-scripts-bash",
+  "1-4-texte-redirections",
+  "2-2-permissions",
+  "5-2-sauvegarde",
+  "3-3-planification-journaux"
+ ],
+ "teaser": "Plus question de sauvegarder les dossiers à la main chaque soir. Tu m'écris ce script ?",
+ "dialogue": [
+  "On a eu assez peur la dernière fois : un dossier perdu, aucune sauvegarde récente. Ça ne doit plus se reproduire, {user}.",
+  "Je veux un script simple, lisible, qui copie les documents vers un dossier de sauvegarde, en une seule commande.",
+  "Pas de solution toute faite copiée d'internet : je veux comprendre chaque ligne, et pouvoir le faire évoluer plus tard.",
+  "On construit ça ensemble, ligne par ligne ?"
+ ],
+ "outro": "Un script propre, lisible, qui tourne d'une seule commande. La prochaine panne ne nous coûtera plus un dossier entier.",
+ "context": [
+  "{user}, l'objectif : un script `backup.sh` qui copie le dossier `documents` vers un dossier `sauvegardes`, en utilisant des variables plutôt que des chemins écrits en dur — pour qu'il soit facile à adapter demain.",
+  "Le script doit être exécutable directement (`./backup.sh`), pas seulement lisible."
+ ],
+ "objectives": [
+  "Construire un script shell ligne par ligne avec des redirections (>, >>)",
+  "Utiliser des variables shell ($VAR) pour éviter les chemins en dur",
+  "Automatiser la création de dossier et la copie dans un script",
+  "Rendre un script exécutable (chmod +x) et le lancer (./script.sh)",
+  "Savoir comment planifier l'exécution automatique d'un script (cron)"
+ ],
+ "reference": [
+  { "title": "Créer un fichier avec un en-tête", "sql": "echo \"#!/bin/bash\" > backup.sh" },
+  { "title": "Définir puis utiliser une variable", "sql": "echo \"SRC=documents\" >> backup.sh\necho \"mkdir -p \\$DEST\" >> backup.sh" },
+  { "title": "Rendre exécutable puis lancer", "sql": "chmod +x backup.sh\n./backup.sh" }
+ ],
+ "steps": [
+  {
+   "id": "s1",
+   "kind": "shell",
+   "title": "Préparer l'atelier",
+   "task": "Va dans ton dossier personnel et crée un sous-dossier `scripts`, puis place-toi dedans.",
+   "hints": ["cd ~", "mkdir scripts", "cd scripts"],
+   "checks": [{ "t": "cwd", "label": "Le dossier courant est ~/scripts", "path": "~/scripts" }],
+   "solution": "cd ~\nmkdir scripts\ncd scripts",
+   "explain": "Regrouper ses scripts dans un dossier dédié évite qu'ils se perdent parmi les autres fichiers personnels."
+  },
+  {
+   "id": "s2",
+   "kind": "shell",
+   "title": "Écrire l'en-tête du script",
+   "task": "Crée `backup.sh` avec, pour commencer, la ligne shebang `#!/bin/bash` (elle indique quel interpréteur utiliser).",
+   "hints": ["echo '#!/bin/bash' > backup.sh"],
+   "checks": [{ "t": "fileContains", "label": "backup.sh contient la ligne shebang", "path": "backup.sh", "value": "#!/bin/bash" }],
+   "solution": "echo '#!/bin/bash' > backup.sh",
+   "explain": "Le shebang `#!/bin/bash` en première ligne d'un script indique au système quel interpréteur utiliser pour l'exécuter."
+  },
+  {
+   "id": "s3",
+   "kind": "shell",
+   "title": "Définir les variables",
+   "task": "Ajoute deux variables à la suite : `SRC=documents` (la source) et `DEST=sauvegardes` (la destination). **Utilise `>>`** pour ne pas effacer la ligne précédente.",
+   "hints": ["echo 'SRC=documents' >> backup.sh", "echo 'DEST=sauvegardes' >> backup.sh"],
+   "checks": [
+    { "t": "fileContains", "label": "backup.sh définit SRC", "path": "backup.sh", "value": "SRC=documents" },
+    { "t": "fileContains", "label": "backup.sh définit DEST", "path": "backup.sh", "value": "DEST=sauvegardes" }
+   ],
+   "solution": "echo 'SRC=documents' >> backup.sh\necho 'DEST=sauvegardes' >> backup.sh",
+   "explain": "Des variables au début du script centralisent ce qui est amené à changer — ici, modifier la sauvegarde demain ne demandera qu'une seule ligne à éditer."
+  },
+  {
+   "id": "s4",
+   "kind": "shell",
+   "title": "Créer le dossier de destination",
+   "task": "Ajoute une ligne qui crée le dossier de destination s'il n'existe pas encore, en utilisant la variable `$DEST`.",
+   "hints": ["echo 'mkdir -p $DEST' >> backup.sh"],
+   "checks": [{ "t": "fileContains", "label": "backup.sh crée $DEST", "path": "backup.sh", "value": "mkdir -p $DEST" }],
+   "solution": "echo 'mkdir -p $DEST' >> backup.sh",
+   "explain": "`mkdir -p` ne renvoie pas d'erreur si le dossier existe déjà — indispensable dans un script qu'on va relancer plusieurs fois."
+  },
+  {
+   "id": "s5",
+   "kind": "shell",
+   "title": "Copier les données",
+   "task": "Ajoute la ligne qui copie le dossier `$SRC` (situé un niveau au-dessus) vers `$DEST`.",
+   "hints": ["echo 'cp -r ../$SRC $DEST' >> backup.sh"],
+   "checks": [{ "t": "fileContains", "label": "backup.sh copie $SRC vers $DEST", "path": "backup.sh", "value": "cp -r ../$SRC $DEST" }],
+   "solution": "echo 'cp -r ../$SRC $DEST' >> backup.sh",
+   "explain": "En utilisant les variables plutôt que les noms en dur, cette ligne ne changera jamais, même si `SRC`/`DEST` évoluent plus haut dans le script."
+  },
+  {
+   "id": "s6",
+   "kind": "shell",
+   "title": "Confirmer la fin de la sauvegarde",
+   "task": "Ajoute un dernier message pour confirmer que tout s'est bien passé.",
+   "hints": ["echo 'echo \"Sauvegarde terminee\"' >> backup.sh"],
+   "checks": [{ "t": "fileContains", "label": "backup.sh affiche un message de fin", "path": "backup.sh", "value": "Sauvegarde terminee" }],
+   "solution": "echo 'echo \"Sauvegarde terminee\"' >> backup.sh",
+   "explain": "Un script silencieux qui s'arrête sans message laisse planer le doute : a-t-il vraiment fonctionné jusqu'au bout ?"
+  },
+  {
+   "id": "s7",
+   "kind": "shell",
+   "title": "Rendre le script exécutable",
+   "task": "Un script n'est, par défaut, pas autorisé à s'exécuter directement. Ajoute le droit d'exécution.",
+   "hints": ["chmod +x backup.sh"],
+   "checks": [{ "t": "fileMode", "label": "backup.sh est exécutable (755)", "path": "backup.sh", "value": "755" }],
+   "solution": "chmod +x backup.sh",
+   "explain": "Sans le bit d'exécution (`x`), le système refuse `./backup.sh` avec un « Permission refusée », même si le fichier est parfaitement lisible."
+  },
+  {
+   "id": "s8",
+   "kind": "shell",
+   "title": "Lancer le script",
+   "task": "Exécute enfin le script, et vérifie que `documents` a bien été copié dans `sauvegardes`.",
+   "hints": ["./backup.sh", "ls sauvegardes"],
+   "checks": [
+    { "t": "ran", "label": "./backup.sh a été exécuté", "pattern": "^\\./backup\\.sh$" },
+    { "t": "filePresent", "label": "sauvegardes/documents existe", "path": "sauvegardes/documents" }
+   ],
+   "solution": "./backup.sh",
+   "explain": "`./` devant un script force son exécution depuis le dossier courant — sans, le shell chercherait `backup.sh` parmi les commandes système connues et répondrait « commande introuvable »."
+  },
+  {
+   "id": "s9",
+   "kind": "choice",
+   "title": "Et demain soir ?",
+   "task": "Le script fonctionne, mais personne ne doit penser à le relancer chaque soir à la main. Comment l'automatiser proprement ?",
+   "options": [
+    "Lancer le script manuellement chaque soir à la même heure",
+    "L'ajouter à la crontab de l'utilisateur, avec une entrée du type « 0 2 * * * »",
+    "Le copier dans /etc/hostname pour qu'il démarre avec le système",
+    "Mettre le script en mode 777 : tout le monde pourra alors le lancer automatiquement"
+   ],
+   "answer": 1,
+   "explain": "`crontab` planifie l'exécution récurrente d'une commande sans intervention humaine. Une entrée « 0 2 * * * /chemin/backup.sh » le lance chaque nuit à 2h — la sauvegarde ne dépend alors plus de la mémoire de personne."
+  }
+ ],
+ "debrief": [
+  "Un script bash commence presque toujours par un shebang (`#!/bin/bash`) qui précise l'interpréteur à utiliser.",
+  "Des variables en tête de script (au lieu de chemins en dur) rendent la maintenance future bien plus simple.",
+  "`chmod +x` est une étape qu'on oublie souvent — sans elle, `./script.sh` échoue même si le contenu est correct.",
+  "Un script qui marche ne suffit pas : encore faut-il l'automatiser (cron) pour qu'il ne dépende d'aucune mémoire humaine."
+ ]
+}

@@ -179,7 +179,13 @@ export type QuestShellCheck =
   | { t: 'fileAbsent'; label: string; path: string }
   | { t: 'fileEquals'; label: string; path: string; value: string }
   | { t: 'fileContains'; label: string; path: string; value: string }
-  | { t: 'fileMode'; label: string; path: string; value: string };
+  | { t: 'fileMode'; label: string; path: string; value: string }
+  | { t: 'userExists'; label: string; name: string }
+  | { t: 'userInGroup'; label: string; name: string; group: string }
+  | { t: 'packageInstalled'; label: string; name: string }
+  | { t: 'packageAbsent'; label: string; name: string }
+  | { t: 'cronEmpty'; label: string }
+  | { t: 'cronContains'; label: string; pattern: string };
 export interface QuestShellStep extends QuestStepBase { kind: 'shell'; checks: QuestShellCheck[]; solution: string }
 export type QuestStep = QuestSqlStep | QuestPlsqlStep | QuestChoiceStep | QuestShellStep;
 export type QuestPriority = 'Normale' | 'Haute' | 'Critique';
@@ -210,6 +216,8 @@ export interface Quest {
   setup?: string[];
   /** Ordres exécutés ensuite, sans COMMIT (transaction laissée ouverte par un collègue). */
   setupPending?: string[];
+  /** Lignes de commandes shell rejouées à l'ouverture, pour personnaliser l'état du mini-terminal (étapes 'shell'). */
+  setupShell?: string[];
   reference?: { title: string; sql: string }[];
   steps: QuestStep[];
   debrief: string[];

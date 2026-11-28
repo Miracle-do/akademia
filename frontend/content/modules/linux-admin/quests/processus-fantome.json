@@ -1,0 +1,127 @@
+{
+ "id": "processus-fantome",
+ "order": 4,
+ "title": "Processus fantôme",
+ "ticket": "INC-0734",
+ "priority": "Critique",
+ "client": "Supervision 24/7",
+ "minutes": 15,
+ "level": "Avancé",
+ "chapters": [
+  "3-1-processus",
+  "3-3-planification-journaux",
+  "3-2-systemd-boot",
+  "5-3-depannage"
+ ],
+ "setupShell": [
+  "echo 'ALERTE : charge CPU anormale depuis 02:00, un script de sauvegarde semble boucler' > /var/log/syslog",
+  "echo '* * * * * /usr/local/bin/backup_old.sh' > /tmp/cron-legacy.txt",
+  "crontab /tmp/cron-legacy.txt"
+ ],
+ "teaser": "Le serveur rame depuis cette nuit. Quelque chose tourne en boucle, et je ne sais pas quoi.",
+ "dialogue": [
+  "{user}, on a une alerte depuis 2h du matin : charge CPU anormale, et ça ne redescend pas.",
+  "Pas le temps de deviner : il faut identifier le coupable, l'arrêter, comprendre pourquoi il revenait sans cesse, et documenter ce qu'on a fait.",
+  "C'est le genre d'incident qui, mal géré, revient exactement de la même façon la semaine prochaine.",
+  "Tu prends l'astreinte ?"
+ ],
+ "outro": "Processus arrêté, cause trouvée, planification corrigée, et tout est noté dans le journal. L'astreinte suivante n'aura pas à repartir de zéro.",
+ "context": [
+  "{user}, un script fou consomme toutes les ressources du serveur depuis cette nuit. Le journal système a déjà une première alerte — à toi de creuser.",
+  "Méthode classique de dépannage : observer, identifier, agir, vérifier, documenter."
+ ],
+ "objectives": [
+  "Lire un journal système pour comprendre un incident (cat, grep)",
+  "Lister les processus en cours et repérer le fautif (ps)",
+  "Arrêter un processus (kill)",
+  "Inspecter puis nettoyer une tâche planifiée fautive (crontab -l, crontab -r)",
+  "Documenter la résolution d'un incident dans le journal"
+ ],
+ "reference": [
+  { "title": "Lister les processus", "sql": "ps" },
+  { "title": "Arrêter un processus", "sql": "kill -9 4821" },
+  { "title": "Lister puis supprimer une crontab", "sql": "crontab -l\ncrontab -r" }
+ ],
+ "steps": [
+  {
+   "id": "s1",
+   "kind": "shell",
+   "title": "Lire l'alerte",
+   "task": "Avant d'agir, consulte le journal système pour comprendre ce qui a déclenché l'alerte.",
+   "hints": ["cat /var/log/syslog"],
+   "checks": [{ "t": "ran", "label": "Le journal /var/log/syslog a été lu", "pattern": "^cat +/var/log/syslog$" }],
+   "solution": "cat /var/log/syslog",
+   "explain": "Le journal système est toujours le premier réflexe face à un incident : il garde la trace de ce qui s'est passé, même si tu n'étais pas devant l'écran."
+  },
+  {
+   "id": "s2",
+   "kind": "shell",
+   "title": "Repérer le processus fautif",
+   "task": "Liste les processus en cours d'exécution pour identifier celui qui consomme anormalement les ressources.",
+   "hints": ["ps"],
+   "checks": [{ "t": "ran", "label": "La commande ps a été exécutée", "pattern": "^ps$" }],
+   "solution": "ps",
+   "explain": "`ps` donne une photo instantanée des processus actifs — ici, `backup_old.sh` (PID 4821) tourne depuis 00:14:57, bien plus longtemps qu'une sauvegarde ne le devrait."
+  },
+  {
+   "id": "s3",
+   "kind": "shell",
+   "title": "Arrêter le processus",
+   "task": "Mets fin au processus 4821, qui ne répond visiblement plus normalement.",
+   "hints": ["kill -9 4821"],
+   "checks": [{ "t": "ran", "label": "Le processus 4821 a été tué", "pattern": "^kill( +-9)? +4821$" }],
+   "solution": "kill -9 4821",
+   "explain": "`kill -9` envoie un signal qu'un processus ne peut ni ignorer ni intercepter — à réserver aux cas où une interruption normale (`kill` sans option) ne suffit pas."
+  },
+  {
+   "id": "s4",
+   "kind": "shell",
+   "title": "Comprendre pourquoi il revenait",
+   "task": "Le processus s'est peut-être relancé seul. Vérifie si une tâche planifiée pourrait l'expliquer.",
+   "hints": ["crontab -l"],
+   "checks": [{ "t": "ran", "label": "La crontab a été consultée", "pattern": "^crontab +-l$" }],
+   "solution": "crontab -l",
+   "explain": "`crontab -l` affiche les tâches planifiées de l'utilisateur courant — ici, une tâche relance `backup_old.sh` **chaque minute**, ce qui explique la boucle."
+  },
+  {
+   "id": "s5",
+   "kind": "shell",
+   "title": "Supprimer la tâche fautive",
+   "task": "Retire cette planification pour empêcher le script de repartir.",
+   "hints": ["crontab -r"],
+   "checks": [{ "t": "cronEmpty", "label": "La crontab est vide" }],
+   "solution": "crontab -r",
+   "explain": "`crontab -r` supprime entièrement la crontab de l'utilisateur. Dans un vrai contexte, on préférerait souvent éditer la ligne fautive plutôt que tout effacer — mais ici, une seule tâche existait."
+  },
+  {
+   "id": "s6",
+   "kind": "shell",
+   "title": "Documenter l'incident",
+   "task": "Ajoute une ligne au journal pour expliquer ce qui a été fait — indispensable pour la prochaine personne d'astreinte.",
+   "hints": ["echo \"Incident résolu : processus 4821 arrêté, tâche cron supprimée\" >> /var/log/syslog"],
+   "checks": [{ "t": "fileContains", "label": "Le journal contient la résolution", "path": "/var/log/syslog", "value": "Incident résolu" }],
+   "solution": "echo \"Incident résolu : processus 4821 arrêté, tâche cron supprimée\" >> /var/log/syslog",
+   "explain": "Un incident non documenté est un incident qui se reproduit : la prochaine personne d'astreinte doit pouvoir comprendre en une minute ce qui s'est passé."
+  },
+  {
+   "id": "s7",
+   "kind": "choice",
+   "title": "Et si ça redémarre tout seul ?",
+   "task": "La direction demande si ce genre de script pourrait aussi se relancer automatiquement au redémarrage du serveur, via un service système. Quelle commande permettrait de vérifier si un service est activé au démarrage ?",
+   "options": [
+    "systemctl is-enabled nom-du-service",
+    "ps aux | grep nom-du-service",
+    "crontab -l",
+    "chmod +x nom-du-service"
+   ],
+   "answer": 0,
+   "explain": "`systemctl is-enabled` indique si un service est configuré pour démarrer automatiquement avec le système — une tâche cron et un service systemd sont deux mécanismes de démarrage automatique différents, qu'il faut vérifier séparément."
+  }
+ ],
+ "debrief": [
+  "`ps` montre une photo des processus à l'instant T — un processus qui tourne depuis des heures sur une tâche courte est un signal d'alerte.",
+  "`kill -9` est radical : à utiliser quand un `kill` normal ne suffit pas, jamais comme premier réflexe.",
+  "Un processus qui « revient tout seul » a presque toujours une cause : tâche cron, service systemd, ou script parent qui le relance.",
+  "Documenter un incident dans le journal n'est pas optionnel : c'est ce qui évite à la personne suivante de repartir de zéro."
+ ]
+}

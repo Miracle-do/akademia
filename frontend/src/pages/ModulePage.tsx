@@ -13,6 +13,7 @@ import {
 import { Bar } from '@/components/ui';
 import { getModule, loadFormations, loadQuests } from '@/lib/content';
 import { HoodedFigure } from '@/components/quest/HoodedFigure';
+import { QuestEncounter } from '@/components/quest/QuestEncounter';
 import FormationShowcase from '@/components/FormationShowcase';
 import { useEffect, useState } from 'react';
 import type { Formation, Quest } from '@/lib/types';
@@ -260,6 +261,7 @@ export default function ModulePage() {
         </div>
       </section>
       )}
+      {quests.length > 0 && <QuestEncounter moduleId={m.id} />}
     </div>
   );
 }
